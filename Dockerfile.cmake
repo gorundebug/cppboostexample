@@ -9,8 +9,20 @@ FROM ${SERVICEGEN_ASIO_GRPC_SOURCE_STAGE} AS asio-grpc-source-context
 FROM ubuntu:24.04 AS development
 
 ARG TARGETARCH
+ARG SERVICEGEN_APT_UBUNTU_ARCHIVE_URL=
+ARG SERVICEGEN_APT_UBUNTU_SECURITY_URL=
+ARG SERVICEGEN_APT_UBUNTU_PORTS_URL=
+ARG SERVICEGEN_GITHUB_RAW_URL=
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
+
+RUN if [ -n "$SERVICEGEN_APT_UBUNTU_ARCHIVE_URL$SERVICEGEN_APT_UBUNTU_SECURITY_URL$SERVICEGEN_APT_UBUNTU_PORTS_URL" ]; then \
+      find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) -exec sed -i \
+        -e "s|http://archive.ubuntu.com/ubuntu|$SERVICEGEN_APT_UBUNTU_ARCHIVE_URL|g" \
+        -e "s|http://security.ubuntu.com/ubuntu|$SERVICEGEN_APT_UBUNTU_SECURITY_URL|g" \
+        -e "s|http://ports.ubuntu.com/ubuntu-ports|$SERVICEGEN_APT_UBUNTU_PORTS_URL|g" {} +; \
+    fi
+ENV SERVICEGEN_GITHUB_RAW_URL=${SERVICEGEN_GITHUB_RAW_URL}
 
 COPY docker/cppboost-packages-ubuntu-24.04.txt /tmp/cppboost-packages.txt
 RUN rm -f /etc/apt/apt.conf.d/docker-clean
@@ -23,7 +35,20 @@ RUN --mount=type=cache,id=servicegen-apt-lists-${TARGETARCH},target=/var/lib/apt
     && locale-gen en_US.UTF-8 \
     && rm -f /tmp/cppboost-packages.txt
 
-COPY --from=servicelib-source / /opt/servicelib
+COPY --from=servicelib-source / /tmp/servicelib-source
+RUN source_dir=/tmp/servicelib-source; \
+    if [ -f "$source_dir/context" ]; then \
+      mkdir -p /tmp/servicelib-archive; \
+      tar -xf "$source_dir/context" -C /tmp/servicelib-archive; \
+      source_dir=/tmp/servicelib-archive; \
+    fi; \
+    if [ ! -f "$source_dir/CMakeLists.txt" ]; then \
+      source_dir=$(find "$source_dir" -mindepth 1 -maxdepth 1 -type d | head -n 1); \
+    fi; \
+    test -n "$source_dir" && test -f "$source_dir/CMakeLists.txt"; \
+    mkdir -p /opt/servicelib; \
+    cp -a "$source_dir/." /opt/servicelib/; \
+    rm -rf /tmp/servicelib-source
 WORKDIR /workspace
 
 ENV LANG=en_US.UTF-8
@@ -117,6 +142,15 @@ FROM ubuntu:24.04 AS runtime-base
 ARG CPPBOOSTSERVICELIB_PROFILING=OFF
 ARG CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS=OFF
 ARG DEBIAN_FRONTEND=noninteractive
+ARG SERVICEGEN_APT_UBUNTU_ARCHIVE_URL=
+ARG SERVICEGEN_APT_UBUNTU_SECURITY_URL=
+ARG SERVICEGEN_APT_UBUNTU_PORTS_URL=
+RUN if [ -n "$SERVICEGEN_APT_UBUNTU_ARCHIVE_URL$SERVICEGEN_APT_UBUNTU_SECURITY_URL$SERVICEGEN_APT_UBUNTU_PORTS_URL" ]; then \
+      find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) -exec sed -i \
+        -e "s|http://archive.ubuntu.com/ubuntu|$SERVICEGEN_APT_UBUNTU_ARCHIVE_URL|g" \
+        -e "s|http://security.ubuntu.com/ubuntu|$SERVICEGEN_APT_UBUNTU_SECURITY_URL|g" \
+        -e "s|http://ports.ubuntu.com/ubuntu-ports|$SERVICEGEN_APT_UBUNTU_PORTS_URL|g" {} +; \
+    fi
 RUN apt-get update \
     && apt-get install --yes --no-install-recommends ca-certificates \
     && rm -rf /var/lib/apt/lists/*

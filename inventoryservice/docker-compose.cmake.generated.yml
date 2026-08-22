@@ -7,6 +7,10 @@ services:
       args:
         SERVICEGEN_GRPC_SOURCE_STAGE: grpc-source
         SERVICEGEN_ASIO_GRPC_SOURCE_STAGE: asio-grpc-source
+        SERVICEGEN_GITHUB_RAW_URL: ${SERVICEGEN_GITHUB_RAW_URL:-}
+        SERVICEGEN_APT_UBUNTU_ARCHIVE_URL: ${SERVICEGEN_APT_UBUNTU_ARCHIVE_URL:-}
+        SERVICEGEN_APT_UBUNTU_SECURITY_URL: ${SERVICEGEN_APT_UBUNTU_SECURITY_URL:-}
+        SERVICEGEN_APT_UBUNTU_PORTS_URL: ${SERVICEGEN_APT_UBUNTU_PORTS_URL:-}
       additional_contexts:
         servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.5}
         grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}

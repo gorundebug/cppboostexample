@@ -57,11 +57,22 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
         EXCLUDE_FROM_ALL)
   elseif(SERVICEGEN_FETCH_CPP_DEPENDENCIES)
     include(FetchContent)
-    FetchContent_Declare(servicegen_cppboostservicelib
-        GIT_REPOSITORY "${CPPBOOSTSERVICELIB_REPOSITORY}"
-        GIT_TAG "${CPPBOOSTSERVICELIB_REVISION}"
-        GIT_SHALLOW FALSE
-        GIT_PROGRESS TRUE)
+    if(DEFINED ENV{SERVICEGEN_GITHUB_RAW_URL} AND
+       CPPBOOSTSERVICELIB_REPOSITORY MATCHES "^https://github.com/")
+      string(REGEX REPLACE "^https://github.com/" ""
+          _servicegen_framework_path "${CPPBOOSTSERVICELIB_REPOSITORY}")
+      string(REGEX REPLACE "\\.git$" ""
+          _servicegen_framework_path "${_servicegen_framework_path}")
+      FetchContent_Declare(servicegen_cppboostservicelib
+          URL "$ENV{SERVICEGEN_GITHUB_RAW_URL}/${_servicegen_framework_path}/archive/${CPPBOOSTSERVICELIB_REVISION}.tar.gz"
+          DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
+    else()
+      FetchContent_Declare(servicegen_cppboostservicelib
+          GIT_REPOSITORY "${CPPBOOSTSERVICELIB_REPOSITORY}"
+          GIT_TAG "${CPPBOOSTSERVICELIB_REVISION}"
+          GIT_SHALLOW FALSE
+          GIT_PROGRESS TRUE)
+    endif()
     FetchContent_MakeAvailable(servicegen_cppboostservicelib)
   else()
     find_package(cppboostservicelib CONFIG REQUIRED)
@@ -145,7 +156,7 @@ add_test(NAME example_inventory_service_typed_config COMMAND example_inventory_s
 if(NOT TARGET GTest::gtest_main)
   include(FetchContent)
   FetchContent_Declare(servicegen_googletest
-      URL "https://github.com/google/googletest/archive/refs/tags/${CPPBOOSTSERVICELIB_GOOGLETEST_VERSION}.tar.gz"
+      URL "${CPPBOOSTSERVICELIB_GITHUB_ARCHIVE_BASE}/google/googletest/archive/refs/tags/${CPPBOOSTSERVICELIB_GOOGLETEST_VERSION}.tar.gz"
       DOWNLOAD_EXTRACT_TIMESTAMP FALSE)
   set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
   FetchContent_MakeAvailable(servicegen_googletest)

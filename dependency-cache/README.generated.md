@@ -1,7 +1,9 @@
 # Local dependency proxy
 
 The optional shared Nexus instance caches artifacts downloaded
-from public Go, npm, PyPI, Cargo, Helm, Maven Central and Docker Hub registries.
+from public Go, npm, PyPI, Cargo, Helm, Maven Central, APT and Docker Hub registries,
+plus immutable GitHub/GitLab archives and release assets used by generated
+builds.
 It is a network package proxy, not a compiler or BuildKit cache.
 
 ```bash
@@ -45,6 +47,8 @@ ports to the host bridge (`0.0.0.0` by default); use the host firewall or set
 
 Docker image proxying is exposed on port 18083, but Docker Desktop/Engine must
 be configured explicitly to trust/use that registry or registry mirror. The
-generated project never edits daemon settings. A Compose file also cannot cache
-arbitrary Git clones or direct GitHub release downloads; pinned C++
-Git/FetchContent sources keep their existing versioned source cache.
+generated project never edits daemon settings. Pinned C++ sources use immutable
+archives through the raw proxy to populate their separate versioned source
+cache. Generated Debian/Ubuntu build stages rewrite their APT sources to Nexus
+when proxy mode is enabled. Once any of these layers contains an artifact, a
+build does not fetch it from the public upstream again.

@@ -11,6 +11,8 @@ OS := $(shell uname -s)
 ARCH := $(shell uname -m)
 RUNTIME_IMAGE ?= 0
 DOCKER_COMPOSE_RUNTIME_FILES :=
+SERVICEGEN_GITHUB_RAW_URL ?= https://github.com
+SERVICEGEN_GITLAB_RAW_URL ?= https://gitlab.com
 
 # A shared dependency proxy is opt-in through one host directory. Merely
 # setting the variable makes all generated host commands use the long-running
@@ -23,13 +25,21 @@ SERVICEGEN_DEPENDENCY_PROXY_PORT ?= $(SERVICEGEN_NEXUS_PORT)
 SERVICEGEN_DEPENDENCY_PROXY_PORT := $(if $(SERVICEGEN_DEPENDENCY_PROXY_PORT),$(SERVICEGEN_DEPENDENCY_PROXY_PORT),18081)
 SERVICEGEN_DEPENDENCY_PROXY_BASE := http://$(SERVICEGEN_DEPENDENCY_PROXY_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository
 SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository
-export GOPROXY := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/go-proxy/,direct
+export GOPROXY := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/go-proxy/
 export NPM_CONFIG_REGISTRY := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/npm-proxy/
 export PIP_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/pypi-proxy/simple
 export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_HOST)
 export UV_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/pypi-proxy/simple
 export CARGO_REGISTRIES_CRATES_IO_INDEX := sparse+$(SERVICEGEN_DEPENDENCY_PROXY_BASE)/cargo-proxy/
 export SERVICEGEN_MAVEN_CENTRAL_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/maven-central
+export SERVICEGEN_GITHUB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/github-raw
+export SERVICEGEN_GITLAB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/gitlab-raw
+export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-ubuntu-archive
+export SERVICEGEN_APT_UBUNTU_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-ubuntu-security
+export SERVICEGEN_APT_UBUNTU_PORTS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-ubuntu-ports
+export SERVICEGEN_APT_DEBIAN_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-debian
+export SERVICEGEN_APT_DEBIAN_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-debian-security
+export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.5.tar.gz
 export SERVICEGEN_HELM_PROMETHEUS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-prometheus
 export SERVICEGEN_HELM_GRAFANA_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-grafana
 export SERVICEGEN_HELM_OPENTELEMETRY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-opentelemetry
@@ -109,13 +119,20 @@ docker-build: $(LANG_DOCKER_BUILD_TARGETS) ## Build all service Docker images
 docker-build-local: docker-build ## Build Docker images for local development
 
 ifneq ($(strip $(SERVICEGEN_DEPENDENCY_PROXY_DIR)),)
-docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export GOPROXY := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/go-proxy/,direct
+docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export GOPROXY := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/go-proxy/
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export NPM_CONFIG_REGISTRY := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/npm-proxy/
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export PIP_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/pypi-proxy/simple
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST)
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export UV_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/pypi-proxy/simple
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export CARGO_REGISTRIES_CRATES_IO_INDEX := sparse+$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/cargo-proxy/
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_MAVEN_CENTRAL_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/maven-central
+docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_GITHUB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw
+docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_GITLAB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/gitlab-raw
+docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-archive
+docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_APT_UBUNTU_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-security
+docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_APT_UBUNTU_PORTS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-ports
+docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_APT_DEBIAN_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-debian
+docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_APT_DEBIAN_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-debian-security
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_HELM_PROMETHEUS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/helm-prometheus
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_HELM_GRAFANA_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/helm-grafana
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_HELM_OPENTELEMETRY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/helm-opentelemetry
@@ -208,7 +225,7 @@ merge-validate: ## Re-run generated/business interface checks
 $(ACT):
 	@mkdir -p "$(TOOLS_DIR)"
 	@echo "Downloading act $(ACT_VERSION)..."
-	@curl -sSL "https://github.com/nektos/act/releases/download/$(ACT_VERSION)/act_$(OS)_$(ARCH).tar.gz" | tar -xz -C "$(TOOLS_DIR)" act
+	@curl -sSL "$(SERVICEGEN_GITHUB_RAW_URL)/nektos/act/releases/download/$(ACT_VERSION)/act_$(OS)_$(ARCH).tar.gz" | tar -xz -C "$(TOOLS_DIR)" act
 
 $(GH):
 	@mkdir -p "$(TOOLS_DIR)"
@@ -217,13 +234,13 @@ $(GH):
 	_arch=$$(uname -m | sed 's/x86_64/amd64/'); \
 	_ver=$$(echo "$(GH_VERSION)" | sed 's/v//'); \
 	if [ "$$(uname -s)" = "Darwin" ]; then \
-	  curl -sSL "https://github.com/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.zip" -o /tmp/gh.zip; \
+	  curl -sSL "$(SERVICEGEN_GITHUB_RAW_URL)/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.zip" -o /tmp/gh.zip; \
 	  rm -rf /tmp/gh_extract; \
 	  unzip -q /tmp/gh.zip "gh_$${_ver}_$${_os}_$${_arch}/bin/gh" -d /tmp/gh_extract; \
 	  mv /tmp/gh_extract/gh_$${_ver}_$${_os}_$${_arch}/bin/gh "$(GH)"; \
 	  rm -rf /tmp/gh.zip /tmp/gh_extract; \
 	else \
-	  curl -sSL "https://github.com/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.tar.gz" | tar -xz -C /tmp; \
+	  curl -sSL "$(SERVICEGEN_GITHUB_RAW_URL)/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.tar.gz" | tar -xz -C /tmp; \
 	  mv /tmp/gh_$${_ver}_$${_os}_$${_arch}/bin/gh "$(GH)"; \
 	  rm -rf /tmp/gh_$${_ver}_$${_os}_$${_arch}; \
 	fi
@@ -235,7 +252,7 @@ $(GLAB):
 	@_os=$$(uname -s | tr '[:upper:]' '[:lower:]'); \
 	_arch=$$(uname -m | sed 's/amd64/x86_64/'); \
 	_ver=$$(echo "$(GLAB_VERSION)" | sed 's/v//'); \
-	curl -sSL "https://gitlab.com/gitlab-org/cli/-/releases/$(GLAB_VERSION)/downloads/glab_$${_ver}_$${_os}_$${_arch}.tar.gz" | \
+	curl -sSL "$(SERVICEGEN_GITLAB_RAW_URL)/gitlab-org/cli/-/releases/$(GLAB_VERSION)/downloads/glab_$${_ver}_$${_os}_$${_arch}.tar.gz" | \
 	  tar -xz -C "$(TOOLS_DIR)" --strip-components=1 bin/glab
 	@chmod +x "$(GLAB)"
 

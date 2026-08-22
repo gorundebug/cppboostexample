@@ -56,6 +56,28 @@ def common(name: str, remote_url: str) -> dict:
 
 
 def repositories() -> list[tuple[str, str, dict]]:
+    maven = common("maven-central", "https://repo1.maven.org/maven2")
+    maven["raw"] = {
+        "contentDisposition": "ATTACHMENT",
+        "forwardQueryParameters": True,
+        "excludedQueryParameters": [],
+    }
+    github = common("github-raw", "https://github.com")
+    github["proxy"]["contentMaxAge"] = -1
+    github["proxy"]["metadataMaxAge"] = -1
+    github["raw"] = {
+        "contentDisposition": "ATTACHMENT",
+        "forwardQueryParameters": True,
+        "excludedQueryParameters": [],
+    }
+    gitlab = common("gitlab-raw", "https://gitlab.com")
+    gitlab["proxy"]["contentMaxAge"] = -1
+    gitlab["proxy"]["metadataMaxAge"] = -1
+    gitlab["raw"] = {
+        "contentDisposition": "ATTACHMENT",
+        "forwardQueryParameters": True,
+        "excludedQueryParameters": [],
+    }
     definitions = [
         ("go", "go-proxy", common("go-proxy", "https://proxy.golang.org")),
         ("npm", "npm-proxy", common("npm-proxy", "https://registry.npmjs.org")),
@@ -66,15 +88,12 @@ def repositories() -> list[tuple[str, str, dict]]:
         ("helm", "helm-opentelemetry", common("helm-opentelemetry", "https://open-telemetry.github.io/opentelemetry-helm-charts")),
         ("helm", "helm-jaeger", common("helm-jaeger", "https://jaegertracing.github.io/helm-charts")),
         ("helm", "helm-redpanda", common("helm-redpanda", "https://charts.redpanda.com")),
-        ("raw", "maven-central", common("maven-central", "https://repo1.maven.org/maven2")),
+        ("raw", "maven-central", maven),
+        ("raw", "github-raw", github),
+        ("raw", "gitlab-raw", gitlab),
     ]
     definitions[2][2]["pypi"] = {"indexPath": "/simple"}
     definitions[3][2]["cargo"] = {"requireAuthentication": False}
-    definitions[9][2]["raw"] = {
-        "contentDisposition": "ATTACHMENT",
-        "forwardQueryParameters": True,
-        "excludedQueryParameters": [],
-    }
     docker = common("docker-hub", "https://registry-1.docker.io")
     docker["docker"] = {
         "v1Enabled": False,
@@ -88,6 +107,16 @@ def repositories() -> list[tuple[str, str, dict]]:
         "foreignLayerUrlWhitelist": [],
     }
     definitions.append(("docker", "docker-hub", docker))
+    for name, remote_url in (
+        ("apt-ubuntu-archive", "http://archive.ubuntu.com/ubuntu/"),
+        ("apt-ubuntu-security", "http://security.ubuntu.com/ubuntu/"),
+        ("apt-ubuntu-ports", "http://ports.ubuntu.com/ubuntu-ports/"),
+        ("apt-debian", "http://deb.debian.org/debian/"),
+        ("apt-debian-security", "http://deb.debian.org/debian-security/"),
+    ):
+        apt = common(name, remote_url)
+        apt["apt"] = {"distribution": "", "flat": False}
+        definitions.append(("apt", name, apt))
     return definitions
 
 
@@ -125,7 +154,14 @@ def main() -> int:
     }
     for format_name, name, payload in repositories():
         if name in existing:
-            print(f"[dependency-cache] reuse {name}")
+            request(
+                base_url,
+                args.password,
+                "PUT",
+                f"/service/rest/v1/repositories/{format_name}/proxy/{name}",
+                payload,
+            )
+            print(f"[dependency-cache] updated {name}")
             continue
         request(
             base_url,
