@@ -12,7 +12,7 @@ services:
         SERVICEGEN_APT_UBUNTU_SECURITY_URL: ${SERVICEGEN_APT_UBUNTU_SECURITY_URL:-}
         SERVICEGEN_APT_UBUNTU_PORTS_URL: ${SERVICEGEN_APT_UBUNTU_PORTS_URL:-}
       additional_contexts:
-        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.5}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.6}
         grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}
         asio-grpc-source: ${SERVICEGEN_ASIO_GRPC_SOURCE_CONTEXT:-.}
     working_dir: /workspace
