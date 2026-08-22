@@ -62,6 +62,7 @@ print_env() {
   base="http://$host:$nexus_port/repository"
   cat <<EOF
 export GOPROXY=$base/go-proxy/
+export GOSUMDB=off
 export NPM_CONFIG_REGISTRY=$base/npm-proxy/
 export PIP_INDEX_URL=$base/pypi-proxy/simple
 export PIP_TRUSTED_HOST=$host

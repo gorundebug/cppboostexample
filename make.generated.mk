@@ -26,6 +26,7 @@ SERVICEGEN_DEPENDENCY_PROXY_PORT := $(if $(SERVICEGEN_DEPENDENCY_PROXY_PORT),$(S
 SERVICEGEN_DEPENDENCY_PROXY_BASE := http://$(SERVICEGEN_DEPENDENCY_PROXY_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository
 SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository
 export GOPROXY := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/go-proxy/
+export GOSUMDB := off
 export NPM_CONFIG_REGISTRY := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/npm-proxy/
 export PIP_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/pypi-proxy/simple
 export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_HOST)
@@ -120,6 +121,7 @@ docker-build-local: docker-build ## Build Docker images for local development
 
 ifneq ($(strip $(SERVICEGEN_DEPENDENCY_PROXY_DIR)),)
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export GOPROXY := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/go-proxy/
+docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export GOSUMDB := off
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export NPM_CONFIG_REGISTRY := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/npm-proxy/
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export PIP_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/pypi-proxy/simple
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST)
