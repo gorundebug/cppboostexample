@@ -1,0 +1,42 @@
+name: C++ CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout pinned cppboostservicelib
+        run: |
+          git clone "https://github.com/gorundebug/cppboostservicelib.git" .servicelib
+          git -C .servicelib checkout "v0.2.5"
+
+      - name: Build and test
+        env:
+          SERVICELIB_SOURCE_CONTEXT: .servicelib
+        run: ./scripts/test.generated.sh
+
+      - name: Integration tests
+        env:
+          SERVICELIB_SOURCE_CONTEXT: .servicelib
+        run: ./scripts/integration-test.generated.sh
+
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout pinned cppboostservicelib
+        run: |
+          git clone "https://github.com/gorundebug/cppboostservicelib.git" .servicelib
+          git -C .servicelib checkout "v0.2.5"
+
+      - name: Lint
+        env:
+          SERVICELIB_SOURCE_CONTEXT: .servicelib
+        run: ./scripts/lint.generated.sh

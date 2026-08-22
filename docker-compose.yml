@@ -1,0 +1,143 @@
+services:
+  analyticsservice:
+    image: cppboostexample-cpp-build
+    working_dir: /workspace/analyticsservice
+    command:
+      - /workspace/build/analyticsservice/example_analytics_service
+      - --config
+      - /workspace/analyticsservice/config/config.yaml
+      - --values
+      - /workspace/analyticsservice/config/overrides.yaml
+    volumes:
+      - .:/workspace
+      - cpp-cmake-build:/workspace/build
+    stop_grace_period: 30000ms
+    restart: unless-stopped
+    environment:
+      - DEBUG=${ANALYTICS_SERVICE_DEBUG:-0}
+      - ANALYTICS_SERVICE_HTTP_HOST=0.0.0.0
+      - ANALYTICS_SERVICE_GRPC_HOST=0.0.0.0
+    ports:
+      - "9093:9093"
+      - "9203:9203"
+      - "2345:2345"
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
+    networks:
+      - app_net
+
+  inventoryservice:
+    image: cppboostexample-cpp-build
+    working_dir: /workspace/inventoryservice
+    command:
+      - /workspace/build/inventoryservice/example_inventory_service
+      - --config
+      - /workspace/inventoryservice/config/config.yaml
+      - --values
+      - /workspace/inventoryservice/config/overrides.yaml
+    volumes:
+      - .:/workspace
+      - cpp-cmake-build:/workspace/build
+    stop_grace_period: 30000ms
+    restart: unless-stopped
+    environment:
+      - DEBUG=${INVENTORY_SERVICE_DEBUG:-0}
+      - INVENTORY_SERVICE_HTTP_HOST=0.0.0.0
+      - INVENTORY_SERVICE_GRPC_HOST=0.0.0.0
+    ports:
+      - "9092:9092"
+      - "9202:9202"
+      - "2346:2345"
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
+    networks:
+      - app_net
+
+  orderservice:
+    image: cppboostexample-cpp-build
+    working_dir: /workspace/orderservice
+    command:
+      - /workspace/build/orderservice/example_order_service
+      - --config
+      - /workspace/orderservice/config/config.yaml
+      - --values
+      - /workspace/orderservice/config/overrides.yaml
+    volumes:
+      - .:/workspace
+      - cpp-cmake-build:/workspace/build
+    stop_grace_period: 30000ms
+    restart: unless-stopped
+    environment:
+      - DEBUG=${ORDER_SERVICE_DEBUG:-0}
+      - ORDER_SERVICE_HTTP_HOST=0.0.0.0
+      - ORDER_SERVICE_GRPC_HOST=0.0.0.0
+      - INVENTORY_SERVICE_API_ADDRESS=dns:///inventoryservice:9202
+    ports:
+      - "9091:9091"
+      - "9201:9201"
+      - "2347:2345"
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
+    networks:
+      - app_net
+
+
+  redpanda:
+    image: redpandadata/redpanda:v24.2.5
+    restart: unless-stopped
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp=1
+      - --memory=512M
+      - --reserve-memory=0M
+      - --node-id=0
+      - --check=false
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:19092
+    ports:
+      - "${REDPANDA_PORT:-19092}:19092"
+    networks:
+      - app_net
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - app_net
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./analyticsservice/grafana/dist:/etc/grafana/dashboards/analyticsservice:ro
+      - ./inventoryservice/grafana/dist:/etc/grafana/dashboards/inventoryservice:ro
+      - ./orderservice/grafana/dist:/etc/grafana/dashboards/orderservice:ro
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    driver: bridge
+
+volumes:
+  grafana_data:
+  cpp-cmake-build:
+    name: ${SERVICEGEN_CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.5}

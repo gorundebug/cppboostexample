@@ -1,0 +1,27 @@
+openapi: "3.0.3"
+info:
+  title: Order Service API
+  version: "0.0.1"
+paths:
+  /v1/processorder:
+    post:
+      operationId: processorder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessOrderRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessOrderResponse'
+components:
+  schemas:
+    ProcessOrderRequest:
+      type: object
+    ProcessOrderResponse:
+      type: object

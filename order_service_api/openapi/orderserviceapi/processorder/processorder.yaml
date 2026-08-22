@@ -1,0 +1,10 @@
+openapi: "3.0.3"
+info:
+  title: ProcessOrder
+  version: "0.0.1"
+components:
+  schemas:
+    ProcessOrderRequest:
+      type: object
+    ProcessOrderResponse:
+      type: object

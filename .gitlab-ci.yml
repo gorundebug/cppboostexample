@@ -1,0 +1,7 @@
+# User-owned GitLab entrypoint. Generator-managed jobs live in included files.
+stages:
+  - build
+  - lint
+
+include:
+  - local: .gitlab-ci.cpp.generated.yml

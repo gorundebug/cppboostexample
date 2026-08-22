@@ -1,0 +1,87 @@
+dataConnectors:
+    orderEvents:
+        brokers: redpanda:9092
+        endpoints:
+            orderProcessed:
+                consumerGroup: analytics-service
+                createTopic: true
+                enabled: true
+                functionDescription: |
+                    Exchange OrderProcessed events keyed by order ID.
+                    Producers include the final status, processing time, total and confirmed item counts, and a failure reason for unsuccessful orders.
+                    Consumers decode the event and mark its Kafka message processed only after the pipeline handles it successfully.
+                functionInitializerGroup: ""
+                functionName: OrderProcessedEndpoint
+                functionPackage: ""
+                name: Order Processed
+                partitions: 1
+                publicFunction: false
+                replicationFactor: 1
+                topic: order-processed
+        goImplementation: IBM/Sarama
+        name: Order Events
+        password: ""
+        pythonImplementation: aiokafka
+        rustImplementation: rust/rdkafka
+        saslMechanism: SCRAM-SHA-512
+        securityProtocol: PLAINTEXT
+        type: Kafka
+        typeScriptImplementation: confluent/kafka-javascript
+        username: ""
+        version: 2.8.0
+services:
+    analyticsService:
+        color: '#05ABF7'
+        defaultCallSemantics: FunctionCall
+        environment: ""
+        golangVersion: 1.25.4
+        grpcHost: 0.0.0.0
+        grpcPort: 9203
+        httpHost: 0.0.0.0
+        httpPort: 9093
+        kubernetesWorkloadType: Deployment
+        livenessHandler: health/live
+        metricsHandler: metrics
+        modulePath: github.com/gorundebug/cppboostexample-analyticsservice
+        name: Analytics Service
+        pipelines:
+            analytics:
+                consumeOrderProcessed:
+                    endpoint: orderProcessed
+                    name: Consume Order Processed
+                    source: countOrderProcessed
+                    type: Input
+                    valueType: orderProcessed
+                    xPos: -1190
+                    yPos: -205
+                countOrderProcessed:
+                    functionDescription: |
+                        Count successful and unsuccessful orders independently, then return the event unchanged.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: CountOrderProcessed
+                    functionPackage: ""
+                    name: Count Order Processed
+                    source: consumeOrderProcessed
+                    type: Process
+                    valueType: orderProcessed
+                    xPos: -1390
+                    yPos: -19
+        programmingLanguage: CppBoost
+        readinessHandler: health/ready
+        shutdownTimeout: 30000
+        startupHandler: health/startup
+        statusHandler: status
+settings:
+    moduleVersion: v0.2.5
+    name: Example
+    repoPath: github.com/gorundebug/cppboostexample
+types:
+    orderProcessed:
+        definitionFormat: Native
+        description: 'Final order-processing event. Fields: OrderID string, Status string, ProcessedAt time.Time, TotalItems int, ConfirmedItems int, FailureReason string.'
+        module: model
+        name: OrderProcessed
+        publicType: false
+        transferByValue: false
+        type: struct

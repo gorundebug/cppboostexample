@@ -1,0 +1,72 @@
+mode: deployment
+fullnameOverride: otel-collector
+
+image:
+  repository: otel/opentelemetry-collector-contrib
+  tag: 0.158.0
+command:
+  name: otelcol-contrib
+
+config:
+  exporters:
+    debug: null
+    otlp/jaeger:
+      endpoint: jaeger:4317
+      tls:
+        insecure: true
+    otlphttp/loki:
+      endpoint: http://loki-gateway/otlp
+    prometheus:
+      endpoint: 0.0.0.0:8889
+  service:
+    pipelines:
+      traces:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [otlp/jaeger]
+      metrics:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [prometheus]
+      logs:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [otlphttp/loki]
+
+ports:
+  metrics:
+    enabled: true
+    containerPort: 8889
+    servicePort: 8889
+    protocol: TCP
+
+serviceMonitor:
+  enabled: true
+  metricsEndpoints:
+    - port: metrics
+      interval: 5s
+  # The Kubernetes scrape target also defines `service` and `job`. Prometheus
+  # initially preserves the application values as `exported_*`; normalize them
+  # back to the canonical dashboard label contract after target discovery.
+  metricRelabelings:
+    - action: replace
+      sourceLabels: [exported_service]
+      regex: (.+)
+      targetLabel: service
+      replacement: $1
+    - action: labeldrop
+      regex: exported_service
+    - action: replace
+      sourceLabels: [exported_job]
+      regex: (.+)
+      targetLabel: job
+      replacement: $1
+    - action: labeldrop
+      regex: exported_job
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    memory: 512Mi

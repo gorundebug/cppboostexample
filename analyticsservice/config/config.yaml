@@ -1,0 +1,18 @@
+dataConnectors:
+  orderEvents:
+    brokers: $orderEventsBrokers
+    password: $orderEventsPassword
+    saslMechanism: $orderEventsSaslMechanism
+    securityProtocol: $orderEventsSecurityProtocol
+    username: $orderEventsUsername
+endpoints:
+  orderProcessed:
+    enabled: $orderProcessedEnabled
+services:
+  analyticsService:
+    defaultGrpcTimeout: $analyticsServiceDefaultGrpcTimeout
+    environment: $analyticsServiceEnvironment
+    grpcHost: $analyticsServiceGrpcHost
+    grpcPort: $analyticsServiceGrpcPort
+    httpHost: $analyticsServiceHttpHost
+    httpPort: $analyticsServiceHttpPort

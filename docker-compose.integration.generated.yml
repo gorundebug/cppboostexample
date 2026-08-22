@@ -1,0 +1,65 @@
+services:
+  analyticsservice:
+    image: cppboostexample-cpp-build
+    working_dir: /workspace/analyticsservice
+    command:
+      - /workspace/build/analyticsservice/example_analytics_service
+      - --config
+      - /workspace/analyticsservice/config/config.yaml
+      - --values
+      - /workspace/analyticsservice/config/overrides.integration.generated.yaml
+    volumes:
+      - .:/workspace
+      - cpp-cmake-build:/workspace/build
+    depends_on:
+      redpanda:
+        condition: service_healthy
+
+    stop_grace_period: 30000ms
+  inventoryservice:
+    image: cppboostexample-cpp-build
+    working_dir: /workspace/inventoryservice
+    command:
+      - /workspace/build/inventoryservice/example_inventory_service
+      - --config
+      - /workspace/inventoryservice/config/config.yaml
+      - --values
+      - /workspace/inventoryservice/config/overrides.integration.generated.yaml
+    volumes:
+      - .:/workspace
+      - cpp-cmake-build:/workspace/build
+    depends_on:
+      redpanda:
+        condition: service_healthy
+
+    stop_grace_period: 30000ms
+  orderservice:
+    image: cppboostexample-cpp-build
+    working_dir: /workspace/orderservice
+    command:
+      - /workspace/build/orderservice/example_order_service
+      - --config
+      - /workspace/orderservice/config/config.yaml
+      - --values
+      - /workspace/orderservice/config/overrides.integration.generated.yaml
+    volumes:
+      - .:/workspace
+      - cpp-cmake-build:/workspace/build
+    depends_on:
+      redpanda:
+        condition: service_healthy
+
+    stop_grace_period: 30000ms
+
+  redpanda:
+    image: redpandadata/redpanda:v24.2.5
+    command: ["redpanda", "start", "--overprovisioned", "--smp=1", "--memory=512M", "--reserve-memory=0M", "--node-id=0", "--check=false", "--kafka-addr=internal://0.0.0.0:9092", "--advertise-kafka-addr=internal://redpanda:9092"]
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health", "--exit-when-healthy"]
+      interval: 1s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  cpp-cmake-build:
+    name: ${SERVICEGEN_CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.5}

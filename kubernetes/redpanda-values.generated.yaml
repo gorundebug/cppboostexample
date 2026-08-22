@@ -1,0 +1,32 @@
+# Local single-node development settings for the official Redpanda chart.
+auth:
+  sasl:
+    # The local script enables this only when KUBERNETES_KAFKA_SASL_ENABLED=true
+    # and creates the referenced Secret from environment variables.
+    enabled: false
+    mechanism: SCRAM-SHA-512
+    secretRef: redpanda-superusers
+    users: []
+statefulset:
+  replicas: 1
+  initContainers:
+    setDataDirOwnership:
+      enabled: true
+storage:
+  persistentVolume:
+    enabled: false
+tls:
+  enabled: false
+external:
+  enabled: false
+console:
+  enabled: false
+resources:
+  cpu:
+    cores: 1
+  memory:
+    container:
+      max: 1Gi
+    redpanda:
+      memory: 600Mi
+      reserveMemory: 128Mi

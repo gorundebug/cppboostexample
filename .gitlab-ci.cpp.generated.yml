@@ -1,0 +1,26 @@
+variables:
+  SERVICELIB_SOURCE_CONTEXT: .servicelib
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+
+.cpp-dependencies:
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - apk add --no-cache bash git
+    - git clone "https://github.com/gorundebug/cppboostservicelib.git" .servicelib
+    - git -C .servicelib checkout "v0.2.5"
+
+build-test:
+  extends: .cpp-dependencies
+  stage: build
+  script:
+    - ./scripts/test.generated.sh
+    - ./scripts/integration-test.generated.sh
+
+lint:
+  extends: .cpp-dependencies
+  stage: lint
+  script:
+    - ./scripts/lint.generated.sh

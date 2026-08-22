@@ -1,0 +1,62 @@
+# Files listed here are overwritten by scripts/merge.generated.sh even when
+# their basename does not contain "generated".
+#
+# Use one exact path relative to the project root per line. Empty lines and
+# lines beginning with # are ignored. Globs and paths outside the project are
+# not supported.
+#
+# Example:
+# Dockerfile
+# orderservice/config/config.yaml
+scripts/merge-overwrite.txt
+Makefile
+docker-compose.yml
+docker-compose.kubernetes.yml
+docker-compose.dependency-cache.generated.yml
+pyproject.toml
+CMakeLists.txt
+CMakePresets.json
+Dockerfile.cmake
+docker/cppboost-packages-ubuntu-24.04.txt
+inventory_service_api/CMakeLists.txt
+model/CMakeLists.txt
+order_service_api/CMakeLists.txt
+analyticsservice/grafana/dashboards/_lib.libsonnet
+analyticsservice/helm/Chart.yaml
+analyticsservice/helm/values.schema.json
+analyticsservice/helm/templates/NOTES.txt
+analyticsservice/CMakeLists.txt
+analyticsservice/Dockerfile
+analyticsservice/pyproject.toml
+analyticsservice/src/analytics_service/internal/functions/__init__.py
+analyticsservice/cmd/service/main.cpp
+analyticsservice/static_config.yaml
+analyticsservice/config/config.yaml
+analyticsservice/config/config_vars.yaml
+analyticsservice/config/config_vars.integration.yaml
+inventoryservice/grafana/dashboards/_lib.libsonnet
+inventoryservice/helm/Chart.yaml
+inventoryservice/helm/values.schema.json
+inventoryservice/helm/templates/NOTES.txt
+inventoryservice/CMakeLists.txt
+inventoryservice/Dockerfile
+inventoryservice/pyproject.toml
+inventoryservice/src/inventory_service/internal/functions/__init__.py
+inventoryservice/cmd/service/main.cpp
+inventoryservice/static_config.yaml
+inventoryservice/config/config.yaml
+inventoryservice/config/config_vars.yaml
+inventoryservice/config/config_vars.integration.yaml
+orderservice/grafana/dashboards/_lib.libsonnet
+orderservice/helm/Chart.yaml
+orderservice/helm/values.schema.json
+orderservice/helm/templates/NOTES.txt
+orderservice/CMakeLists.txt
+orderservice/Dockerfile
+orderservice/pyproject.toml
+orderservice/src/order_service/internal/functions/__init__.py
+orderservice/cmd/service/main.cpp
+orderservice/static_config.yaml
+orderservice/config/config.yaml
+orderservice/config/config_vars.yaml
+orderservice/config/config_vars.integration.yaml

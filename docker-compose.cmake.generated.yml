@@ -1,0 +1,90 @@
+services:
+  cpp-build:
+    image: cppboostexample-cpp-build
+    build:
+      context: .
+      dockerfile: Dockerfile.cmake
+      target: development
+      args:
+        SERVICEGEN_GRPC_SOURCE_STAGE: grpc-source
+        SERVICEGEN_ASIO_GRPC_SOURCE_STAGE: asio-grpc-source
+      additional_contexts:
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.5}
+        grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}
+        asio-grpc-source: ${SERVICEGEN_ASIO_GRPC_SOURCE_CONTEXT:-.}
+    working_dir: /workspace
+    environment:
+      CPPBOOSTSERVICELIB_SOURCE_DIR: ${SERVICELIB_CONTAINER_SOURCE_DIR:-/opt/servicelib}
+      SERVICELIB_SOURCE_DIR: ${SERVICELIB_CONTAINER_SOURCE_DIR:-/opt/servicelib}
+      CCACHE_DIR: /ccache
+      CCACHE_BASEDIR: /workspace
+      CCACHE_COMPILERCHECK: content
+      CCACHE_MAXSIZE: ${CCACHE_MAXSIZE:-20G}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GITLAB_TOKEN: ${GITLAB_TOKEN:-}
+      SERVICEGEN_FETCH_CPP_DEPENDENCIES: ${SERVICEGEN_FETCH_CPP_DEPENDENCIES:-OFF}
+    volumes:
+      - .:/workspace
+      - cpp-cmake-build:/workspace/build
+      - cpp-ccache:/ccache
+    command:
+      - /bin/bash
+      - -lc
+      - source scripts/configure-git-auth.generated.sh && cmake --preset docker-debug -DSERVICEGEN_FETCH_CPP_DEPENDENCIES="${SERVICEGEN_FETCH_CPP_DEPENDENCIES:-OFF}" && cmake --build --preset docker-debug --parallel && ctest --preset docker-debug
+  analyticsservice-runtime:
+    image: cppboostexample-analyticsservice
+    build:
+      context: .
+      dockerfile: Dockerfile.cmake
+      target: runtime-analyticsservice
+      args:
+        SERVICEGEN_GRPC_SOURCE_STAGE: grpc-source
+        SERVICEGEN_ASIO_GRPC_SOURCE_STAGE: asio-grpc-source
+        CPPBOOSTSERVICELIB_PROFILING: ${CPPBOOSTSERVICELIB_PROFILING:-OFF}
+        CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS: ${CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS:-OFF}
+        SERVICEGEN_RUNTIME_STRIP: ${SERVICEGEN_RUNTIME_STRIP:-ON}
+        SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
+      additional_contexts:
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.5}
+        grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}
+        asio-grpc-source: ${SERVICEGEN_ASIO_GRPC_SOURCE_CONTEXT:-.}
+  inventoryservice-runtime:
+    image: cppboostexample-inventoryservice
+    build:
+      context: .
+      dockerfile: Dockerfile.cmake
+      target: runtime-inventoryservice
+      args:
+        SERVICEGEN_GRPC_SOURCE_STAGE: grpc-source
+        SERVICEGEN_ASIO_GRPC_SOURCE_STAGE: asio-grpc-source
+        CPPBOOSTSERVICELIB_PROFILING: ${CPPBOOSTSERVICELIB_PROFILING:-OFF}
+        CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS: ${CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS:-OFF}
+        SERVICEGEN_RUNTIME_STRIP: ${SERVICEGEN_RUNTIME_STRIP:-ON}
+        SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
+      additional_contexts:
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.5}
+        grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}
+        asio-grpc-source: ${SERVICEGEN_ASIO_GRPC_SOURCE_CONTEXT:-.}
+  orderservice-runtime:
+    image: cppboostexample-orderservice
+    build:
+      context: .
+      dockerfile: Dockerfile.cmake
+      target: runtime-orderservice
+      args:
+        SERVICEGEN_GRPC_SOURCE_STAGE: grpc-source
+        SERVICEGEN_ASIO_GRPC_SOURCE_STAGE: asio-grpc-source
+        CPPBOOSTSERVICELIB_PROFILING: ${CPPBOOSTSERVICELIB_PROFILING:-OFF}
+        CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS: ${CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS:-OFF}
+        SERVICEGEN_RUNTIME_STRIP: ${SERVICEGEN_RUNTIME_STRIP:-ON}
+        SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
+      additional_contexts:
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.5}
+        grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}
+        asio-grpc-source: ${SERVICEGEN_ASIO_GRPC_SOURCE_CONTEXT:-.}
+
+volumes:
+  cpp-cmake-build:
+    name: ${SERVICEGEN_CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.5}
+  cpp-ccache:
+    name: cppboostexample_cpp-ccache

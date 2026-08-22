@@ -1,0 +1,6 @@
+apiVersion: v2
+name: inventoryservice
+description: Helm chart for Inventory Service
+type: application
+version: 0.2.5
+appVersion: "0.2.5"

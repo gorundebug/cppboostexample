@@ -1,0 +1,27 @@
+dataConnectors:
+  inventoryServiceApi:
+    address: $inventoryServiceApiAddress
+    connectionsCount: $inventoryServiceApiConnectionsCount
+  orderEvents:
+    brokers: $orderEventsBrokers
+    password: $orderEventsPassword
+    saslMechanism: $orderEventsSaslMechanism
+    securityProtocol: $orderEventsSecurityProtocol
+    username: $orderEventsUsername
+endpoints:
+  orderProcessed:
+    enabled: $orderProcessedEnabled
+pools:
+  defaultPool:
+    executorsCount: $defaultPoolExecutorsCount
+services:
+  orderService:
+    defaultGrpcTimeout: $orderServiceDefaultGrpcTimeout
+    environment: $orderServiceEnvironment
+    grpcHost: $orderServiceGrpcHost
+    grpcPort: $orderServiceGrpcPort
+    httpHost: $orderServiceHttpHost
+    httpPort: $orderServiceHttpPort
+streams:
+  softDeadline:
+    duration: $softDeadlineDuration

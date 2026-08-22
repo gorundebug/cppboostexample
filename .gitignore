@@ -1,0 +1,48 @@
+# Build artifacts
+bin/
+generated/
+build/
+dist/
+compile_commands.json
+.ccache/
+.cppservicelib/
+.pyservicelib/
+.servicegen/
+
+# Go
+*.test
+*.out
+coverage.out
+
+# Tools (downloaded binaries); userver compatibility patches are source input.
+tools/*
+
+# Proto descriptors (binary, regenerated)
+descriptors/
+
+# Go workspace sum (regenerated)
+go.work.sum
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Services (cloned separately via clone.generated.sh)
+/inventoryservice/
+/orderservice/
+
+# Modules (cloned separately via clone.generated.sh)
+/inventory_service_api/
+/model/
+/order_service_api/

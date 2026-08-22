@@ -1,0 +1,40 @@
+# Local-only monitoring stack. Production clusters should provide their own
+# Prometheus/Grafana installation and retention/security policy.
+alertmanager:
+  enabled: true
+
+grafana:
+  enabled: true
+  adminPassword: admin
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: ALL
+      folderAnnotation: grafana_folder
+      provider:
+        foldersFromFilesStructure: true
+  additionalDataSources:
+    - name: Jaeger
+      type: jaeger
+      access: proxy
+      url: http://jaeger:16686
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://loki-gateway
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+
+# k3s does not expose these control-plane endpoints like kubeadm clusters do.
+kubeControllerManager:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+nodeExporter:
+  enabled: false

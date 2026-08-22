@@ -1,0 +1,10 @@
+syntax = "proto3";
+package inventoryserviceapi;
+
+import "proto/inventoryserviceapi/processorderitem/processorderitem.proto";
+
+option go_package = "github.com/gorundebug/cppboostexample-inventory-service-api/pkg/generated/proto/inventoryserviceapi";
+
+service InventoryServiceApi {
+  rpc ProcessOrderItem(processorderitem.ProcessOrderItemRequest) returns (processorderitem.ProcessOrderItemResponse) {}
+}

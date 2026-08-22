@@ -1,0 +1,15 @@
+dataConnectors:
+  inventoryServiceApi:
+    address: $inventoryServiceApiAddress
+    connectionsCount: $inventoryServiceApiConnectionsCount
+pools:
+  inventoryPriorityWorkers:
+    executorsCount: $inventoryPriorityWorkersExecutorsCount
+services:
+  inventoryService:
+    defaultGrpcTimeout: $inventoryServiceDefaultGrpcTimeout
+    environment: $inventoryServiceEnvironment
+    grpcHost: $inventoryServiceGrpcHost
+    grpcPort: $inventoryServiceGrpcPort
+    httpHost: $inventoryServiceHttpHost
+    httpPort: $inventoryServiceHttpPort

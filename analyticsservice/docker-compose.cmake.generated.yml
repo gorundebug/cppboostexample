@@ -1,0 +1,36 @@
+services:
+  cpp-build:
+    image: analyticsservice-cpp-build
+    build:
+      context: .
+      dockerfile: Dockerfile.cmake
+      args:
+        SERVICEGEN_GRPC_SOURCE_STAGE: grpc-source
+        SERVICEGEN_ASIO_GRPC_SOURCE_STAGE: asio-grpc-source
+      additional_contexts:
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.5}
+        grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}
+        asio-grpc-source: ${SERVICEGEN_ASIO_GRPC_SOURCE_CONTEXT:-.}
+    working_dir: /workspace
+    environment:
+      CPPBOOSTSERVICELIB_SOURCE_DIR: ${SERVICELIB_CONTAINER_SOURCE_DIR:-/opt/servicelib}
+      SERVICELIB_SOURCE_DIR: ${SERVICELIB_CONTAINER_SOURCE_DIR:-/opt/servicelib}
+      CCACHE_DIR: /ccache
+      CCACHE_BASEDIR: /workspace
+      CCACHE_COMPILERCHECK: content
+      CCACHE_MAXSIZE: ${CCACHE_MAXSIZE:-20G}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GITLAB_TOKEN: ${GITLAB_TOKEN:-}
+      SERVICEGEN_FETCH_CPP_DEPENDENCIES: ${SERVICEGEN_FETCH_CPP_DEPENDENCIES:-ON}
+    volumes:
+      - .:/workspace
+      - cpp-cmake-build:/workspace/build
+      - cpp-ccache:/ccache
+    command:
+      - /bin/bash
+      - -lc
+      - source scripts/configure-git-auth.generated.sh && cmake --preset docker-debug -DSERVICEGEN_FETCH_CPP_DEPENDENCIES="${SERVICEGEN_FETCH_CPP_DEPENDENCIES:-ON}" && cmake --build --preset docker-debug --parallel && ctest --preset docker-debug
+
+volumes:
+  cpp-cmake-build:
+  cpp-ccache:

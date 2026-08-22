@@ -1,0 +1,43 @@
+services:
+  analyticsservice:
+    image: cppboostexample-analyticsservice
+    working_dir: /app
+    command:
+      - --config
+      - /app/config/config.yaml
+      - --values
+      - /app/config/overrides.yaml
+    volumes: !reset []
+    security_opt: !reset []
+    cap_add: !reset []
+    ports: !override
+      - "9093:9093"
+      - "9203:9203"
+  inventoryservice:
+    image: cppboostexample-inventoryservice
+    working_dir: /app
+    command:
+      - --config
+      - /app/config/config.yaml
+      - --values
+      - /app/config/overrides.yaml
+    volumes: !reset []
+    security_opt: !reset []
+    cap_add: !reset []
+    ports: !override
+      - "9092:9092"
+      - "9202:9202"
+  orderservice:
+    image: cppboostexample-orderservice
+    working_dir: /app
+    command:
+      - --config
+      - /app/config/config.yaml
+      - --values
+      - /app/config/overrides.yaml
+    volumes: !reset []
+    security_opt: !reset []
+    cap_add: !reset []
+    ports: !override
+      - "9091:9091"
+      - "9201:9201"

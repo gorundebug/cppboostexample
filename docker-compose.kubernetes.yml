@@ -1,0 +1,80 @@
+# Local Kubernetes control plane for development and conformance.
+services:
+  registry:
+    image: registry:2.8.3
+    restart: unless-stopped
+    ports:
+      - "${KUBERNETES_REGISTRY_PORT:-5001}:5000"
+    volumes:
+      - kubernetes-registry:/var/lib/registry
+
+  kubernetes:
+    image: rancher/k3s:v1.36.1-k3s1
+    privileged: true
+    restart: unless-stopped
+    depends_on:
+      - registry
+    command:
+      - server
+      - --disable=traefik
+      - --disable=servicelb
+      - --write-kubeconfig=/output/kubeconfig.yaml
+      - --write-kubeconfig-mode=0644
+    environment:
+      K3S_TOKEN: ${KUBERNETES_TOKEN:-servicegen-local}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${KUBERNETES_API_PORT:-6443}:6443"
+    tmpfs:
+      - /run
+      - /var/run
+    volumes:
+      - kubernetes-data:/var/lib/rancher/k3s
+      # Keep the large containerd image/content store across `clean` runs.
+      # Cluster state remains disposable in the separate kubernetes-data volume.
+      - kubernetes-image-cache:/var/lib/rancher/k3s/agent/containerd
+      - kubernetes-kubeconfig:/output
+      - ./kubernetes/registries.generated.yaml:/etc/rancher/k3s/registries.yaml:ro
+    healthcheck:
+      test: ["CMD", "kubectl", "get", "--raw=/readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+
+  helm:
+    image: alpine/helm:4.2.3
+    profiles: ["tools"]
+    network_mode: service:kubernetes
+    depends_on:
+      kubernetes:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    working_dir: /workspace
+    environment:
+      KUBECONFIG: /output/kubeconfig.yaml
+      SERVICEGEN_HELM_PROMETHEUS_URL: ${SERVICEGEN_HELM_PROMETHEUS_URL:-https://prometheus-community.github.io/helm-charts}
+      SERVICEGEN_HELM_GRAFANA_URL: ${SERVICEGEN_HELM_GRAFANA_URL:-https://grafana.github.io/helm-charts}
+      SERVICEGEN_HELM_OPENTELEMETRY_URL: ${SERVICEGEN_HELM_OPENTELEMETRY_URL:-https://open-telemetry.github.io/opentelemetry-helm-charts}
+      SERVICEGEN_HELM_JAEGER_URL: ${SERVICEGEN_HELM_JAEGER_URL:-https://jaegertracing.github.io/helm-charts}
+      SERVICEGEN_HELM_REDPANDA_URL: ${SERVICEGEN_HELM_REDPANDA_URL:-https://charts.redpanda.com}
+    volumes:
+      - .:/workspace
+      - kubernetes-kubeconfig:/output:ro
+      - kubernetes-helm-cache:/root/.cache/helm
+      - kubernetes-helm-config:/root/.config/helm
+
+volumes:
+  kubernetes-data:
+  kubernetes-kubeconfig:
+  kubernetes-registry:
+  kubernetes-image-cache:
+    external: true
+    name: ${KUBERNETES_IMAGE_CACHE_VOLUME:-servicegen-kubernetes-image-cache-v1}
+  kubernetes-helm-cache:
+    external: true
+    name: ${KUBERNETES_HELM_CACHE_VOLUME:-servicegen-kubernetes-helm-cache}
+  kubernetes-helm-config:
+    external: true
+    name: ${KUBERNETES_HELM_CONFIG_VOLUME:-servicegen-kubernetes-helm-config}

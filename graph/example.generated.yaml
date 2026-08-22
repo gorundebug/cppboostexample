@@ -1,0 +1,433 @@
+dataConnectors:
+    inventoryServiceApi:
+        address: dns:///localhost:9202
+        connectionsCount: 1
+        endpoints:
+            processOrderItem:
+                functionDescription: |
+                    Reserve inventory for one order item using its order ID, item ID, SKU, and quantity.
+                    Return the available quantity, reservation outcome, and status. The caller combines this response with the original identity, requested quantity, and unit price.
+                    If the inventory call fails, the caller returns a non-reserved PROCESSING_ERROR result with the failure message.
+                functionInitializerGroup: ""
+                functionName: ProcessOrderItem
+                functionPackage: ""
+                grpcMethodType: NoStreaming
+                methodName: ProcessOrderItem
+                name: Process Order Item
+                publicFunction: false
+        goImplementation: google/grpc
+        module: inventory_service_api
+        name: Inventory Service API
+        pythonImplementation: google/grpc
+        rustImplementation: rust/tonic
+        type: gRPC
+        typeScriptImplementation: grpc/grpc-js
+    orderEvents:
+        brokers: redpanda:9092
+        endpoints:
+            orderProcessed:
+                consumerGroup: analytics-service
+                createTopic: true
+                enabled: true
+                functionDescription: |
+                    Exchange OrderProcessed events keyed by order ID.
+                    Producers include the final status, processing time, total and confirmed item counts, and a failure reason for unsuccessful orders.
+                    Consumers decode the event and mark its Kafka message processed only after the pipeline handles it successfully.
+                functionInitializerGroup: ""
+                functionName: OrderProcessedEndpoint
+                functionPackage: ""
+                name: Order Processed
+                partitions: 1
+                publicFunction: false
+                replicationFactor: 1
+                topic: order-processed
+        goImplementation: IBM/Sarama
+        name: Order Events
+        password: ""
+        pythonImplementation: aiokafka
+        rustImplementation: rust/rdkafka
+        saslMechanism: SCRAM-SHA-512
+        securityProtocol: PLAINTEXT
+        type: Kafka
+        typeScriptImplementation: confluent/kafka-javascript
+        username: ""
+        version: 2.8.0
+    orderServiceApi:
+        endpoints:
+            processOrder:
+                functionDescription: |
+                    Accept orders with at least one item and positive quantities; reject malformed or invalid requests as client errors.
+                    Reuse X-Request-ID when supplied, otherwise generate an order ID. Preserve customer, item, price, and X-Trace data, and apply the configured timeout of five seconds by default.
+                    Return one response per order. When all items finish, use CONFIRMED only if every item was reserved; otherwise use PARTIALLY_CONFIRMED. If the deadline wins, return TIMED_OUT with the item results received so far.
+                    Calculate the total from processed item prices, falling back to the submitted total when no item result arrived, and include individual item failures in the response.
+                functionInitializerGroup: ""
+                functionName: ProcessOrder
+                functionPackage: ""
+                httpMethodType: POST
+                name: Process Order
+                path: /v1/processorder
+                publicFunction: false
+        goImplementation: net/http
+        module: order_service_api
+        name: Order Service API
+        pythonImplementation: aiohttp
+        rustImplementation: rust/axum
+        type: HTTP
+        typeScriptImplementation: node/http
+        useDedicatedListener: false
+modules:
+    inventoryServiceApi:
+        golangVersion: 1.25.4
+        modulePath: github.com/gorundebug/cppboostexample-inventory-service-api
+        name: inventory_service_api
+    model:
+        golangVersion: 1.25.4
+        modulePath: github.com/gorundebug/cppboostexample-model
+        name: model
+    orderServiceApi:
+        golangVersion: 1.25.4
+        modulePath: github.com/gorundebug/cppboostexample-order-service-api
+        name: order_service_api
+pools:
+    defaultPool:
+        executorsCount: 2
+        name: Default Pool
+    inventoryPriorityWorkers:
+        executorsCount: 2
+        name: Inventory Priority Workers
+services:
+    analyticsService:
+        color: '#05ABF7'
+        defaultCallSemantics: FunctionCall
+        environment: ""
+        golangVersion: 1.25.4
+        grpcHost: 0.0.0.0
+        grpcPort: 9203
+        httpHost: 0.0.0.0
+        httpPort: 9093
+        kubernetesWorkloadType: Deployment
+        livenessHandler: health/live
+        metricsHandler: metrics
+        modulePath: github.com/gorundebug/cppboostexample-analyticsservice
+        name: Analytics Service
+        pipelines:
+            analytics:
+                consumeOrderProcessed:
+                    endpoint: orderProcessed
+                    name: Consume Order Processed
+                    source: countOrderProcessed
+                    type: Input
+                    valueType: orderProcessed
+                    xPos: -1190
+                    yPos: -205
+                countOrderProcessed:
+                    functionDescription: |
+                        Count successful and unsuccessful orders independently, then return the event unchanged.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: CountOrderProcessed
+                    functionPackage: ""
+                    name: Count Order Processed
+                    source: consumeOrderProcessed
+                    type: Process
+                    valueType: orderProcessed
+                    xPos: -1390
+                    yPos: -19
+        programmingLanguage: CppBoost
+        readinessHandler: health/ready
+        shutdownTimeout: 30000
+        startupHandler: health/startup
+        statusHandler: status
+    inventoryService:
+        color: '#6800FF'
+        defaultCallSemantics: FunctionCall
+        environment: ""
+        golangVersion: 1.25.4
+        grpcHost: 0.0.0.0
+        grpcPort: 9202
+        httpHost: 0.0.0.0
+        httpPort: 9092
+        kubernetesWorkloadType: Deployment
+        links:
+            link1:
+                callSemantics: FunctionCall
+                from: getInventoryItemData
+                to: mergeInventoryResult
+            link2:
+                callSemantics: FunctionCall
+                from: processInventoryItem
+                poolName: Inventory Priority Workers
+                priority: 10
+                to: getInventoryItemData
+        livenessHandler: health/live
+        metricsHandler: metrics
+        modulePath: github.com/gorundebug/cppboostexample-inventoryservice
+        name: Inventory Service
+        pipelines:
+            inventoryItem:
+                getInventoryItemData:
+                    errorStream: getInventoryItemError
+                    functionDescription: |
+                        Reserve the requested quantity without allowing concurrent orders to overdraw stock.
+                        On success, return CONFIRMED with the requested quantity available. Otherwise return OUT_OF_STOCK with the current available quantity.
+                        Preserve the order and item identity, requested quantity, and unit price.
+                        The example starts with SKU-001: 100, SKU-002: 50, and SKU-003: 25.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: GetInventoryItemData
+                    functionPackage: ""
+                    name: Get Inventory Item Data
+                    source: processInventoryItem
+                    type: Process
+                    valueType: orderItemResult
+                    xPos: 527
+                    yPos: -562
+                getInventoryItemError:
+                    functionDescription: |
+                        When inventory processing fails, return an OUT_OF_STOCK result with no available quantity.
+                        Preserve the order and item identity and requested quantity, and record the failure.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: GetInventoryItemError
+                    functionPackage: ""
+                    name: Get Inventory Item Error
+                    source: getInventoryItemData
+                    type: Error
+                    valueType: orderItemResult
+                    xPos: 733
+                    yPos: -263
+                mergeInventoryResult:
+                    name: Merge Inventory Result
+                    sources:
+                        - getInventoryItemData
+                        - getInventoryItemError
+                    type: Merge
+                    xPos: 542
+                    yPos: 33
+                processInventoryItem:
+                    endpoint: processOrderItem
+                    name: 'Process Inventory Item '
+                    source: mergeInventoryResult
+                    type: Input
+                    valueType: orderItem
+                    xPos: 250
+                    yPos: -400
+        programmingLanguage: CppBoost
+        readinessHandler: health/ready
+        shutdownTimeout: 30000
+        startupHandler: health/startup
+        statusHandler: status
+    orderService:
+        color: '#FF5C00'
+        defaultCallSemantics: FunctionCall
+        defaultGrpcTimeout: 5000
+        environment: ""
+        golangVersion: 1.25.4
+        grpcHost: 0.0.0.0
+        grpcPort: 9201
+        httpHost: 0.0.0.0
+        httpPort: 9091
+        kubernetesWorkloadType: Deployment
+        links:
+            link1:
+                callSemantics: FunctionCall
+                from: mergeResults
+                to: splitOrderResult
+            link2:
+                callSemantics: FunctionCall
+                from: processOrder
+                poolName: Default Pool
+                priority: 1
+                to: splitPipeline
+            link3:
+                callSemantics: FunctionCall
+                from: splitPipeline
+                to: processOrderItems
+            link4:
+                callSemantics: FunctionCall
+                from: splitPipeline
+                to: softDeadline
+        livenessHandler: health/live
+        metricsHandler: metrics
+        modulePath: github.com/gorundebug/cppboostexample-orderservice
+        name: Order Service
+        pipelines:
+            default:
+                processOrderItemError:
+                    name: ProcessOrderItemError
+                    source: processOrderItem
+                    type: Error
+                    valueType: orderState
+                    xPos: -134
+                    yPos: -129
+            order:
+                mapOrderItemResultToOrderState:
+                    functionDescription: |
+                        Produce an order result containing one inventory result and preserving its order ID.
+                        Mark it CONFIRMED when the item was reserved; otherwise mark it PARTIALLY_CONFIRMED.
+                        Record the time when this result is produced.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: MapOrderItemResultToOrderState
+                    functionPackage: ""
+                    name: Map Order Item Result To Order State
+                    source: processOrderItem
+                    type: Map
+                    valueType: orderState
+                    xPos: 103
+                    yPos: -52
+                mapToOrderProcessed:
+                    functionDescription: |
+                        Create an OrderProcessed event from the final order state.
+                        Preserve the order ID, status, and processing time. Count all item results and reserved items; for unsuccessful orders use the final status as the failure reason.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: MapToOrderProcessed
+                    functionPackage: ""
+                    name: MapToOrderProcessed
+                    source: splitOrderResult
+                    type: Map
+                    valueType: orderProcessed
+                    xPos: -821
+                    yPos: -26
+                mapToOrderState:
+                    functionDescription: |
+                        Produce a TIMED_OUT order result that preserves the order ID and submitted total.
+                        Do not add item results at this stage; results received before the timeout are included in the final response.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: MapToOrderState
+                    functionPackage: ""
+                    name: Map to Order State
+                    source: softDeadline
+                    type: Map
+                    valueType: orderState
+                    xPos: -368
+                    yPos: -227
+                mergeResults:
+                    name: Merge Results
+                    sources:
+                        - mapToOrderState
+                        - mapOrderItemResultToOrderState
+                        - processOrderItemError
+                    type: Merge
+                    xPos: -228
+                    yPos: 130
+                processOrder:
+                    endpoint: processOrder
+                    name: Process Order
+                    source: splitOrderResult
+                    type: Input
+                    valueType: order
+                    xPos: -760
+                    yPos: -367
+                processOrderItem:
+                    endpoint: processOrderItem
+                    errorStream: processOrderItemError
+                    name: Process Order Item
+                    source: processOrderItems
+                    type: Sink
+                    valueType: orderItemResult
+                    xPos: -60
+                    yPos: -375
+                processOrderItems:
+                    functionDescription: |
+                        Emit every order item independently for inventory processing.
+                        Preserve each item's data and assign the parent order ID.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ProcessOrderItems
+                    functionPackage: ""
+                    name: Process Order Items
+                    source: splitPipeline
+                    type: FlatMap
+                    valueType: orderItem
+                    xPos: -198
+                    yPos: -662
+                publishOrderProcessed:
+                    endpoint: orderProcessed
+                    name: Publish Order Processed
+                    source: mapToOrderProcessed
+                    type: Sink
+                    valueType: orderProcessed
+                    xPos: -944
+                    yPos: -255
+                softDeadline:
+                    duration: 1000
+                    functionDescription: |
+                        Trigger the timeout branch shortly before the request deadline, leaving the configured duration to assemble a response.
+                        When no request deadline exists, use the configured duration itself. Never wait past an existing deadline.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: SoftDeadline
+                    functionPackage: ""
+                    name: Soft Deadline
+                    source: splitPipeline
+                    type: Delay
+                    xPos: -477
+                    yPos: -444
+                splitOrderResult:
+                    name: Split Order Result
+                    source: mergeResults
+                    type: Split
+                    xPos: -671
+                    yPos: -129
+                splitPipeline:
+                    name: Split Pipeline
+                    source: processOrder
+                    type: Split
+                    xPos: -640
+                    yPos: -597
+        programmingLanguage: CppBoost
+        readinessHandler: health/ready
+        shutdownTimeout: 30000
+        startupHandler: health/startup
+        statusHandler: status
+settings:
+    moduleVersion: v0.2.5
+    name: Example
+    repoPath: github.com/gorundebug/cppboostexample
+types:
+    order:
+        definitionFormat: Native
+        description: 'E-commerce order submitted by a customer. Fields: ID string, CustomerID string, Items []OrderItem, CreatedAt time.Time.'
+        name: Order
+        publicType: false
+        transferByValue: false
+        type: struct
+    orderItem:
+        definitionFormat: Native
+        description: 'A single line item within an order. Fields: OrderID string, ItemID string, SKU string, Quantity int.'
+        module: model
+        name: OrderItem
+        publicType: false
+        transferByValue: false
+        type: struct
+    orderItemResult:
+        definitionFormat: Native
+        description: 'Inventory reservation result for a single order item. Fields: OrderID string, ItemID string, SKU string, RequestedQty int, AvailableQty int, Reserved bool, Status string (CONFIRMED / OUT_OF_STOCK / PROCESSING_ERROR), UnitPrice float64, Error string.'
+        module: model
+        name: OrderItemResult
+        publicType: false
+        transferByValue: false
+        type: struct
+    orderProcessed:
+        definitionFormat: Native
+        description: 'Final order-processing event. Fields: OrderID string, Status string, ProcessedAt time.Time, TotalItems int, ConfirmedItems int, FailureReason string.'
+        module: model
+        name: OrderProcessed
+        publicType: false
+        transferByValue: false
+        type: struct
+    orderState:
+        definitionFormat: Native
+        description: 'Processing result of an order. Fields: OrderID string, Status string (CONFIRMED — all items reserved; PARTIALLY_CONFIRMED — some items out of stock; TIMED_OUT — order timed out), ConfirmedItems []OrderItemResult, TotalAmount float64, ProcessedAt time.Time.'
+        name: OrderState
+        publicType: false
+        transferByValue: false
+        type: struct
+    unknownType:
+        name: UnknownType
+        publicType: false
+        type: int
+        useAlias: false

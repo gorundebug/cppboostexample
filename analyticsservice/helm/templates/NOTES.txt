@@ -1,0 +1,4 @@
+Analytics Service is installed in namespace {{ .Release.Namespace }}.
+
+Inspect metrics through the API proxy:
+  kubectl get --raw "/api/v1/namespaces/{{ .Release.Namespace }}/services/http:analyticsservice:9093/proxy/metrics"

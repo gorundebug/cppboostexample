@@ -1,0 +1,1 @@
+#include "analyticsservice/internal/functions/count_order_processed.hpp"

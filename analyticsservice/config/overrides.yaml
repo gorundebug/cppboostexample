@@ -1,0 +1,18 @@
+dataConnectors:
+  orderEvents:
+    brokers: redpanda:9092
+    password: ""
+    saslMechanism: SCRAM-SHA-512
+    securityProtocol: PLAINTEXT
+    username: ""
+endpoints:
+  orderProcessed:
+    enabled: true
+services:
+  analyticsService:
+    defaultGrpcTimeout: 0
+    environment: ""
+    grpcHost: 0.0.0.0
+    grpcPort: 9203
+    httpHost: 0.0.0.0
+    httpPort: 9093

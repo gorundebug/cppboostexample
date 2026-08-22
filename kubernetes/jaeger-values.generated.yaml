@@ -1,0 +1,9 @@
+# Jaeger v2 all-in-one with in-memory storage is intended for local validation.
+jaeger:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi

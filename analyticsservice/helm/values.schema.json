@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["replicaCount", "workloadType", "image", "service", "metrics", "probes", "env", "args"],
+  "properties": {
+    "replicaCount": {"type": "integer", "minimum": 1},
+    "workloadType": {"enum": ["Deployment", "StatefulSet"]},
+    "image": {
+      "type": "object",
+      "required": ["repository", "tag", "pullPolicy"],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "tag": {"type": "string", "minLength": 1, "not": {"const": "latest"}},
+        "pullPolicy": {"enum": ["Always", "IfNotPresent", "Never"]}
+      },
+      "additionalProperties": false
+    },
+    "service": {"type": "object"},
+    "metrics": {
+      "type": "object",
+      "required": ["serviceMonitor"],
+      "properties": {
+        "serviceMonitor": {
+          "type": "object",
+          "required": ["enabled", "path", "interval"],
+          "properties": {
+            "enabled": {"type": "boolean"},
+            "path": {"type": "string", "pattern": "^/"},
+            "interval": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "probes": {"type": "object"},
+    "env": {"type": "object", "additionalProperties": {"type": ["string", "number", "boolean"]}},
+    "secretEnvFrom": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "extraEnvFrom": {"type": "array"},
+    "extraVolumes": {"type": "array"},
+    "extraVolumeMounts": {"type": "array"},
+    "extraObjects": {"type": "array"},
+    "serviceAccount": {"type": "object"},
+    "persistence": {"type": "object"},
+    "args": {"type": "array", "items": {"type": "string"}},
+    "resources": {"type": "object"},
+    "annotations": {"type": "object"},
+    "podAnnotations": {"type": "object"},
+    "podLabels": {"type": "object"},
+    "podSecurityContext": {"type": "object"},
+    "securityContext": {"type": "object"},
+    "nodeSelector": {"type": "object"},
+    "tolerations": {"type": "array"},
+    "affinity": {"type": "object"}
+  },
+  "additionalProperties": true
+}
