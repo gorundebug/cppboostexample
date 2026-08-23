@@ -44,7 +44,8 @@ RUN set -eu; \
       tar -xf "$archive" -C /tmp/servicelib-archive; \
       source_dir=/tmp/servicelib-archive; \
     fi; \
-    manifest=$(find "$source_dir" -mindepth 1 -maxdepth 2 -type f -name CMakeLists.txt -print -quit); \
+    manifest="$source_dir/CMakeLists.txt"; \
+    if [ ! -f "$manifest" ]; then manifest=$(find "$source_dir" -mindepth 2 -maxdepth 2 -type f -name CMakeLists.txt -print -quit); fi; \
     if [ -z "$manifest" ]; then echo "cppboostservicelib source context has no CMakeLists.txt" >&2; exit 1; fi; \
     source_dir=${manifest%/CMakeLists.txt}; \
     if [ -z "$source_dir" ] || [ "$source_dir" = "/" ]; then echo "unsafe cppboostservicelib source directory" >&2; exit 1; fi; \
