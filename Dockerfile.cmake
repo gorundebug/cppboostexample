@@ -36,16 +36,18 @@ RUN --mount=type=cache,id=servicegen-apt-lists-${TARGETARCH},target=/var/lib/apt
     && rm -f /tmp/cppboost-packages.txt
 
 COPY --from=servicelib-source / /tmp/servicelib-source
-RUN source_dir=/tmp/servicelib-source; \
-    if [ -f "$source_dir/context" ]; then \
+RUN set -eu; \
+    source_dir=/tmp/servicelib-source; \
+    archive=$(find "$source_dir" -mindepth 1 -maxdepth 1 -type f \( -name context -o -name '*.tar' -o -name '*.tar.gz' -o -name '*.tgz' -o -name '*.tar.xz' \) -print -quit); \
+    if [ -n "$archive" ]; then \
       mkdir -p /tmp/servicelib-archive; \
-      tar -xf "$source_dir/context" -C /tmp/servicelib-archive; \
+      tar -xf "$archive" -C /tmp/servicelib-archive; \
       source_dir=/tmp/servicelib-archive; \
     fi; \
-    if [ ! -f "$source_dir/CMakeLists.txt" ]; then \
-      source_dir=$(find "$source_dir" -mindepth 1 -maxdepth 1 -type d | head -n 1); \
-    fi; \
-    test -n "$source_dir" && test -f "$source_dir/CMakeLists.txt"; \
+    manifest=$(find "$source_dir" -mindepth 1 -maxdepth 2 -type f -name CMakeLists.txt -print -quit); \
+    if [ -z "$manifest" ]; then echo "cppboostservicelib source context has no CMakeLists.txt" >&2; exit 1; fi; \
+    source_dir=${manifest%/CMakeLists.txt}; \
+    if [ -z "$source_dir" ] || [ "$source_dir" = "/" ]; then echo "unsafe cppboostservicelib source directory" >&2; exit 1; fi; \
     mkdir -p /opt/servicelib; \
     cp -a "$source_dir/." /opt/servicelib/; \
     rm -rf /tmp/servicelib-source
