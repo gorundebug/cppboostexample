@@ -5,6 +5,8 @@ services:
       context: .
       dockerfile: Dockerfile.cmake
       target: development
+      extra_hosts:
+        - "host.docker.internal:host-gateway"
       args:
         SERVICEGEN_GRPC_SOURCE_STAGE: grpc-source
         SERVICEGEN_ASIO_GRPC_SOURCE_STAGE: asio-grpc-source
@@ -13,7 +15,7 @@ services:
         SERVICEGEN_APT_UBUNTU_SECURITY_URL: ${SERVICEGEN_APT_UBUNTU_SECURITY_URL:-}
         SERVICEGEN_APT_UBUNTU_PORTS_URL: ${SERVICEGEN_APT_UBUNTU_PORTS_URL:-}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.6}}
+        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.7}}
         grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}
         asio-grpc-source: ${SERVICEGEN_ASIO_GRPC_SOURCE_CONTEXT:-.}
     working_dir: /workspace
@@ -42,6 +44,8 @@ services:
       context: .
       dockerfile: Dockerfile.cmake
       target: runtime-analyticsservice
+      extra_hosts:
+        - "host.docker.internal:host-gateway"
       args:
         SERVICEGEN_GRPC_SOURCE_STAGE: grpc-source
         SERVICEGEN_ASIO_GRPC_SOURCE_STAGE: asio-grpc-source
@@ -54,7 +58,7 @@ services:
         SERVICEGEN_RUNTIME_STRIP: ${SERVICEGEN_RUNTIME_STRIP:-ON}
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.6}}
+        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.7}}
         grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}
         asio-grpc-source: ${SERVICEGEN_ASIO_GRPC_SOURCE_CONTEXT:-.}
   inventoryservice-runtime:
@@ -63,6 +67,8 @@ services:
       context: .
       dockerfile: Dockerfile.cmake
       target: runtime-inventoryservice
+      extra_hosts:
+        - "host.docker.internal:host-gateway"
       args:
         SERVICEGEN_GRPC_SOURCE_STAGE: grpc-source
         SERVICEGEN_ASIO_GRPC_SOURCE_STAGE: asio-grpc-source
@@ -75,7 +81,7 @@ services:
         SERVICEGEN_RUNTIME_STRIP: ${SERVICEGEN_RUNTIME_STRIP:-ON}
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.6}}
+        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.7}}
         grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}
         asio-grpc-source: ${SERVICEGEN_ASIO_GRPC_SOURCE_CONTEXT:-.}
   orderservice-runtime:
@@ -84,6 +90,8 @@ services:
       context: .
       dockerfile: Dockerfile.cmake
       target: runtime-orderservice
+      extra_hosts:
+        - "host.docker.internal:host-gateway"
       args:
         SERVICEGEN_GRPC_SOURCE_STAGE: grpc-source
         SERVICEGEN_ASIO_GRPC_SOURCE_STAGE: asio-grpc-source
@@ -96,12 +104,12 @@ services:
         SERVICEGEN_RUNTIME_STRIP: ${SERVICEGEN_RUNTIME_STRIP:-ON}
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.6}}
+        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.7}}
         grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}
         asio-grpc-source: ${SERVICEGEN_ASIO_GRPC_SOURCE_CONTEXT:-.}
 
 volumes:
   cpp-cmake-build:
-    name: ${SERVICEGEN_CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.6}
+    name: ${SERVICEGEN_CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.7}
   cpp-ccache:
     name: cppboostexample_cpp-ccache
