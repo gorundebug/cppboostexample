@@ -19,13 +19,13 @@ clone_if_missing() {
 }
 
 echo "==> Cloning services..."
-clone_if_missing "analyticsservice" "https://github.com/gorundebug/cppboostexample-analyticsservice.git" "v0.2.11"
-clone_if_missing "inventoryservice" "https://github.com/gorundebug/cppboostexample-inventoryservice.git" "v0.2.11"
-clone_if_missing "orderservice" "https://github.com/gorundebug/cppboostexample-orderservice.git" "v0.2.11"
+clone_if_missing "analyticsservice" "https://github.com/gorundebug/cppboostexample-analyticsservice.git" "v0.2.12"
+clone_if_missing "inventoryservice" "https://github.com/gorundebug/cppboostexample-inventoryservice.git" "v0.2.12"
+clone_if_missing "orderservice" "https://github.com/gorundebug/cppboostexample-orderservice.git" "v0.2.12"
 
 echo "==> Cloning modules..."
-clone_if_missing "inventory_service_api" "https://github.com/gorundebug/cppboostexample-inventory-service-api.git" "v0.2.11"
-clone_if_missing "model" "https://github.com/gorundebug/cppboostexample-model.git" "v0.2.11"
-clone_if_missing "order_service_api" "https://github.com/gorundebug/cppboostexample-order-service-api.git" "v0.2.11"
+clone_if_missing "inventory_service_api" "https://github.com/gorundebug/cppboostexample-inventory-service-api.git" "v0.2.12"
+clone_if_missing "model" "https://github.com/gorundebug/cppboostexample-model.git" "v0.2.12"
+clone_if_missing "order_service_api" "https://github.com/gorundebug/cppboostexample-order-service-api.git" "v0.2.12"
 
 echo "==> Done."
