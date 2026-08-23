@@ -49,8 +49,6 @@ services:
     depends_on:
       kubernetes:
         condition: service_healthy
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     working_dir: /workspace
     environment:
       KUBECONFIG: /output/kubeconfig.yaml
