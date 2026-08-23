@@ -52,3 +52,16 @@ archives through the raw proxy to populate their separate versioned source
 cache. Generated Debian/Ubuntu build stages rewrite their APT sources to Nexus
 when proxy mode is enabled. Once any of these layers contains an artifact, a
 build does not fetch it from the public upstream again.
+
+## Changing C++ dependency versions
+
+After changing a pinned C++ dependency version or its acquisition logic, run:
+
+```bash
+make dependency-source-cache-invalidate
+```
+
+The command removes the project's prepared C++ source cache and its CMake build
+volumes. It deliberately preserves compiler `ccache` data and the Nexus proxy.
+The next build reconstructs the complete dependency tree; immutable archives
+already downloaded by Nexus are reused.

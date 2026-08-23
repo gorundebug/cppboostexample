@@ -9,6 +9,7 @@
 # Dockerfile
 # orderservice/config/config.yaml
 scripts/merge-overwrite.txt
+scripts/dependency-source-cache.generated.sh
 Makefile
 docker-compose.yml
 docker-compose.kubernetes.yml

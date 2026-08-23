@@ -6,7 +6,7 @@ PROJECT_DIR := $(abspath .)
 BIN_DIR := $(PROJECT_DIR)/bin
 TOOLS_DIR := $(PROJECT_DIR)/tools
 GOPRIVATE := github.com
-MODULE_VERSION := v0.2.8
+MODULE_VERSION := v0.2.9
 OS := $(shell uname -s)
 ARCH := $(shell uname -m)
 RUNTIME_IMAGE ?= 0
@@ -40,7 +40,7 @@ export SERVICEGEN_APT_UBUNTU_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)
 export SERVICEGEN_APT_UBUNTU_PORTS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-ubuntu-ports
 export SERVICEGEN_APT_DEBIAN_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-debian
 export SERVICEGEN_APT_DEBIAN_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-debian-security
-export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.8.tar.gz
+export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.9.tar.gz
 export SERVICEGEN_HELM_PROMETHEUS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-prometheus
 export SERVICEGEN_HELM_GRAFANA_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-grafana
 export SERVICEGEN_HELM_OPENTELEMETRY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-opentelemetry
@@ -56,9 +56,28 @@ LANG_FMT_TARGETS :=
 LANG_GEN_TARGETS :=
 LANG_CLEAN_TARGETS :=
 LANG_TOOL_TARGETS :=
+LANG_HOST_PREP_TARGETS :=
 LANG_DOCKER_BUILD_TARGETS :=
 LANG_INTEGRATION_TARGETS :=
 include make.cpp.generated.mk
+
+# Docker targets use the proxy address reachable from containers. GNU Make
+# propagates target-specific variables to prerequisites, so host-side code
+# generation must explicitly restore the host address. Otherwise a target
+# such as docker-build makes curl/cargo/pnpm on macOS try to resolve
+# host.docker.internal.
+ifneq ($(strip $(SERVICEGEN_DEPENDENCY_PROXY_DIR)),)
+$(LANG_HOST_PREP_TARGETS): export GOPROXY := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/go-proxy/
+$(LANG_HOST_PREP_TARGETS): export GOSUMDB := off
+$(LANG_HOST_PREP_TARGETS): export NPM_CONFIG_REGISTRY := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/npm-proxy/
+$(LANG_HOST_PREP_TARGETS): export PIP_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/pypi-proxy/simple
+$(LANG_HOST_PREP_TARGETS): export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_HOST)
+$(LANG_HOST_PREP_TARGETS): export UV_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/pypi-proxy/simple
+$(LANG_HOST_PREP_TARGETS): export CARGO_REGISTRIES_CRATES_IO_INDEX := sparse+$(SERVICEGEN_DEPENDENCY_PROXY_BASE)/cargo-proxy/
+$(LANG_HOST_PREP_TARGETS): export SERVICEGEN_MAVEN_CENTRAL_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/maven-central
+$(LANG_HOST_PREP_TARGETS): export SERVICEGEN_GITHUB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/github-raw
+$(LANG_HOST_PREP_TARGETS): export SERVICEGEN_GITLAB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/gitlab-raw
+endif
 
 ifeq ($(RUNTIME_IMAGE),1)
 export SERVICEGEN_DOCKER_TARGET := runtime
@@ -67,7 +86,7 @@ else
 DOCKER_COMPOSE := docker compose
 endif
 
-ACT_VERSION := v0.2.84
+ACT_VERSION := v0.2.94
 ACT := $(TOOLS_DIR)/act
 GH_VERSION := v2.67.0
 GH := $(TOOLS_DIR)/gh
@@ -85,6 +104,7 @@ GLAB := $(TOOLS_DIR)/glab
 	dependency-cache-up dependency-cache-status dependency-cache-env \
 	dependency-cache-docker-env dependency-cache-docker-build \
 	dependency-cache-down dependency-cache-clean \
+	dependency-source-cache-invalidate \
 	git-push git-delete git-push-inventory_service_api git-delete-inventory_service_api git-push-model git-delete-model git-push-order_service_api git-delete-order_service_api git-push-analyticsservice git-delete-analyticsservice git-push-inventoryservice git-delete-inventoryservice git-push-orderservice git-delete-orderservice git-push-project git-delete-project
 
 all: build ## Build all services (default)
@@ -182,6 +202,9 @@ dependency-cache-down: ## Stop the proxy while preserving downloaded artifacts
 
 dependency-cache-clean: ## Stop the proxy and delete all downloaded artifacts
 	@bash scripts/dependency-cache.generated.sh clean
+
+dependency-source-cache-invalidate: ## Recreate C++ sources/CMake state, preserving ccache and Nexus
+	@bash scripts/dependency-source-cache.generated.sh invalidate
 
 kubernetes-up: ## Build, deploy and verify all services in local Kubernetes
 	@bash scripts/kubernetes.generated.sh up
