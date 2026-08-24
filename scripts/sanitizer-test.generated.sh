@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "$0")/dependency-proxy-env.generated.sh"
 
 sanitizer="${1:?expected asan or tsan}"
 case "$sanitizer" in

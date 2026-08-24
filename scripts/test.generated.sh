@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "$0")/dependency-proxy-env.generated.sh"
 
 # Configure and build first so this command also works with an empty build
 # volume on a clean CI runner.

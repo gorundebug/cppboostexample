@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "$0")/dependency-proxy-env.generated.sh"
 
 exec docker compose -f docker-compose.cmake.generated.yml run --build --rm cpp-build \
   /bin/bash -lc '

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "$0")/dependency-proxy-env.generated.sh"
 
 # Docker is the canonical C++ build environment. The compose file deliberately
 # leaves the platform unset so Docker selects the runner's native architecture.

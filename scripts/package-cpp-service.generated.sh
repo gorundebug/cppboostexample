@@ -50,6 +50,7 @@ mkdir -p "${output_dir}/docker" "${output_dir}/scripts"
 cp -R docker/. "${output_dir}/docker/"
 cp scripts/cmake-docker.generated.sh scripts/build.generated.sh scripts/test.generated.sh \
   scripts/lint.generated.sh scripts/format.generated.sh \
+  scripts/dependency-proxy-env.generated.sh \
   scripts/conan-install.generated.sh \
   scripts/configure-git-auth.generated.sh \
   scripts/run_with_progress.generated.sh "${output_dir}/scripts/"

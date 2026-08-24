@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "$0")/dependency-proxy-env.generated.sh"
 
 # Build and start the generated services, then exercise the real
 # HTTP -> graph -> gRPC -> graph -> HTTP path on the Compose network.
