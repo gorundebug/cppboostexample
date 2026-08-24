@@ -35,6 +35,8 @@ type serviceMakers struct {
 	localJobMaker          func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.LocalJob, error)
 	temporalJobMaker       func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.TemporalJob, error)
 	//data source function makers
+	localScheduleMaker    func(ctx context.Context, cfg *runtimecfg.CronEndpointConfig, env environment.ServiceEnvironment) (*functions.LocalSchedule, error)
+	temporalScheduleMaker func(ctx context.Context, cfg *runtimecfg.TemporalEndpointConfig, env environment.ServiceEnvironment) (*functions.TemporalSchedule, error)
 	//data sink function makers
 }
 
@@ -44,6 +46,8 @@ type serviceFunctions struct {
 	localJob          *functions.LocalJob
 	temporalJob       *functions.TemporalJob
 	//data source functions
+	localSchedule    *functions.LocalSchedule
+	temporalSchedule *functions.TemporalSchedule
 	//data sink functions
 }
 
@@ -125,6 +129,16 @@ func (s *Service) initMakers(ctx context.Context) error {
 			return functions.MakeTemporalJob(ctx, env, cfg)
 		}
 	}
+	if s.makers.localScheduleMaker == nil {
+		s.makers.localScheduleMaker = func(ctx context.Context, cfg *runtimecfg.CronEndpointConfig, env environment.ServiceEnvironment) (*functions.LocalSchedule, error) {
+			return functions.MakeLocalSchedule(ctx, env, cfg)
+		}
+	}
+	if s.makers.temporalScheduleMaker == nil {
+		s.makers.temporalScheduleMaker = func(ctx context.Context, cfg *runtimecfg.TemporalEndpointConfig, env environment.ServiceEnvironment) (*functions.TemporalSchedule, error) {
+			return functions.MakeTemporalSchedule(ctx, env, cfg)
+		}
+	}
 
 	return nil
 }
@@ -199,10 +213,10 @@ func (s *Service) initStreams(ctx context.Context) error {
 	if s.dataConnectors.durableJob, err = datasource.TemporalEndpointConsumer(s.streams.consumeDurableJob); err != nil {
 		return err
 	}
-	if s.dataConnectors.localSchedule, err = datasource.GocronEndpointConsumer(s.streams.localSchedule); err != nil {
+	if s.dataConnectors.localSchedule, err = functions.MakeEndpointConsumerLocalSchedule(s.streams.localSchedule, s.functions.localSchedule); err != nil {
 		return err
 	}
-	if s.dataConnectors.temporalSchedule, err = datasource.TemporalScheduleEndpointConsumer(s.streams.temporalSchedule); err != nil {
+	if s.dataConnectors.temporalSchedule, err = functions.MakeEndpointConsumerTemporalSchedule(s.streams.temporalSchedule, s.functions.temporalSchedule); err != nil {
 		return err
 	}
 	if s.dataConnectors.submitDurableJobDurableJob, err = datasink.TemporalEndpointConsumer(s.streams.submitDurableJob); err != nil {
@@ -233,6 +247,20 @@ func (s *Service) initFunctions(ctx context.Context, cfg *config.Config) error {
 		eg.Go(func() error {
 			var err error
 			s.functions.temporalJob, err = s.makers.temporalJobMaker(egCtx, &cfg.Streams.MakeTemporalJob, s)
+			return err
+		})
+	}
+	if s.makers.localScheduleMaker != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.localSchedule, err = s.makers.localScheduleMaker(egCtx, &cfg.Endpoints.LocalSchedule, s)
+			return err
+		})
+	}
+	if s.makers.temporalScheduleMaker != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.temporalSchedule, err = s.makers.temporalScheduleMaker(egCtx, &cfg.Endpoints.TemporalSchedule, s)
 			return err
 		})
 	}

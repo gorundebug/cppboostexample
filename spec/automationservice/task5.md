@@ -1,4 +1,4 @@
-# Task 2/5: `LocalSchedule`
+# Task 5/5: `TemporalSchedule`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
@@ -6,7 +6,7 @@
 |-------|-------|
 | Language | `Go` |
 | Kind | `schedule-source` |
-| File | `automationservice/internal/functions/localschedule.go` |
+| File | `automationservice/internal/functions/temporalschedule.go` |
 | Service | `Automation Service` |
 
 
@@ -19,8 +19,8 @@
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/localschedule.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/temporalschedule.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task2.md — LocalSchedule — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task5.md — TemporalSchedule — Go — done`

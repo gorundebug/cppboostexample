@@ -1,4 +1,4 @@
-# Task 3/3: `TemporalJob`
+# Task 3/5: `ProcessDurableJob`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
@@ -6,29 +6,29 @@
 |-------|-------|
 | Language | `Go` |
 | Kind | `map` |
-| File | `automationservice/internal/functions/temporaljob.go` |
-| Test | `automationservice/internal/functions/temporaljob_test.go` |
+| File | `automationservice/internal/functions/processdurablejob.go` |
+| Test | `automationservice/internal/functions/processdurablejob_test.go` |
 | Service | `Automation Service` |
 
 
 ## Behaviour
 
-Create a job message identifying the durable scheduled firing.
+Process one accepted automation job and return its result.
 
 
 
 
 
 ## Stream types
-- Input: `ScheduleTrigger`
+- Input: `string`
 - Output: `string`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/temporaljob.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/processdurablejob.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/temporaljob_test.go`
+- [ ] Implement meaningful assertions in `automationservice/internal/functions/processdurablejob_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task3.md — TemporalJob — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task3.md — ProcessDurableJob — Go — done`

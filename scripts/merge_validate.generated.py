@@ -92,7 +92,10 @@ def maker_requirements(relative: str, content: str) -> set[str]:
 
 def definition_pattern(name: str) -> re.Pattern[str]:
     if name.startswith("Make"):
-        return re.compile(rf"\b(?:func\s+|inline\s+[^\n]*\s+){re.escape(name)}\s*\(")
+        return re.compile(
+            rf"\b(?:func\s+|inline\s+[^\n]*\s+){re.escape(name)}"
+            rf"\s*(?:\[[^\]\n]+\])?\s*\("
+        )
     return re.compile(rf"\b(?:pub\s+)?(?:async\s+)?def\s+{re.escape(name)}\s*\(|"
                       rf"\bpub\s+fn\s+{re.escape(name)}\s*\(")
 

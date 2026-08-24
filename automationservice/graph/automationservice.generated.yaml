@@ -3,6 +3,7 @@ dataConnectors:
         endpoints:
             localSchedule:
                 enabled: true
+                functionName: LocalSchedule
                 missedRunPolicy: FireOnce
                 name: Local Schedule
                 overlapPolicy: Skip
@@ -29,6 +30,7 @@ dataConnectors:
                 activityHeartbeatTimeout: 5000
                 activityStartToCloseTimeout: 30000
                 enabled: true
+                functionName: TemporalSchedule
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Temporal Schedule
