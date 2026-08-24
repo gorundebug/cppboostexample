@@ -165,7 +165,7 @@ docker-build docker-build-local docker-up kubernetes-up kubernetes-build kuberne
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export UV_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/pypi-proxy/simple
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export CARGO_REGISTRIES_CRATES_IO_INDEX := sparse+$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/cargo-proxy/
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_MAVEN_CENTRAL_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/maven-central
-docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_GITHUB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw
+docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy grafana-dashboards: export SERVICEGEN_GITHUB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_GITLAB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/gitlab-raw
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_GIT_MIRROR_URL := $(SERVICEGEN_GIT_MIRROR_DOCKER_BASE)
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export GIT_CONFIG_KEY_0 := url.$(SERVICEGEN_GIT_MIRROR_DOCKER_BASE)/github.com/.insteadOf
