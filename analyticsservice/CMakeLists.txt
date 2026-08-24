@@ -133,12 +133,16 @@ target_link_libraries(example_analytics_service_typed_config PRIVATE
 add_test(NAME example_analytics_service_typed_config COMMAND example_analytics_service_typed_config)
 
 if(NOT TARGET GTest::gtest_main)
-  include(FetchContent)
-  FetchContent_Declare(servicegen_googletest
-      URL "${CPPBOOSTSERVICELIB_GITHUB_ARCHIVE_BASE}/google/googletest/archive/refs/tags/${CPPBOOSTSERVICELIB_GOOGLETEST_VERSION}.tar.gz"
-      DOWNLOAD_EXTRACT_TIMESTAMP FALSE)
-  set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
-  FetchContent_MakeAvailable(servicegen_googletest)
+  if(CPPBOOSTSERVICELIB_DEPENDENCY_MODE STREQUAL "CONAN")
+    find_package(GTest CONFIG REQUIRED)
+  else()
+    include(FetchContent)
+    FetchContent_Declare(servicegen_googletest
+        URL "${CPPBOOSTSERVICELIB_GITHUB_ARCHIVE_BASE}/google/googletest/archive/refs/tags/${CPPBOOSTSERVICELIB_GOOGLETEST_VERSION}.tar.gz"
+        DOWNLOAD_EXTRACT_TIMESTAMP FALSE)
+    set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(servicegen_googletest)
+  endif()
 endif()
 include(GoogleTest)
 
