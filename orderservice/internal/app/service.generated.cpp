@@ -287,7 +287,7 @@ void ServiceGenerated::initDataSinks(const config::Config& cfg) {
 
   connectors_.publish_order_processed_producer =
       std::make_unique<servicelib::datasink::kafka::LibrdkafkaProducerClient>(
-          cfg.dataConnectors.orderEvents, getMetrics());
+          getMetrics());
   endpoints_.publish_order_processed = std::make_shared<PublishOrderProcessedKafkaSinkEndpoint>(
       streams_.publish_order_processed.get(), *connectors_.publish_order_processed_producer,
       *functions_.order_processed_endpoint);

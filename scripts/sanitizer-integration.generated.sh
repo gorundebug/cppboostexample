@@ -39,6 +39,7 @@ SERVICELIB_NOOP_METRICS=1 \
 inventory_pid="$!"
 
 ORDER_PROCESSED_ENABLED=false \
+INVENTORY_SERVICE_API_ADDRESS=dns:///127.0.0.1:9202 \
 SERVICELIB_NOOP_METRICS=1 \
   "./${build_dir}/orderservice/example_order_service" \
     --config orderservice/config/config.yaml \
@@ -47,8 +48,9 @@ SERVICELIB_NOOP_METRICS=1 \
 order_pid="$!"
 
 ready=0
-for _ in $(seq 1 300); do
-  if python3 -c 'import json, urllib.request; assert all(set(("nodes", "edges")) <= json.load(urllib.request.urlopen(f"http://127.0.0.1:{port}/status/data", timeout=0.2)).keys() for port in (9091, 9092))' \
+ready_deadline=$((SECONDS + 120))
+while (( SECONDS < ready_deadline )); do
+  if python3 -c 'import json, urllib.request; assert all(set(("nodes", "edges")) <= json.load(urllib.request.urlopen(f"http://127.0.0.1:{port}/status/data", timeout=2)).keys() for port in (9091, 9092))' \
       >/dev/null 2>&1; then
     ready=1
     break
