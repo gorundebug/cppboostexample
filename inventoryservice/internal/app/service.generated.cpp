@@ -41,7 +41,7 @@ ServiceGenerated::ServiceGenerated(
       servicelib::config::detail::MakeRuntimeConfigSnapshot(config_);
 }
 
-ServiceGenerated::~ServiceGenerated() { stop(); }
+ServiceGenerated::~ServiceGenerated() { stopRuntime(); }
 
 void ServiceGenerated::start() {
   try {
@@ -191,6 +191,22 @@ void ServiceGenerated::stop() noexcept {
   } catch (...) {
     report_failure("serviceStopping", "unknown exception");
   }
+
+  stopRuntime();
+}
+
+void ServiceGenerated::stopRuntime() noexcept {
+  const auto report_failure =
+      [this](std::string_view operation, std::string_view error) noexcept {
+        try {
+          getLogger().error(
+              "generated service shutdown failed",
+              {servicelib::log::Field::Str("operation", std::string(operation)),
+               servicelib::log::Field::Err(error)});
+        } catch (...) {
+          // Logging must not escape a noexcept service destructor.
+        }
+      };
 
   if (http_server_) http_server_->Stop();
 

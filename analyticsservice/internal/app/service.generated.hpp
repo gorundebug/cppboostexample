@@ -79,6 +79,7 @@ class ServiceGenerated
   void initRuntime();
   void initStreams(const config::Config& config);
   void initDataSources(const config::Config& config);
+  void stopRuntime() noexcept;
   void releaseRuntime() noexcept;
 
   using ConsumeOrderProcessedInput =

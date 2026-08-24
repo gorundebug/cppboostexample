@@ -5,5 +5,4 @@ Checks: >
   portability-*
 WarningsAsErrors: ''
 HeaderFilterRegex: '^/workspace/'
-ExcludeHeaderFilterRegex: '^/workspace/build/'
 FormatStyle: file

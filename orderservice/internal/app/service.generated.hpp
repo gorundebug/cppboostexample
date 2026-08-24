@@ -122,6 +122,7 @@ class ServiceGenerated
   void initStreams(const config::Config& config);
   void initDataSinks(const config::Config& config);
   void initDataSources(const config::Config& config);
+  void stopRuntime() noexcept;
   void releaseRuntime() noexcept;
 
   using ProcessOrderInput =
