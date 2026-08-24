@@ -38,6 +38,7 @@ SERVICELIB_NOOP_METRICS=1 \
     --workers 2 &
 inventory_pid="$!"
 
+ORDER_PROCESSED_ENABLED=false \
 SERVICELIB_NOOP_METRICS=1 \
   "./${build_dir}/orderservice/example_order_service" \
     --config orderservice/config/config.yaml \
