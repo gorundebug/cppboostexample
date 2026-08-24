@@ -86,6 +86,8 @@ docker-build:
 			--build-context servicelib-source="$(GOSERVICELIB_SOURCE_CONTEXT)" \
 			--build-arg GOPROXY="$${GOPROXY:-https://proxy.golang.org,direct}" \
 			--build-arg GOSUMDB="$${GOSUMDB:-sum.golang.org}" \
+			--build-arg SERVICEGEN_APT_DEBIAN_URL="$${SERVICEGEN_APT_DEBIAN_URL:-}" \
+			--build-arg SERVICEGEN_APT_DEBIAN_SECURITY_URL="$${SERVICEGEN_APT_DEBIAN_SECURITY_URL:-}" \
 			--build-arg SERVICE_DIR="$(SERVICE_NAME)" \
 			--build-arg SERVICEGEN_RUNTIME_STRIP="$(SERVICEGEN_RUNTIME_STRIP)" \
 			-t $(SERVICE_NAME):latest "$(PROJECT_DIR)"; \
@@ -95,6 +97,8 @@ docker-build:
 			--build-context servicelib-source="$(GOSERVICELIB_SOURCE_CONTEXT)" \
 			--build-arg GOPROXY="$${GOPROXY:-https://proxy.golang.org,direct}" \
 			--build-arg GOSUMDB="$${GOSUMDB:-sum.golang.org}" \
+			--build-arg SERVICEGEN_APT_DEBIAN_URL="$${SERVICEGEN_APT_DEBIAN_URL:-}" \
+			--build-arg SERVICEGEN_APT_DEBIAN_SECURITY_URL="$${SERVICEGEN_APT_DEBIAN_SECURITY_URL:-}" \
 			--build-arg SERVICEGEN_RUNTIME_STRIP="$(SERVICEGEN_RUNTIME_STRIP)" \
 			-t $(SERVICE_NAME):latest .; \
 	fi
