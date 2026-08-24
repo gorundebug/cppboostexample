@@ -21,7 +21,8 @@ export CPPBOOSTSERVICELIB_ENABLE_KAFKA=True
 export CPPBOOSTSERVICELIB_ENABLE_OTEL=True
 
 "$framework_dir/scripts/conan-install.sh" "$build_type" \
-  --output-folder="$output_dir"
+  --output-folder="$output_dir" \
+  "${@:3}"
 
 mapfile -t toolchains < <(find "$output_dir" -type f -name conan_toolchain.cmake -print)
 if [[ "${#toolchains[@]}" -ne 1 ]]; then
