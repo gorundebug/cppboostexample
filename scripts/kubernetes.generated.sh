@@ -261,8 +261,8 @@ deploy_infrastructure() {
     --from-literal=password="${TEMPORAL_POSTGRES_PASSWORD}" \
     --dry-run=client -o yaml | kubectl apply -f - >/dev/null
   progress "starting pinned PostgreSQL for Temporal"
-  kubectl --namespace "${NAMESPACE}" apply \
-    -f kubernetes/temporal-postgresql.generated.yaml >/dev/null
+  kubectl --namespace "${NAMESPACE}" apply -f - \
+    < kubernetes/temporal-postgresql.generated.yaml >/dev/null
   kubectl --namespace "${NAMESPACE}" rollout status \
     statefulset/temporal-postgresql --timeout="${TIMEOUT}"
 
