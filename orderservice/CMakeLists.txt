@@ -39,14 +39,12 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
       CACHE BOOL "Build OpenTelemetry tracing and logging support" FORCE)
   set(CPPBOOSTSERVICELIB_BUILD_TESTS OFF CACHE BOOL
       "Do not register framework self-tests in a standalone consumer" FORCE)
-
-  # A standalone generated service uses the same Conan dependency graph as the
-  # complete workspace. The framework source may be local or fetched, while
-  # its third-party packages always come from the selected Conan lockfile.
-  if(SERVICEGEN_FETCH_CPP_DEPENDENCIES)
-    set(CPPBOOSTSERVICELIB_DEPENDENCY_MODE "CONAN" CACHE STRING
-        "Dependency provider for standalone cppboostservicelib" FORCE)
-  endif()
+  # The canonical standalone toolchain installs the exact dependency graph
+  # through Conan whether the framework source is local or fetched. Keep this
+  # as an overridable cache default so an explicit host build may still select
+  # another provider without silently mixing Conan and system packages.
+  set(CPPBOOSTSERVICELIB_DEPENDENCY_MODE "CONAN" CACHE STRING
+      "Dependency provider for standalone cppboostservicelib")
 
   if(CPPBOOSTSERVICELIB_SOURCE_DIR)
     add_subdirectory(
