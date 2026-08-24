@@ -1,10 +1,5 @@
 # syntax=docker/dockerfile:1
-ARG SERVICEGEN_GRPC_SOURCE_STAGE=empty-source-cache
-ARG SERVICEGEN_ASIO_GRPC_SOURCE_STAGE=empty-source-cache
 FROM servicelib-source AS servicelib-source
-FROM scratch AS empty-source-cache
-FROM ${SERVICEGEN_GRPC_SOURCE_STAGE} AS grpc-source-context
-FROM ${SERVICEGEN_ASIO_GRPC_SOURCE_STAGE} AS asio-grpc-source-context
 
 FROM ubuntu:24.04 AS development
 
@@ -13,6 +8,9 @@ ARG SERVICEGEN_APT_UBUNTU_ARCHIVE_URL=
 ARG SERVICEGEN_APT_UBUNTU_SECURITY_URL=
 ARG SERVICEGEN_APT_UBUNTU_PORTS_URL=
 ARG SERVICEGEN_GITHUB_RAW_URL=
+ARG SERVICEGEN_CONAN_REMOTE_URL=
+ARG PIP_INDEX_URL=https://pypi.org/simple
+ARG PIP_TRUSTED_HOST=
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
@@ -23,6 +21,7 @@ RUN if [ -n "$SERVICEGEN_APT_UBUNTU_ARCHIVE_URL$SERVICEGEN_APT_UBUNTU_SECURITY_U
         -e "s|http://ports.ubuntu.com/ubuntu-ports|$SERVICEGEN_APT_UBUNTU_PORTS_URL|g" {} +; \
     fi
 ENV SERVICEGEN_GITHUB_RAW_URL=${SERVICEGEN_GITHUB_RAW_URL}
+ENV SERVICEGEN_CONAN_REMOTE_URL=${SERVICEGEN_CONAN_REMOTE_URL}
 
 COPY docker/cppboost-packages-ubuntu-24.04.txt /tmp/cppboost-packages.txt
 RUN rm -f /etc/apt/apt.conf.d/docker-clean
@@ -34,6 +33,13 @@ RUN --mount=type=cache,id=servicegen-apt-lists-${TARGETARCH},target=/var/lib/apt
        < /tmp/cppboost-packages.txt \
     && locale-gen en_US.UTF-8 \
     && rm -f /tmp/cppboost-packages.txt
+
+RUN python3 -m venv /opt/conan \
+    && PIP_TRUSTED_HOST="$PIP_TRUSTED_HOST" \
+       /opt/conan/bin/pip install --no-cache-dir --index-url "$PIP_INDEX_URL" \
+       conan==2.31.1
+ENV PATH=/opt/conan/bin:$PATH
+ENV CONAN_HOME=/conan
 
 COPY --from=servicelib-source / /tmp/servicelib-source
 RUN set -eu; \
@@ -68,49 +74,16 @@ ARG SERVICEGEN_EXAMPLE_PROFILE=function-call
 COPY . /workspace
 RUN --mount=type=cache,id=cppboostexample-runtime-build-${TARGETARCH}-${SERVICEGEN_EXAMPLE_PROFILE},target=/workspace/build,sharing=locked \
     --mount=type=cache,id=cppboostexample-runtime-ccache-${TARGETARCH},target=/ccache \
-    --mount=type=cache,id=servicegen-grpc-v1.71.0-asio-grpc-v3.5.0-sources-${TARGETARCH},target=/var/cache/servicegen-cpp-sources,sharing=locked \
-    --mount=type=bind,from=grpc-source-context,target=/servicegen-grpc-source,ro \
-    --mount=type=bind,from=asio-grpc-source-context,target=/servicegen-asio-grpc-source,ro \
-    grpc_source_arg="" \
-    && asio_grpc_source_arg="" \
-    && if [ -f /var/cache/servicegen-cpp-sources/grpc-src/include/grpc/grpc.h ]; then \
-         grpc_source_arg="-DFETCHCONTENT_SOURCE_DIR_GRPC=/var/cache/servicegen-cpp-sources/grpc-src"; \
-       elif [ -f /workspace/build/_deps/grpc-src/include/grpc/grpc.h ]; then \
-         grpc_source_arg="-DFETCHCONTENT_SOURCE_DIR_GRPC=/workspace/build/_deps/grpc-src"; \
-       fi \
-    && if [ -f /var/cache/servicegen-cpp-sources/asio-grpc-src/src/agrpc/asio_grpc.hpp ]; then \
-         asio_grpc_source_arg="-DFETCHCONTENT_SOURCE_DIR_ASIO-GRPC=/var/cache/servicegen-cpp-sources/asio-grpc-src"; \
-       elif [ -f /workspace/build/_deps/asio-grpc-src/src/agrpc/asio_grpc.hpp ]; then \
-         asio_grpc_source_arg="-DFETCHCONTENT_SOURCE_DIR_ASIO-GRPC=/workspace/build/_deps/asio-grpc-src"; \
-       fi \
-    && if [ -f /servicegen-grpc-source/include/grpc/grpc.h ]; then \
-         grpc_source_arg="-DFETCHCONTENT_SOURCE_DIR_GRPC=/servicegen-grpc-source"; \
-       fi \
-    && if [ -f /servicegen-asio-grpc-source/src/agrpc/asio_grpc.hpp ]; then \
-         asio_grpc_source_arg="-DFETCHCONTENT_SOURCE_DIR_ASIO-GRPC=/servicegen-asio-grpc-source"; \
-       fi \
+    --mount=type=cache,id=cppboostexample-runtime-conan2-${TARGETARCH},target=/conan,sharing=locked \
+    ./scripts/run_with_progress.generated.sh "Conan Release install" \
+      ./scripts/conan-install.generated.sh Release /workspace/build/conan-release \
+    && conan_toolchain="$(cat /workspace/build/conan-release/toolchain.path)" \
     && CCACHE_DIR=/ccache ./scripts/run_with_progress.generated.sh "Release configure" cmake --preset docker-release \
+      --fresh \
+      -DCMAKE_TOOLCHAIN_FILE="${conan_toolchain}" \
       -DSERVICEGEN_FETCH_CPP_DEPENDENCIES=OFF \
-      -DFETCHCONTENT_UPDATES_DISCONNECTED=ON \
       -DCPPBOOSTSERVICELIB_PROFILING="${CPPBOOSTSERVICELIB_PROFILING}" \
       -DCPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS="${CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS}" \
-      ${grpc_source_arg} ${asio_grpc_source_arg} \
-    && if [ ! -f /var/cache/servicegen-cpp-sources/grpc-src/include/grpc/grpc.h ]; then \
-         grpc_source=/workspace/build/_deps/grpc-src; \
-         if [ -f /servicegen-grpc-source/include/grpc/grpc.h ]; then grpc_source=/servicegen-grpc-source; fi; \
-         grpc_cache_tmp="/var/cache/servicegen-cpp-sources/.grpc-src.$$"; \
-         rm -rf "${grpc_cache_tmp}"; \
-         cp -a "${grpc_source}" "${grpc_cache_tmp}"; \
-         mv "${grpc_cache_tmp}" /var/cache/servicegen-cpp-sources/grpc-src; \
-       fi \
-    && if [ ! -f /var/cache/servicegen-cpp-sources/asio-grpc-src/src/agrpc/asio_grpc.hpp ]; then \
-         asio_grpc_source=/workspace/build/_deps/asio-grpc-src; \
-         if [ -f /servicegen-asio-grpc-source/src/agrpc/asio_grpc.hpp ]; then asio_grpc_source=/servicegen-asio-grpc-source; fi; \
-         asio_grpc_cache_tmp="/var/cache/servicegen-cpp-sources/.asio-grpc-src.$$"; \
-         rm -rf "${asio_grpc_cache_tmp}"; \
-         cp -a "${asio_grpc_source}" "${asio_grpc_cache_tmp}"; \
-         mv "${asio_grpc_cache_tmp}" /var/cache/servicegen-cpp-sources/asio-grpc-src; \
-       fi \
     && ./scripts/run_with_progress.generated.sh "Release build" cmake --build --preset docker-release \
       --target example_analytics_service example_inventory_service example_order_service --parallel \
     && mkdir -p /opt/service-bin /opt/runtime-libs \

@@ -8,16 +8,15 @@ services:
       extra_hosts:
         - "host.docker.internal:host-gateway"
       args:
-        SERVICEGEN_GRPC_SOURCE_STAGE: grpc-source
-        SERVICEGEN_ASIO_GRPC_SOURCE_STAGE: asio-grpc-source
         SERVICEGEN_GITHUB_RAW_URL: ${SERVICEGEN_GITHUB_RAW_URL:-}
+        SERVICEGEN_CONAN_REMOTE_URL: ${SERVICEGEN_CONAN_REMOTE_URL:-}
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
+        PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:-}
         SERVICEGEN_APT_UBUNTU_ARCHIVE_URL: ${SERVICEGEN_APT_UBUNTU_ARCHIVE_URL:-}
         SERVICEGEN_APT_UBUNTU_SECURITY_URL: ${SERVICEGEN_APT_UBUNTU_SECURITY_URL:-}
         SERVICEGEN_APT_UBUNTU_PORTS_URL: ${SERVICEGEN_APT_UBUNTU_PORTS_URL:-}
       additional_contexts:
         servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.12}}
-        grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}
-        asio-grpc-source: ${SERVICEGEN_ASIO_GRPC_SOURCE_CONTEXT:-.}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     working_dir: /workspace
@@ -37,14 +36,17 @@ services:
       GIT_CONFIG_VALUE_1: ${GIT_CONFIG_VALUE_1:-}
       SERVICEGEN_FETCH_CPP_DEPENDENCIES: ${SERVICEGEN_FETCH_CPP_DEPENDENCIES:-OFF}
       SERVICEGEN_GITHUB_RAW_URL: ${SERVICEGEN_GITHUB_RAW_URL:-}
+      SERVICEGEN_CONAN_REMOTE_URL: ${SERVICEGEN_CONAN_REMOTE_URL:-}
+      CONAN_HOME: /conan
     volumes:
       - .:/workspace
       - cpp-cmake-build:/workspace/build
       - cpp-ccache:/ccache
+      - ${SERVICEGEN_CONAN_HOME:-cpp-conan2}:/conan
     command:
       - /bin/bash
       - -lc
-      - source scripts/configure-git-auth.generated.sh && cmake --preset docker-debug -DSERVICEGEN_FETCH_CPP_DEPENDENCIES="${SERVICEGEN_FETCH_CPP_DEPENDENCIES:-OFF}" && cmake --build --preset docker-debug --parallel && ctest --preset docker-debug
+      - source scripts/configure-git-auth.generated.sh && ./scripts/conan-install.generated.sh Debug /workspace/build/conan-debug && conan_toolchain="$$(cat /workspace/build/conan-debug/toolchain.path)" && cmake --fresh --preset docker-debug -DCMAKE_TOOLCHAIN_FILE="$$conan_toolchain" -DSERVICEGEN_FETCH_CPP_DEPENDENCIES=OFF && cmake --build --preset docker-debug --parallel && ctest --preset docker-debug
   analyticsservice-runtime:
     image: cppboostexample-analyticsservice
     build:
@@ -54,9 +56,10 @@ services:
       extra_hosts:
         - "host.docker.internal:host-gateway"
       args:
-        SERVICEGEN_GRPC_SOURCE_STAGE: grpc-source
-        SERVICEGEN_ASIO_GRPC_SOURCE_STAGE: asio-grpc-source
         SERVICEGEN_GITHUB_RAW_URL: ${SERVICEGEN_GITHUB_RAW_URL:-}
+        SERVICEGEN_CONAN_REMOTE_URL: ${SERVICEGEN_CONAN_REMOTE_URL:-}
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
+        PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:-}
         SERVICEGEN_APT_UBUNTU_ARCHIVE_URL: ${SERVICEGEN_APT_UBUNTU_ARCHIVE_URL:-}
         SERVICEGEN_APT_UBUNTU_SECURITY_URL: ${SERVICEGEN_APT_UBUNTU_SECURITY_URL:-}
         SERVICEGEN_APT_UBUNTU_PORTS_URL: ${SERVICEGEN_APT_UBUNTU_PORTS_URL:-}
@@ -66,8 +69,6 @@ services:
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
         servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.12}}
-        grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}
-        asio-grpc-source: ${SERVICEGEN_ASIO_GRPC_SOURCE_CONTEXT:-.}
   inventoryservice-runtime:
     image: cppboostexample-inventoryservice
     build:
@@ -77,9 +78,10 @@ services:
       extra_hosts:
         - "host.docker.internal:host-gateway"
       args:
-        SERVICEGEN_GRPC_SOURCE_STAGE: grpc-source
-        SERVICEGEN_ASIO_GRPC_SOURCE_STAGE: asio-grpc-source
         SERVICEGEN_GITHUB_RAW_URL: ${SERVICEGEN_GITHUB_RAW_URL:-}
+        SERVICEGEN_CONAN_REMOTE_URL: ${SERVICEGEN_CONAN_REMOTE_URL:-}
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
+        PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:-}
         SERVICEGEN_APT_UBUNTU_ARCHIVE_URL: ${SERVICEGEN_APT_UBUNTU_ARCHIVE_URL:-}
         SERVICEGEN_APT_UBUNTU_SECURITY_URL: ${SERVICEGEN_APT_UBUNTU_SECURITY_URL:-}
         SERVICEGEN_APT_UBUNTU_PORTS_URL: ${SERVICEGEN_APT_UBUNTU_PORTS_URL:-}
@@ -89,8 +91,6 @@ services:
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
         servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.12}}
-        grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}
-        asio-grpc-source: ${SERVICEGEN_ASIO_GRPC_SOURCE_CONTEXT:-.}
   orderservice-runtime:
     image: cppboostexample-orderservice
     build:
@@ -100,9 +100,10 @@ services:
       extra_hosts:
         - "host.docker.internal:host-gateway"
       args:
-        SERVICEGEN_GRPC_SOURCE_STAGE: grpc-source
-        SERVICEGEN_ASIO_GRPC_SOURCE_STAGE: asio-grpc-source
         SERVICEGEN_GITHUB_RAW_URL: ${SERVICEGEN_GITHUB_RAW_URL:-}
+        SERVICEGEN_CONAN_REMOTE_URL: ${SERVICEGEN_CONAN_REMOTE_URL:-}
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
+        PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:-}
         SERVICEGEN_APT_UBUNTU_ARCHIVE_URL: ${SERVICEGEN_APT_UBUNTU_ARCHIVE_URL:-}
         SERVICEGEN_APT_UBUNTU_SECURITY_URL: ${SERVICEGEN_APT_UBUNTU_SECURITY_URL:-}
         SERVICEGEN_APT_UBUNTU_PORTS_URL: ${SERVICEGEN_APT_UBUNTU_PORTS_URL:-}
@@ -112,11 +113,11 @@ services:
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
         servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.12}}
-        grpc-source: ${SERVICEGEN_GRPC_SOURCE_CONTEXT:-.}
-        asio-grpc-source: ${SERVICEGEN_ASIO_GRPC_SOURCE_CONTEXT:-.}
 
 volumes:
   cpp-cmake-build:
     name: ${SERVICEGEN_CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.12}
   cpp-ccache:
     name: cppboostexample_cpp-ccache
+  cpp-conan2:
+    name: cppboostexample_cpp-conan2

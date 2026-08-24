@@ -2,57 +2,54 @@
 
 .DEFAULT_GOAL := build
 
-export SERVICEGEN_FETCH_CPP_DEPENDENCIES := ON
-BUILD_DIR ?= build
+export SERVICEGEN_FETCH_CPP_DEPENDENCIES := OFF
 
 ifneq ($(strip $(SERVICEGEN_DEPENDENCY_PROXY_DIR)),)
 SERVICEGEN_DEPENDENCY_PROXY_HOST ?= localhost
 SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST ?= host.docker.internal
 SERVICEGEN_DEPENDENCY_PROXY_PORT ?= $(SERVICEGEN_NEXUS_PORT)
 SERVICEGEN_DEPENDENCY_PROXY_PORT := $(if $(SERVICEGEN_DEPENDENCY_PROXY_PORT),$(SERVICEGEN_DEPENDENCY_PROXY_PORT),18081)
+export SERVICEGEN_CONAN_HOME := $(SERVICEGEN_DEPENDENCY_PROXY_DIR)/conan2
 export SERVICEGEN_GITHUB_RAW_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/github-raw
+export SERVICEGEN_CONAN_REMOTE_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/conan-proxy
 export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.12.tar.gz
 export SERVICELIB_SOURCE_CONTEXT ?= $(CPPBOOSTSERVICELIB_SOURCE_CONTEXT)
-docker-build docker-up: export SERVICEGEN_GITHUB_RAW_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/github-raw
-docker-build docker-up: export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-archive
-docker-build docker-up: export SERVICEGEN_APT_UBUNTU_SECURITY_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-security
-docker-build docker-up: export SERVICEGEN_APT_UBUNTU_PORTS_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-ports
+build test release-build release-test lint docker-build docker-up: export SERVICEGEN_GITHUB_RAW_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/github-raw
+build test release-build release-test lint docker-build docker-up: export SERVICEGEN_CONAN_REMOTE_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/conan-proxy
+build test release-build release-test lint docker-build docker-up: export PIP_INDEX_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/pypi-proxy/simple
+build test release-build release-test lint docker-build docker-up: export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST)
+build test release-build release-test lint docker-build docker-up: export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-archive
+build test release-build release-test lint docker-build docker-up: export SERVICEGEN_APT_UBUNTU_SECURITY_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-security
+build test release-build release-test lint docker-build docker-up: export SERVICEGEN_APT_UBUNTU_PORTS_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-ports
 endif
 
 .PHONY: build test release-build release-test release-up lint fmt clean \
 	docker-build docker-up docker-down docker-clean help
 
-build: ## Build the standalone service with CMake
-	@cmake -S . -B "$(BUILD_DIR)" -G Ninja -DCMAKE_BUILD_TYPE=Debug \
-		-DSERVICEGEN_FETCH_CPP_DEPENDENCIES="$(SERVICEGEN_FETCH_CPP_DEPENDENCIES)"
-	@cmake --build "$(BUILD_DIR)" --parallel
+build: ## Build the standalone service in the canonical Docker toolchain
+	@./scripts/build.generated.sh docker-debug
 
 test: ## Build and run all service tests
-	@$(MAKE) build
-	@ctest --test-dir "$(BUILD_DIR)" --output-on-failure
+	@./scripts/test.generated.sh docker-debug
 
-release-build: ## Build the optimized standalone service with CMake
-	@cmake -S . -B "$(BUILD_DIR)-release" -G Ninja -DCMAKE_BUILD_TYPE=Release \
-		-DSERVICEGEN_FETCH_CPP_DEPENDENCIES="$(SERVICEGEN_FETCH_CPP_DEPENDENCIES)"
-	@cmake --build "$(BUILD_DIR)-release" --parallel
+release-build: ## Build the optimized standalone service in Docker
+	@./scripts/build.generated.sh docker-release
 
 release-test: ## Build and test the optimized standalone service
-	@$(MAKE) release-build
-	@ctest --test-dir "$(BUILD_DIR)-release" --output-on-failure
+	@./scripts/test.generated.sh docker-release
 
 release-up: release-build ## Build the optimized service
 
 lint: ## Run generated clang-format and clang-tidy targets
-	@cmake --build "$(BUILD_DIR)" --target clang-format-check clang-tidy 2>/dev/null || \
-	  { echo "lint targets are not available for this standalone project"; exit 1; }
+	@./scripts/lint.generated.sh
 
 fmt: ## Format C++ sources
 	@find . -type f \( -name '*.cpp' -o -name '*.hpp' \) -not -path './build/*' \
 		-exec clang-format -i {} +
 
 clean: ## Remove CMake build artifacts
-	@cmake -E remove_directory "$(BUILD_DIR)"
-	@cmake -E remove_directory "$(BUILD_DIR)-release"
+	@docker compose -f docker-compose.cmake.generated.yml down --volumes --remove-orphans
+	@rm -rf build
 
 docker-build: build ## Build the reusable C++ toolchain image and service
 	@docker compose -f docker-compose.cmake.generated.yml build cpp-build

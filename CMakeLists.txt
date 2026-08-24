@@ -26,10 +26,10 @@ set(CPPBOOSTSERVICELIB_REPOSITORY
 set(CPPBOOSTSERVICELIB_REVISION
     "v0.2.12" CACHE STRING
     "Pinned cppboostservicelib revision")
-set(CPPBOOSTSERVICELIB_DEPENDENCY_MODE "FETCH" CACHE STRING
+set(CPPBOOSTSERVICELIB_DEPENDENCY_MODE "CONAN" CACHE STRING
     "Dependency provider used for a source-tree cppboostservicelib build")
 set(CPPBOOSTSERVICELIB_BUILD_TESTS OFF CACHE BOOL
-    "Do not build framework self-tests in a generated consumer workspace")
+    "Do not build framework self-tests in a generated consumer workspace" FORCE)
 
 set(CPPBOOSTSERVICELIB_ENABLE_GRPC ON
     CACHE BOOL "Build asio-grpc support" FORCE)

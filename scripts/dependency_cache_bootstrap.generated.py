@@ -92,6 +92,9 @@ def repositories() -> list[tuple[str, str, dict]]:
         ("raw", "github-raw", github),
         ("raw", "gitlab-raw", gitlab),
     ]
+    conan = common("conan-proxy", "https://center2.conan.io")
+    conan["conanProxy"] = {"conanVersion": "V2"}
+    definitions.append(("conan", "conan-proxy", conan))
     definitions[2][2]["pypi"] = {"indexPath": "/simple"}
     definitions[3][2]["cargo"] = {"requireAuthentication": False}
     docker = common("docker-hub", "https://registry-1.docker.io")
@@ -184,15 +187,19 @@ def main() -> int:
     realms = request(
         base_url, args.password, "GET", "/service/rest/v1/security/realms/active"
     )
-    if "DockerToken" not in realms:
+    required_realms = [realm for realm in ("DockerToken", "ConanToken") if realm not in realms]
+    if required_realms:
         request(
             base_url,
             args.password,
             "PUT",
             "/service/rest/v1/security/realms/active",
-            [*realms, "DockerToken"],
+            [*realms, *required_realms],
         )
-        print("[dependency-cache] Docker bearer token realm enabled")
+        print(
+            "[dependency-cache] enabled bearer token realms: "
+            + ", ".join(required_realms)
+        )
     return 0
 
 

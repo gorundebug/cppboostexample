@@ -40,13 +40,11 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   set(CPPBOOSTSERVICELIB_BUILD_TESTS OFF CACHE BOOL
       "Do not register framework self-tests in a standalone consumer" FORCE)
 
-  # A standalone generated service must be buildable in the same clean Docker
-  # environment as the complete workspace. Fetching the framework source alone
-  # is insufficient: its transitive Boost/gRPC/asio-grpc dependencies must use
-  # the pinned FETCH provider as well. Installed-dependency consumers retain
-  # SYSTEM mode by disabling SERVICEGEN_FETCH_CPP_DEPENDENCIES.
+  # A standalone generated service uses the same Conan dependency graph as the
+  # complete workspace. The framework source may be local or fetched, while
+  # its third-party packages always come from the selected Conan lockfile.
   if(SERVICEGEN_FETCH_CPP_DEPENDENCIES)
-    set(CPPBOOSTSERVICELIB_DEPENDENCY_MODE "FETCH" CACHE STRING
+    set(CPPBOOSTSERVICELIB_DEPENDENCY_MODE "CONAN" CACHE STRING
         "Dependency provider for standalone cppboostservicelib" FORCE)
   endif()
 

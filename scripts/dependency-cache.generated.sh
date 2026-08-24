@@ -136,6 +136,7 @@ export PIP_INDEX_URL=$base/pypi-proxy/simple
 export PIP_TRUSTED_HOST=$host
 export UV_INDEX_URL=$base/pypi-proxy/simple
 export CARGO_REGISTRIES_CRATES_IO_INDEX=sparse+$base/cargo-proxy/
+export SERVICEGEN_CONAN_REMOTE_URL=$base/conan-proxy
 export SERVICEGEN_MAVEN_CENTRAL_URL=$base/maven-central
 export SERVICEGEN_GITHUB_RAW_URL=$base/github-raw
 export SERVICEGEN_GITLAB_RAW_URL=$base/gitlab-raw

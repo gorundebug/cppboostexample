@@ -26,33 +26,16 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
   'set -euo pipefail
    source scripts/configure-git-auth.generated.sh
    build_dir="build/sanitizers/$SERVICEGEN_CPP_SANITIZER"
-   host_tools_dir="build/sanitizers/host-tools"
-   host_protoc="$host_tools_dir/third_party/protobuf/protoc"
-   host_grpc_plugin="$host_tools_dir/grpc_cpp_plugin"
+   conan_dir="build/conan-sanitizers/$SERVICEGEN_CPP_SANITIZER"
+   ./scripts/conan-install.generated.sh Debug "$conan_dir"
+   conan_toolchain="$(cat "$conan_dir/toolchain.path")"
    cmake -S . -B "$build_dir" -G Ninja \
+     --fresh \
      -DCMAKE_BUILD_TYPE=Debug \
-     -DFETCHCONTENT_QUIET=OFF \
+     -DCMAKE_TOOLCHAIN_FILE="$conan_toolchain" \
      -DCPPBOOSTSERVICELIB_SOURCE_DIR="$CPPBOOSTSERVICELIB_SOURCE_DIR" \
-     -DCPPBOOSTSERVICELIB_HOST_PROTOC_EXECUTABLE="$host_protoc" \
-     -DCPPBOOSTSERVICELIB_HOST_GRPC_CPP_PLUGIN_EXECUTABLE="$host_grpc_plugin" \
-     -DSERVICEGEN_FETCH_CPP_DEPENDENCIES="${SERVICEGEN_FETCH_CPP_DEPENDENCIES:-OFF}" \
+     -DSERVICEGEN_FETCH_CPP_DEPENDENCIES=OFF \
      $SERVICEGEN_CPP_SANITIZER_OPTIONS
-   if [[ ! -x "$host_protoc" || ! -x "$host_grpc_plugin" ]]; then
-     cmake -S "$build_dir/_deps/grpc-src" -B "$host_tools_dir" -G Ninja \
-       -DCMAKE_BUILD_TYPE=Release \
-       -DgRPC_BUILD_TESTS=OFF \
-       -DgRPC_INSTALL=OFF \
-       -Dprotobuf_BUILD_TESTS=OFF \
-       -Dprotobuf_INSTALL=OFF \
-       -DgRPC_BUILD_GRPC_CSHARP_PLUGIN=OFF \
-       -DgRPC_BUILD_GRPC_NODE_PLUGIN=OFF \
-       -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN=OFF \
-       -DgRPC_BUILD_GRPC_PHP_PLUGIN=OFF \
-       -DgRPC_BUILD_GRPC_PYTHON_PLUGIN=OFF \
-       -DgRPC_BUILD_GRPC_RUBY_PLUGIN=OFF
-     cmake --build "$host_tools_dir" \
-       --target protoc grpc_cpp_plugin --parallel
-   fi
    cmake --build "$build_dir" --parallel
    case "$SERVICEGEN_CPP_SANITIZER" in
      asan)
