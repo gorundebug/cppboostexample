@@ -112,7 +112,7 @@ GLAB := $(TOOLS_DIR)/glab
 	kubernetes-up kubernetes-build kubernetes-deploy kubernetes-test \
 	kubernetes-status kubernetes-down kubernetes-clean \
 	k8s-up k8s-build k8s-deploy k8s-test k8s-status k8s-down k8s-clean \
-	dependency-cache-up dependency-cache-status dependency-cache-env \
+	dependency-cache-up dependency-cache-status dependency-cache-refresh dependency-cache-env \
 	dependency-cache-docker-env dependency-cache-docker-build \
 	dependency-cache-down dependency-cache-clean \
 	dependency-source-cache-invalidate \
@@ -199,6 +199,9 @@ dependency-cache-up: ## Start and configure the shared local package proxy
 
 dependency-cache-status: ## Show the shared local package proxy status
 	@bash scripts/dependency-cache.generated.sh status
+
+dependency-cache-refresh: ## Refresh every cached Git mirror from its upstream
+	@bash scripts/dependency-cache.generated.sh refresh
 
 dependency-cache-env: ## Print package-manager environment for the local proxy
 	@bash scripts/dependency-cache.generated.sh env

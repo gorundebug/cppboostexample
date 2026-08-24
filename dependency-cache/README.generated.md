@@ -18,6 +18,9 @@ make SERVICEGEN_NEXUS_ACCEPT_EULA=true dependency-cache-up
 # Later starts; the container remains running between project builds:
 make dependency-cache-up
 
+# Force every existing bare Git mirror to fetch current refs now:
+make dependency-cache-refresh
+
 # Host package managers:
 eval "$(make -s dependency-cache-env)"
 make build
@@ -59,9 +62,10 @@ build does not fetch it from the public upstream again.
 GitHub and GitLab HTTPS clone URLs are rewritten process-locally to the mirror;
 the user's global Git configuration is never modified. A repository is cloned
 from upstream once and refreshed after
-`SERVICEGEN_GIT_MIRROR_REFRESH_SECONDS` (one hour by default). Set it to `0`
-for a fully offline immutable mirror, or remove the corresponding bare mirror
-directory when an immediate refresh is required.
+`SERVICEGEN_GIT_MIRROR_REFRESH_SECONDS` (one hour by default). Run
+`make dependency-cache-refresh` to fetch and prune every existing mirror
+immediately. Set the refresh interval to `0` for a fully offline immutable
+mirror; the explicit refresh command remains available.
 
 ## Changing C++ dependency versions
 

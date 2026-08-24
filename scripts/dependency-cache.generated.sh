@@ -56,6 +56,57 @@ wait_ready() {
   done
 }
 
+wait_git_mirror() {
+  attempts=0
+  until curl --silent --output /dev/null "$git_mirror_url/"; do
+    attempts=$((attempts + 1))
+    if [ "$attempts" -ge 60 ]; then
+      echo "[dependency-cache] Git mirror did not become ready at $git_mirror_url" >&2
+      compose logs --tail 100 git-mirror >&2 || true
+      exit 1
+    fi
+    sleep 1
+  done
+}
+
+refresh_git_mirrors() {
+  mkdir -p "$git_mirror_dir"
+  chmod 0777 "$git_mirror_dir"
+  compose up -d git-mirror
+  wait_git_mirror
+  compose exec -T git-mirror sh <<'SERVICEGEN_REFRESH_GIT_MIRRORS'
+set -eu
+mirror_list="/tmp/servicegen-git-mirrors.$$"
+trap 'rm -f "$mirror_list"' EXIT HUP INT TERM
+find /mirrors -type d -name '*.git' -prune -print >"$mirror_list"
+if [ ! -s "$mirror_list" ]; then
+  echo "[dependency-cache] no cached Git mirrors to refresh"
+  exit 0
+fi
+while IFS= read -r mirror; do
+  lock="${mirror}.lock"
+  attempt=0
+  until mkdir "$lock" 2>/dev/null; do
+    attempt=$((attempt + 1))
+    if [ "$attempt" -ge 1200 ]; then
+      echo "[dependency-cache] lock timeout: $mirror" >&2
+      exit 1
+    fi
+    sleep 0.1
+  done
+  echo "[dependency-cache] refreshing ${mirror#/mirrors/}"
+  if git -C "$mirror" remote update --prune; then
+    touch "$mirror/servicegen-last-refresh"
+    rmdir "$lock"
+  else
+    status=$?
+    rmdir "$lock"
+    exit "$status"
+  fi
+done <"$mirror_list"
+SERVICEGEN_REFRESH_GIT_MIRRORS
+}
+
 bootstrap() {
   password=$(compose exec -T nexus sh -c 'cat /nexus-data/admin.password 2>/dev/null || true')
   if [ -z "$password" ]; then
@@ -124,6 +175,9 @@ case "${1:-up}" in
   status)
     compose ps
     ;;
+  refresh)
+    refresh_git_mirrors
+    ;;
   env)
     print_env
     ;;
@@ -135,7 +189,7 @@ case "${1:-up}" in
     rm -rf "$cache_dir" "$git_mirror_dir"
     ;;
   *)
-    echo "usage: $0 {up|status|env|down|clean}" >&2
+    echo "usage: $0 {up|status|refresh|env|down|clean}" >&2
     exit 2
     ;;
 esac
