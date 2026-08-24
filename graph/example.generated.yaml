@@ -22,6 +22,21 @@ dataConnectors:
         rustImplementation: rust/tonic
         type: gRPC
         typeScriptImplementation: grpc/grpc-js
+    localCron:
+        endpoints:
+            localSchedule:
+                enabled: true
+                missedRunPolicy: FireOnce
+                name: Local Schedule
+                overlapPolicy: Skip
+                schedule: '*/5 * * * *'
+                timezone: UTC
+        goImplementation: go/gocron
+        name: Local Cron
+        pythonImplementation: python/apscheduler
+        rustImplementation: rust/croner
+        type: Cron
+        typeScriptImplementation: node/croner
     orderEvents:
         brokers: redpanda:9092
         endpoints:
@@ -75,6 +90,39 @@ dataConnectors:
         type: HTTP
         typeScriptImplementation: node/http
         useDedicatedListener: false
+    temporal:
+        address: temporal:7233
+        endpoints:
+            durableJob:
+                activityHeartbeatTimeout: 5000
+                activityStartToCloseTimeout: 30000
+                enabled: true
+                maximumAttempts: 3
+                name: Durable Job
+                taskQueue: automation-jobs
+                workflowExecutionTimeout: 60000
+            temporalSchedule:
+                activityHeartbeatTimeout: 5000
+                activityStartToCloseTimeout: 30000
+                enabled: true
+                maximumAttempts: 3
+                missedRunPolicy: FireOnce
+                name: Temporal Schedule
+                overlapPolicy: Skip
+                schedule: '*/10 * * * *'
+                scheduleId: example-automation-schedule
+                taskQueue: automation-schedules
+                timezone: UTC
+                workflowExecutionTimeout: 60000
+        goImplementation: temporal/go
+        identity: example-automation
+        maxConcurrentActivities: 2
+        maxConcurrentWorkflows: 4
+        name: Temporal
+        namespace: default
+        pythonImplementation: temporal/python
+        type: Temporal
+        typeScriptImplementation: temporal/typescript
 modules:
     inventoryServiceApi:
         golangVersion: 1.25.4
@@ -134,6 +182,115 @@ services:
                     xPos: -1390
                     yPos: -19
         programmingLanguage: CppBoost
+        readinessHandler: health/ready
+        shutdownTimeout: 30000
+        startupHandler: health/startup
+        statusHandler: status
+    automationService:
+        color: '#00A86B'
+        defaultCallSemantics: FunctionCall
+        environment: ""
+        golangVersion: 1.25.4
+        grpcHost: 0.0.0.0
+        grpcPort: 9204
+        httpHost: 0.0.0.0
+        httpPort: 9094
+        kubernetesWorkloadType: Deployment
+        links:
+            link1:
+                activityHeartbeatTimeout: 5000
+                activityStartToCloseTimeout: 30000
+                callSemantics: DurableCall
+                dataConnector: temporal
+                from: consumeDurableJob
+                maximumAttempts: 3
+                taskQueue: automation-durable-calls
+                to: processDurableJob
+                workflowExecutionTimeout: 60000
+        livenessHandler: health/live
+        metricsHandler: metrics
+        modulePath: github.com/gorundebug/cppboostexample-automationservice
+        name: Automation Service
+        pipelines:
+            automation:
+                consumeDurableJob:
+                    endpoint: durableJob
+                    name: Consume Durable Job
+                    source: processDurableJob
+                    type: Input
+                    valueType: string
+                    xPos: -130
+                    yPos: -330
+                localSchedule:
+                    endpoint: localSchedule
+                    name: Local Schedule
+                    type: Input
+                    valueType: scheduleTrigger
+                    xPos: -1050
+                    yPos: -480
+                makeLocalJob:
+                    functionDescription: |
+                        Create a job message identifying the local scheduled firing.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: LocalJob
+                    functionPackage: ""
+                    name: Make Local Job
+                    source: localSchedule
+                    type: Map
+                    valueType: string
+                    xPos: -820
+                    yPos: -480
+                makeTemporalJob:
+                    functionDescription: |
+                        Create a job message identifying the durable scheduled firing.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: TemporalJob
+                    functionPackage: ""
+                    name: Make Temporal Job
+                    source: temporalSchedule
+                    type: Map
+                    valueType: string
+                    xPos: -820
+                    yPos: -180
+                mergeJobSubmissions:
+                    name: Merge Job Submissions
+                    sources:
+                        - makeLocalJob
+                        - makeTemporalJob
+                    type: Merge
+                    xPos: -570
+                    yPos: -330
+                processDurableJob:
+                    functionDescription: |
+                        Process one accepted automation job and return its result.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ProcessDurableJob
+                    functionPackage: ""
+                    name: Process Durable Job
+                    source: consumeDurableJob
+                    type: Map
+                    valueType: string
+                    xPos: 140
+                    yPos: -330
+                submitDurableJob:
+                    endpoint: durableJob
+                    name: Submit Durable Job
+                    source: mergeJobSubmissions
+                    type: Sink
+                    valueType: string
+                    xPos: -360
+                    yPos: -330
+                temporalSchedule:
+                    endpoint: temporalSchedule
+                    name: Temporal Schedule
+                    type: Input
+                    valueType: scheduleTrigger
+                    xPos: -1050
+                    yPos: -180
+        programmingLanguage: GoLang
         readinessHandler: health/ready
         shutdownTimeout: 30000
         startupHandler: health/startup
@@ -426,6 +583,16 @@ types:
         publicType: false
         transferByValue: false
         type: struct
+    scheduleTrigger:
+        description: Portable local or durable schedule firing metadata.
+        name: ScheduleTrigger
+        publicType: false
+        type: schedule trigger
+    string:
+        description: Automation job payload and result.
+        publicType: false
+        type: string
+        useAlias: false
     unknownType:
         name: UnknownType
         publicType: false

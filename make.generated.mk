@@ -40,6 +40,7 @@ export SERVICEGEN_APT_UBUNTU_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)
 export SERVICEGEN_APT_UBUNTU_PORTS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-ubuntu-ports
 export SERVICEGEN_APT_DEBIAN_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-debian
 export SERVICEGEN_APT_DEBIAN_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-debian-security
+export GOSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/servicelib/archive/refs/tags/v0.2.12.tar.gz
 export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.12.tar.gz
 export SERVICEGEN_HELM_PROMETHEUS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-prometheus
 export SERVICEGEN_HELM_GRAFANA_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-grafana
@@ -59,6 +60,7 @@ LANG_TOOL_TARGETS :=
 LANG_HOST_PREP_TARGETS :=
 LANG_DOCKER_BUILD_TARGETS :=
 LANG_INTEGRATION_TARGETS :=
+include make.golang.generated.mk
 include make.cpp.generated.mk
 
 # Docker targets use the proxy address reachable from containers. GNU Make
@@ -105,13 +107,13 @@ GLAB := $(TOOLS_DIR)/glab
 	dependency-cache-docker-env dependency-cache-docker-build \
 	dependency-cache-down dependency-cache-clean \
 	dependency-source-cache-invalidate \
-	git-push git-delete git-push-inventory_service_api git-delete-inventory_service_api git-push-model git-delete-model git-push-order_service_api git-delete-order_service_api git-push-analyticsservice git-delete-analyticsservice git-push-inventoryservice git-delete-inventoryservice git-push-orderservice git-delete-orderservice git-push-project git-delete-project
+	git-push git-delete git-push-inventory_service_api git-delete-inventory_service_api git-push-model git-delete-model git-push-order_service_api git-delete-order_service_api git-push-analyticsservice git-delete-analyticsservice git-push-automationservice git-delete-automationservice git-push-inventoryservice git-delete-inventoryservice git-push-orderservice git-delete-orderservice git-push-project git-delete-project
 
 all: build ## Build all services (default)
 
 init: tools gen fmt ## First-time setup: install tools, generate, and format
 
-git-init: gen git-push ## Generate, publish repositories, and synchronize dependencies
+git-init: gen git-push go-mod-sync ## Generate, publish repositories, and synchronize dependencies
 
 build: $(LANG_BUILD_TARGETS) ## Build all services
 
@@ -164,6 +166,7 @@ endif
 
 grafana-dashboards: ## Generate Grafana dashboards for all services
 	@cd analyticsservice/grafana && bash generate.generated.sh
+	@cd automationservice/grafana && bash generate.generated.sh
 	@cd inventoryservice/grafana && bash generate.generated.sh
 	@cd orderservice/grafana && bash generate.generated.sh
 
@@ -348,6 +351,13 @@ git-delete-analyticsservice: $(GH) ## Delete service Analytics Service from remo
 	@$(GH) repo delete gorundebug/cppboostexample-analyticsservice --yes 2>/dev/null || true
 
 
+git-push-automationservice: $(GH) ## Push service Automation Service to github.com/gorundebug/cppboostexample-automationservice
+	$(call git-push-dir,automationservice,$(MODULE_VERSION),github.com,gorundebug/cppboostexample-automationservice,)
+
+git-delete-automationservice: $(GH) ## Delete service Automation Service from remote
+	@$(GH) repo delete gorundebug/cppboostexample-automationservice --yes 2>/dev/null || true
+
+
 git-push-inventoryservice: $(GH) ## Push service Inventory Service to github.com/gorundebug/cppboostexample-inventoryservice
 	$(call git-push-dir,inventoryservice,$(MODULE_VERSION),github.com,gorundebug/cppboostexample-inventoryservice,cpp-service)
 
@@ -372,10 +382,10 @@ git-delete-project: $(GH) ## Delete project repository github.com/gorundebug/cpp
 git-push: gen $(GH) ## Generate and push all modules, services, and project repositories
 	@$(GH) auth status >/dev/null 2>&1 || { echo "ERROR: authenticate first with: $(GH) auth login"; exit 1; }
 
-	@$(MAKE) git-push-inventory_service_api git-push-model git-push-order_service_api git-push-analyticsservice git-push-inventoryservice git-push-orderservice git-push-project
+	@$(MAKE) git-push-inventory_service_api git-push-model git-push-order_service_api git-push-analyticsservice git-push-automationservice git-push-inventoryservice git-push-orderservice git-push-project
 
 git-delete: $(GH) ## Delete all generated remote repositories
-	@$(MAKE) git-delete-inventory_service_api git-delete-model git-delete-order_service_api git-delete-analyticsservice git-delete-inventoryservice git-delete-orderservice git-delete-project
+	@$(MAKE) git-delete-inventory_service_api git-delete-model git-delete-order_service_api git-delete-analyticsservice git-delete-automationservice git-delete-inventoryservice git-delete-orderservice git-delete-project
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-32s %s\n", $$1, $$2}'

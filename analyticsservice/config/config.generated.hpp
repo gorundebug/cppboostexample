@@ -20,8 +20,8 @@ namespace example::analytics_service::config {
 inline constexpr int kAnalyticsServiceServiceId = 1;
 inline constexpr int kConsumeOrderProcessedStreamId = 1;
 inline constexpr int kCountOrderProcessedStreamId = 2;
-inline constexpr int kOrderProcessedEndpointId = 2;
-inline constexpr int kOrderEventsConnectorId = 2;
+inline constexpr int kOrderProcessedEndpointId = 3;
+inline constexpr int kOrderEventsConnectorId = 3;
 
 class Config final : public servicelib::config::IConfig {
  public:

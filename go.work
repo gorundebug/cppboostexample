@@ -1,0 +1,8 @@
+go 1.25.4
+
+use (
+	./automationservice
+	./inventory_service_api
+	./model
+	./order_service_api
+)

@@ -1,0 +1,18 @@
+dataConnectors:
+  temporal:
+    address: $temporalAddress
+endpoints:
+  durableJob:
+    enabled: $durableJobEnabled
+  localSchedule:
+    enabled: $localScheduleEnabled
+  temporalSchedule:
+    enabled: $temporalScheduleEnabled
+services:
+  automationService:
+    defaultGrpcTimeout: $automationServiceDefaultGrpcTimeout
+    environment: $automationServiceEnvironment
+    grpcHost: $automationServiceGrpcHost
+    grpcPort: $automationServiceGrpcPort
+    httpHost: $automationServiceHttpHost
+    httpPort: $automationServiceHttpPort

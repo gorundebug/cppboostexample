@@ -15,6 +15,7 @@ docker-compose.yml
 docker-compose.kubernetes.yml
 docker-compose.dependency-cache.generated.yml
 pyproject.toml
+go.work
 CMakeLists.txt
 CMakePresets.json
 Dockerfile.cmake
@@ -35,6 +36,18 @@ analyticsservice/static_config.yaml
 analyticsservice/config/config.yaml
 analyticsservice/config/config_vars.yaml
 analyticsservice/config/config_vars.integration.yaml
+automationservice/grafana/dashboards/_lib.libsonnet
+automationservice/helm/Chart.yaml
+automationservice/helm/values.schema.json
+automationservice/helm/templates/NOTES.txt
+automationservice/Dockerfile
+automationservice/pyproject.toml
+automationservice/src/automation_service/internal/functions/__init__.py
+automationservice/cmd/service/main.cpp
+automationservice/static_config.yaml
+automationservice/config/config.yaml
+automationservice/config/config_vars.yaml
+automationservice/config/config_vars.integration.yaml
 inventoryservice/grafana/dashboards/_lib.libsonnet
 inventoryservice/helm/Chart.yaml
 inventoryservice/helm/values.schema.json

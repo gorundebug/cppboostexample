@@ -1,0 +1,49 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - misspell
+    - gocritic
+    - noctx
+    - bodyclose
+    - exhaustive
+    - godot
+    - nilerr
+    - unconvert
+    - whitespace
+  settings:
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - style
+      disabled-checks:
+        - commentedOutCode
+        - paramTypeCombine
+        - whyNoLint
+    godot:
+      scope: declarations
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/gorundebug/cppboostexample-automationservice
+
+issues:
+  exclude-rules:
+    - path: \.generated\.go
+      linters:
+        - all
+    - path: _test\.go
+      linters:
+        - errcheck

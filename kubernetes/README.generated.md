@@ -72,3 +72,20 @@ service chart.
 
 The Compose cluster is local development infrastructure, not a production
 Kubernetes distribution.
+
+## Temporal
+
+The graph contains a Temporal connector, so the local environment also starts
+the pinned Temporal Server, matching Admin Tools, PostgreSQL persistence and Web
+UI. Compose exposes the frontend on `localhost:${TEMPORAL_PORT:-7233}` and the UI
+on `http://localhost:${TEMPORAL_UI_PORT:-8080}`.
+
+The Kubernetes path installs the official pinned Temporal chart and a local
+PostgreSQL StatefulSet. The database password is created as a Kubernetes Secret
+from `KUBERNETES_TEMPORAL_POSTGRES_PASSWORD` (local default: `temporal`); it is
+never rendered into a ConfigMap or generated values file. Generated service
+configuration uses the cluster-internal `temporal-frontend:7233` address.
+
+Production deployments should replace the local PostgreSQL manifest and Secret
+with operator-owned persistence and secret management while retaining the same
+service chart and connector environment contract.

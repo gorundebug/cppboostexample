@@ -57,6 +57,7 @@ services:
       SERVICEGEN_HELM_OPENTELEMETRY_URL: ${SERVICEGEN_HELM_OPENTELEMETRY_URL:-https://open-telemetry.github.io/opentelemetry-helm-charts}
       SERVICEGEN_HELM_JAEGER_URL: ${SERVICEGEN_HELM_JAEGER_URL:-https://jaegertracing.github.io/helm-charts}
       SERVICEGEN_HELM_REDPANDA_URL: ${SERVICEGEN_HELM_REDPANDA_URL:-https://charts.redpanda.com}
+      SERVICEGEN_HELM_TEMPORAL_URL: ${SERVICEGEN_HELM_TEMPORAL_URL:-https://go.temporal.io/helm-charts}
     volumes:
       - .:/workspace
       - kubernetes-kubeconfig:/output:ro

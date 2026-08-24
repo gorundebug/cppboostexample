@@ -1,0 +1,18 @@
+dataConnectors:
+  temporal:
+    address: temporal:7233
+endpoints:
+  durableJob:
+    enabled: true
+  localSchedule:
+    enabled: true
+  temporalSchedule:
+    enabled: true
+services:
+  automationService:
+    defaultGrpcTimeout: 0
+    environment: ""
+    grpcHost: 0.0.0.0
+    grpcPort: 9204
+    httpHost: 0.0.0.0
+    httpPort: 9094

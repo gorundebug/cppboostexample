@@ -1,0 +1,25 @@
+# Build artifacts
+bin/
+
+# Go
+*.test
+*.out
+coverage.out
+
+# Tools (downloaded binaries)
+tools/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

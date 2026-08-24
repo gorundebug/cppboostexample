@@ -17,11 +17,11 @@
 
 namespace example::inventory_service::config {
 
-inline constexpr int kInventoryServiceServiceId = 2;
-inline constexpr int kGetInventoryItemDataStreamId = 3;
-inline constexpr int kGetInventoryItemErrorStreamId = 4;
-inline constexpr int kMergeInventoryResultStreamId = 5;
-inline constexpr int kProcessInventoryItemStreamId = 6;
+inline constexpr int kInventoryServiceServiceId = 3;
+inline constexpr int kGetInventoryItemDataStreamId = 11;
+inline constexpr int kGetInventoryItemErrorStreamId = 12;
+inline constexpr int kMergeInventoryResultStreamId = 13;
+inline constexpr int kProcessInventoryItemStreamId = 14;
 inline constexpr int kProcessOrderItemEndpointId = 1;
 inline constexpr int kInventoryServiceApiConnectorId = 1;
 

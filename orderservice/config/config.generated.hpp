@@ -17,25 +17,25 @@
 
 namespace example::order_service::config {
 
-inline constexpr int kOrderServiceServiceId = 3;
-inline constexpr int kProcessOrderItemErrorStreamId = 7;
-inline constexpr int kMapOrderItemResultToOrderStateStreamId = 8;
-inline constexpr int kMapToOrderProcessedStreamId = 9;
-inline constexpr int kMapToOrderStateStreamId = 10;
-inline constexpr int kMergeResultsStreamId = 11;
-inline constexpr int kProcessOrderStreamId = 12;
-inline constexpr int kProcessOrderItemStreamId = 13;
-inline constexpr int kProcessOrderItemsStreamId = 14;
-inline constexpr int kPublishOrderProcessedStreamId = 15;
-inline constexpr int kSoftDeadlineStreamId = 16;
-inline constexpr int kSplitOrderResultStreamId = 17;
-inline constexpr int kSplitPipelineStreamId = 18;
-inline constexpr int kOrderProcessedEndpointId = 2;
-inline constexpr int kProcessOrderEndpointId = 3;
+inline constexpr int kOrderServiceServiceId = 4;
+inline constexpr int kProcessOrderItemErrorStreamId = 15;
+inline constexpr int kMapOrderItemResultToOrderStateStreamId = 16;
+inline constexpr int kMapToOrderProcessedStreamId = 17;
+inline constexpr int kMapToOrderStateStreamId = 18;
+inline constexpr int kMergeResultsStreamId = 19;
+inline constexpr int kProcessOrderStreamId = 20;
+inline constexpr int kProcessOrderItemStreamId = 21;
+inline constexpr int kProcessOrderItemsStreamId = 22;
+inline constexpr int kPublishOrderProcessedStreamId = 23;
+inline constexpr int kSoftDeadlineStreamId = 24;
+inline constexpr int kSplitOrderResultStreamId = 25;
+inline constexpr int kSplitPipelineStreamId = 26;
+inline constexpr int kOrderProcessedEndpointId = 3;
+inline constexpr int kProcessOrderEndpointId = 4;
 inline constexpr int kProcessOrderItemEndpointId = 1;
 inline constexpr int kInventoryServiceApiConnectorId = 1;
-inline constexpr int kOrderEventsConnectorId = 2;
-inline constexpr int kOrderServiceApiConnectorId = 3;
+inline constexpr int kOrderEventsConnectorId = 3;
+inline constexpr int kOrderServiceApiConnectorId = 4;
 
 class Config final : public servicelib::config::IConfig {
  public:

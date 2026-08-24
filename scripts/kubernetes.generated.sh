@@ -21,6 +21,7 @@ DOCKER_ARCH="${KUBERNETES_IMAGE_CACHE_ARCH:-$(docker info --format '{{.Architect
 IMAGE_CACHE_VOLUME="${KUBERNETES_IMAGE_CACHE_VOLUME:-servicegen-kubernetes-image-cache-v1-${DOCKER_ARCH}}"
 export KUBERNETES_IMAGE_CACHE_VOLUME="${IMAGE_CACHE_VOLUME}"
 GRAFANA_ADMIN_PASSWORD="${KUBERNETES_GRAFANA_ADMIN_PASSWORD:-admin}"
+TEMPORAL_POSTGRES_PASSWORD="${KUBERNETES_TEMPORAL_POSTGRES_PASSWORD:-temporal}"
 
 progress() { printf '==> [kubernetes] %s\n' "$*"; }
 
@@ -116,6 +117,11 @@ build_images() {
     "${HOST_REGISTRY}/cppboostexample/analyticsservice:${IMAGE_TAG}"
   docker push \
     "${HOST_REGISTRY}/cppboostexample/analyticsservice:${IMAGE_TAG}"
+  progress "publishing automationservice image"
+  docker tag "automationservice:latest" \
+    "${HOST_REGISTRY}/cppboostexample/automationservice:${IMAGE_TAG}"
+  docker push \
+    "${HOST_REGISTRY}/cppboostexample/automationservice:${IMAGE_TAG}"
   progress "publishing inventoryservice image"
   docker tag "cppboostexample-inventoryservice:latest" \
     "${HOST_REGISTRY}/cppboostexample/inventoryservice:${IMAGE_TAG}"
@@ -146,6 +152,21 @@ configure_grafana_dashboards() {
       --overwrite >/dev/null
     kubectl --namespace "${NAMESPACE}" annotate configmap "${configmap}" \
       grafana_folder=analyticsservice \
+      --overwrite >/dev/null
+  done
+  dashboard_index=0
+  for dashboard in automationservice/grafana/dist/*.json; do
+    [[ -f "${dashboard}" ]] || continue
+    dashboard_index=$((dashboard_index + 1))
+    configmap="automationservice-dashboard-${dashboard_index}"
+    kubectl --namespace "${NAMESPACE}" create configmap "${configmap}" \
+      --from-file="$(basename "${dashboard}")=/dev/stdin" \
+      --dry-run=client -o yaml < "${dashboard}" | kubectl apply -f - >/dev/null
+    kubectl --namespace "${NAMESPACE}" label configmap "${configmap}" \
+      grafana_dashboard=1 servicegen.dev/generated-dashboard=true \
+      --overwrite >/dev/null
+    kubectl --namespace "${NAMESPACE}" annotate configmap "${configmap}" \
+      grafana_folder=automationservice \
       --overwrite >/dev/null
   done
   dashboard_index=0
@@ -234,6 +255,27 @@ deploy_infrastructure() {
     --values kubernetes/redpanda-values.generated.yaml \
     "$@" \
     --wait --timeout "${TIMEOUT}"
+  progress "creating the local Temporal persistence Secret"
+  kubectl --namespace "${NAMESPACE}" create secret generic \
+    temporal-postgresql \
+    --from-literal=password="${TEMPORAL_POSTGRES_PASSWORD}" \
+    --dry-run=client -o yaml | kubectl apply -f - >/dev/null
+  progress "starting pinned PostgreSQL for Temporal"
+  kubectl --namespace "${NAMESPACE}" apply \
+    -f kubernetes/temporal-postgresql.generated.yaml >/dev/null
+  kubectl --namespace "${NAMESPACE}" rollout status \
+    statefulset/temporal-postgresql --timeout="${TIMEOUT}"
+
+  progress "installing pinned Temporal chart"
+  helm repo add temporal \
+    "${SERVICEGEN_HELM_TEMPORAL_URL:-https://go.temporal.io/helm-charts}" \
+    --force-update
+  helm repo update temporal
+  helm upgrade --install temporal temporal/temporal \
+    --version 1.6.0 \
+    --namespace "${NAMESPACE}" --create-namespace \
+    --values kubernetes/temporal-values.generated.yaml \
+    --wait --timeout "${TIMEOUT}"
 }
 
 deploy_services() {
@@ -254,6 +296,23 @@ deploy_services() {
     --values analyticsservice/helm/values.generated.yaml \
     --values analyticsservice/helm/values.yaml \
     --set-string image.repository="${CLUSTER_REGISTRY}/cppboostexample/analyticsservice" \
+    --set-string image.tag="${IMAGE_TAG}" \
+    "$@"
+  set --
+  if [[ "${KAFKA_SASL_ENABLED}" == "true" ]]; then
+    set -- --set-string "secretEnvFrom[0]=${KAFKA_SERVICE_SECRET}"
+  fi
+  set -- "$@" \
+    --set-string env.AUTOMATION_SERVICE_ENVIRONMENT=staging \
+    --set-string env.OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317 \
+    --set-string env.OTEL_EXPORTER_OTLP_INSECURE=true \
+    --set-string env.OTEL_METRIC_EXPORT_INTERVAL=5000
+  helm upgrade --install automationservice \
+    automationservice/helm \
+    --namespace "${NAMESPACE}" --create-namespace \
+    --values automationservice/helm/values.generated.yaml \
+    --values automationservice/helm/values.yaml \
+    --set-string image.repository="${CLUSTER_REGISTRY}/cppboostexample/automationservice" \
     --set-string image.tag="${IMAGE_TAG}" \
     "$@"
   set --
@@ -303,6 +362,8 @@ verify() {
   kubectl --namespace "${NAMESPACE}" rollout status \
     deployment/analyticsservice --timeout="${TIMEOUT}"
   kubectl --namespace "${NAMESPACE}" rollout status \
+    deployment/automationservice --timeout="${TIMEOUT}"
+  kubectl --namespace "${NAMESPACE}" rollout status \
     deployment/inventoryservice --timeout="${TIMEOUT}"
   kubectl --namespace "${NAMESPACE}" rollout status \
     deployment/orderservice --timeout="${TIMEOUT}"
@@ -311,6 +372,10 @@ verify() {
     "/api/v1/namespaces/${NAMESPACE}/services/http:analyticsservice:9093/proxy/health/ready" \
     >/dev/null
   printf '  PASS  analyticsservice /health/ready\n'
+  kubectl get --raw \
+    "/api/v1/namespaces/${NAMESPACE}/services/http:automationservice:9094/proxy/health/ready" \
+    >/dev/null
+  printf '  PASS  automationservice /health/ready\n'
   kubectl get --raw \
     "/api/v1/namespaces/${NAMESPACE}/services/http:inventoryservice:9092/proxy/health/ready" \
     >/dev/null
@@ -338,11 +403,29 @@ verify() {
   printf '  PASS  loki ready\n'
   kubectl --namespace "${NAMESPACE}" rollout status deployment/otel-collector --timeout="${TIMEOUT}"
   printf '  PASS  otel collector ready\n'
+  progress "checking Temporal server, namespace and Web UI"
+  for component in frontend history matching worker; do
+    kubectl --namespace "${NAMESPACE}" rollout status \
+      "deployment/temporal-${component}" --timeout="${TIMEOUT}"
+  done
+  kubectl --namespace "${NAMESPACE}" exec deployment/temporal-admintools -- \
+    temporal operator cluster health --address temporal-frontend:7233 >/dev/null
+  kubectl --namespace "${NAMESPACE}" exec deployment/temporal-admintools -- \
+    temporal operator namespace describe -n default \
+      --address temporal-frontend:7233 >/dev/null
+  kubectl get --raw \
+    "/api/v1/namespaces/${NAMESPACE}/services/http:temporal-web:8080/proxy/" \
+    >/dev/null
+  printf '  PASS  temporal cluster, default namespace and Web UI\n'
   dashboard_count="$(kubectl --namespace "${NAMESPACE}" get configmap \
     --selector=servicegen.dev/generated-dashboard=true \
     -o go-template='{{len .items}}')"
   expected_dashboard_count=0
   for dashboard in analyticsservice/grafana/dist/*.json; do
+    [[ -f "${dashboard}" ]] || continue
+    expected_dashboard_count=$((expected_dashboard_count + 1))
+  done
+  for dashboard in automationservice/grafana/dist/*.json; do
     [[ -f "${dashboard}" ]] || continue
     expected_dashboard_count=$((expected_dashboard_count + 1))
   done
