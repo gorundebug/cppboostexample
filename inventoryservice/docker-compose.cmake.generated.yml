@@ -4,6 +4,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.cmake
+      # The project Dockerfile also contains runtime stages for every service.
+      # A packaged service only needs the shared development toolchain here;
+      # selecting it explicitly keeps an independent build independent.
+      target: development
       extra_hosts:
         - "host.docker.internal:host-gateway"
       args:
