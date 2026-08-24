@@ -20,11 +20,11 @@ LANG_FMT_TARGETS += golang-fmt
 LANG_GEN_TARGETS += golang-gen
 LANG_CLEAN_TARGETS += golang-clean
 LANG_TOOL_TARGETS += golang-tools
-LANG_HOST_PREP_TARGETS += golang-gen golang-tools
+LANG_HOST_PREP_TARGETS += golang-gen golang-codegen golang-tools
 LANG_DOCKER_BUILD_TARGETS += golang-docker-build
 
 .PHONY: golang-build golang-test golang-lint golang-lint-fix golang-fmt \
-	golang-fmt-go golang-fmt-proto golang-gen golang-gen-proto \
+	golang-fmt-go golang-fmt-proto golang-gen golang-codegen golang-gen-proto \
 	golang-clean golang-tools \
 	golang-docker-build go-mod-tidy go-mod-sync fmt-go fmt-proto gen-proto \
 	 docker-build-local-automationservice debug-automationservice
@@ -60,13 +60,15 @@ golang-gen-proto: $(PROTOC) $(PROTOC_GEN_GO) $(PROTOC_GEN_GO_GRPC) ## Generate G
 	@$(MAKE) -C ./inventory_service_api -f Makefile gen-proto PROTOC="$(PROTOC)"
 	@$(MAKE) -C ./model -f Makefile gen-proto PROTOC="$(PROTOC)"
 	@$(MAKE) -C ./order_service_api -f Makefile gen-proto PROTOC="$(PROTOC)"
-golang-gen: golang-gen-proto golang-fmt go-mod-tidy ## Generate all Go transport code
+golang-codegen: golang-gen-proto golang-fmt ## Generate all Go transport code without changing module manifests
+
+golang-gen: golang-codegen go-mod-tidy ## Generate transport code and synchronize module manifests
 
 golang-clean: ## Remove Go build artifacts
 	@$(MAKE) -C ./automationservice -f Makefile clean PROJECT_DIR="$(PROJECT_DIR)" BIN_DIR="$(BIN_DIR)"
 	@rm -rf "$(BIN_DIR)"
 
-golang-docker-build: golang-gen ## Build Go service Docker images entirely in Docker
+golang-docker-build: golang-codegen ## Build Go service Docker images entirely in Docker
 	@$(MAKE) -C ./automationservice -f Makefile docker-build PROJECT_DIR="$(PROJECT_DIR)"
 
 fmt-go: golang-fmt-go ## Format Go code
