@@ -18,9 +18,19 @@
     "service": {"type": "object"},
     "metrics": {
       "type": "object",
-      "required": ["serviceMonitor"],
+      "required": ["serviceMonitor", "temporalSdk"],
       "properties": {
         "serviceMonitor": {
+          "type": "object",
+          "required": ["enabled", "path", "interval"],
+          "properties": {
+            "enabled": {"type": "boolean"},
+            "path": {"type": "string", "pattern": "^/"},
+            "interval": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false
+        },
+        "temporalSdk": {
           "type": "object",
           "required": ["enabled", "path", "interval"],
           "properties": {

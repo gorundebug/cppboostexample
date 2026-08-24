@@ -86,6 +86,14 @@ from `KUBERNETES_TEMPORAL_POSTGRES_PASSWORD` (local default: `temporal`); it is
 never rendered into a ConfigMap or generated values file. Generated service
 configuration uses the cluster-internal `temporal-frontend:7233` address.
 
+Observability keeps three metric owners separate. Temporal Server exports its
+official server metrics; each supported SDK/Worker process exports official SDK
+metrics on port `9464`; and ServiceLib exports application/graph metrics on the
+service HTTP metrics handler. Prometheus scrapes all three sources in both
+Compose and Kubernetes. ServiceLib does not remeasure Temporal queue, Workflow,
+Activity, or retry latency; dashboards map the official Temporal series to the
+corresponding `DurableCall` view and add only graph-level context.
+
 Production deployments should replace the local PostgreSQL manifest and Secret
 with operator-owned persistence and secret management while retaining the same
 service chart and connector environment contract.

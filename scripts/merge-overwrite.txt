@@ -12,6 +12,7 @@ scripts/merge-overwrite.txt
 scripts/dependency-source-cache.generated.sh
 Makefile
 docker-compose.yml
+prometheus.yml
 docker-compose.kubernetes.yml
 docker-compose.dependency-cache.generated.yml
 pyproject.toml

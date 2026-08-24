@@ -14,10 +14,15 @@ service:
   type: ClusterIP
   httpPort: 9094
   grpcPort: 9204
+  temporalSdkMetricsPort: 9464
 
 metrics:
   serviceMonitor:
     enabled: false
+    path: /metrics
+    interval: 5s
+  temporalSdk:
+    enabled: true
     path: /metrics
     interval: 5s
 
@@ -74,6 +79,7 @@ env:
   AUTOMATION_SERVICE_GRPC_HOST: "0.0.0.0"
   AUTOMATION_SERVICE_HTTP_HOST: "0.0.0.0"
   TEMPORAL_ADDRESS: "temporal-frontend:7233"
+  TEMPORAL_SDK_METRICS_BIND_ADDRESS: "0.0.0.0:9464"
 
 args:
   []

@@ -33,6 +33,7 @@ services:
     restart: unless-stopped
     environment:
       - DEBUG=${AUTOMATION_SERVICE_DEBUG:-0}
+      - TEMPORAL_SDK_METRICS_BIND_ADDRESS=0.0.0.0:9464
       - AUTOMATION_SERVICE_HTTP_HOST=0.0.0.0
       - AUTOMATION_SERVICE_GRPC_HOST=0.0.0.0
     ports:
@@ -178,6 +179,7 @@ services:
       POSTGRES_SEEDS: temporal-postgresql
       BIND_ON_IP: 0.0.0.0
       DYNAMIC_CONFIG_FILE_PATH: config/dynamicconfig/development-sql.generated.yaml
+      PROMETHEUS_ENDPOINT: 0.0.0.0:8000
     ports:
       - "${TEMPORAL_PORT:-7233}:7233"
     volumes:

@@ -18,4 +18,15 @@ spec:
       path: {{ .Values.metrics.serviceMonitor.path }}
       interval: {{ .Values.metrics.serviceMonitor.interval }}
       honorLabels: true
+    {{- if .Values.metrics.temporalSdk.enabled }}
+    - port: temporal-sdk-metrics
+      path: {{ .Values.metrics.temporalSdk.path }}
+      interval: {{ .Values.metrics.temporalSdk.interval }}
+      honorLabels: true
+      relabelings:
+        - targetLabel: telemetry_source
+          replacement: temporal-sdk
+        - targetLabel: service
+          replacement: "automationservice"
+    {{- end }}
 {{- end }}

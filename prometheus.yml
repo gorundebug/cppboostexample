@@ -3,10 +3,35 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
+  - job_name: 'temporal-server'
+    static_configs:
+      - targets: ['temporal:8000']
+        labels:
+          telemetry_source: 'temporal-server'
+    metrics_path: '/metrics'
   - job_name: 'analyticsservice'
     static_configs:
       - targets: ['analyticsservice:9093']
-
+    metrics_path: '/metrics'
+    # Prometheus 3 rejects an otherwise valid text exposition when a legacy
+    # exporter omits its precise Content-Type. Keep generated workspaces
+    # compatible with older framework releases during rolling upgrades.
+    fallback_scrape_protocol: PrometheusText0.0.4
+  - job_name: 'automationservice'
+    static_configs:
+      - targets: ['automationservice:9094']
+    metrics_path: '/metrics'
+    # Prometheus 3 rejects an otherwise valid text exposition when a legacy
+    # exporter omits its precise Content-Type. Keep generated workspaces
+    # compatible with older framework releases during rolling upgrades.
+    fallback_scrape_protocol: PrometheusText0.0.4
+  - job_name: 'automationservice-temporal-sdk'
+    static_configs:
+      - targets: ['automationservice:9464']
+        labels:
+          service: 'automationservice'
+          telemetry_source: 'temporal-sdk'
+    metrics_path: '/metrics'
   - job_name: 'inventoryservice'
     static_configs:
       - targets: ['inventoryservice:9092']

@@ -12,6 +12,10 @@ server:
       interval: 15s
       additionalLabels:
         release: monitoring
+      metricRelabelings:
+        - action: replace
+          targetLabel: telemetry_source
+          replacement: temporal-server
   config:
     logLevel: info
     persistence:

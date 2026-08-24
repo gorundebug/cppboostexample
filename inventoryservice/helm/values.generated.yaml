@@ -14,9 +14,14 @@ service:
   type: ClusterIP
   httpPort: 9092
   grpcPort: 9202
+  temporalSdkMetricsPort: 9464
 
 metrics:
   serviceMonitor:
+    enabled: false
+    path: /metrics
+    interval: 5s
+  temporalSdk:
     enabled: false
     path: /metrics
     interval: 5s
