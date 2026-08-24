@@ -6,22 +6,28 @@ project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 compose_file="$project_dir/docker-compose.dependency-cache.generated.yml"
 nexus_port=${SERVICEGEN_NEXUS_PORT:-18081}
 nexus_url="http://localhost:$nexus_port"
+git_mirror_port=${SERVICEGEN_GIT_MIRROR_PORT:-18084}
+git_mirror_url="http://localhost:$git_mirror_port"
 proxy_dir=${SERVICEGEN_DEPENDENCY_PROXY_DIR:-}
 if [ -z "$proxy_dir" ]; then
   echo "[dependency-cache] SERVICEGEN_DEPENDENCY_PROXY_DIR must point to the shared proxy data directory" >&2
   exit 2
 fi
 cache_dir="${proxy_dir%/}/nexus"
+git_mirror_dir="${proxy_dir%/}/git-mirror"
 
 # Docker Desktop forwards host.docker.internal to host loopback. Native Linux
 # Docker resolves the same stable name through host-gateway, so Nexus must also
 # listen on the host bridge rather than loopback only.
 if [ "$(uname -s)" = "Linux" ]; then
   SERVICEGEN_NEXUS_BIND_HOST=${SERVICEGEN_NEXUS_BIND_HOST:-0.0.0.0}
+  SERVICEGEN_GIT_MIRROR_BIND_HOST=${SERVICEGEN_GIT_MIRROR_BIND_HOST:-0.0.0.0}
 else
   SERVICEGEN_NEXUS_BIND_HOST=${SERVICEGEN_NEXUS_BIND_HOST:-127.0.0.1}
+  SERVICEGEN_GIT_MIRROR_BIND_HOST=${SERVICEGEN_GIT_MIRROR_BIND_HOST:-127.0.0.1}
 fi
 export SERVICEGEN_NEXUS_BIND_HOST
+export SERVICEGEN_GIT_MIRROR_BIND_HOST
 
 compose() {
   docker compose -f "$compose_file" "$@"
@@ -37,6 +43,16 @@ wait_ready() {
       exit 1
     fi
     sleep 2
+  done
+  attempts=0
+  until curl --silent --output /dev/null "$git_mirror_url/"; do
+    attempts=$((attempts + 1))
+    if [ "$attempts" -ge 60 ]; then
+      echo "[dependency-cache] Git mirror did not become ready at $git_mirror_url" >&2
+      compose logs --tail 100 git-mirror >&2 || true
+      exit 1
+    fi
+    sleep 1
   done
 }
 
@@ -60,6 +76,7 @@ bootstrap() {
 print_env() {
   host=${SERVICEGEN_NEXUS_CLIENT_HOST:-localhost}
   base="http://$host:$nexus_port/repository"
+  git_mirror="http://$host:$git_mirror_port/cgi-bin/git"
   cat <<EOF
 export GOPROXY=$base/go-proxy/
 export GOSUMDB=off
@@ -82,18 +99,26 @@ export SERVICEGEN_HELM_OPENTELEMETRY_URL=$base/helm-opentelemetry
 export SERVICEGEN_HELM_JAEGER_URL=$base/helm-jaeger
 export SERVICEGEN_HELM_REDPANDA_URL=$base/helm-redpanda
 export SERVICEGEN_NEXUS_DOCKER_REGISTRY=$host:${SERVICEGEN_NEXUS_DOCKER_PORT:-18083}
+export SERVICEGEN_GIT_MIRROR_URL=$git_mirror
+export GIT_CONFIG_COUNT=2
+export GIT_CONFIG_KEY_0=url.$git_mirror/github.com/.insteadOf
+export GIT_CONFIG_VALUE_0=https://github.com/
+export GIT_CONFIG_KEY_1=url.$git_mirror/gitlab.com/.insteadOf
+export GIT_CONFIG_VALUE_1=https://gitlab.com/
 EOF
 }
 
 case "${1:-up}" in
   up)
-    mkdir -p "$cache_dir"
-    chmod 0777 "$cache_dir"
-    compose up -d nexus
+    mkdir -p "$cache_dir" "$git_mirror_dir"
+    chmod 0777 "$cache_dir" "$git_mirror_dir"
+    compose up -d nexus git-mirror
     wait_ready
     bootstrap
     echo "[dependency-cache] ready: $nexus_url"
     echo "[dependency-cache] data: $cache_dir"
+    echo "[dependency-cache] Git mirror: $git_mirror_url"
+    echo "[dependency-cache] Git data: $git_mirror_dir"
     echo "[dependency-cache] run: eval \"\$(make -s dependency-cache-env)\""
     ;;
   status)
@@ -107,7 +132,7 @@ case "${1:-up}" in
     ;;
   clean)
     compose down
-    rm -rf "$cache_dir"
+    rm -rf "$cache_dir" "$git_mirror_dir"
     ;;
   *)
     echo "usage: $0 {up|status|env|down|clean}" >&2

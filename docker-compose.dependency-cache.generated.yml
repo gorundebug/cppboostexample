@@ -2,6 +2,20 @@
 name: servicegen-dependency-cache
 
 services:
+  git-mirror:
+    image: servicegen-git-mirror:2.49.1
+    build:
+      context: .
+      dockerfile: dependency-cache/Dockerfile.git-mirror.generated
+    restart: unless-stopped
+    ports:
+      - "${SERVICEGEN_GIT_MIRROR_BIND_HOST:-127.0.0.1}:${SERVICEGEN_GIT_MIRROR_PORT:-18084}:8080"
+    environment:
+      SERVICEGEN_GIT_MIRROR_REFRESH_SECONDS: ${SERVICEGEN_GIT_MIRROR_REFRESH_SECONDS:-3600}
+    volumes:
+      - ${SERVICEGEN_DEPENDENCY_PROXY_DIR:?set SERVICEGEN_DEPENDENCY_PROXY_DIR}/git-mirror:/mirrors
+      - ./scripts/git_mirror.generated.cgi:/www/cgi-bin/git:ro
+
   nexus:
     image: sonatype/nexus3:3.95.0
     restart: unless-stopped

@@ -4,7 +4,9 @@ The optional shared Nexus instance caches artifacts downloaded
 from public Go, npm, PyPI, Cargo, Helm, Maven Central, APT and Docker Hub registries,
 plus immutable GitHub/GitLab archives and release assets used by generated
 builds.
-It is a network package proxy, not a compiler or BuildKit cache.
+The companion persistent Git mirror caches smart-HTTP clones used by CPM and
+other Git-based fetchers, which a package proxy cannot cache. Neither service
+is a compiler or BuildKit cache.
 
 ```bash
 # Configure one global data directory in your shell:
@@ -29,7 +31,8 @@ The first command is required once for a new cache directory after reading the
 Later starts do not need the flag.
 
 Downloaded artifacts are stored under
-`$SERVICEGEN_DEPENDENCY_PROXY_DIR/nexus`. When this variable is present,
+`$SERVICEGEN_DEPENDENCY_PROXY_DIR/nexus`; bare Git mirrors are stored under
+`$SERVICEGEN_DEPENDENCY_PROXY_DIR/git-mirror`. When this variable is present,
 generated Make targets automatically route all
 supported host and Docker package downloads through that Nexus instance. The
 container has `restart: unless-stopped`; ordinary `docker-down` commands do not
@@ -52,6 +55,13 @@ archives through the raw proxy to populate their separate versioned source
 cache. Generated Debian/Ubuntu build stages rewrite their APT sources to Nexus
 when proxy mode is enabled. Once any of these layers contains an artifact, a
 build does not fetch it from the public upstream again.
+
+GitHub and GitLab HTTPS clone URLs are rewritten process-locally to the mirror;
+the user's global Git configuration is never modified. A repository is cloned
+from upstream once and refreshed after
+`SERVICEGEN_GIT_MIRROR_REFRESH_SECONDS` (one hour by default). Set it to `0`
+for a fully offline immutable mirror, or remove the corresponding bare mirror
+directory when an immediate refresh is required.
 
 ## Changing C++ dependency versions
 
