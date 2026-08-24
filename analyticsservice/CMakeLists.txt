@@ -77,6 +77,16 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     find_package(cppboostservicelib CONFIG REQUIRED)
   endif()
 
+  # Conan imported targets are directory-scoped. In a standalone service the
+  # framework and contract modules are sibling subdirectories, so establish
+  # the code-generation packages in the service root as well. This makes the
+  # protoc and grpc_cpp_plugin targets visible to every packaged local module.
+  if(CPPBOOSTSERVICELIB_DEPENDENCY_MODE STREQUAL "CONAN")
+    find_package(Protobuf CONFIG REQUIRED)
+    find_package(gRPC CONFIG REQUIRED)
+    find_package(asio-grpc CONFIG REQUIRED)
+  endif()
+
   if(NOT TARGET example_model)
     set(_servicegen_module_source "${SERVICEGEN_MODULES_ROOT}/model")
     if(EXISTS "${_servicegen_module_source}/CMakeLists.txt")
