@@ -49,17 +49,17 @@ golang-fmt-go: ## Format Go code
 
 golang-fmt-proto: $(BUF) ## Format protobuf files used by Go
 	@$(MAKE) -C ./automationservice -f Makefile fmt-proto TOOLS_DIR="$(TOOLS_DIR)"
-	@$(MAKE) -C ./inventory_service_api -f Makefile fmt-proto TOOLS_DIR="$(TOOLS_DIR)"
-	@$(MAKE) -C ./model -f Makefile fmt-proto TOOLS_DIR="$(TOOLS_DIR)"
-	@$(MAKE) -C ./order_service_api -f Makefile fmt-proto TOOLS_DIR="$(TOOLS_DIR)"
+	@$(MAKE) -C ./inventory_service_api -f make.generated.mk fmt-proto TOOLS_DIR="$(TOOLS_DIR)"
+	@$(MAKE) -C ./model -f make.generated.mk fmt-proto TOOLS_DIR="$(TOOLS_DIR)"
+	@$(MAKE) -C ./order_service_api -f make.generated.mk fmt-proto TOOLS_DIR="$(TOOLS_DIR)"
 
 golang-fmt: golang-fmt-go golang-fmt-proto ## Format all Go-owned sources
 
 golang-gen-proto: $(PROTOC) $(PROTOC_GEN_GO) $(PROTOC_GEN_GO_GRPC) ## Generate Go protobuf code
 	@$(MAKE) -C ./automationservice -f Makefile gen-proto PROTOC="$(PROTOC)"
-	@$(MAKE) -C ./inventory_service_api -f Makefile gen-proto PROTOC="$(PROTOC)"
-	@$(MAKE) -C ./model -f Makefile gen-proto PROTOC="$(PROTOC)"
-	@$(MAKE) -C ./order_service_api -f Makefile gen-proto PROTOC="$(PROTOC)"
+	@$(MAKE) -C ./inventory_service_api -f make.generated.mk gen-proto PROTOC="$(PROTOC)"
+	@$(MAKE) -C ./model -f make.generated.mk gen-proto PROTOC="$(PROTOC)"
+	@$(MAKE) -C ./order_service_api -f make.generated.mk gen-proto PROTOC="$(PROTOC)"
 golang-codegen: golang-gen-proto golang-fmt ## Generate all Go transport code without changing module manifests
 
 golang-gen: golang-codegen go-mod-tidy ## Generate transport code and synchronize module manifests
