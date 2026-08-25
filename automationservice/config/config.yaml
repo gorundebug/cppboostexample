@@ -16,3 +16,6 @@ services:
     grpcPort: $automationServiceGrpcPort
     httpHost: $automationServiceHttpHost
     httpPort: $automationServiceHttpPort
+streams:
+  durablePause:
+    duration: $durablePauseDuration

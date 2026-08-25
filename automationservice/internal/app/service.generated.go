@@ -31,6 +31,7 @@ import (
 
 type serviceMakers struct {
 	//stream function makers
+	durablePauseMaker      func(ctx context.Context, cfg *runtimecfg.DelayStreamConfig, env environment.ServiceEnvironment) (*functions.DurablePause, error)
 	processDurableJobMaker func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ProcessDurableJob, error)
 	//data source function makers
 	localScheduleMaker    func(ctx context.Context, cfg *runtimecfg.CronEndpointConfig, env environment.ServiceEnvironment) (*functions.LocalSchedule, error)
@@ -40,6 +41,7 @@ type serviceMakers struct {
 
 type serviceFunctions struct {
 	//stream functions
+	durablePause      *functions.DurablePause
 	processDurableJob *functions.ProcessDurableJob
 	//data source functions
 	localSchedule    *functions.LocalSchedule
@@ -50,6 +52,7 @@ type serviceFunctions struct {
 type serviceStreams struct {
 	//streams
 	consumeDurableJob   runtime.TypedInputStream[string, string, error]
+	durablePause        runtime.TypedConsumedStream[string]
 	processDurableJob   runtime.TypedTransformConsumedStream[string, string]
 	localSchedule       runtime.TypedInputStream[string, any, error]
 	temporalSchedule    runtime.TypedInputStream[string, any, error]
@@ -108,6 +111,11 @@ func (s *Service) Config() *config.Config {
 }
 
 func (s *Service) initMakers(ctx context.Context) error {
+	if s.makers.durablePauseMaker == nil {
+		s.makers.durablePauseMaker = func(ctx context.Context, cfg *runtimecfg.DelayStreamConfig, env environment.ServiceEnvironment) (*functions.DurablePause, error) {
+			return functions.MakeDurablePause(ctx, env, cfg)
+		}
+	}
 	if s.makers.processDurableJobMaker == nil {
 		s.makers.processDurableJobMaker = func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ProcessDurableJob, error) {
 			return functions.MakeProcessDurableJob(ctx, env, cfg)
@@ -170,7 +178,10 @@ func (s *Service) initStreams(ctx context.Context) error {
 	if s.streams.consumeDurableJob, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeDurableJob, s); err != nil {
 		return err
 	}
-	if s.streams.processDurableJob, err = transformation.Map[string, string](&cfg.Streams.ProcessDurableJob, s.streams.consumeDurableJob, s.functions.processDurableJob); err != nil {
+	if s.streams.durablePause, err = transformation.Delay[string](&cfg.Streams.DurablePause, s.streams.consumeDurableJob, s.functions.durablePause); err != nil {
+		return err
+	}
+	if s.streams.processDurableJob, err = transformation.Map[string, string](&cfg.Streams.ProcessDurableJob, s.streams.durablePause, s.functions.processDurableJob); err != nil {
 		return err
 	}
 	if s.streams.localSchedule, err = transformation.Input[string, any, error](&cfg.Streams.LocalSchedule, s); err != nil {
@@ -207,6 +218,13 @@ func (s *Service) initStreams(ctx context.Context) error {
 
 func (s *Service) initFunctions(ctx context.Context, cfg *config.Config) error {
 	eg, egCtx := errgroup.WithContext(ctx)
+	if s.makers.durablePauseMaker != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.durablePause, err = s.makers.durablePauseMaker(egCtx, &cfg.Streams.DurablePause, s)
+			return err
+		})
+	}
 	if s.makers.processDurableJobMaker != nil {
 		eg.Go(func() error {
 			var err error

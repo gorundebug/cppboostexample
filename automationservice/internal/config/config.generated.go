@@ -20,6 +20,7 @@ const (
 // Stream IDs
 const (
 	consumeDurableJobStreamID = iota + 1
+	durablePauseStreamID
 	localScheduleStreamID
 	mergeJobSubmissionsStreamID
 	processDurableJobStreamID
@@ -47,6 +48,7 @@ type Config struct {
 
 	Streams struct {
 		ConsumeDurableJob   cfg.InputStreamConfig `yaml:"consumeDurableJob" mapstructure:"consumeDurableJob"`
+		DurablePause        cfg.DelayStreamConfig `yaml:"durablePause" mapstructure:"durablePause"`
 		LocalSchedule       cfg.InputStreamConfig `yaml:"localSchedule" mapstructure:"localSchedule"`
 		MergeJobSubmissions cfg.MergeStreamConfig `yaml:"mergeJobSubmissions" mapstructure:"mergeJobSubmissions"`
 		ProcessDurableJob   cfg.MapStreamConfig   `yaml:"processDurableJob" mapstructure:"processDurableJob"`
@@ -71,7 +73,7 @@ type Config struct {
 	} `yaml:"pools" mapstructure:"pools"`
 
 	Links struct {
-		ConsumeDurableJobToProcessDurableJob cfg.LinkConfig `yaml:"consumeDurableJobToProcessDurableJob" mapstructure:"consumeDurableJobToProcessDurableJob"`
+		ConsumeDurableJobToDurablePause cfg.LinkConfig `yaml:"consumeDurableJobToDurablePause" mapstructure:"consumeDurableJobToDurablePause"`
 	} `yaml:"links" mapstructure:"links"`
 
 	Modules struct {
@@ -101,6 +103,7 @@ func (c *Config) GetServices() []*cfg.ServiceConfig {
 func (c *Config) GetStreams() []cfg.StreamConfig {
 	return []cfg.StreamConfig{
 		&c.Streams.ConsumeDurableJob,
+		&c.Streams.DurablePause,
 		&c.Streams.LocalSchedule,
 		&c.Streams.MergeJobSubmissions,
 		&c.Streams.ProcessDurableJob,
@@ -130,7 +133,7 @@ func (c *Config) GetPools() []*cfg.PoolConfig {
 
 func (c *Config) GetLinks() []*cfg.LinkConfig {
 	return []*cfg.LinkConfig{
-		&c.Links.ConsumeDurableJobToProcessDurableJob,
+		&c.Links.ConsumeDurableJobToDurablePause,
 	}
 }
 
@@ -168,6 +171,9 @@ func (c *Config) ApplyEnvironment() error {
 		return err
 	}
 	if err := c.applyDurableJobEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyDurablePauseDuration(); err != nil {
 		return err
 	}
 	if err := c.applyLocalScheduleEnabled(); err != nil {
@@ -275,6 +281,21 @@ func (c *Config) applyDurableJobEnabled() error {
 	return nil
 }
 
+func (c *Config) applyDurablePauseDuration() error {
+	value, exists := os.LookupEnv("DURABLE_PAUSE_DURATION")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert DURABLE_PAUSE_DURATION to int: %w", err)
+	}
+	c.Streams.DurablePause.Duration = intVal
+
+	return nil
+}
+
 func (c *Config) applyLocalScheduleEnabled() error {
 	value, exists := os.LookupEnv("LOCAL_SCHEDULE_ENABLED")
 	if !exists {
@@ -345,6 +366,7 @@ func MakeConfig() *Config {
 		},
 		Streams: struct {
 			ConsumeDurableJob   cfg.InputStreamConfig `yaml:"consumeDurableJob" mapstructure:"consumeDurableJob"`
+			DurablePause        cfg.DelayStreamConfig `yaml:"durablePause" mapstructure:"durablePause"`
 			LocalSchedule       cfg.InputStreamConfig `yaml:"localSchedule" mapstructure:"localSchedule"`
 			MergeJobSubmissions cfg.MergeStreamConfig `yaml:"mergeJobSubmissions" mapstructure:"mergeJobSubmissions"`
 			ProcessDurableJob   cfg.MapStreamConfig   `yaml:"processDurableJob" mapstructure:"processDurableJob"`
@@ -361,6 +383,19 @@ func MakeConfig() *Config {
 				YPos:       -330,
 				ValueType:  "string",
 				IdEndpoint: durableJobEndpointID,
+			},
+
+			DurablePause: cfg.DelayStreamConfig{
+				ID:                  durablePauseStreamID,
+				Name:                "Durable Pause",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            consumeDurableJobStreamID,
+				XPos:                90,
+				YPos:                -330,
+				Duration:            250,
+				FunctionName:        "DurablePause",
+				FunctionDescription: "Suspend a DurableCall through a Temporal timer, then resume the pipeline without occupying an Activity slot.\n",
 			},
 
 			LocalSchedule: cfg.InputStreamConfig{
@@ -389,8 +424,8 @@ func MakeConfig() *Config {
 				Name:                "Process Durable Job",
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
-				IdSource:            consumeDurableJobStreamID,
-				XPos:                140,
+				IdSource:            durablePauseStreamID,
+				XPos:                330,
 				YPos:                -330,
 				ValueType:           "string",
 				FunctionName:        "ProcessDurableJob",
@@ -489,11 +524,11 @@ func MakeConfig() *Config {
 		Pools: struct {
 		}{},
 		Links: struct {
-			ConsumeDurableJobToProcessDurableJob cfg.LinkConfig `yaml:"consumeDurableJobToProcessDurableJob" mapstructure:"consumeDurableJobToProcessDurableJob"`
+			ConsumeDurableJobToDurablePause cfg.LinkConfig `yaml:"consumeDurableJobToDurablePause" mapstructure:"consumeDurableJobToDurablePause"`
 		}{
-			ConsumeDurableJobToProcessDurableJob: cfg.LinkConfig{
+			ConsumeDurableJobToDurablePause: cfg.LinkConfig{
 				From: consumeDurableJobStreamID,
-				To:   processDurableJobStreamID,
+				To:   durablePauseStreamID,
 				CallSemantics: &cfg.CallSemanticsGroup{
 					DurableCall: &cfg.DurableCallSemanticsConfig{
 						IdDataConnector:             temporalConnectorID,

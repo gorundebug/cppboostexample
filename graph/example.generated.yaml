@@ -211,7 +211,7 @@ services:
                 from: consumeDurableJob
                 maximumAttempts: 3
                 taskQueue: automation-durable-calls
-                to: processDurableJob
+                to: durablePause
                 workflowExecutionTimeout: 60000
         livenessHandler: health/live
         metricsHandler: metrics
@@ -226,6 +226,19 @@ services:
                     type: Input
                     valueType: string
                     xPos: -130
+                    yPos: -330
+                durablePause:
+                    duration: 250
+                    functionDescription: |
+                        Suspend a DurableCall through a Temporal timer, then resume the pipeline without occupying an Activity slot.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: DurablePause
+                    functionPackage: ""
+                    name: Durable Pause
+                    source: consumeDurableJob
+                    type: Delay
+                    xPos: 90
                     yPos: -330
                 localSchedule:
                     endpoint: localSchedule
@@ -250,10 +263,10 @@ services:
                     functionName: ProcessDurableJob
                     functionPackage: ""
                     name: Process Durable Job
-                    source: consumeDurableJob
+                    source: durablePause
                     type: Map
                     valueType: string
-                    xPos: 140
+                    xPos: 330
                     yPos: -330
                 submitDurableJob:
                     endpoint: durableJob
