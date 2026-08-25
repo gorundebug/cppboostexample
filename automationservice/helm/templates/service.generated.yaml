@@ -17,9 +17,9 @@ spec:
       port: {{ .Values.service.grpcPort }}
       targetPort: grpc
       protocol: TCP
-    - name: temporal-sdk-metrics
+    - name: temporal-metrics
       port: {{ .Values.service.temporalSdkMetricsPort }}
-      targetPort: temporal-sdk-metrics
+      targetPort: temporal-metrics
       protocol: TCP
 {{- if eq .Values.workloadType "StatefulSet" }}
 ---
@@ -43,8 +43,8 @@ spec:
       port: {{ .Values.service.grpcPort }}
       targetPort: grpc
       protocol: TCP
-    - name: temporal-sdk-metrics
+    - name: temporal-metrics
       port: {{ .Values.service.temporalSdkMetricsPort }}
-      targetPort: temporal-sdk-metrics
+      targetPort: temporal-metrics
       protocol: TCP
 {{- end }}
