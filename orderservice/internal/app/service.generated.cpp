@@ -252,6 +252,7 @@ void ServiceGenerated::initStreams(const config::Config& cfg) {
 }
 
 void ServiceGenerated::initDataSinks(const config::Config& cfg) {
+  (void)cfg;
 
   {
     const auto& connector = cfg.dataConnectors.inventoryServiceApi;

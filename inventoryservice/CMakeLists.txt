@@ -152,6 +152,7 @@ target_link_libraries(example_inventory_service PRIVATE
     example_inventory_service_api
 )
 
+if(BUILD_TESTING)
 add_executable(example_inventory_service_typed_config config/config.generated.cpp)
 target_compile_features(example_inventory_service_typed_config PRIVATE cxx_std_20)
 target_include_directories(example_inventory_service_typed_config PRIVATE
@@ -188,3 +189,5 @@ target_link_libraries(example_inventory_service_unit_tests PRIVATE
     example_inventory_service_api
 )
 gtest_discover_tests(example_inventory_service_unit_tests)
+
+endif()
