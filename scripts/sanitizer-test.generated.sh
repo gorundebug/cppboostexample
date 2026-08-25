@@ -22,6 +22,7 @@ esac
 options="${cmake_options[*]}"
 exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
   -e SERVICEGEN_CPP_SANITIZER="$sanitizer" \
+  -e SERVICEGEN_SANITIZER_INTEGRATION="${SERVICEGEN_SANITIZER_INTEGRATION:-1}" \
   -e SERVICEGEN_CPP_SANITIZER_OPTIONS="$options" cpp-build \
   /bin/bash -lc \
   'set -euo pipefail
@@ -40,7 +41,7 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
        conan_link_flags="[\"-fsanitize=thread\"]"
        ;;
    esac
-   ./scripts/conan-install.generated.sh Debug "$conan_dir" \
+   ./scripts/conan-install.generated.sh RelWithDebInfo "$conan_dir" \
      -s:h "compiler.sanitizer=$conan_sanitizer" \
      -c:h "tools.build:cflags=$conan_compile_flags" \
      -c:h "tools.build:cxxflags=$conan_compile_flags" \
@@ -49,7 +50,7 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
    conan_toolchain="$(cat "$conan_dir/toolchain.path")"
    cmake -S . -B "$build_dir" -G Ninja \
      --fresh \
-     -DCMAKE_BUILD_TYPE=Debug \
+     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
      -DCMAKE_TOOLCHAIN_FILE="$conan_toolchain" \
      -DCPPBOOSTSERVICELIB_SOURCE_DIR="$CPPBOOSTSERVICELIB_SOURCE_DIR" \
      -DSERVICEGEN_FETCH_CPP_DEPENDENCIES=OFF \
@@ -66,5 +67,7 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
          ctest --test-dir "$build_dir" --output-on-failure
        ;;
    esac
-   scripts/sanitizer-integration.generated.sh \
-     "$build_dir" "$SERVICEGEN_CPP_SANITIZER"'
+   if [[ "$SERVICEGEN_SANITIZER_INTEGRATION" == "1" ]]; then
+     scripts/sanitizer-integration.generated.sh \
+       "$build_dir" "$SERVICEGEN_CPP_SANITIZER"
+   fi'

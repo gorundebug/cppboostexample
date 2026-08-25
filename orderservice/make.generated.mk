@@ -14,16 +14,16 @@ export SERVICEGEN_GITHUB_RAW_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_HOST):$
 export SERVICEGEN_CONAN_REMOTE_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/conan-proxy
 export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.12.tar.gz
 export SERVICELIB_SOURCE_CONTEXT ?= $(CPPBOOSTSERVICELIB_SOURCE_CONTEXT)
-build test release-build release-test lint docker-build docker-up: export SERVICEGEN_GITHUB_RAW_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/github-raw
-build test release-build release-test lint docker-build docker-up: export SERVICEGEN_CONAN_REMOTE_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/conan-proxy
-build test release-build release-test lint docker-build docker-up: export PIP_INDEX_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/pypi-proxy/simple
-build test release-build release-test lint docker-build docker-up: export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST)
-build test release-build release-test lint docker-build docker-up: export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-archive
-build test release-build release-test lint docker-build docker-up: export SERVICEGEN_APT_UBUNTU_SECURITY_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-security
-build test release-build release-test lint docker-build docker-up: export SERVICEGEN_APT_UBUNTU_PORTS_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-ports
+build test release-build release-test asan-test tsan-test lint docker-build docker-up: export SERVICEGEN_GITHUB_RAW_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/github-raw
+build test release-build release-test asan-test tsan-test lint docker-build docker-up: export SERVICEGEN_CONAN_REMOTE_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/conan-proxy
+build test release-build release-test asan-test tsan-test lint docker-build docker-up: export PIP_INDEX_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/pypi-proxy/simple
+build test release-build release-test asan-test tsan-test lint docker-build docker-up: export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST)
+build test release-build release-test asan-test tsan-test lint docker-build docker-up: export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-archive
+build test release-build release-test asan-test tsan-test lint docker-build docker-up: export SERVICEGEN_APT_UBUNTU_SECURITY_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-security
+build test release-build release-test asan-test tsan-test lint docker-build docker-up: export SERVICEGEN_APT_UBUNTU_PORTS_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-ports
 endif
 
-.PHONY: build test release-build release-test release-up lint fmt clean \
+.PHONY: build test release-build release-test asan-test tsan-test release-up lint fmt clean \
 	docker-build docker-up docker-down docker-clean help
 
 build: ## Build the standalone service in the canonical Docker toolchain
@@ -37,6 +37,12 @@ release-build: ## Build the optimized standalone service in Docker
 
 release-test: ## Build and test the optimized standalone service
 	@./scripts/test.generated.sh docker-release
+
+asan-test: ## Run standalone service tests with ASan and UBSan
+	@SERVICEGEN_SANITIZER_INTEGRATION=0 ./scripts/sanitizer-test.generated.sh asan
+
+tsan-test: ## Run standalone service tests with TSan
+	@SERVICEGEN_SANITIZER_INTEGRATION=0 ./scripts/sanitizer-test.generated.sh tsan
 
 release-up: release-build ## Build the optimized service
 

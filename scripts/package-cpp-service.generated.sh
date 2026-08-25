@@ -49,6 +49,7 @@ cp CMakePresets.json Dockerfile.cmake docker-compose.cmake.generated.yml \
 mkdir -p "${output_dir}/docker" "${output_dir}/scripts"
 cp -R docker/. "${output_dir}/docker/"
 cp scripts/cmake-docker.generated.sh scripts/build.generated.sh scripts/test.generated.sh \
+  scripts/sanitizer-test.generated.sh \
   scripts/lint.generated.sh scripts/format.generated.sh \
   scripts/dependency-proxy-env.generated.sh \
   scripts/conan-install.generated.sh \

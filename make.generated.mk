@@ -183,15 +183,15 @@ docker-build docker-build-local docker-up kubernetes-up kubernetes-build kuberne
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_HELM_OPENTELEMETRY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/helm-opentelemetry
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_HELM_JAEGER_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/helm-jaeger
 docker-build docker-build-local docker-up kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_HELM_REDPANDA_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/helm-redpanda
-# Boost build/test targets execute Conan and CMake inside Docker even when
+# C++ build/test targets execute Conan and CMake inside Docker even when
 # invoked directly, so they need the same container-reachable proxy endpoints.
-cpp-build cpp-test cpp-release-build cpp-release-test cpp-lint cpp-integration-test: export SERVICEGEN_CONAN_REMOTE_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/conan-proxy
-cpp-build cpp-test cpp-release-build cpp-release-test cpp-lint cpp-integration-test: export SERVICEGEN_GITHUB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw
-cpp-build cpp-test cpp-release-build cpp-release-test cpp-lint cpp-integration-test: export PIP_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/pypi-proxy/simple
-cpp-build cpp-test cpp-release-build cpp-release-test cpp-lint cpp-integration-test: export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST)
-cpp-build cpp-test cpp-release-build cpp-release-test cpp-lint cpp-integration-test: export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-archive
-cpp-build cpp-test cpp-release-build cpp-release-test cpp-lint cpp-integration-test: export SERVICEGEN_APT_UBUNTU_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-security
-cpp-build cpp-test cpp-release-build cpp-release-test cpp-lint cpp-integration-test: export SERVICEGEN_APT_UBUNTU_PORTS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-ports
+cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test cpp-lint cpp-integration-test: export SERVICEGEN_CONAN_REMOTE_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/conan-proxy
+cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test cpp-lint cpp-integration-test: export SERVICEGEN_GITHUB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw
+cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test cpp-lint cpp-integration-test: export PIP_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/pypi-proxy/simple
+cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test cpp-lint cpp-integration-test: export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST)
+cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test cpp-lint cpp-integration-test: export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-archive
+cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test cpp-lint cpp-integration-test: export SERVICEGEN_APT_UBUNTU_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-security
+cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test cpp-lint cpp-integration-test: export SERVICEGEN_APT_UBUNTU_PORTS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-ports
 endif
 
 grafana-dashboards: ## Generate Grafana dashboards for all services
