@@ -30,6 +30,6 @@ func TestProcessWorkflowJob_Map(t *testing.T) {
 	require.Equal(t, "continued:job-1", request.NextInput)
 	require.Empty(t, collected)
 
-	f.Map(ctx, nil, "continued:job-1", out)
-	require.Equal(t, []string{"workflow:processed:job-1"}, collected)
+	f.Map(ctx, nil, "sequential:b:sequential:a:continued:job-1", out)
+	require.Equal(t, []string{"workflow:processed:sequential:b:sequential:a:job-1"}, collected)
 }

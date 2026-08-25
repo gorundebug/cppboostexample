@@ -17,10 +17,10 @@ type ProcessWorkflowJob struct{}
 
 func (f *ProcessWorkflowJob) Map(ctx context.Context, _ runtime.Stream, value string, out runtime.Collect[string]) {
 	const continuedPrefix = "continued:"
-	if !strings.HasPrefix(value, continuedPrefix) {
+	if !strings.Contains(value, continuedPrefix) {
 		runtime.TemporalContinueAsNew(ctx, continuedPrefix+value)
 	}
-	out.Out(ctx, "workflow:processed:"+strings.TrimPrefix(value, continuedPrefix))
+	out.Out(ctx, "workflow:processed:"+strings.Replace(value, continuedPrefix, "", 1))
 }
 
 // MakeProcessWorkflowJob is instantiated once at application startup via its maker function.
