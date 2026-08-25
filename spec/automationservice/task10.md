@@ -1,19 +1,19 @@
-# Task 10/13: `ScheduledWorkflowPause`
+# Task 10/20: `ProcessFanoutActivityC`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `Go` |
-| Kind | `delay` |
-| File | `automationservice/internal/functions/scheduledworkflowpause.go` |
-| Test | `automationservice/internal/functions/scheduledworkflowpause_test.go` |
+| Kind | `map` |
+| File | `automationservice/internal/functions/processfanoutactivityc.go` |
+| Test | `automationservice/internal/functions/processfanoutactivityc_test.go` |
 | Service | `Automation Service` |
 
 
 ## Behaviour
 
-Use the official Temporal Workflow timer for a scheduled Workflow.
+Return Activity C's typed fan-out result.
 
 
 
@@ -26,9 +26,9 @@ Use the official Temporal Workflow timer for a scheduled Workflow.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/scheduledworkflowpause.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/processfanoutactivityc.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/scheduledworkflowpause_test.go`
+- [ ] Implement meaningful assertions in `automationservice/internal/functions/processfanoutactivityc_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task10.md — ScheduledWorkflowPause — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task10.md — ProcessFanoutActivityC — Go — done`

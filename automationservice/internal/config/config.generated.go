@@ -20,19 +20,39 @@ const (
 // Stream IDs
 const (
 	activityPauseStreamID = iota + 1
+	callFanOutActivityAStreamID
+	callFanOutActivityBStreamID
+	callFanOutActivityCStreamID
+	callSequentialActivityAStreamID
+	callSequentialActivityBStreamID
 	consumeActivityJobStreamID
+	consumeFanOutActivityAStreamID
+	consumeFanOutActivityBStreamID
+	consumeFanOutActivityCStreamID
+	consumeFanOutWorkflowJobStreamID
+	consumeSequentialActivityAStreamID
+	consumeSequentialActivityBStreamID
 	consumeWorkflowJobStreamID
 	localScheduleStreamID
 	observeActivityResultStreamID
+	observeFanOutActivityBStreamID
+	observeFanOutActivityCStreamID
 	observeWorkflowResultStreamID
 	processActivityJobStreamID
+	processFanOutActivityAStreamID
+	processFanOutActivityBStreamID
+	processFanOutActivityCStreamID
 	processScheduledActivityStreamID
 	processScheduledWorkflowStreamID
+	processSequentialActivityAStreamID
+	processSequentialActivityBStreamID
 	processWorkflowJobStreamID
 	scheduledActivityPauseStreamID
 	scheduledWorkflowPauseStreamID
+	splitActivityAResultStreamID
 	splitOnDemandJobsStreamID
 	submitActivityJobStreamID
+	submitFanOutWorkflowJobStreamID
 	submitWorkflowJobStreamID
 	temporalActivityScheduleStreamID
 	temporalWorkflowScheduleStreamID
@@ -42,7 +62,13 @@ const (
 // Endpoint IDs
 const (
 	activityJobEndpointID = iota + 1
+	fanOutActivityAEndpointID
+	fanOutActivityBEndpointID
+	fanOutActivityCEndpointID
+	fanOutWorkflowJobEndpointID
 	localScheduleEndpointID
+	sequentialActivityAEndpointID
+	sequentialActivityBEndpointID
 	temporalActivityScheduleEndpointID
 	temporalWorkflowScheduleEndpointID
 	workflowJobEndpointID
@@ -60,24 +86,44 @@ type Config struct {
 	} `yaml:"services" mapstructure:"services"`
 
 	Streams struct {
-		ActivityPause            cfg.DelayStreamConfig `yaml:"activityPause" mapstructure:"activityPause"`
-		ConsumeActivityJob       cfg.InputStreamConfig `yaml:"consumeActivityJob" mapstructure:"consumeActivityJob"`
-		ConsumeWorkflowJob       cfg.InputStreamConfig `yaml:"consumeWorkflowJob" mapstructure:"consumeWorkflowJob"`
-		LocalSchedule            cfg.InputStreamConfig `yaml:"localSchedule" mapstructure:"localSchedule"`
-		ObserveActivityResult    cfg.MapStreamConfig   `yaml:"observeActivityResult" mapstructure:"observeActivityResult"`
-		ObserveWorkflowResult    cfg.MapStreamConfig   `yaml:"observeWorkflowResult" mapstructure:"observeWorkflowResult"`
-		ProcessActivityJob       cfg.MapStreamConfig   `yaml:"processActivityJob" mapstructure:"processActivityJob"`
-		ProcessScheduledActivity cfg.MapStreamConfig   `yaml:"processScheduledActivity" mapstructure:"processScheduledActivity"`
-		ProcessScheduledWorkflow cfg.MapStreamConfig   `yaml:"processScheduledWorkflow" mapstructure:"processScheduledWorkflow"`
-		ProcessWorkflowJob       cfg.MapStreamConfig   `yaml:"processWorkflowJob" mapstructure:"processWorkflowJob"`
-		ScheduledActivityPause   cfg.DelayStreamConfig `yaml:"scheduledActivityPause" mapstructure:"scheduledActivityPause"`
-		ScheduledWorkflowPause   cfg.DelayStreamConfig `yaml:"scheduledWorkflowPause" mapstructure:"scheduledWorkflowPause"`
-		SplitOnDemandJobs        cfg.SplitStreamConfig `yaml:"splitOnDemandJobs" mapstructure:"splitOnDemandJobs"`
-		SubmitActivityJob        cfg.SinkStreamConfig  `yaml:"submitActivityJob" mapstructure:"submitActivityJob"`
-		SubmitWorkflowJob        cfg.SinkStreamConfig  `yaml:"submitWorkflowJob" mapstructure:"submitWorkflowJob"`
-		TemporalActivitySchedule cfg.InputStreamConfig `yaml:"temporalActivitySchedule" mapstructure:"temporalActivitySchedule"`
-		TemporalWorkflowSchedule cfg.InputStreamConfig `yaml:"temporalWorkflowSchedule" mapstructure:"temporalWorkflowSchedule"`
-		WorkflowPause            cfg.DelayStreamConfig `yaml:"workflowPause" mapstructure:"workflowPause"`
+		ActivityPause              cfg.DelayStreamConfig `yaml:"activityPause" mapstructure:"activityPause"`
+		CallFanOutActivityA        cfg.SinkStreamConfig  `yaml:"callFanOutActivityA" mapstructure:"callFanOutActivityA"`
+		CallFanOutActivityB        cfg.SinkStreamConfig  `yaml:"callFanOutActivityB" mapstructure:"callFanOutActivityB"`
+		CallFanOutActivityC        cfg.SinkStreamConfig  `yaml:"callFanOutActivityC" mapstructure:"callFanOutActivityC"`
+		CallSequentialActivityA    cfg.SinkStreamConfig  `yaml:"callSequentialActivityA" mapstructure:"callSequentialActivityA"`
+		CallSequentialActivityB    cfg.SinkStreamConfig  `yaml:"callSequentialActivityB" mapstructure:"callSequentialActivityB"`
+		ConsumeActivityJob         cfg.InputStreamConfig `yaml:"consumeActivityJob" mapstructure:"consumeActivityJob"`
+		ConsumeFanOutActivityA     cfg.InputStreamConfig `yaml:"consumeFanOutActivityA" mapstructure:"consumeFanOutActivityA"`
+		ConsumeFanOutActivityB     cfg.InputStreamConfig `yaml:"consumeFanOutActivityB" mapstructure:"consumeFanOutActivityB"`
+		ConsumeFanOutActivityC     cfg.InputStreamConfig `yaml:"consumeFanOutActivityC" mapstructure:"consumeFanOutActivityC"`
+		ConsumeFanOutWorkflowJob   cfg.InputStreamConfig `yaml:"consumeFanOutWorkflowJob" mapstructure:"consumeFanOutWorkflowJob"`
+		ConsumeSequentialActivityA cfg.InputStreamConfig `yaml:"consumeSequentialActivityA" mapstructure:"consumeSequentialActivityA"`
+		ConsumeSequentialActivityB cfg.InputStreamConfig `yaml:"consumeSequentialActivityB" mapstructure:"consumeSequentialActivityB"`
+		ConsumeWorkflowJob         cfg.InputStreamConfig `yaml:"consumeWorkflowJob" mapstructure:"consumeWorkflowJob"`
+		LocalSchedule              cfg.InputStreamConfig `yaml:"localSchedule" mapstructure:"localSchedule"`
+		ObserveActivityResult      cfg.MapStreamConfig   `yaml:"observeActivityResult" mapstructure:"observeActivityResult"`
+		ObserveFanOutActivityB     cfg.MapStreamConfig   `yaml:"observeFanOutActivityB" mapstructure:"observeFanOutActivityB"`
+		ObserveFanOutActivityC     cfg.MapStreamConfig   `yaml:"observeFanOutActivityC" mapstructure:"observeFanOutActivityC"`
+		ObserveWorkflowResult      cfg.MapStreamConfig   `yaml:"observeWorkflowResult" mapstructure:"observeWorkflowResult"`
+		ProcessActivityJob         cfg.MapStreamConfig   `yaml:"processActivityJob" mapstructure:"processActivityJob"`
+		ProcessFanOutActivityA     cfg.MapStreamConfig   `yaml:"processFanOutActivityA" mapstructure:"processFanOutActivityA"`
+		ProcessFanOutActivityB     cfg.MapStreamConfig   `yaml:"processFanOutActivityB" mapstructure:"processFanOutActivityB"`
+		ProcessFanOutActivityC     cfg.MapStreamConfig   `yaml:"processFanOutActivityC" mapstructure:"processFanOutActivityC"`
+		ProcessScheduledActivity   cfg.MapStreamConfig   `yaml:"processScheduledActivity" mapstructure:"processScheduledActivity"`
+		ProcessScheduledWorkflow   cfg.MapStreamConfig   `yaml:"processScheduledWorkflow" mapstructure:"processScheduledWorkflow"`
+		ProcessSequentialActivityA cfg.MapStreamConfig   `yaml:"processSequentialActivityA" mapstructure:"processSequentialActivityA"`
+		ProcessSequentialActivityB cfg.MapStreamConfig   `yaml:"processSequentialActivityB" mapstructure:"processSequentialActivityB"`
+		ProcessWorkflowJob         cfg.MapStreamConfig   `yaml:"processWorkflowJob" mapstructure:"processWorkflowJob"`
+		ScheduledActivityPause     cfg.DelayStreamConfig `yaml:"scheduledActivityPause" mapstructure:"scheduledActivityPause"`
+		ScheduledWorkflowPause     cfg.DelayStreamConfig `yaml:"scheduledWorkflowPause" mapstructure:"scheduledWorkflowPause"`
+		SplitActivityAResult       cfg.SplitStreamConfig `yaml:"splitActivityAResult" mapstructure:"splitActivityAResult"`
+		SplitOnDemandJobs          cfg.SplitStreamConfig `yaml:"splitOnDemandJobs" mapstructure:"splitOnDemandJobs"`
+		SubmitActivityJob          cfg.SinkStreamConfig  `yaml:"submitActivityJob" mapstructure:"submitActivityJob"`
+		SubmitFanOutWorkflowJob    cfg.SinkStreamConfig  `yaml:"submitFanOutWorkflowJob" mapstructure:"submitFanOutWorkflowJob"`
+		SubmitWorkflowJob          cfg.SinkStreamConfig  `yaml:"submitWorkflowJob" mapstructure:"submitWorkflowJob"`
+		TemporalActivitySchedule   cfg.InputStreamConfig `yaml:"temporalActivitySchedule" mapstructure:"temporalActivitySchedule"`
+		TemporalWorkflowSchedule   cfg.InputStreamConfig `yaml:"temporalWorkflowSchedule" mapstructure:"temporalWorkflowSchedule"`
+		WorkflowPause              cfg.DelayStreamConfig `yaml:"workflowPause" mapstructure:"workflowPause"`
 	} `yaml:"streams" mapstructure:"streams"`
 
 	DataConnectors struct {
@@ -88,7 +134,19 @@ type Config struct {
 	Endpoints struct {
 		ActivityJob cfg.TemporalEndpointConfig `yaml:"activityJob" mapstructure:"activityJob"`
 
+		FanOutActivityA cfg.TemporalEndpointConfig `yaml:"fanOutActivityA" mapstructure:"fanOutActivityA"`
+
+		FanOutActivityB cfg.TemporalEndpointConfig `yaml:"fanOutActivityB" mapstructure:"fanOutActivityB"`
+
+		FanOutActivityC cfg.TemporalEndpointConfig `yaml:"fanOutActivityC" mapstructure:"fanOutActivityC"`
+
+		FanOutWorkflowJob cfg.TemporalEndpointConfig `yaml:"fanOutWorkflowJob" mapstructure:"fanOutWorkflowJob"`
+
 		LocalSchedule cfg.CronEndpointConfig `yaml:"localSchedule" mapstructure:"localSchedule"`
+
+		SequentialActivityA cfg.TemporalEndpointConfig `yaml:"sequentialActivityA" mapstructure:"sequentialActivityA"`
+
+		SequentialActivityB cfg.TemporalEndpointConfig `yaml:"sequentialActivityB" mapstructure:"sequentialActivityB"`
 
 		TemporalActivitySchedule cfg.TemporalEndpointConfig `yaml:"temporalActivitySchedule" mapstructure:"temporalActivitySchedule"`
 
@@ -101,8 +159,13 @@ type Config struct {
 	} `yaml:"pools" mapstructure:"pools"`
 
 	Links struct {
-		ConsumeActivityJobToActivityPause cfg.LinkConfig `yaml:"consumeActivityJobToActivityPause" mapstructure:"consumeActivityJobToActivityPause"`
-		ConsumeWorkflowJobToWorkflowPause cfg.LinkConfig `yaml:"consumeWorkflowJobToWorkflowPause" mapstructure:"consumeWorkflowJobToWorkflowPause"`
+		ConsumeActivityJobToActivityPause                      cfg.LinkConfig `yaml:"consumeActivityJobToActivityPause" mapstructure:"consumeActivityJobToActivityPause"`
+		ConsumeFanOutActivityAToProcessFanOutActivityA         cfg.LinkConfig `yaml:"consumeFanOutActivityAToProcessFanOutActivityA" mapstructure:"consumeFanOutActivityAToProcessFanOutActivityA"`
+		ConsumeFanOutActivityBToProcessFanOutActivityB         cfg.LinkConfig `yaml:"consumeFanOutActivityBToProcessFanOutActivityB" mapstructure:"consumeFanOutActivityBToProcessFanOutActivityB"`
+		ConsumeFanOutActivityCToProcessFanOutActivityC         cfg.LinkConfig `yaml:"consumeFanOutActivityCToProcessFanOutActivityC" mapstructure:"consumeFanOutActivityCToProcessFanOutActivityC"`
+		ConsumeSequentialActivityAToProcessSequentialActivityA cfg.LinkConfig `yaml:"consumeSequentialActivityAToProcessSequentialActivityA" mapstructure:"consumeSequentialActivityAToProcessSequentialActivityA"`
+		ConsumeSequentialActivityBToProcessSequentialActivityB cfg.LinkConfig `yaml:"consumeSequentialActivityBToProcessSequentialActivityB" mapstructure:"consumeSequentialActivityBToProcessSequentialActivityB"`
+		ConsumeWorkflowJobToWorkflowPause                      cfg.LinkConfig `yaml:"consumeWorkflowJobToWorkflowPause" mapstructure:"consumeWorkflowJobToWorkflowPause"`
 	} `yaml:"links" mapstructure:"links"`
 
 	Modules struct {
@@ -132,19 +195,39 @@ func (c *Config) GetServices() []*cfg.ServiceConfig {
 func (c *Config) GetStreams() []cfg.StreamConfig {
 	return []cfg.StreamConfig{
 		&c.Streams.ActivityPause,
+		&c.Streams.CallFanOutActivityA,
+		&c.Streams.CallFanOutActivityB,
+		&c.Streams.CallFanOutActivityC,
+		&c.Streams.CallSequentialActivityA,
+		&c.Streams.CallSequentialActivityB,
 		&c.Streams.ConsumeActivityJob,
+		&c.Streams.ConsumeFanOutActivityA,
+		&c.Streams.ConsumeFanOutActivityB,
+		&c.Streams.ConsumeFanOutActivityC,
+		&c.Streams.ConsumeFanOutWorkflowJob,
+		&c.Streams.ConsumeSequentialActivityA,
+		&c.Streams.ConsumeSequentialActivityB,
 		&c.Streams.ConsumeWorkflowJob,
 		&c.Streams.LocalSchedule,
 		&c.Streams.ObserveActivityResult,
+		&c.Streams.ObserveFanOutActivityB,
+		&c.Streams.ObserveFanOutActivityC,
 		&c.Streams.ObserveWorkflowResult,
 		&c.Streams.ProcessActivityJob,
+		&c.Streams.ProcessFanOutActivityA,
+		&c.Streams.ProcessFanOutActivityB,
+		&c.Streams.ProcessFanOutActivityC,
 		&c.Streams.ProcessScheduledActivity,
 		&c.Streams.ProcessScheduledWorkflow,
+		&c.Streams.ProcessSequentialActivityA,
+		&c.Streams.ProcessSequentialActivityB,
 		&c.Streams.ProcessWorkflowJob,
 		&c.Streams.ScheduledActivityPause,
 		&c.Streams.ScheduledWorkflowPause,
+		&c.Streams.SplitActivityAResult,
 		&c.Streams.SplitOnDemandJobs,
 		&c.Streams.SubmitActivityJob,
+		&c.Streams.SubmitFanOutWorkflowJob,
 		&c.Streams.SubmitWorkflowJob,
 		&c.Streams.TemporalActivitySchedule,
 		&c.Streams.TemporalWorkflowSchedule,
@@ -162,7 +245,13 @@ func (c *Config) GetDataConnectors() []cfg.DataConnectorConfig {
 func (c *Config) GetEndpoints() []cfg.EndpointConfig {
 	return []cfg.EndpointConfig{
 		&c.Endpoints.ActivityJob,
+		&c.Endpoints.FanOutActivityA,
+		&c.Endpoints.FanOutActivityB,
+		&c.Endpoints.FanOutActivityC,
+		&c.Endpoints.FanOutWorkflowJob,
 		&c.Endpoints.LocalSchedule,
+		&c.Endpoints.SequentialActivityA,
+		&c.Endpoints.SequentialActivityB,
 		&c.Endpoints.TemporalActivitySchedule,
 		&c.Endpoints.TemporalWorkflowSchedule,
 		&c.Endpoints.WorkflowJob,
@@ -176,6 +265,11 @@ func (c *Config) GetPools() []*cfg.PoolConfig {
 func (c *Config) GetLinks() []*cfg.LinkConfig {
 	return []*cfg.LinkConfig{
 		&c.Links.ConsumeActivityJobToActivityPause,
+		&c.Links.ConsumeFanOutActivityAToProcessFanOutActivityA,
+		&c.Links.ConsumeFanOutActivityBToProcessFanOutActivityB,
+		&c.Links.ConsumeFanOutActivityCToProcessFanOutActivityC,
+		&c.Links.ConsumeSequentialActivityAToProcessSequentialActivityA,
+		&c.Links.ConsumeSequentialActivityBToProcessSequentialActivityB,
 		&c.Links.ConsumeWorkflowJobToWorkflowPause,
 	}
 }
@@ -219,6 +313,18 @@ func (c *Config) ApplyEnvironment() error {
 	if err := c.applyAutomationServiceHttpPort(); err != nil {
 		return err
 	}
+	if err := c.applyFanOutActivityAEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityBEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityCEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutWorkflowJobEnabled(); err != nil {
+		return err
+	}
 	if err := c.applyLocalScheduleEnabled(); err != nil {
 		return err
 	}
@@ -226,6 +332,12 @@ func (c *Config) ApplyEnvironment() error {
 		return err
 	}
 	if err := c.applyScheduledWorkflowPauseDuration(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityAEnabled(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityBEnabled(); err != nil {
 		return err
 	}
 	if err := c.applyTemporalActivityScheduleEnabled(); err != nil {
@@ -354,6 +466,66 @@ func (c *Config) applyAutomationServiceHttpPort() error {
 	return nil
 }
 
+func (c *Config) applyFanOutActivityAEnabled() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_A_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_A_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.FanOutActivityA.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityBEnabled() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_B_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_B_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.FanOutActivityB.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityCEnabled() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_C_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_C_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.FanOutActivityC.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutWorkflowJobEnabled() error {
+	value, exists := os.LookupEnv("FAN_OUT_WORKFLOW_JOB_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_WORKFLOW_JOB_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.FanOutWorkflowJob.Enabled = boolVal
+
+	return nil
+}
+
 func (c *Config) applyLocalScheduleEnabled() error {
 	value, exists := os.LookupEnv("LOCAL_SCHEDULE_ENABLED")
 	if !exists {
@@ -395,6 +567,36 @@ func (c *Config) applyScheduledWorkflowPauseDuration() error {
 		return fmt.Errorf("failed to convert SCHEDULED_WORKFLOW_PAUSE_DURATION to int: %w", err)
 	}
 	c.Streams.ScheduledWorkflowPause.Duration = intVal
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityAEnabled() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_A_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_A_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.SequentialActivityA.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityBEnabled() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_B_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_B_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.SequentialActivityB.Enabled = boolVal
 
 	return nil
 }
@@ -498,24 +700,44 @@ func MakeConfig() *Config {
 			},
 		},
 		Streams: struct {
-			ActivityPause            cfg.DelayStreamConfig `yaml:"activityPause" mapstructure:"activityPause"`
-			ConsumeActivityJob       cfg.InputStreamConfig `yaml:"consumeActivityJob" mapstructure:"consumeActivityJob"`
-			ConsumeWorkflowJob       cfg.InputStreamConfig `yaml:"consumeWorkflowJob" mapstructure:"consumeWorkflowJob"`
-			LocalSchedule            cfg.InputStreamConfig `yaml:"localSchedule" mapstructure:"localSchedule"`
-			ObserveActivityResult    cfg.MapStreamConfig   `yaml:"observeActivityResult" mapstructure:"observeActivityResult"`
-			ObserveWorkflowResult    cfg.MapStreamConfig   `yaml:"observeWorkflowResult" mapstructure:"observeWorkflowResult"`
-			ProcessActivityJob       cfg.MapStreamConfig   `yaml:"processActivityJob" mapstructure:"processActivityJob"`
-			ProcessScheduledActivity cfg.MapStreamConfig   `yaml:"processScheduledActivity" mapstructure:"processScheduledActivity"`
-			ProcessScheduledWorkflow cfg.MapStreamConfig   `yaml:"processScheduledWorkflow" mapstructure:"processScheduledWorkflow"`
-			ProcessWorkflowJob       cfg.MapStreamConfig   `yaml:"processWorkflowJob" mapstructure:"processWorkflowJob"`
-			ScheduledActivityPause   cfg.DelayStreamConfig `yaml:"scheduledActivityPause" mapstructure:"scheduledActivityPause"`
-			ScheduledWorkflowPause   cfg.DelayStreamConfig `yaml:"scheduledWorkflowPause" mapstructure:"scheduledWorkflowPause"`
-			SplitOnDemandJobs        cfg.SplitStreamConfig `yaml:"splitOnDemandJobs" mapstructure:"splitOnDemandJobs"`
-			SubmitActivityJob        cfg.SinkStreamConfig  `yaml:"submitActivityJob" mapstructure:"submitActivityJob"`
-			SubmitWorkflowJob        cfg.SinkStreamConfig  `yaml:"submitWorkflowJob" mapstructure:"submitWorkflowJob"`
-			TemporalActivitySchedule cfg.InputStreamConfig `yaml:"temporalActivitySchedule" mapstructure:"temporalActivitySchedule"`
-			TemporalWorkflowSchedule cfg.InputStreamConfig `yaml:"temporalWorkflowSchedule" mapstructure:"temporalWorkflowSchedule"`
-			WorkflowPause            cfg.DelayStreamConfig `yaml:"workflowPause" mapstructure:"workflowPause"`
+			ActivityPause              cfg.DelayStreamConfig `yaml:"activityPause" mapstructure:"activityPause"`
+			CallFanOutActivityA        cfg.SinkStreamConfig  `yaml:"callFanOutActivityA" mapstructure:"callFanOutActivityA"`
+			CallFanOutActivityB        cfg.SinkStreamConfig  `yaml:"callFanOutActivityB" mapstructure:"callFanOutActivityB"`
+			CallFanOutActivityC        cfg.SinkStreamConfig  `yaml:"callFanOutActivityC" mapstructure:"callFanOutActivityC"`
+			CallSequentialActivityA    cfg.SinkStreamConfig  `yaml:"callSequentialActivityA" mapstructure:"callSequentialActivityA"`
+			CallSequentialActivityB    cfg.SinkStreamConfig  `yaml:"callSequentialActivityB" mapstructure:"callSequentialActivityB"`
+			ConsumeActivityJob         cfg.InputStreamConfig `yaml:"consumeActivityJob" mapstructure:"consumeActivityJob"`
+			ConsumeFanOutActivityA     cfg.InputStreamConfig `yaml:"consumeFanOutActivityA" mapstructure:"consumeFanOutActivityA"`
+			ConsumeFanOutActivityB     cfg.InputStreamConfig `yaml:"consumeFanOutActivityB" mapstructure:"consumeFanOutActivityB"`
+			ConsumeFanOutActivityC     cfg.InputStreamConfig `yaml:"consumeFanOutActivityC" mapstructure:"consumeFanOutActivityC"`
+			ConsumeFanOutWorkflowJob   cfg.InputStreamConfig `yaml:"consumeFanOutWorkflowJob" mapstructure:"consumeFanOutWorkflowJob"`
+			ConsumeSequentialActivityA cfg.InputStreamConfig `yaml:"consumeSequentialActivityA" mapstructure:"consumeSequentialActivityA"`
+			ConsumeSequentialActivityB cfg.InputStreamConfig `yaml:"consumeSequentialActivityB" mapstructure:"consumeSequentialActivityB"`
+			ConsumeWorkflowJob         cfg.InputStreamConfig `yaml:"consumeWorkflowJob" mapstructure:"consumeWorkflowJob"`
+			LocalSchedule              cfg.InputStreamConfig `yaml:"localSchedule" mapstructure:"localSchedule"`
+			ObserveActivityResult      cfg.MapStreamConfig   `yaml:"observeActivityResult" mapstructure:"observeActivityResult"`
+			ObserveFanOutActivityB     cfg.MapStreamConfig   `yaml:"observeFanOutActivityB" mapstructure:"observeFanOutActivityB"`
+			ObserveFanOutActivityC     cfg.MapStreamConfig   `yaml:"observeFanOutActivityC" mapstructure:"observeFanOutActivityC"`
+			ObserveWorkflowResult      cfg.MapStreamConfig   `yaml:"observeWorkflowResult" mapstructure:"observeWorkflowResult"`
+			ProcessActivityJob         cfg.MapStreamConfig   `yaml:"processActivityJob" mapstructure:"processActivityJob"`
+			ProcessFanOutActivityA     cfg.MapStreamConfig   `yaml:"processFanOutActivityA" mapstructure:"processFanOutActivityA"`
+			ProcessFanOutActivityB     cfg.MapStreamConfig   `yaml:"processFanOutActivityB" mapstructure:"processFanOutActivityB"`
+			ProcessFanOutActivityC     cfg.MapStreamConfig   `yaml:"processFanOutActivityC" mapstructure:"processFanOutActivityC"`
+			ProcessScheduledActivity   cfg.MapStreamConfig   `yaml:"processScheduledActivity" mapstructure:"processScheduledActivity"`
+			ProcessScheduledWorkflow   cfg.MapStreamConfig   `yaml:"processScheduledWorkflow" mapstructure:"processScheduledWorkflow"`
+			ProcessSequentialActivityA cfg.MapStreamConfig   `yaml:"processSequentialActivityA" mapstructure:"processSequentialActivityA"`
+			ProcessSequentialActivityB cfg.MapStreamConfig   `yaml:"processSequentialActivityB" mapstructure:"processSequentialActivityB"`
+			ProcessWorkflowJob         cfg.MapStreamConfig   `yaml:"processWorkflowJob" mapstructure:"processWorkflowJob"`
+			ScheduledActivityPause     cfg.DelayStreamConfig `yaml:"scheduledActivityPause" mapstructure:"scheduledActivityPause"`
+			ScheduledWorkflowPause     cfg.DelayStreamConfig `yaml:"scheduledWorkflowPause" mapstructure:"scheduledWorkflowPause"`
+			SplitActivityAResult       cfg.SplitStreamConfig `yaml:"splitActivityAResult" mapstructure:"splitActivityAResult"`
+			SplitOnDemandJobs          cfg.SplitStreamConfig `yaml:"splitOnDemandJobs" mapstructure:"splitOnDemandJobs"`
+			SubmitActivityJob          cfg.SinkStreamConfig  `yaml:"submitActivityJob" mapstructure:"submitActivityJob"`
+			SubmitFanOutWorkflowJob    cfg.SinkStreamConfig  `yaml:"submitFanOutWorkflowJob" mapstructure:"submitFanOutWorkflowJob"`
+			SubmitWorkflowJob          cfg.SinkStreamConfig  `yaml:"submitWorkflowJob" mapstructure:"submitWorkflowJob"`
+			TemporalActivitySchedule   cfg.InputStreamConfig `yaml:"temporalActivitySchedule" mapstructure:"temporalActivitySchedule"`
+			TemporalWorkflowSchedule   cfg.InputStreamConfig `yaml:"temporalWorkflowSchedule" mapstructure:"temporalWorkflowSchedule"`
+			WorkflowPause              cfg.DelayStreamConfig `yaml:"workflowPause" mapstructure:"workflowPause"`
 		}{
 			ActivityPause: cfg.DelayStreamConfig{
 				ID:                  activityPauseStreamID,
@@ -530,6 +752,66 @@ func MakeConfig() *Config {
 				FunctionDescription: "Apply the ordinary local Delay while processing an on-demand Temporal Activity.\n",
 			},
 
+			CallFanOutActivityA: cfg.SinkStreamConfig{
+				ID:         callFanOutActivityAStreamID,
+				Name:       "Call Fan-Out Activity A",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   consumeFanOutWorkflowJobStreamID,
+				XPos:       -250,
+				YPos:       800,
+				ValueType:  "string",
+				IdEndpoint: fanOutActivityAEndpointID,
+			},
+
+			CallFanOutActivityB: cfg.SinkStreamConfig{
+				ID:         callFanOutActivityBStreamID,
+				Name:       "Call Fan-Out Activity B",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   splitActivityAResultStreamID,
+				XPos:       270,
+				YPos:       720,
+				ValueType:  "string",
+				IdEndpoint: fanOutActivityBEndpointID,
+			},
+
+			CallFanOutActivityC: cfg.SinkStreamConfig{
+				ID:         callFanOutActivityCStreamID,
+				Name:       "Call Fan-Out Activity C",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   splitActivityAResultStreamID,
+				XPos:       270,
+				YPos:       880,
+				ValueType:  "string",
+				IdEndpoint: fanOutActivityCEndpointID,
+			},
+
+			CallSequentialActivityA: cfg.SinkStreamConfig{
+				ID:         callSequentialActivityAStreamID,
+				Name:       "Call Sequential Activity A",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   workflowPauseStreamID,
+				XPos:       10,
+				YPos:       -420,
+				ValueType:  "string",
+				IdEndpoint: sequentialActivityAEndpointID,
+			},
+
+			CallSequentialActivityB: cfg.SinkStreamConfig{
+				ID:         callSequentialActivityBStreamID,
+				Name:       "Call Sequential Activity B",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   callSequentialActivityAStreamID,
+				XPos:       270,
+				YPos:       -420,
+				ValueType:  "string",
+				IdEndpoint: sequentialActivityBEndpointID,
+			},
+
 			ConsumeActivityJob: cfg.InputStreamConfig{
 				ID:         consumeActivityJobStreamID,
 				Name:       "Consume Activity Job",
@@ -540,6 +822,77 @@ func MakeConfig() *Config {
 				YPos:       -720,
 				ValueType:  "string",
 				IdEndpoint: activityJobEndpointID,
+			},
+
+			ConsumeFanOutActivityA: cfg.InputStreamConfig{
+				ID:         consumeFanOutActivityAStreamID,
+				Name:       "Consume Fan-Out Activity A",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   processFanOutActivityAStreamID,
+				XPos:       -500,
+				YPos:       1050,
+				ValueType:  "string",
+				IdEndpoint: fanOutActivityAEndpointID,
+			},
+
+			ConsumeFanOutActivityB: cfg.InputStreamConfig{
+				ID:         consumeFanOutActivityBStreamID,
+				Name:       "Consume Fan-Out Activity B",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   processFanOutActivityBStreamID,
+				XPos:       -500,
+				YPos:       1200,
+				ValueType:  "string",
+				IdEndpoint: fanOutActivityBEndpointID,
+			},
+
+			ConsumeFanOutActivityC: cfg.InputStreamConfig{
+				ID:         consumeFanOutActivityCStreamID,
+				Name:       "Consume Fan-Out Activity C",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   processFanOutActivityCStreamID,
+				XPos:       -500,
+				YPos:       1350,
+				ValueType:  "string",
+				IdEndpoint: fanOutActivityCEndpointID,
+			},
+
+			ConsumeFanOutWorkflowJob: cfg.InputStreamConfig{
+				ID:         consumeFanOutWorkflowJobStreamID,
+				Name:       "Consume Fan-Out Workflow Job",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				XPos:       -500,
+				YPos:       800,
+				ValueType:  "string",
+				IdEndpoint: fanOutWorkflowJobEndpointID,
+			},
+
+			ConsumeSequentialActivityA: cfg.InputStreamConfig{
+				ID:         consumeSequentialActivityAStreamID,
+				Name:       "Consume Sequential Activity A",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   processSequentialActivityAStreamID,
+				XPos:       -500,
+				YPos:       500,
+				ValueType:  "string",
+				IdEndpoint: sequentialActivityAEndpointID,
+			},
+
+			ConsumeSequentialActivityB: cfg.InputStreamConfig{
+				ID:         consumeSequentialActivityBStreamID,
+				Name:       "Consume Sequential Activity B",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   processSequentialActivityBStreamID,
+				XPos:       -500,
+				YPos:       650,
+				ValueType:  "string",
+				IdEndpoint: sequentialActivityBEndpointID,
 			},
 
 			ConsumeWorkflowJob: cfg.InputStreamConfig{
@@ -578,6 +931,32 @@ func MakeConfig() *Config {
 				FunctionDescription: "Preserve the result returned through the on-demand Activity endpoint.\n",
 			},
 
+			ObserveFanOutActivityB: cfg.MapStreamConfig{
+				ID:                  observeFanOutActivityBStreamID,
+				Name:                "Observe Fan-Out Activity B",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            callFanOutActivityBStreamID,
+				XPos:                530,
+				YPos:                720,
+				ValueType:           "string",
+				FunctionName:        "ObserveFanoutActivityB",
+				FunctionDescription: "Observe the typed result returned by the Activity B fan-out branch.\n",
+			},
+
+			ObserveFanOutActivityC: cfg.MapStreamConfig{
+				ID:                  observeFanOutActivityCStreamID,
+				Name:                "Observe Fan-Out Activity C",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            callFanOutActivityCStreamID,
+				XPos:                530,
+				YPos:                880,
+				ValueType:           "string",
+				FunctionName:        "ObserveFanoutActivityC",
+				FunctionDescription: "Observe the typed result returned by the Activity C fan-out branch.\n",
+			},
+
 			ObserveWorkflowResult: cfg.MapStreamConfig{
 				ID:                  observeWorkflowResultStreamID,
 				Name:                "Observe Workflow Result",
@@ -602,6 +981,45 @@ func MakeConfig() *Config {
 				ValueType:           "string",
 				FunctionName:        "ProcessActivityJob",
 				FunctionDescription: "Record Activity progress with DurableCallHeartbeat and return the processed job result.\n",
+			},
+
+			ProcessFanOutActivityA: cfg.MapStreamConfig{
+				ID:                  processFanOutActivityAStreamID,
+				Name:                "Process Fan-Out Activity A",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            consumeFanOutActivityAStreamID,
+				XPos:                -250,
+				YPos:                1050,
+				ValueType:           "string",
+				FunctionName:        "ProcessFanoutActivityA",
+				FunctionDescription: "Return Activity A's typed result before the Workflow Split.\n",
+			},
+
+			ProcessFanOutActivityB: cfg.MapStreamConfig{
+				ID:                  processFanOutActivityBStreamID,
+				Name:                "Process Fan-Out Activity B",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            consumeFanOutActivityBStreamID,
+				XPos:                -250,
+				YPos:                1200,
+				ValueType:           "string",
+				FunctionName:        "ProcessFanoutActivityB",
+				FunctionDescription: "Return Activity B's typed fan-out result.\n",
+			},
+
+			ProcessFanOutActivityC: cfg.MapStreamConfig{
+				ID:                  processFanOutActivityCStreamID,
+				Name:                "Process Fan-Out Activity C",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            consumeFanOutActivityCStreamID,
+				XPos:                -250,
+				YPos:                1350,
+				ValueType:           "string",
+				FunctionName:        "ProcessFanoutActivityC",
+				FunctionDescription: "Return Activity C's typed fan-out result.\n",
 			},
 
 			ProcessScheduledActivity: cfg.MapStreamConfig{
@@ -630,13 +1048,39 @@ func MakeConfig() *Config {
 				FunctionDescription: "Return the visible result of one scheduled Workflow execution.\n",
 			},
 
+			ProcessSequentialActivityA: cfg.MapStreamConfig{
+				ID:                  processSequentialActivityAStreamID,
+				Name:                "Process Sequential Activity A",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            consumeSequentialActivityAStreamID,
+				XPos:                -250,
+				YPos:                500,
+				ValueType:           "string",
+				FunctionName:        "ProcessSequentialActivityA",
+				FunctionDescription: "Return sequential Activity A's typed result to its Temporal sink.\n",
+			},
+
+			ProcessSequentialActivityB: cfg.MapStreamConfig{
+				ID:                  processSequentialActivityBStreamID,
+				Name:                "Process Sequential Activity B",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            consumeSequentialActivityBStreamID,
+				XPos:                -250,
+				YPos:                650,
+				ValueType:           "string",
+				FunctionName:        "ProcessSequentialActivityB",
+				FunctionDescription: "Return sequential Activity B's typed result to its Temporal sink.\n",
+			},
+
 			ProcessWorkflowJob: cfg.MapStreamConfig{
 				ID:                  processWorkflowJobStreamID,
 				Name:                "Process Workflow Job",
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
-				IdSource:            workflowPauseStreamID,
-				XPos:                10,
+				IdSource:            callSequentialActivityBStreamID,
+				XPos:                530,
 				YPos:                -420,
 				ValueType:           "string",
 				FunctionName:        "ProcessWorkflowJob",
@@ -669,6 +1113,16 @@ func MakeConfig() *Config {
 				FunctionDescription: "Use the official Temporal Workflow timer for a scheduled Workflow.\n",
 			},
 
+			SplitActivityAResult: cfg.SplitStreamConfig{
+				ID:        splitActivityAResultStreamID,
+				Name:      "Split Activity A Result",
+				Pipeline:  "automation",
+				IdService: automationServiceServiceID,
+				IdSource:  callFanOutActivityAStreamID,
+				XPos:      10,
+				YPos:      800,
+			},
+
 			SplitOnDemandJobs: cfg.SplitStreamConfig{
 				ID:        splitOnDemandJobsStreamID,
 				Name:      "Split On-Demand Jobs",
@@ -689,6 +1143,18 @@ func MakeConfig() *Config {
 				YPos:       -720,
 				ValueType:  "string",
 				IdEndpoint: activityJobEndpointID,
+			},
+
+			SubmitFanOutWorkflowJob: cfg.SinkStreamConfig{
+				ID:         submitFanOutWorkflowJobStreamID,
+				Name:       "Submit Fan-Out Workflow Job",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   splitOnDemandJobsStreamID,
+				XPos:       -760,
+				YPos:       800,
+				ValueType:  "string",
+				IdEndpoint: fanOutWorkflowJobEndpointID,
 			},
 
 			SubmitWorkflowJob: cfg.SinkStreamConfig{
@@ -763,7 +1229,13 @@ func MakeConfig() *Config {
 		},
 		Endpoints: struct {
 			ActivityJob              cfg.TemporalEndpointConfig `yaml:"activityJob" mapstructure:"activityJob"`
+			FanOutActivityA          cfg.TemporalEndpointConfig `yaml:"fanOutActivityA" mapstructure:"fanOutActivityA"`
+			FanOutActivityB          cfg.TemporalEndpointConfig `yaml:"fanOutActivityB" mapstructure:"fanOutActivityB"`
+			FanOutActivityC          cfg.TemporalEndpointConfig `yaml:"fanOutActivityC" mapstructure:"fanOutActivityC"`
+			FanOutWorkflowJob        cfg.TemporalEndpointConfig `yaml:"fanOutWorkflowJob" mapstructure:"fanOutWorkflowJob"`
 			LocalSchedule            cfg.CronEndpointConfig     `yaml:"localSchedule" mapstructure:"localSchedule"`
+			SequentialActivityA      cfg.TemporalEndpointConfig `yaml:"sequentialActivityA" mapstructure:"sequentialActivityA"`
+			SequentialActivityB      cfg.TemporalEndpointConfig `yaml:"sequentialActivityB" mapstructure:"sequentialActivityB"`
 			TemporalActivitySchedule cfg.TemporalEndpointConfig `yaml:"temporalActivitySchedule" mapstructure:"temporalActivitySchedule"`
 			TemporalWorkflowSchedule cfg.TemporalEndpointConfig `yaml:"temporalWorkflowSchedule" mapstructure:"temporalWorkflowSchedule"`
 			WorkflowJob              cfg.TemporalEndpointConfig `yaml:"workflowJob" mapstructure:"workflowJob"`
@@ -781,6 +1253,56 @@ func MakeConfig() *Config {
 				MaximumAttempts:             3,
 			},
 
+			FanOutActivityA: cfg.TemporalEndpointConfig{
+				ID:                          fanOutActivityAEndpointID,
+				Name:                        "Fan-Out Activity A",
+				IdDataConnector:             temporalConnectorID,
+				Enabled:                     true,
+				TaskQueue:                   "automation-activity-jobs",
+				TemporalExecutionType:       api.Activity,
+				WorkflowExecutionTimeout:    60000,
+				ActivityStartToCloseTimeout: 30000,
+				ActivityHeartbeatTimeout:    5000,
+				MaximumAttempts:             3,
+			},
+
+			FanOutActivityB: cfg.TemporalEndpointConfig{
+				ID:                          fanOutActivityBEndpointID,
+				Name:                        "Fan-Out Activity B",
+				IdDataConnector:             temporalConnectorID,
+				Enabled:                     true,
+				TaskQueue:                   "automation-activity-jobs",
+				TemporalExecutionType:       api.Activity,
+				WorkflowExecutionTimeout:    60000,
+				ActivityStartToCloseTimeout: 30000,
+				ActivityHeartbeatTimeout:    5000,
+				MaximumAttempts:             3,
+			},
+
+			FanOutActivityC: cfg.TemporalEndpointConfig{
+				ID:                          fanOutActivityCEndpointID,
+				Name:                        "Fan-Out Activity C",
+				IdDataConnector:             temporalConnectorID,
+				Enabled:                     true,
+				TaskQueue:                   "automation-activity-jobs",
+				TemporalExecutionType:       api.Activity,
+				WorkflowExecutionTimeout:    60000,
+				ActivityStartToCloseTimeout: 30000,
+				ActivityHeartbeatTimeout:    5000,
+				MaximumAttempts:             3,
+			},
+
+			FanOutWorkflowJob: cfg.TemporalEndpointConfig{
+				ID:                       fanOutWorkflowJobEndpointID,
+				Name:                     "Fan-Out Workflow Job",
+				IdDataConnector:          temporalConnectorID,
+				Enabled:                  true,
+				TaskQueue:                "automation-workflow-jobs",
+				TemporalExecutionType:    api.Workflow,
+				WorkflowExecutionTimeout: 60000,
+				MaximumAttempts:          3,
+			},
+
 			LocalSchedule: cfg.CronEndpointConfig{
 				ID:              localScheduleEndpointID,
 				Name:            "Local Schedule",
@@ -790,6 +1312,32 @@ func MakeConfig() *Config {
 				Timezone:        "UTC",
 				OverlapPolicy:   api.ScheduleOverlapPolicySkip,
 				MissedRunPolicy: api.ScheduleMissedRunPolicyFireOnce,
+			},
+
+			SequentialActivityA: cfg.TemporalEndpointConfig{
+				ID:                          sequentialActivityAEndpointID,
+				Name:                        "Sequential Activity A",
+				IdDataConnector:             temporalConnectorID,
+				Enabled:                     true,
+				TaskQueue:                   "automation-activity-jobs",
+				TemporalExecutionType:       api.Activity,
+				WorkflowExecutionTimeout:    60000,
+				ActivityStartToCloseTimeout: 30000,
+				ActivityHeartbeatTimeout:    5000,
+				MaximumAttempts:             3,
+			},
+
+			SequentialActivityB: cfg.TemporalEndpointConfig{
+				ID:                          sequentialActivityBEndpointID,
+				Name:                        "Sequential Activity B",
+				IdDataConnector:             temporalConnectorID,
+				Enabled:                     true,
+				TaskQueue:                   "automation-activity-jobs",
+				TemporalExecutionType:       api.Activity,
+				WorkflowExecutionTimeout:    60000,
+				ActivityStartToCloseTimeout: 30000,
+				ActivityHeartbeatTimeout:    5000,
+				MaximumAttempts:             3,
 			},
 
 			TemporalActivitySchedule: cfg.TemporalEndpointConfig{
@@ -840,12 +1388,52 @@ func MakeConfig() *Config {
 		Pools: struct {
 		}{},
 		Links: struct {
-			ConsumeActivityJobToActivityPause cfg.LinkConfig `yaml:"consumeActivityJobToActivityPause" mapstructure:"consumeActivityJobToActivityPause"`
-			ConsumeWorkflowJobToWorkflowPause cfg.LinkConfig `yaml:"consumeWorkflowJobToWorkflowPause" mapstructure:"consumeWorkflowJobToWorkflowPause"`
+			ConsumeActivityJobToActivityPause                      cfg.LinkConfig `yaml:"consumeActivityJobToActivityPause" mapstructure:"consumeActivityJobToActivityPause"`
+			ConsumeFanOutActivityAToProcessFanOutActivityA         cfg.LinkConfig `yaml:"consumeFanOutActivityAToProcessFanOutActivityA" mapstructure:"consumeFanOutActivityAToProcessFanOutActivityA"`
+			ConsumeFanOutActivityBToProcessFanOutActivityB         cfg.LinkConfig `yaml:"consumeFanOutActivityBToProcessFanOutActivityB" mapstructure:"consumeFanOutActivityBToProcessFanOutActivityB"`
+			ConsumeFanOutActivityCToProcessFanOutActivityC         cfg.LinkConfig `yaml:"consumeFanOutActivityCToProcessFanOutActivityC" mapstructure:"consumeFanOutActivityCToProcessFanOutActivityC"`
+			ConsumeSequentialActivityAToProcessSequentialActivityA cfg.LinkConfig `yaml:"consumeSequentialActivityAToProcessSequentialActivityA" mapstructure:"consumeSequentialActivityAToProcessSequentialActivityA"`
+			ConsumeSequentialActivityBToProcessSequentialActivityB cfg.LinkConfig `yaml:"consumeSequentialActivityBToProcessSequentialActivityB" mapstructure:"consumeSequentialActivityBToProcessSequentialActivityB"`
+			ConsumeWorkflowJobToWorkflowPause                      cfg.LinkConfig `yaml:"consumeWorkflowJobToWorkflowPause" mapstructure:"consumeWorkflowJobToWorkflowPause"`
 		}{
 			ConsumeActivityJobToActivityPause: cfg.LinkConfig{
 				From: consumeActivityJobStreamID,
 				To:   activityPauseStreamID,
+				CallSemantics: &cfg.CallSemanticsGroup{
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
+				},
+			},
+			ConsumeFanOutActivityAToProcessFanOutActivityA: cfg.LinkConfig{
+				From: consumeFanOutActivityAStreamID,
+				To:   processFanOutActivityAStreamID,
+				CallSemantics: &cfg.CallSemanticsGroup{
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
+				},
+			},
+			ConsumeFanOutActivityBToProcessFanOutActivityB: cfg.LinkConfig{
+				From: consumeFanOutActivityBStreamID,
+				To:   processFanOutActivityBStreamID,
+				CallSemantics: &cfg.CallSemanticsGroup{
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
+				},
+			},
+			ConsumeFanOutActivityCToProcessFanOutActivityC: cfg.LinkConfig{
+				From: consumeFanOutActivityCStreamID,
+				To:   processFanOutActivityCStreamID,
+				CallSemantics: &cfg.CallSemanticsGroup{
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
+				},
+			},
+			ConsumeSequentialActivityAToProcessSequentialActivityA: cfg.LinkConfig{
+				From: consumeSequentialActivityAStreamID,
+				To:   processSequentialActivityAStreamID,
+				CallSemantics: &cfg.CallSemanticsGroup{
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
+				},
+			},
+			ConsumeSequentialActivityBToProcessSequentialActivityB: cfg.LinkConfig{
+				From: consumeSequentialActivityBStreamID,
+				To:   processSequentialActivityBStreamID,
 				CallSemantics: &cfg.CallSemanticsGroup{
 					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
 				},

@@ -1,4 +1,4 @@
-# Task 3/13: `ObserveActivityResult`
+# Task 3/20: `ObserveActivityResult`
 
 > Rules: [`spec/rules.md`](../rules.md)
 

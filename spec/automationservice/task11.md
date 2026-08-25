@@ -1,18 +1,19 @@
-# Task 11/13: `TemporalActivitySchedule`
+# Task 11/20: `ProcessScheduledActivity`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `Go` |
-| Kind | `schedule-source` |
-| File | `automationservice/internal/functions/temporalactivityschedule.go` |
+| Kind | `map` |
+| File | `automationservice/internal/functions/processscheduledactivity.go` |
+| Test | `automationservice/internal/functions/processscheduledactivity_test.go` |
 | Service | `Automation Service` |
 
 
 ## Behaviour
 
-Create an Activity job message identifying the durable scheduled firing.
+Return the visible result of one scheduled Activity execution.
 
 
 
@@ -25,8 +26,9 @@ Create an Activity job message identifying the durable scheduled firing.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/temporalactivityschedule.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/processscheduledactivity.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
+- [ ] Implement meaningful assertions in `automationservice/internal/functions/processscheduledactivity_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task11.md — TemporalActivitySchedule — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task11.md — ProcessScheduledActivity — Go — done`

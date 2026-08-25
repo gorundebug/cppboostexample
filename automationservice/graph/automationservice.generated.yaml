@@ -29,6 +29,58 @@ dataConnectors:
                 taskQueue: automation-activity-jobs
                 temporalExecutionType: Activity
                 workflowExecutionTimeout: 60000
+            fanOutActivityA:
+                activityHeartbeatTimeout: 5000
+                activityStartToCloseTimeout: 30000
+                enabled: true
+                maximumAttempts: 3
+                name: Fan-Out Activity A
+                taskQueue: automation-activity-jobs
+                temporalExecutionType: Activity
+                workflowExecutionTimeout: 60000
+            fanOutActivityB:
+                activityHeartbeatTimeout: 5000
+                activityStartToCloseTimeout: 30000
+                enabled: true
+                maximumAttempts: 3
+                name: Fan-Out Activity B
+                taskQueue: automation-activity-jobs
+                temporalExecutionType: Activity
+                workflowExecutionTimeout: 60000
+            fanOutActivityC:
+                activityHeartbeatTimeout: 5000
+                activityStartToCloseTimeout: 30000
+                enabled: true
+                maximumAttempts: 3
+                name: Fan-Out Activity C
+                taskQueue: automation-activity-jobs
+                temporalExecutionType: Activity
+                workflowExecutionTimeout: 60000
+            fanOutWorkflowJob:
+                enabled: true
+                maximumAttempts: 3
+                name: Fan-Out Workflow Job
+                taskQueue: automation-workflow-jobs
+                temporalExecutionType: Workflow
+                workflowExecutionTimeout: 60000
+            sequentialActivityA:
+                activityHeartbeatTimeout: 5000
+                activityStartToCloseTimeout: 30000
+                enabled: true
+                maximumAttempts: 3
+                name: Sequential Activity A
+                taskQueue: automation-activity-jobs
+                temporalExecutionType: Activity
+                workflowExecutionTimeout: 60000
+            sequentialActivityB:
+                activityHeartbeatTimeout: 5000
+                activityStartToCloseTimeout: 30000
+                enabled: true
+                maximumAttempts: 3
+                name: Sequential Activity B
+                taskQueue: automation-activity-jobs
+                temporalExecutionType: Activity
+                workflowExecutionTimeout: 60000
             temporalActivitySchedule:
                 activityHeartbeatTimeout: 5000
                 activityStartToCloseTimeout: 30000
@@ -95,6 +147,26 @@ services:
                 to: activityPause
             link2:
                 callSemantics: FunctionCall
+                from: consumeFanOutActivityA
+                to: processFanOutActivityA
+            link3:
+                callSemantics: FunctionCall
+                from: consumeFanOutActivityB
+                to: processFanOutActivityB
+            link4:
+                callSemantics: FunctionCall
+                from: consumeFanOutActivityC
+                to: processFanOutActivityC
+            link5:
+                callSemantics: FunctionCall
+                from: consumeSequentialActivityA
+                to: processSequentialActivityA
+            link6:
+                callSemantics: FunctionCall
+                from: consumeSequentialActivityB
+                to: processSequentialActivityB
+            link7:
+                callSemantics: FunctionCall
                 from: consumeWorkflowJob
                 to: workflowPause
         livenessHandler: health/live
@@ -116,6 +188,46 @@ services:
                     type: Delay
                     xPos: -250
                     yPos: -720
+                callFanOutActivityA:
+                    endpoint: fanOutActivityA
+                    name: Call Fan-Out Activity A
+                    source: consumeFanOutWorkflowJob
+                    type: Sink
+                    valueType: string
+                    xPos: -250
+                    yPos: 800
+                callFanOutActivityB:
+                    endpoint: fanOutActivityB
+                    name: Call Fan-Out Activity B
+                    source: splitActivityAResult
+                    type: Sink
+                    valueType: string
+                    xPos: 270
+                    yPos: 720
+                callFanOutActivityC:
+                    endpoint: fanOutActivityC
+                    name: Call Fan-Out Activity C
+                    source: splitActivityAResult
+                    type: Sink
+                    valueType: string
+                    xPos: 270
+                    yPos: 880
+                callSequentialActivityA:
+                    endpoint: sequentialActivityA
+                    name: Call Sequential Activity A
+                    source: workflowPause
+                    type: Sink
+                    valueType: string
+                    xPos: 10
+                    yPos: -420
+                callSequentialActivityB:
+                    endpoint: sequentialActivityB
+                    name: Call Sequential Activity B
+                    source: callSequentialActivityA
+                    type: Sink
+                    valueType: string
+                    xPos: 270
+                    yPos: -420
                 consumeActivityJob:
                     endpoint: activityJob
                     name: Consume Activity Job
@@ -124,6 +236,53 @@ services:
                     valueType: string
                     xPos: -500
                     yPos: -720
+                consumeFanOutActivityA:
+                    endpoint: fanOutActivityA
+                    name: Consume Fan-Out Activity A
+                    source: processFanOutActivityA
+                    type: Input
+                    valueType: string
+                    xPos: -500
+                    yPos: 1050
+                consumeFanOutActivityB:
+                    endpoint: fanOutActivityB
+                    name: Consume Fan-Out Activity B
+                    source: processFanOutActivityB
+                    type: Input
+                    valueType: string
+                    xPos: -500
+                    yPos: 1200
+                consumeFanOutActivityC:
+                    endpoint: fanOutActivityC
+                    name: Consume Fan-Out Activity C
+                    source: processFanOutActivityC
+                    type: Input
+                    valueType: string
+                    xPos: -500
+                    yPos: 1350
+                consumeFanOutWorkflowJob:
+                    endpoint: fanOutWorkflowJob
+                    name: Consume Fan-Out Workflow Job
+                    type: Input
+                    valueType: string
+                    xPos: -500
+                    yPos: 800
+                consumeSequentialActivityA:
+                    endpoint: sequentialActivityA
+                    name: Consume Sequential Activity A
+                    source: processSequentialActivityA
+                    type: Input
+                    valueType: string
+                    xPos: -500
+                    yPos: 500
+                consumeSequentialActivityB:
+                    endpoint: sequentialActivityB
+                    name: Consume Sequential Activity B
+                    source: processSequentialActivityB
+                    type: Input
+                    valueType: string
+                    xPos: -500
+                    yPos: 650
                 consumeWorkflowJob:
                     endpoint: workflowJob
                     name: Consume Workflow Job
@@ -152,6 +311,32 @@ services:
                     valueType: string
                     xPos: -500
                     yPos: -570
+                observeFanOutActivityB:
+                    functionDescription: |
+                        Observe the typed result returned by the Activity B fan-out branch.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ObserveFanoutActivityB
+                    functionPackage: ""
+                    name: Observe Fan-Out Activity B
+                    source: callFanOutActivityB
+                    type: Map
+                    valueType: string
+                    xPos: 530
+                    yPos: 720
+                observeFanOutActivityC:
+                    functionDescription: |
+                        Observe the typed result returned by the Activity C fan-out branch.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ObserveFanoutActivityC
+                    functionPackage: ""
+                    name: Observe Fan-Out Activity C
+                    source: callFanOutActivityC
+                    type: Map
+                    valueType: string
+                    xPos: 530
+                    yPos: 880
                 observeWorkflowResult:
                     functionDescription: |
                         Preserve the result returned through the on-demand Workflow endpoint.
@@ -178,6 +363,45 @@ services:
                     valueType: string
                     xPos: 10
                     yPos: -720
+                processFanOutActivityA:
+                    functionDescription: |
+                        Return Activity A's typed result before the Workflow Split.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ProcessFanoutActivityA
+                    functionPackage: ""
+                    name: Process Fan-Out Activity A
+                    source: consumeFanOutActivityA
+                    type: Map
+                    valueType: string
+                    xPos: -250
+                    yPos: 1050
+                processFanOutActivityB:
+                    functionDescription: |
+                        Return Activity B's typed fan-out result.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ProcessFanoutActivityB
+                    functionPackage: ""
+                    name: Process Fan-Out Activity B
+                    source: consumeFanOutActivityB
+                    type: Map
+                    valueType: string
+                    xPos: -250
+                    yPos: 1200
+                processFanOutActivityC:
+                    functionDescription: |
+                        Return Activity C's typed fan-out result.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ProcessFanoutActivityC
+                    functionPackage: ""
+                    name: Process Fan-Out Activity C
+                    source: consumeFanOutActivityC
+                    type: Map
+                    valueType: string
+                    xPos: -250
+                    yPos: 1350
                 processScheduledActivity:
                     functionDescription: |
                         Return the visible result of one scheduled Activity execution.
@@ -204,6 +428,32 @@ services:
                     valueType: string
                     xPos: -250
                     yPos: 240
+                processSequentialActivityA:
+                    functionDescription: |
+                        Return sequential Activity A's typed result to its Temporal sink.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ProcessSequentialActivityA
+                    functionPackage: ""
+                    name: Process Sequential Activity A
+                    source: consumeSequentialActivityA
+                    type: Map
+                    valueType: string
+                    xPos: -250
+                    yPos: 500
+                processSequentialActivityB:
+                    functionDescription: |
+                        Return sequential Activity B's typed result to its Temporal sink.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ProcessSequentialActivityB
+                    functionPackage: ""
+                    name: Process Sequential Activity B
+                    source: consumeSequentialActivityB
+                    type: Map
+                    valueType: string
+                    xPos: -250
+                    yPos: 650
                 processWorkflowJob:
                     functionDescription: |
                         Continue the Workflow as new once, then return its final result.
@@ -212,10 +462,10 @@ services:
                     functionName: ProcessWorkflowJob
                     functionPackage: ""
                     name: Process Workflow Job
-                    source: workflowPause
+                    source: callSequentialActivityB
                     type: Map
                     valueType: string
-                    xPos: 10
+                    xPos: 530
                     yPos: -420
                 scheduledActivityPause:
                     duration: 250
@@ -243,6 +493,12 @@ services:
                     type: Delay
                     xPos: -500
                     yPos: 240
+                splitActivityAResult:
+                    name: Split Activity A Result
+                    source: callFanOutActivityA
+                    type: Split
+                    xPos: 10
+                    yPos: 800
                 splitOnDemandJobs:
                     name: Split On-Demand Jobs
                     source: localSchedule
@@ -257,6 +513,14 @@ services:
                     valueType: string
                     xPos: -760
                     yPos: -720
+                submitFanOutWorkflowJob:
+                    endpoint: fanOutWorkflowJob
+                    name: Submit Fan-Out Workflow Job
+                    source: splitOnDemandJobs
+                    type: Sink
+                    valueType: string
+                    xPos: -760
+                    yPos: 800
                 submitWorkflowJob:
                     endpoint: workflowJob
                     name: Submit Workflow Job

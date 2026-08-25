@@ -1,18 +1,19 @@
-# Task 12/13: `TemporalWorkflowSchedule`
+# Task 12/20: `ProcessScheduledWorkflow`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `Go` |
-| Kind | `schedule-source` |
-| File | `automationservice/internal/functions/temporalworkflowschedule.go` |
+| Kind | `map` |
+| File | `automationservice/internal/functions/processscheduledworkflow.go` |
+| Test | `automationservice/internal/functions/processscheduledworkflow_test.go` |
 | Service | `Automation Service` |
 
 
 ## Behaviour
 
-Create a Workflow job message identifying the durable scheduled firing.
+Return the visible result of one scheduled Workflow execution.
 
 
 
@@ -25,8 +26,9 @@ Create a Workflow job message identifying the durable scheduled firing.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/temporalworkflowschedule.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/processscheduledworkflow.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
+- [ ] Implement meaningful assertions in `automationservice/internal/functions/processscheduledworkflow_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task12.md — TemporalWorkflowSchedule — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task12.md — ProcessScheduledWorkflow — Go — done`

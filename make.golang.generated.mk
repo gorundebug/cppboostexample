@@ -11,10 +11,13 @@ PROTOC_GEN_GO_GRPC_VERSION := v1.5.1
 PROTOC_GEN_GO_GRPC := $(TOOLS_DIR)/protoc-gen-go-grpc
 GOLANGCI_LINT_VERSION := v2.12.2
 GOLANGCI_LINT := $(TOOLS_DIR)/golangci-lint
+WORKFLOWCHECK_VERSION := v0.5.0
+WORKFLOWCHECK := $(TOOLS_DIR)/workflowcheck
 
 LANG_BUILD_TARGETS += golang-build
 LANG_TEST_TARGETS += golang-test
 LANG_LINT_TARGETS += golang-lint
+LANG_LINT_TARGETS += golang-workflowcheck
 LANG_LINT_FIX_TARGETS += golang-lint-fix
 LANG_FMT_TARGETS += golang-fmt
 LANG_GEN_TARGETS += golang-gen
@@ -26,7 +29,7 @@ LANG_DOCKER_BUILD_TARGETS += golang-docker-build
 .PHONY: golang-build golang-test golang-lint golang-lint-fix golang-fmt \
 	golang-fmt-go golang-fmt-proto golang-gen golang-codegen golang-gen-proto \
 	golang-clean golang-tools \
-	golang-docker-build go-mod-tidy go-mod-sync fmt-go fmt-proto gen-proto \
+	golang-docker-build go-mod-tidy go-mod-sync fmt-go fmt-proto gen-proto golang-workflowcheck \
 	 docker-build-local-automationservice debug-automationservice
 
 golang-build: golang-gen ## Generate transport code and build all Go services
@@ -40,6 +43,8 @@ golang-lint: $(GOLANGCI_LINT) ## Run Go linters
 
 golang-lint-fix: $(GOLANGCI_LINT) ## Auto-fix Go lint issues
 	@$(MAKE) -C ./automationservice -f Makefile lint-fix GOLANGCI_LINT="$(GOLANGCI_LINT)"
+golang-workflowcheck: $(WORKFLOWCHECK) ## Check Go Temporal Workflow determinism
+	@cd ./automationservice && GOWORK=off "$(WORKFLOWCHECK)" ./...
 
 golang-fmt-go: ## Format Go code
 	@gofmt -w ./automationservice
@@ -125,4 +130,7 @@ $(PROTOC_GEN_GO_GRPC):
 $(GOLANGCI_LINT):
 	@mkdir -p "$(TOOLS_DIR)"
 	@GOBIN="$(TOOLS_DIR)" go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
-golang-tools: $(BUF) $(PROTOC) $(PROTOC_GEN_GO) $(PROTOC_GEN_GO_GRPC) $(GOLANGCI_LINT) ## Install Go code-generation and lint tools
+$(WORKFLOWCHECK):
+	@mkdir -p "$(TOOLS_DIR)"
+	@GOBIN="$(TOOLS_DIR)" go install go.temporal.io/sdk/contrib/tools/workflowcheck@$(WORKFLOWCHECK_VERSION)
+golang-tools: $(BUF) $(PROTOC) $(PROTOC_GEN_GO) $(PROTOC_GEN_GO_GRPC) $(GOLANGCI_LINT) $(WORKFLOWCHECK) ## Install Go code-generation and lint tools

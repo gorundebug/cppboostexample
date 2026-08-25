@@ -4,8 +4,20 @@ dataConnectors:
 endpoints:
   activityJob:
     enabled: $activityJobEnabled
+  fanOutActivityA:
+    enabled: $fanOutActivityAEnabled
+  fanOutActivityB:
+    enabled: $fanOutActivityBEnabled
+  fanOutActivityC:
+    enabled: $fanOutActivityCEnabled
+  fanOutWorkflowJob:
+    enabled: $fanOutWorkflowJobEnabled
   localSchedule:
     enabled: $localScheduleEnabled
+  sequentialActivityA:
+    enabled: $sequentialActivityAEnabled
+  sequentialActivityB:
+    enabled: $sequentialActivityBEnabled
   temporalActivitySchedule:
     enabled: $temporalActivityScheduleEnabled
   temporalWorkflowSchedule:

@@ -1,4 +1,4 @@
-# Task 7/13: `ProcessScheduledWorkflow`
+# Task 7/20: `ProcessActivityJob`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
@@ -6,14 +6,14 @@
 |-------|-------|
 | Language | `Go` |
 | Kind | `map` |
-| File | `automationservice/internal/functions/processscheduledworkflow.go` |
-| Test | `automationservice/internal/functions/processscheduledworkflow_test.go` |
+| File | `automationservice/internal/functions/processactivityjob.go` |
+| Test | `automationservice/internal/functions/processactivityjob_test.go` |
 | Service | `Automation Service` |
 
 
 ## Behaviour
 
-Return the visible result of one scheduled Workflow execution.
+Record Activity progress with DurableCallHeartbeat and return the processed job result.
 
 
 
@@ -26,9 +26,9 @@ Return the visible result of one scheduled Workflow execution.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/processscheduledworkflow.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/processactivityjob.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/processscheduledworkflow_test.go`
+- [ ] Implement meaningful assertions in `automationservice/internal/functions/processactivityjob_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task7.md — ProcessScheduledWorkflow — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task7.md — ProcessActivityJob — Go — done`

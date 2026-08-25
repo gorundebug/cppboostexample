@@ -4,7 +4,19 @@ dataConnectors:
 endpoints:
   activityJob:
     enabled: true
+  fanOutActivityA:
+    enabled: true
+  fanOutActivityB:
+    enabled: true
+  fanOutActivityC:
+    enabled: true
+  fanOutWorkflowJob:
+    enabled: true
   localSchedule:
+    enabled: true
+  sequentialActivityA:
+    enabled: true
+  sequentialActivityB:
     enabled: true
   temporalActivitySchedule:
     enabled: true
