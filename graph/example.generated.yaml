@@ -26,6 +26,8 @@ dataConnectors:
         endpoints:
             localSchedule:
                 enabled: true
+                functionDescription: |
+                    Create a job message identifying the local scheduled firing.
                 functionName: LocalSchedule
                 missedRunPolicy: FireOnce
                 name: Local Schedule
@@ -106,6 +108,8 @@ dataConnectors:
                 activityHeartbeatTimeout: 5000
                 activityStartToCloseTimeout: 30000
                 enabled: true
+                functionDescription: |
+                    Create a job message identifying the durable scheduled firing.
                 functionName: TemporalSchedule
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
@@ -227,40 +231,14 @@ services:
                     endpoint: localSchedule
                     name: Local Schedule
                     type: Input
-                    valueType: scheduleTrigger
+                    valueType: string
                     xPos: -1050
                     yPos: -480
-                makeLocalJob:
-                    functionDescription: |
-                        Create a job message identifying the local scheduled firing.
-                    functionInitializerGroup: ""
-                    functionModule: ""
-                    functionName: LocalJob
-                    functionPackage: ""
-                    name: Make Local Job
-                    source: localSchedule
-                    type: Map
-                    valueType: string
-                    xPos: -820
-                    yPos: -480
-                makeTemporalJob:
-                    functionDescription: |
-                        Create a job message identifying the durable scheduled firing.
-                    functionInitializerGroup: ""
-                    functionModule: ""
-                    functionName: TemporalJob
-                    functionPackage: ""
-                    name: Make Temporal Job
-                    source: temporalSchedule
-                    type: Map
-                    valueType: string
-                    xPos: -820
-                    yPos: -180
                 mergeJobSubmissions:
                     name: Merge Job Submissions
                     sources:
-                        - makeLocalJob
-                        - makeTemporalJob
+                        - localSchedule
+                        - temporalSchedule
                     type: Merge
                     xPos: -570
                     yPos: -330
@@ -289,7 +267,7 @@ services:
                     endpoint: temporalSchedule
                     name: Temporal Schedule
                     type: Input
-                    valueType: scheduleTrigger
+                    valueType: string
                     xPos: -1050
                     yPos: -180
         programmingLanguage: GoLang
@@ -585,11 +563,6 @@ types:
         publicType: false
         transferByValue: false
         type: struct
-    scheduleTrigger:
-        description: Portable local or durable schedule firing metadata.
-        name: ScheduleTrigger
-        publicType: false
-        type: schedule trigger
     string:
         description: Automation job payload and result.
         publicType: false

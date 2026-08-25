@@ -26,14 +26,12 @@ import (
 	"github.com/gorundebug/cppboostexample-automationservice/internal/functions"
 	datasink "github.com/gorundebug/servicelib/datasink"
 	datasource "github.com/gorundebug/servicelib/datasource"
-	runtimetemporal "github.com/gorundebug/servicelib/runtime/temporal"
+	datasourcetemporal "github.com/gorundebug/servicelib/datasource/temporal"
 )
 
 type serviceMakers struct {
 	//stream function makers
 	processDurableJobMaker func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ProcessDurableJob, error)
-	localJobMaker          func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.LocalJob, error)
-	temporalJobMaker       func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.TemporalJob, error)
 	//data source function makers
 	localScheduleMaker    func(ctx context.Context, cfg *runtimecfg.CronEndpointConfig, env environment.ServiceEnvironment) (*functions.LocalSchedule, error)
 	temporalScheduleMaker func(ctx context.Context, cfg *runtimecfg.TemporalEndpointConfig, env environment.ServiceEnvironment) (*functions.TemporalSchedule, error)
@@ -43,8 +41,6 @@ type serviceMakers struct {
 type serviceFunctions struct {
 	//stream functions
 	processDurableJob *functions.ProcessDurableJob
-	localJob          *functions.LocalJob
-	temporalJob       *functions.TemporalJob
 	//data source functions
 	localSchedule    *functions.LocalSchedule
 	temporalSchedule *functions.TemporalSchedule
@@ -55,10 +51,8 @@ type serviceStreams struct {
 	//streams
 	consumeDurableJob   runtime.TypedInputStream[string, string, error]
 	processDurableJob   runtime.TypedTransformConsumedStream[string, string]
-	localSchedule       runtime.TypedInputStream[runtime.ScheduleTrigger, any, error]
-	makeLocalJob        runtime.TypedTransformConsumedStream[runtime.ScheduleTrigger, string]
-	temporalSchedule    runtime.TypedInputStream[runtime.ScheduleTrigger, any, error]
-	makeTemporalJob     runtime.TypedTransformConsumedStream[runtime.ScheduleTrigger, string]
+	localSchedule       runtime.TypedInputStream[string, any, error]
+	temporalSchedule    runtime.TypedInputStream[string, any, error]
 	mergeJobSubmissions runtime.TypedConsumedStream[string]
 	submitDurableJob    runtime.TypedSinkStream[string, error]
 }
@@ -70,8 +64,8 @@ type serviceHandlers struct {
 type serviceDataConnectors struct {
 	//data sources
 	durableJob       runtime.Consumer[string]
-	localSchedule    runtime.Consumer[runtime.ScheduleTrigger]
-	temporalSchedule runtime.Consumer[runtime.ScheduleTrigger]
+	localSchedule    runtime.Consumer[string]
+	temporalSchedule runtime.Consumer[string]
 	//data sinks
 	submitDurableJobDurableJob runtime.Consumer[string]
 }
@@ -119,16 +113,6 @@ func (s *Service) initMakers(ctx context.Context) error {
 			return functions.MakeProcessDurableJob(ctx, env, cfg)
 		}
 	}
-	if s.makers.localJobMaker == nil {
-		s.makers.localJobMaker = func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.LocalJob, error) {
-			return functions.MakeLocalJob(ctx, env, cfg)
-		}
-	}
-	if s.makers.temporalJobMaker == nil {
-		s.makers.temporalJobMaker = func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.TemporalJob, error) {
-			return functions.MakeTemporalJob(ctx, env, cfg)
-		}
-	}
 	if s.makers.localScheduleMaker == nil {
 		s.makers.localScheduleMaker = func(ctx context.Context, cfg *runtimecfg.CronEndpointConfig, env environment.ServiceEnvironment) (*functions.LocalSchedule, error) {
 			return functions.MakeLocalSchedule(ctx, env, cfg)
@@ -155,7 +139,7 @@ func (s *Service) buildRuntime(ctx context.Context) error {
 	}
 
 	var err error
-	if _, err = runtimetemporal.MakeConnector(cfg.DataConnectors.Temporal.ID, s); err != nil {
+	if _, err = datasourcetemporal.MakeConnector(cfg.DataConnectors.Temporal.ID, s); err != nil {
 		return fmt.Errorf("init Temporal connector 'Temporal' failed: %w", err)
 	}
 
@@ -189,19 +173,13 @@ func (s *Service) initStreams(ctx context.Context) error {
 	if s.streams.processDurableJob, err = transformation.Map[string, string](&cfg.Streams.ProcessDurableJob, s.streams.consumeDurableJob, s.functions.processDurableJob); err != nil {
 		return err
 	}
-	if s.streams.localSchedule, err = transformation.Input[runtime.ScheduleTrigger, any, error](&cfg.Streams.LocalSchedule, s); err != nil {
+	if s.streams.localSchedule, err = transformation.Input[string, any, error](&cfg.Streams.LocalSchedule, s); err != nil {
 		return err
 	}
-	if s.streams.makeLocalJob, err = transformation.Map[runtime.ScheduleTrigger, string](&cfg.Streams.MakeLocalJob, s.streams.localSchedule, s.functions.localJob); err != nil {
+	if s.streams.temporalSchedule, err = transformation.Input[string, any, error](&cfg.Streams.TemporalSchedule, s); err != nil {
 		return err
 	}
-	if s.streams.temporalSchedule, err = transformation.Input[runtime.ScheduleTrigger, any, error](&cfg.Streams.TemporalSchedule, s); err != nil {
-		return err
-	}
-	if s.streams.makeTemporalJob, err = transformation.Map[runtime.ScheduleTrigger, string](&cfg.Streams.MakeTemporalJob, s.streams.temporalSchedule, s.functions.temporalJob); err != nil {
-		return err
-	}
-	if s.streams.mergeJobSubmissions, err = transformation.Merge[string](&cfg.Streams.MergeJobSubmissions, s.streams.makeLocalJob, s.streams.makeTemporalJob); err != nil {
+	if s.streams.mergeJobSubmissions, err = transformation.Merge[string](&cfg.Streams.MergeJobSubmissions, s.streams.localSchedule, s.streams.temporalSchedule); err != nil {
 		return err
 	}
 	if s.streams.submitDurableJob, err = transformation.Sink[string, error](&cfg.Streams.SubmitDurableJob, s.streams.mergeJobSubmissions); err != nil {
@@ -233,20 +211,6 @@ func (s *Service) initFunctions(ctx context.Context, cfg *config.Config) error {
 		eg.Go(func() error {
 			var err error
 			s.functions.processDurableJob, err = s.makers.processDurableJobMaker(egCtx, &cfg.Streams.ProcessDurableJob, s)
-			return err
-		})
-	}
-	if s.makers.localJobMaker != nil {
-		eg.Go(func() error {
-			var err error
-			s.functions.localJob, err = s.makers.localJobMaker(egCtx, &cfg.Streams.MakeLocalJob, s)
-			return err
-		})
-	}
-	if s.makers.temporalJobMaker != nil {
-		eg.Go(func() error {
-			var err error
-			s.functions.temporalJob, err = s.makers.temporalJobMaker(egCtx, &cfg.Streams.MakeTemporalJob, s)
 			return err
 		})
 	}

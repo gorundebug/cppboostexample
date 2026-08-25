@@ -21,8 +21,6 @@ const (
 const (
 	consumeDurableJobStreamID = iota + 1
 	localScheduleStreamID
-	makeLocalJobStreamID
-	makeTemporalJobStreamID
 	mergeJobSubmissionsStreamID
 	processDurableJobStreamID
 	submitDurableJobStreamID
@@ -50,8 +48,6 @@ type Config struct {
 	Streams struct {
 		ConsumeDurableJob   cfg.InputStreamConfig `yaml:"consumeDurableJob" mapstructure:"consumeDurableJob"`
 		LocalSchedule       cfg.InputStreamConfig `yaml:"localSchedule" mapstructure:"localSchedule"`
-		MakeLocalJob        cfg.MapStreamConfig   `yaml:"makeLocalJob" mapstructure:"makeLocalJob"`
-		MakeTemporalJob     cfg.MapStreamConfig   `yaml:"makeTemporalJob" mapstructure:"makeTemporalJob"`
 		MergeJobSubmissions cfg.MergeStreamConfig `yaml:"mergeJobSubmissions" mapstructure:"mergeJobSubmissions"`
 		ProcessDurableJob   cfg.MapStreamConfig   `yaml:"processDurableJob" mapstructure:"processDurableJob"`
 		SubmitDurableJob    cfg.SinkStreamConfig  `yaml:"submitDurableJob" mapstructure:"submitDurableJob"`
@@ -85,8 +81,7 @@ type Config struct {
 	} `yaml:"modules" mapstructure:"modules"`
 
 	Types struct {
-		ScheduleTrigger cfg.TypeConfig `yaml:"scheduleTrigger" mapstructure:"scheduleTrigger"`
-		String          cfg.TypeConfig `yaml:"string" mapstructure:"string"`
+		String cfg.TypeConfig `yaml:"string" mapstructure:"string"`
 	} `yaml:"types" mapstructure:"types"`
 
 	Custom     CustomConfig           `yaml:",inline" mapstructure:",squash"`
@@ -107,8 +102,6 @@ func (c *Config) GetStreams() []cfg.StreamConfig {
 	return []cfg.StreamConfig{
 		&c.Streams.ConsumeDurableJob,
 		&c.Streams.LocalSchedule,
-		&c.Streams.MakeLocalJob,
-		&c.Streams.MakeTemporalJob,
 		&c.Streams.MergeJobSubmissions,
 		&c.Streams.ProcessDurableJob,
 		&c.Streams.SubmitDurableJob,
@@ -151,7 +144,6 @@ func (c *Config) GetModules() []*cfg.ModuleConfig {
 
 func (c *Config) GetTypes() []*cfg.TypeConfig {
 	return []*cfg.TypeConfig{
-		&c.Types.ScheduleTrigger,
 		&c.Types.String,
 	}
 }
@@ -354,8 +346,6 @@ func MakeConfig() *Config {
 		Streams: struct {
 			ConsumeDurableJob   cfg.InputStreamConfig `yaml:"consumeDurableJob" mapstructure:"consumeDurableJob"`
 			LocalSchedule       cfg.InputStreamConfig `yaml:"localSchedule" mapstructure:"localSchedule"`
-			MakeLocalJob        cfg.MapStreamConfig   `yaml:"makeLocalJob" mapstructure:"makeLocalJob"`
-			MakeTemporalJob     cfg.MapStreamConfig   `yaml:"makeTemporalJob" mapstructure:"makeTemporalJob"`
 			MergeJobSubmissions cfg.MergeStreamConfig `yaml:"mergeJobSubmissions" mapstructure:"mergeJobSubmissions"`
 			ProcessDurableJob   cfg.MapStreamConfig   `yaml:"processDurableJob" mapstructure:"processDurableJob"`
 			SubmitDurableJob    cfg.SinkStreamConfig  `yaml:"submitDurableJob" mapstructure:"submitDurableJob"`
@@ -380,34 +370,8 @@ func MakeConfig() *Config {
 				IdService:  automationServiceServiceID,
 				XPos:       -1050,
 				YPos:       -480,
-				ValueType:  "ScheduleTrigger",
+				ValueType:  "string",
 				IdEndpoint: localScheduleEndpointID,
-			},
-
-			MakeLocalJob: cfg.MapStreamConfig{
-				ID:                  makeLocalJobStreamID,
-				Name:                "Make Local Job",
-				Pipeline:            "automation",
-				IdService:           automationServiceServiceID,
-				IdSource:            localScheduleStreamID,
-				XPos:                -820,
-				YPos:                -480,
-				ValueType:           "string",
-				FunctionName:        "LocalJob",
-				FunctionDescription: "Create a job message identifying the local scheduled firing.\n",
-			},
-
-			MakeTemporalJob: cfg.MapStreamConfig{
-				ID:                  makeTemporalJobStreamID,
-				Name:                "Make Temporal Job",
-				Pipeline:            "automation",
-				IdService:           automationServiceServiceID,
-				IdSource:            temporalScheduleStreamID,
-				XPos:                -820,
-				YPos:                -180,
-				ValueType:           "string",
-				FunctionName:        "TemporalJob",
-				FunctionDescription: "Create a job message identifying the durable scheduled firing.\n",
 			},
 
 			MergeJobSubmissions: cfg.MergeStreamConfig{
@@ -415,7 +379,7 @@ func MakeConfig() *Config {
 				Name:      "Merge Job Submissions",
 				Pipeline:  "automation",
 				IdService: automationServiceServiceID,
-				IdSources: []int{makeLocalJobStreamID, makeTemporalJobStreamID},
+				IdSources: []int{localScheduleStreamID, temporalScheduleStreamID},
 				XPos:      -570,
 				YPos:      -330,
 			},
@@ -452,7 +416,7 @@ func MakeConfig() *Config {
 				IdService:  automationServiceServiceID,
 				XPos:       -1050,
 				YPos:       -180,
-				ValueType:  "ScheduleTrigger",
+				ValueType:  "string",
 				IdEndpoint: temporalScheduleEndpointID,
 			},
 		},
@@ -561,14 +525,8 @@ func MakeConfig() *Config {
 			},
 		},
 		Types: struct {
-			ScheduleTrigger cfg.TypeConfig `yaml:"scheduleTrigger" mapstructure:"scheduleTrigger"`
-			String          cfg.TypeConfig `yaml:"string" mapstructure:"string"`
+			String cfg.TypeConfig `yaml:"string" mapstructure:"string"`
 		}{
-			ScheduleTrigger: cfg.TypeConfig{
-				Name: "ScheduleTrigger",
-				Type: api.DataTypeScheduleTrigger,
-			},
-
 			String: cfg.TypeConfig{
 				Name: "string",
 				Type: api.DataTypeString,

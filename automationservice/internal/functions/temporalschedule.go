@@ -2,6 +2,7 @@ package functions
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gorundebug/servicelib/datasource"
 	"github.com/gorundebug/servicelib/runtime"
@@ -9,12 +10,12 @@ import (
 	"github.com/gorundebug/servicelib/runtime/environment"
 )
 
-var _ runtime.ScheduleEndpointFunction[runtime.ScheduleTrigger] = (*TemporalSchedule)(nil)
+var _ runtime.ScheduleEndpointFunction[string] = (*TemporalSchedule)(nil)
 
-func MakeEndpointConsumerTemporalSchedule[R, E any](
-	stream runtime.TypedInputStream[runtime.ScheduleTrigger, R, E],
-	function runtime.ScheduleEndpointFunction[runtime.ScheduleTrigger],
-) (runtime.Consumer[runtime.ScheduleTrigger], error) {
+func MakeEndpointConsumerTemporalSchedule[T, R, E any](
+	stream runtime.TypedInputStream[T, R, E],
+	function runtime.ScheduleEndpointFunction[T],
+) (runtime.Consumer[T], error) {
 	return datasource.TemporalScheduleEndpointConsumer(stream, function)
 }
 
@@ -25,9 +26,9 @@ type TemporalSchedule struct{}
 func (f *TemporalSchedule) OnTrigger(
 	ctx context.Context,
 	trigger runtime.ScheduleTrigger,
-	out runtime.Collect[runtime.ScheduleTrigger],
+	out runtime.Collect[string],
 ) {
-	out.Out(ctx, trigger)
+	out.Out(ctx, fmt.Sprintf("temporal:%s:%s", trigger.ScheduleID, trigger.TriggerID))
 }
 
 // MakeTemporalSchedule constructs the endpoint function once during service startup.
