@@ -98,40 +98,54 @@ int main(int argc, char* argv[]) {
                                     runtime.grpcContext(),
                                     config, *service_logger,
                                     metrics, tracing.get());
-    runtime.start();
-    service.start();
-    loader.Start(std::chrono::seconds{5},
-                 [](std::shared_ptr<const servicelib::config::RuntimeConfig>
-                        next_config) {
-                   servicelib::config::RuntimeConfigRegistry::Publish(
-                       std::move(next_config));
-                 });
+    bool runtime_shutdown{};
+    const auto shutdown_runtime = [&] {
+      if (runtime_shutdown) return;
+      const auto shutdown_timeout = std::chrono::milliseconds(
+          own_service_config.shutdownTimeout > 0
+              ? own_service_config.shutdownTimeout
+              : 0);
+      grpc_server->Shutdown(std::chrono::system_clock::now() +
+                            shutdown_timeout);
+      loader.Stop();
+      service.stop();
+      runtime.stop();
+      runtime.join();
+      runtime_shutdown = true;
+    };
+    try {
+      runtime.start();
+      service.start();
+      loader.Start(std::chrono::seconds{5},
+                   [](std::shared_ptr<const servicelib::config::RuntimeConfig>
+                          next_config) {
+                     servicelib::config::RuntimeConfigRegistry::Publish(
+                         std::move(next_config));
+                   });
     grpc_services.registerHandlers(runtime.grpcContext(), service,
                                    runtime.grpcExecutor());
 
-    std::promise<void> shutdown;
-    auto shutdown_requested = shutdown.get_future();
-    runtime.waitForSignals({SIGINT, SIGTERM},
-                           [&](int) { shutdown.set_value(); });
-    shutdown_requested.wait();
-    const auto shutdown_timeout = std::chrono::milliseconds(
-        own_service_config.shutdownTimeout > 0
-            ? own_service_config.shutdownTimeout
-            : 0);
-    grpc_server->Shutdown(std::chrono::system_clock::now() +
-                          shutdown_timeout);
-
-    loader.Stop();
-    service.stop();
-    runtime.stop();
-    runtime.join();
-    const bool tracing_flushed = !tracing || tracing->forceFlush();
-    const bool tracing_stopped = !tracing || tracing->shutdown();
-    const bool logs_flushed = !otlp_logs || otlp_logs->forceFlush();
-    const bool logs_stopped = !otlp_logs || otlp_logs->shutdown();
-    if (!tracing_flushed || !tracing_stopped || !logs_flushed ||
-        !logs_stopped) {
-      throw std::runtime_error("failed to flush OpenTelemetry providers");
+      std::promise<void> shutdown;
+      auto shutdown_requested = shutdown.get_future();
+      runtime.waitForSignals({SIGINT, SIGTERM},
+                             [&](int) { shutdown.set_value(); });
+      shutdown_requested.wait();
+      shutdown_runtime();
+      const bool tracing_flushed = !tracing || tracing->forceFlush();
+      const bool tracing_stopped = !tracing || tracing->shutdown();
+      const bool logs_flushed = !otlp_logs || otlp_logs->forceFlush();
+      const bool logs_stopped = !otlp_logs || otlp_logs->shutdown();
+      if (!tracing_flushed || !tracing_stopped || !logs_flushed ||
+          !logs_stopped) {
+        throw std::runtime_error("failed to flush OpenTelemetry providers");
+      }
+    } catch (...) {
+      try {
+        shutdown_runtime();
+      } catch (...) {
+        // Preserve the original startup/runtime failure.
+      }
+      throw;
     }
     return 0;
   } catch (const std::exception& error) {

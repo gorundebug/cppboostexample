@@ -41,7 +41,10 @@ ServiceGenerated::ServiceGenerated(
       servicelib::config::detail::MakeRuntimeConfigSnapshot(config_);
 }
 
-ServiceGenerated::~ServiceGenerated() { stopRuntime(); }
+ServiceGenerated::~ServiceGenerated() {
+  stopRuntime();
+  releaseRuntime();
+}
 
 void ServiceGenerated::start() {
   try {
@@ -56,7 +59,6 @@ void ServiceGenerated::start() {
     serviceStarted();
   } catch (...) {
     stop();
-    releaseRuntime();
     throw;
   }
 }
@@ -371,7 +373,6 @@ void ServiceGenerated::stopRuntime() noexcept {
   } catch (...) {
     report_failure("ServiceApp::stop", "unknown exception");
   }
-  releaseRuntime();
 }
 
 void ServiceGenerated::releaseRuntime() noexcept {
