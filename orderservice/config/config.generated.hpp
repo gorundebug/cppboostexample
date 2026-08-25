@@ -18,18 +18,18 @@
 namespace example::order_service::config {
 
 inline constexpr int kOrderServiceServiceId = 4;
-inline constexpr int kProcessOrderItemErrorStreamId = 14;
-inline constexpr int kMapOrderItemResultToOrderStateStreamId = 15;
-inline constexpr int kMapToOrderProcessedStreamId = 16;
-inline constexpr int kMapToOrderStateStreamId = 17;
-inline constexpr int kMergeResultsStreamId = 18;
-inline constexpr int kProcessOrderStreamId = 19;
-inline constexpr int kProcessOrderItemStreamId = 20;
-inline constexpr int kProcessOrderItemsStreamId = 21;
-inline constexpr int kPublishOrderProcessedStreamId = 22;
-inline constexpr int kSoftDeadlineStreamId = 23;
-inline constexpr int kSplitOrderResultStreamId = 24;
-inline constexpr int kSplitPipelineStreamId = 25;
+inline constexpr int kProcessOrderItemErrorStreamId = 25;
+inline constexpr int kMapOrderItemResultToOrderStateStreamId = 26;
+inline constexpr int kMapToOrderProcessedStreamId = 27;
+inline constexpr int kMapToOrderStateStreamId = 28;
+inline constexpr int kMergeResultsStreamId = 29;
+inline constexpr int kProcessOrderStreamId = 30;
+inline constexpr int kProcessOrderItemStreamId = 31;
+inline constexpr int kProcessOrderItemsStreamId = 32;
+inline constexpr int kPublishOrderProcessedStreamId = 33;
+inline constexpr int kSoftDeadlineStreamId = 34;
+inline constexpr int kSplitOrderResultStreamId = 35;
+inline constexpr int kSplitPipelineStreamId = 36;
 inline constexpr int kOrderProcessedEndpointId = 3;
 inline constexpr int kProcessOrderEndpointId = 4;
 inline constexpr int kProcessOrderItemEndpointId = 1;

@@ -1,4 +1,4 @@
-# Task 1/4: `DurablePause`
+# Task 1/13: `ActivityPause`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
@@ -6,14 +6,14 @@
 |-------|-------|
 | Language | `Go` |
 | Kind | `delay` |
-| File | `automationservice/internal/functions/durablepause.go` |
-| Test | `automationservice/internal/functions/durablepause_test.go` |
+| File | `automationservice/internal/functions/activitypause.go` |
+| Test | `automationservice/internal/functions/activitypause_test.go` |
 | Service | `Automation Service` |
 
 
 ## Behaviour
 
-Suspend a DurableCall through a Temporal timer, then resume the pipeline without occupying an Activity slot.
+Apply the ordinary local Delay while processing an on-demand Temporal Activity.
 
 
 
@@ -26,9 +26,9 @@ Suspend a DurableCall through a Temporal timer, then resume the pipeline without
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/durablepause.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/activitypause.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/durablepause_test.go`
+- [ ] Implement meaningful assertions in `automationservice/internal/functions/activitypause_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task1.md — DurablePause — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task1.md — ActivityPause — Go — done`

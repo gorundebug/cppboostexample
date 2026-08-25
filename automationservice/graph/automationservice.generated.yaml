@@ -20,29 +20,53 @@ dataConnectors:
     temporal:
         address: temporal:7233
         endpoints:
-            durableJob:
+            activityJob:
                 activityHeartbeatTimeout: 5000
                 activityStartToCloseTimeout: 30000
                 enabled: true
                 maximumAttempts: 3
-                name: Durable Job
-                taskQueue: automation-jobs
+                name: Activity Job
+                taskQueue: automation-activity-jobs
+                temporalExecutionType: Activity
                 workflowExecutionTimeout: 60000
-            temporalSchedule:
+            temporalActivitySchedule:
                 activityHeartbeatTimeout: 5000
                 activityStartToCloseTimeout: 30000
                 enabled: true
                 functionDescription: |
-                    Create a job message identifying the durable scheduled firing.
-                functionName: TemporalSchedule
+                    Create an Activity job message identifying the durable scheduled firing.
+                functionName: TemporalActivitySchedule
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
-                name: Temporal Schedule
+                name: Temporal Activity Schedule
                 overlapPolicy: Skip
                 schedule: '*/10 * * * *'
-                scheduleId: example-automation-schedule
-                taskQueue: automation-schedules
+                scheduleId: example-automation-activity-schedule
+                taskQueue: automation-activity-schedules
+                temporalExecutionType: Activity
                 timezone: UTC
+                workflowExecutionTimeout: 60000
+            temporalWorkflowSchedule:
+                enabled: true
+                functionDescription: |
+                    Create a Workflow job message identifying the durable scheduled firing.
+                functionName: TemporalWorkflowSchedule
+                maximumAttempts: 3
+                missedRunPolicy: FireOnce
+                name: Temporal Workflow Schedule
+                overlapPolicy: Skip
+                schedule: '*/10 * * * *'
+                scheduleId: example-automation-workflow-schedule
+                taskQueue: automation-workflow-schedules
+                temporalExecutionType: Workflow
+                timezone: UTC
+                workflowExecutionTimeout: 60000
+            workflowJob:
+                enabled: true
+                maximumAttempts: 3
+                name: Workflow Job
+                taskQueue: automation-workflow-jobs
+                temporalExecutionType: Workflow
                 workflowExecutionTimeout: 60000
         goImplementation: temporal/go
         identity: example-automation
@@ -66,85 +90,210 @@ services:
         kubernetesWorkloadType: Deployment
         links:
             link1:
-                activityHeartbeatTimeout: 5000
-                activityStartToCloseTimeout: 30000
-                callSemantics: DurableCall
-                dataConnector: temporal
-                from: consumeDurableJob
-                maximumAttempts: 3
-                taskQueue: automation-durable-calls
-                to: durablePause
-                workflowExecutionTimeout: 60000
+                callSemantics: FunctionCall
+                from: consumeActivityJob
+                to: activityPause
+            link2:
+                callSemantics: FunctionCall
+                from: consumeWorkflowJob
+                to: workflowPause
         livenessHandler: health/live
         metricsHandler: metrics
         modulePath: github.com/gorundebug/cppboostexample-automationservice
         name: Automation Service
         pipelines:
             automation:
-                consumeDurableJob:
-                    endpoint: durableJob
-                    name: Consume Durable Job
-                    source: processDurableJob
-                    type: Input
-                    valueType: string
-                    xPos: -130
-                    yPos: -330
-                durablePause:
+                activityPause:
                     duration: 250
                     functionDescription: |
-                        Suspend a DurableCall through a Temporal timer, then resume the pipeline without occupying an Activity slot.
+                        Apply the ordinary local Delay while processing an on-demand Temporal Activity.
                     functionInitializerGroup: ""
                     functionModule: ""
-                    functionName: DurablePause
+                    functionName: ActivityPause
                     functionPackage: ""
-                    name: Durable Pause
-                    source: consumeDurableJob
+                    name: Activity Pause
+                    source: consumeActivityJob
                     type: Delay
-                    xPos: 90
-                    yPos: -330
+                    xPos: -250
+                    yPos: -720
+                consumeActivityJob:
+                    endpoint: activityJob
+                    name: Consume Activity Job
+                    source: processActivityJob
+                    type: Input
+                    valueType: string
+                    xPos: -500
+                    yPos: -720
+                consumeWorkflowJob:
+                    endpoint: workflowJob
+                    name: Consume Workflow Job
+                    source: processWorkflowJob
+                    type: Input
+                    valueType: string
+                    xPos: -500
+                    yPos: -420
                 localSchedule:
                     endpoint: localSchedule
                     name: Local Schedule
                     type: Input
                     valueType: string
-                    xPos: -1050
-                    yPos: -480
-                mergeJobSubmissions:
-                    name: Merge Job Submissions
-                    sources:
-                        - localSchedule
-                        - temporalSchedule
-                    type: Merge
-                    xPos: -570
-                    yPos: -330
-                processDurableJob:
+                    xPos: -1250
+                    yPos: -570
+                observeActivityResult:
                     functionDescription: |
-                        Process one accepted automation job and return its result.
+                        Preserve the result returned through the on-demand Activity endpoint.
                     functionInitializerGroup: ""
                     functionModule: ""
-                    functionName: ProcessDurableJob
+                    functionName: ObserveActivityResult
                     functionPackage: ""
-                    name: Process Durable Job
-                    source: durablePause
+                    name: Observe Activity Result
+                    source: submitActivityJob
                     type: Map
                     valueType: string
-                    xPos: 330
-                    yPos: -330
-                submitDurableJob:
-                    endpoint: durableJob
-                    name: Submit Durable Job
-                    source: mergeJobSubmissions
+                    xPos: -500
+                    yPos: -570
+                observeWorkflowResult:
+                    functionDescription: |
+                        Preserve the result returned through the on-demand Workflow endpoint.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ObserveWorkflowResult
+                    functionPackage: ""
+                    name: Observe Workflow Result
+                    source: submitWorkflowJob
+                    type: Map
+                    valueType: string
+                    xPos: -500
+                    yPos: -270
+                processActivityJob:
+                    functionDescription: |
+                        Record Activity progress with DurableCallHeartbeat and return the processed job result.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ProcessActivityJob
+                    functionPackage: ""
+                    name: Process Activity Job
+                    source: activityPause
+                    type: Map
+                    valueType: string
+                    xPos: 10
+                    yPos: -720
+                processScheduledActivity:
+                    functionDescription: |
+                        Return the visible result of one scheduled Activity execution.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ProcessScheduledActivity
+                    functionPackage: ""
+                    name: Process Scheduled Activity
+                    source: scheduledActivityPause
+                    type: Map
+                    valueType: string
+                    xPos: -250
+                    yPos: -60
+                processScheduledWorkflow:
+                    functionDescription: |
+                        Return the visible result of one scheduled Workflow execution.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ProcessScheduledWorkflow
+                    functionPackage: ""
+                    name: Process Scheduled Workflow
+                    source: scheduledWorkflowPause
+                    type: Map
+                    valueType: string
+                    xPos: -250
+                    yPos: 240
+                processWorkflowJob:
+                    functionDescription: |
+                        Continue the Workflow as new once, then return its final result.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ProcessWorkflowJob
+                    functionPackage: ""
+                    name: Process Workflow Job
+                    source: workflowPause
+                    type: Map
+                    valueType: string
+                    xPos: 10
+                    yPos: -420
+                scheduledActivityPause:
+                    duration: 250
+                    functionDescription: |
+                        Apply the ordinary local Delay inside an Activity started by Temporal Schedule.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ScheduledActivityPause
+                    functionPackage: ""
+                    name: Scheduled Activity Pause
+                    source: temporalActivitySchedule
+                    type: Delay
+                    xPos: -500
+                    yPos: -60
+                scheduledWorkflowPause:
+                    duration: 250
+                    functionDescription: |
+                        Use the official Temporal Workflow timer for a scheduled Workflow.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ScheduledWorkflowPause
+                    functionPackage: ""
+                    name: Scheduled Workflow Pause
+                    source: temporalWorkflowSchedule
+                    type: Delay
+                    xPos: -500
+                    yPos: 240
+                splitOnDemandJobs:
+                    name: Split On-Demand Jobs
+                    source: localSchedule
+                    type: Split
+                    xPos: -1010
+                    yPos: -570
+                submitActivityJob:
+                    endpoint: activityJob
+                    name: Submit Activity Job
+                    source: splitOnDemandJobs
                     type: Sink
                     valueType: string
-                    xPos: -360
-                    yPos: -330
-                temporalSchedule:
-                    endpoint: temporalSchedule
-                    name: Temporal Schedule
+                    xPos: -760
+                    yPos: -720
+                submitWorkflowJob:
+                    endpoint: workflowJob
+                    name: Submit Workflow Job
+                    source: splitOnDemandJobs
+                    type: Sink
+                    valueType: string
+                    xPos: -760
+                    yPos: -420
+                temporalActivitySchedule:
+                    endpoint: temporalActivitySchedule
+                    name: Temporal Activity Schedule
+                    source: processScheduledActivity
                     type: Input
                     valueType: string
-                    xPos: -1050
-                    yPos: -180
+                    xPos: -760
+                    yPos: -60
+                temporalWorkflowSchedule:
+                    endpoint: temporalWorkflowSchedule
+                    name: Temporal Workflow Schedule
+                    source: processScheduledWorkflow
+                    type: Input
+                    valueType: string
+                    xPos: -760
+                    yPos: 240
+                workflowPause:
+                    duration: 250
+                    functionDescription: |
+                        Use the same Delay contract backed by the Temporal Workflow timer.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: WorkflowPause
+                    functionPackage: ""
+                    name: Workflow Pause
+                    source: consumeWorkflowJob
+                    type: Delay
+                    xPos: -250
+                    yPos: -420
         programmingLanguage: GoLang
         readinessHandler: health/ready
         shutdownTimeout: 30000

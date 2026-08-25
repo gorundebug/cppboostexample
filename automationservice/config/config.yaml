@@ -2,12 +2,16 @@ dataConnectors:
   temporal:
     address: $temporalAddress
 endpoints:
-  durableJob:
-    enabled: $durableJobEnabled
+  activityJob:
+    enabled: $activityJobEnabled
   localSchedule:
     enabled: $localScheduleEnabled
-  temporalSchedule:
-    enabled: $temporalScheduleEnabled
+  temporalActivitySchedule:
+    enabled: $temporalActivityScheduleEnabled
+  temporalWorkflowSchedule:
+    enabled: $temporalWorkflowScheduleEnabled
+  workflowJob:
+    enabled: $workflowJobEnabled
 services:
   automationService:
     defaultGrpcTimeout: $automationServiceDefaultGrpcTimeout
@@ -17,5 +21,11 @@ services:
     httpHost: $automationServiceHttpHost
     httpPort: $automationServiceHttpPort
 streams:
-  durablePause:
-    duration: $durablePauseDuration
+  activityPause:
+    duration: $activityPauseDuration
+  scheduledActivityPause:
+    duration: $scheduledActivityPauseDuration
+  scheduledWorkflowPause:
+    duration: $scheduledWorkflowPauseDuration
+  workflowPause:
+    duration: $workflowPauseDuration

@@ -19,20 +19,33 @@ const (
 
 // Stream IDs
 const (
-	consumeDurableJobStreamID = iota + 1
-	durablePauseStreamID
+	activityPauseStreamID = iota + 1
+	consumeActivityJobStreamID
+	consumeWorkflowJobStreamID
 	localScheduleStreamID
-	mergeJobSubmissionsStreamID
-	processDurableJobStreamID
-	submitDurableJobStreamID
-	temporalScheduleStreamID
+	observeActivityResultStreamID
+	observeWorkflowResultStreamID
+	processActivityJobStreamID
+	processScheduledActivityStreamID
+	processScheduledWorkflowStreamID
+	processWorkflowJobStreamID
+	scheduledActivityPauseStreamID
+	scheduledWorkflowPauseStreamID
+	splitOnDemandJobsStreamID
+	submitActivityJobStreamID
+	submitWorkflowJobStreamID
+	temporalActivityScheduleStreamID
+	temporalWorkflowScheduleStreamID
+	workflowPauseStreamID
 )
 
 // Endpoint IDs
 const (
-	durableJobEndpointID = iota + 1
+	activityJobEndpointID = iota + 1
 	localScheduleEndpointID
-	temporalScheduleEndpointID
+	temporalActivityScheduleEndpointID
+	temporalWorkflowScheduleEndpointID
+	workflowJobEndpointID
 )
 
 // Connector IDs
@@ -47,13 +60,24 @@ type Config struct {
 	} `yaml:"services" mapstructure:"services"`
 
 	Streams struct {
-		ConsumeDurableJob   cfg.InputStreamConfig `yaml:"consumeDurableJob" mapstructure:"consumeDurableJob"`
-		DurablePause        cfg.DelayStreamConfig `yaml:"durablePause" mapstructure:"durablePause"`
-		LocalSchedule       cfg.InputStreamConfig `yaml:"localSchedule" mapstructure:"localSchedule"`
-		MergeJobSubmissions cfg.MergeStreamConfig `yaml:"mergeJobSubmissions" mapstructure:"mergeJobSubmissions"`
-		ProcessDurableJob   cfg.MapStreamConfig   `yaml:"processDurableJob" mapstructure:"processDurableJob"`
-		SubmitDurableJob    cfg.SinkStreamConfig  `yaml:"submitDurableJob" mapstructure:"submitDurableJob"`
-		TemporalSchedule    cfg.InputStreamConfig `yaml:"temporalSchedule" mapstructure:"temporalSchedule"`
+		ActivityPause            cfg.DelayStreamConfig `yaml:"activityPause" mapstructure:"activityPause"`
+		ConsumeActivityJob       cfg.InputStreamConfig `yaml:"consumeActivityJob" mapstructure:"consumeActivityJob"`
+		ConsumeWorkflowJob       cfg.InputStreamConfig `yaml:"consumeWorkflowJob" mapstructure:"consumeWorkflowJob"`
+		LocalSchedule            cfg.InputStreamConfig `yaml:"localSchedule" mapstructure:"localSchedule"`
+		ObserveActivityResult    cfg.MapStreamConfig   `yaml:"observeActivityResult" mapstructure:"observeActivityResult"`
+		ObserveWorkflowResult    cfg.MapStreamConfig   `yaml:"observeWorkflowResult" mapstructure:"observeWorkflowResult"`
+		ProcessActivityJob       cfg.MapStreamConfig   `yaml:"processActivityJob" mapstructure:"processActivityJob"`
+		ProcessScheduledActivity cfg.MapStreamConfig   `yaml:"processScheduledActivity" mapstructure:"processScheduledActivity"`
+		ProcessScheduledWorkflow cfg.MapStreamConfig   `yaml:"processScheduledWorkflow" mapstructure:"processScheduledWorkflow"`
+		ProcessWorkflowJob       cfg.MapStreamConfig   `yaml:"processWorkflowJob" mapstructure:"processWorkflowJob"`
+		ScheduledActivityPause   cfg.DelayStreamConfig `yaml:"scheduledActivityPause" mapstructure:"scheduledActivityPause"`
+		ScheduledWorkflowPause   cfg.DelayStreamConfig `yaml:"scheduledWorkflowPause" mapstructure:"scheduledWorkflowPause"`
+		SplitOnDemandJobs        cfg.SplitStreamConfig `yaml:"splitOnDemandJobs" mapstructure:"splitOnDemandJobs"`
+		SubmitActivityJob        cfg.SinkStreamConfig  `yaml:"submitActivityJob" mapstructure:"submitActivityJob"`
+		SubmitWorkflowJob        cfg.SinkStreamConfig  `yaml:"submitWorkflowJob" mapstructure:"submitWorkflowJob"`
+		TemporalActivitySchedule cfg.InputStreamConfig `yaml:"temporalActivitySchedule" mapstructure:"temporalActivitySchedule"`
+		TemporalWorkflowSchedule cfg.InputStreamConfig `yaml:"temporalWorkflowSchedule" mapstructure:"temporalWorkflowSchedule"`
+		WorkflowPause            cfg.DelayStreamConfig `yaml:"workflowPause" mapstructure:"workflowPause"`
 	} `yaml:"streams" mapstructure:"streams"`
 
 	DataConnectors struct {
@@ -62,18 +86,23 @@ type Config struct {
 	} `yaml:"dataConnectors" mapstructure:"dataConnectors"`
 
 	Endpoints struct {
-		DurableJob cfg.TemporalEndpointConfig `yaml:"durableJob" mapstructure:"durableJob"`
+		ActivityJob cfg.TemporalEndpointConfig `yaml:"activityJob" mapstructure:"activityJob"`
 
 		LocalSchedule cfg.CronEndpointConfig `yaml:"localSchedule" mapstructure:"localSchedule"`
 
-		TemporalSchedule cfg.TemporalEndpointConfig `yaml:"temporalSchedule" mapstructure:"temporalSchedule"`
+		TemporalActivitySchedule cfg.TemporalEndpointConfig `yaml:"temporalActivitySchedule" mapstructure:"temporalActivitySchedule"`
+
+		TemporalWorkflowSchedule cfg.TemporalEndpointConfig `yaml:"temporalWorkflowSchedule" mapstructure:"temporalWorkflowSchedule"`
+
+		WorkflowJob cfg.TemporalEndpointConfig `yaml:"workflowJob" mapstructure:"workflowJob"`
 	} `yaml:"endpoints" mapstructure:"endpoints"`
 
 	Pools struct {
 	} `yaml:"pools" mapstructure:"pools"`
 
 	Links struct {
-		ConsumeDurableJobToDurablePause cfg.LinkConfig `yaml:"consumeDurableJobToDurablePause" mapstructure:"consumeDurableJobToDurablePause"`
+		ConsumeActivityJobToActivityPause cfg.LinkConfig `yaml:"consumeActivityJobToActivityPause" mapstructure:"consumeActivityJobToActivityPause"`
+		ConsumeWorkflowJobToWorkflowPause cfg.LinkConfig `yaml:"consumeWorkflowJobToWorkflowPause" mapstructure:"consumeWorkflowJobToWorkflowPause"`
 	} `yaml:"links" mapstructure:"links"`
 
 	Modules struct {
@@ -102,13 +131,24 @@ func (c *Config) GetServices() []*cfg.ServiceConfig {
 
 func (c *Config) GetStreams() []cfg.StreamConfig {
 	return []cfg.StreamConfig{
-		&c.Streams.ConsumeDurableJob,
-		&c.Streams.DurablePause,
+		&c.Streams.ActivityPause,
+		&c.Streams.ConsumeActivityJob,
+		&c.Streams.ConsumeWorkflowJob,
 		&c.Streams.LocalSchedule,
-		&c.Streams.MergeJobSubmissions,
-		&c.Streams.ProcessDurableJob,
-		&c.Streams.SubmitDurableJob,
-		&c.Streams.TemporalSchedule,
+		&c.Streams.ObserveActivityResult,
+		&c.Streams.ObserveWorkflowResult,
+		&c.Streams.ProcessActivityJob,
+		&c.Streams.ProcessScheduledActivity,
+		&c.Streams.ProcessScheduledWorkflow,
+		&c.Streams.ProcessWorkflowJob,
+		&c.Streams.ScheduledActivityPause,
+		&c.Streams.ScheduledWorkflowPause,
+		&c.Streams.SplitOnDemandJobs,
+		&c.Streams.SubmitActivityJob,
+		&c.Streams.SubmitWorkflowJob,
+		&c.Streams.TemporalActivitySchedule,
+		&c.Streams.TemporalWorkflowSchedule,
+		&c.Streams.WorkflowPause,
 	}
 }
 
@@ -121,9 +161,11 @@ func (c *Config) GetDataConnectors() []cfg.DataConnectorConfig {
 
 func (c *Config) GetEndpoints() []cfg.EndpointConfig {
 	return []cfg.EndpointConfig{
-		&c.Endpoints.DurableJob,
+		&c.Endpoints.ActivityJob,
 		&c.Endpoints.LocalSchedule,
-		&c.Endpoints.TemporalSchedule,
+		&c.Endpoints.TemporalActivitySchedule,
+		&c.Endpoints.TemporalWorkflowSchedule,
+		&c.Endpoints.WorkflowJob,
 	}
 }
 
@@ -133,7 +175,8 @@ func (c *Config) GetPools() []*cfg.PoolConfig {
 
 func (c *Config) GetLinks() []*cfg.LinkConfig {
 	return []*cfg.LinkConfig{
-		&c.Links.ConsumeDurableJobToDurablePause,
+		&c.Links.ConsumeActivityJobToActivityPause,
+		&c.Links.ConsumeWorkflowJobToWorkflowPause,
 	}
 }
 
@@ -152,6 +195,12 @@ func (c *Config) GetTypes() []*cfg.TypeConfig {
 }
 
 func (c *Config) ApplyEnvironment() error {
+	if err := c.applyActivityJobEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyActivityPauseDuration(); err != nil {
+		return err
+	}
 	if err := c.applyAutomationServiceDefaultGrpcTimeout(); err != nil {
 		return err
 	}
@@ -170,21 +219,60 @@ func (c *Config) ApplyEnvironment() error {
 	if err := c.applyAutomationServiceHttpPort(); err != nil {
 		return err
 	}
-	if err := c.applyDurableJobEnabled(); err != nil {
-		return err
-	}
-	if err := c.applyDurablePauseDuration(); err != nil {
-		return err
-	}
 	if err := c.applyLocalScheduleEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyScheduledActivityPauseDuration(); err != nil {
+		return err
+	}
+	if err := c.applyScheduledWorkflowPauseDuration(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalActivityScheduleEnabled(); err != nil {
 		return err
 	}
 	if err := c.applyTemporalAddress(); err != nil {
 		return err
 	}
-	if err := c.applyTemporalScheduleEnabled(); err != nil {
+	if err := c.applyTemporalWorkflowScheduleEnabled(); err != nil {
 		return err
 	}
+	if err := c.applyWorkflowJobEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyWorkflowPauseDuration(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Config) applyActivityJobEnabled() error {
+	value, exists := os.LookupEnv("ACTIVITY_JOB_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert ACTIVITY_JOB_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.ActivityJob.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyActivityPauseDuration() error {
+	value, exists := os.LookupEnv("ACTIVITY_PAUSE_DURATION")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert ACTIVITY_PAUSE_DURATION to int: %w", err)
+	}
+	c.Streams.ActivityPause.Duration = intVal
+
 	return nil
 }
 
@@ -266,36 +354,6 @@ func (c *Config) applyAutomationServiceHttpPort() error {
 	return nil
 }
 
-func (c *Config) applyDurableJobEnabled() error {
-	value, exists := os.LookupEnv("DURABLE_JOB_ENABLED")
-	if !exists {
-		return nil
-	}
-
-	boolVal, err := strconv.ParseBool(value)
-	if err != nil {
-		return fmt.Errorf("failed to convert DURABLE_JOB_ENABLED to bool: %w", err)
-	}
-	c.Endpoints.DurableJob.Enabled = boolVal
-
-	return nil
-}
-
-func (c *Config) applyDurablePauseDuration() error {
-	value, exists := os.LookupEnv("DURABLE_PAUSE_DURATION")
-	if !exists {
-		return nil
-	}
-
-	intVal, err := strconv.Atoi(value)
-	if err != nil {
-		return fmt.Errorf("failed to convert DURABLE_PAUSE_DURATION to int: %w", err)
-	}
-	c.Streams.DurablePause.Duration = intVal
-
-	return nil
-}
-
 func (c *Config) applyLocalScheduleEnabled() error {
 	value, exists := os.LookupEnv("LOCAL_SCHEDULE_ENABLED")
 	if !exists {
@@ -311,6 +369,51 @@ func (c *Config) applyLocalScheduleEnabled() error {
 	return nil
 }
 
+func (c *Config) applyScheduledActivityPauseDuration() error {
+	value, exists := os.LookupEnv("SCHEDULED_ACTIVITY_PAUSE_DURATION")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SCHEDULED_ACTIVITY_PAUSE_DURATION to int: %w", err)
+	}
+	c.Streams.ScheduledActivityPause.Duration = intVal
+
+	return nil
+}
+
+func (c *Config) applyScheduledWorkflowPauseDuration() error {
+	value, exists := os.LookupEnv("SCHEDULED_WORKFLOW_PAUSE_DURATION")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SCHEDULED_WORKFLOW_PAUSE_DURATION to int: %w", err)
+	}
+	c.Streams.ScheduledWorkflowPause.Duration = intVal
+
+	return nil
+}
+
+func (c *Config) applyTemporalActivityScheduleEnabled() error {
+	value, exists := os.LookupEnv("TEMPORAL_ACTIVITY_SCHEDULE_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert TEMPORAL_ACTIVITY_SCHEDULE_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.TemporalActivitySchedule.Enabled = boolVal
+
+	return nil
+}
+
 func (c *Config) applyTemporalAddress() error {
 	value, exists := os.LookupEnv("TEMPORAL_ADDRESS")
 	if !exists {
@@ -322,17 +425,47 @@ func (c *Config) applyTemporalAddress() error {
 	return nil
 }
 
-func (c *Config) applyTemporalScheduleEnabled() error {
-	value, exists := os.LookupEnv("TEMPORAL_SCHEDULE_ENABLED")
+func (c *Config) applyTemporalWorkflowScheduleEnabled() error {
+	value, exists := os.LookupEnv("TEMPORAL_WORKFLOW_SCHEDULE_ENABLED")
 	if !exists {
 		return nil
 	}
 
 	boolVal, err := strconv.ParseBool(value)
 	if err != nil {
-		return fmt.Errorf("failed to convert TEMPORAL_SCHEDULE_ENABLED to bool: %w", err)
+		return fmt.Errorf("failed to convert TEMPORAL_WORKFLOW_SCHEDULE_ENABLED to bool: %w", err)
 	}
-	c.Endpoints.TemporalSchedule.Enabled = boolVal
+	c.Endpoints.TemporalWorkflowSchedule.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyWorkflowJobEnabled() error {
+	value, exists := os.LookupEnv("WORKFLOW_JOB_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert WORKFLOW_JOB_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.WorkflowJob.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyWorkflowPauseDuration() error {
+	value, exists := os.LookupEnv("WORKFLOW_PAUSE_DURATION")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert WORKFLOW_PAUSE_DURATION to int: %w", err)
+	}
+	c.Streams.WorkflowPause.Duration = intVal
 
 	return nil
 }
@@ -365,37 +498,60 @@ func MakeConfig() *Config {
 			},
 		},
 		Streams: struct {
-			ConsumeDurableJob   cfg.InputStreamConfig `yaml:"consumeDurableJob" mapstructure:"consumeDurableJob"`
-			DurablePause        cfg.DelayStreamConfig `yaml:"durablePause" mapstructure:"durablePause"`
-			LocalSchedule       cfg.InputStreamConfig `yaml:"localSchedule" mapstructure:"localSchedule"`
-			MergeJobSubmissions cfg.MergeStreamConfig `yaml:"mergeJobSubmissions" mapstructure:"mergeJobSubmissions"`
-			ProcessDurableJob   cfg.MapStreamConfig   `yaml:"processDurableJob" mapstructure:"processDurableJob"`
-			SubmitDurableJob    cfg.SinkStreamConfig  `yaml:"submitDurableJob" mapstructure:"submitDurableJob"`
-			TemporalSchedule    cfg.InputStreamConfig `yaml:"temporalSchedule" mapstructure:"temporalSchedule"`
+			ActivityPause            cfg.DelayStreamConfig `yaml:"activityPause" mapstructure:"activityPause"`
+			ConsumeActivityJob       cfg.InputStreamConfig `yaml:"consumeActivityJob" mapstructure:"consumeActivityJob"`
+			ConsumeWorkflowJob       cfg.InputStreamConfig `yaml:"consumeWorkflowJob" mapstructure:"consumeWorkflowJob"`
+			LocalSchedule            cfg.InputStreamConfig `yaml:"localSchedule" mapstructure:"localSchedule"`
+			ObserveActivityResult    cfg.MapStreamConfig   `yaml:"observeActivityResult" mapstructure:"observeActivityResult"`
+			ObserveWorkflowResult    cfg.MapStreamConfig   `yaml:"observeWorkflowResult" mapstructure:"observeWorkflowResult"`
+			ProcessActivityJob       cfg.MapStreamConfig   `yaml:"processActivityJob" mapstructure:"processActivityJob"`
+			ProcessScheduledActivity cfg.MapStreamConfig   `yaml:"processScheduledActivity" mapstructure:"processScheduledActivity"`
+			ProcessScheduledWorkflow cfg.MapStreamConfig   `yaml:"processScheduledWorkflow" mapstructure:"processScheduledWorkflow"`
+			ProcessWorkflowJob       cfg.MapStreamConfig   `yaml:"processWorkflowJob" mapstructure:"processWorkflowJob"`
+			ScheduledActivityPause   cfg.DelayStreamConfig `yaml:"scheduledActivityPause" mapstructure:"scheduledActivityPause"`
+			ScheduledWorkflowPause   cfg.DelayStreamConfig `yaml:"scheduledWorkflowPause" mapstructure:"scheduledWorkflowPause"`
+			SplitOnDemandJobs        cfg.SplitStreamConfig `yaml:"splitOnDemandJobs" mapstructure:"splitOnDemandJobs"`
+			SubmitActivityJob        cfg.SinkStreamConfig  `yaml:"submitActivityJob" mapstructure:"submitActivityJob"`
+			SubmitWorkflowJob        cfg.SinkStreamConfig  `yaml:"submitWorkflowJob" mapstructure:"submitWorkflowJob"`
+			TemporalActivitySchedule cfg.InputStreamConfig `yaml:"temporalActivitySchedule" mapstructure:"temporalActivitySchedule"`
+			TemporalWorkflowSchedule cfg.InputStreamConfig `yaml:"temporalWorkflowSchedule" mapstructure:"temporalWorkflowSchedule"`
+			WorkflowPause            cfg.DelayStreamConfig `yaml:"workflowPause" mapstructure:"workflowPause"`
 		}{
-			ConsumeDurableJob: cfg.InputStreamConfig{
-				ID:         consumeDurableJobStreamID,
-				Name:       "Consume Durable Job",
-				Pipeline:   "automation",
-				IdService:  automationServiceServiceID,
-				IdSource:   processDurableJobStreamID,
-				XPos:       -130,
-				YPos:       -330,
-				ValueType:  "string",
-				IdEndpoint: durableJobEndpointID,
-			},
-
-			DurablePause: cfg.DelayStreamConfig{
-				ID:                  durablePauseStreamID,
-				Name:                "Durable Pause",
+			ActivityPause: cfg.DelayStreamConfig{
+				ID:                  activityPauseStreamID,
+				Name:                "Activity Pause",
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
-				IdSource:            consumeDurableJobStreamID,
-				XPos:                90,
-				YPos:                -330,
+				IdSource:            consumeActivityJobStreamID,
+				XPos:                -250,
+				YPos:                -720,
 				Duration:            250,
-				FunctionName:        "DurablePause",
-				FunctionDescription: "Suspend a DurableCall through a Temporal timer, then resume the pipeline without occupying an Activity slot.\n",
+				FunctionName:        "ActivityPause",
+				FunctionDescription: "Apply the ordinary local Delay while processing an on-demand Temporal Activity.\n",
+			},
+
+			ConsumeActivityJob: cfg.InputStreamConfig{
+				ID:         consumeActivityJobStreamID,
+				Name:       "Consume Activity Job",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   processActivityJobStreamID,
+				XPos:       -500,
+				YPos:       -720,
+				ValueType:  "string",
+				IdEndpoint: activityJobEndpointID,
+			},
+
+			ConsumeWorkflowJob: cfg.InputStreamConfig{
+				ID:         consumeWorkflowJobStreamID,
+				Name:       "Consume Workflow Job",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   processWorkflowJobStreamID,
+				XPos:       -500,
+				YPos:       -420,
+				ValueType:  "string",
+				IdEndpoint: workflowJobEndpointID,
 			},
 
 			LocalSchedule: cfg.InputStreamConfig{
@@ -403,56 +559,185 @@ func MakeConfig() *Config {
 				Name:       "Local Schedule",
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
-				XPos:       -1050,
-				YPos:       -480,
+				XPos:       -1250,
+				YPos:       -570,
 				ValueType:  "string",
 				IdEndpoint: localScheduleEndpointID,
 			},
 
-			MergeJobSubmissions: cfg.MergeStreamConfig{
-				ID:        mergeJobSubmissionsStreamID,
-				Name:      "Merge Job Submissions",
-				Pipeline:  "automation",
-				IdService: automationServiceServiceID,
-				IdSources: []int{localScheduleStreamID, temporalScheduleStreamID},
-				XPos:      -570,
-				YPos:      -330,
-			},
-
-			ProcessDurableJob: cfg.MapStreamConfig{
-				ID:                  processDurableJobStreamID,
-				Name:                "Process Durable Job",
+			ObserveActivityResult: cfg.MapStreamConfig{
+				ID:                  observeActivityResultStreamID,
+				Name:                "Observe Activity Result",
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
-				IdSource:            durablePauseStreamID,
-				XPos:                330,
-				YPos:                -330,
+				IdSource:            submitActivityJobStreamID,
+				XPos:                -500,
+				YPos:                -570,
 				ValueType:           "string",
-				FunctionName:        "ProcessDurableJob",
-				FunctionDescription: "Process one accepted automation job and return its result.\n",
+				FunctionName:        "ObserveActivityResult",
+				FunctionDescription: "Preserve the result returned through the on-demand Activity endpoint.\n",
 			},
 
-			SubmitDurableJob: cfg.SinkStreamConfig{
-				ID:         submitDurableJobStreamID,
-				Name:       "Submit Durable Job",
-				Pipeline:   "automation",
-				IdService:  automationServiceServiceID,
-				IdSource:   mergeJobSubmissionsStreamID,
-				XPos:       -360,
-				YPos:       -330,
-				ValueType:  "string",
-				IdEndpoint: durableJobEndpointID,
+			ObserveWorkflowResult: cfg.MapStreamConfig{
+				ID:                  observeWorkflowResultStreamID,
+				Name:                "Observe Workflow Result",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            submitWorkflowJobStreamID,
+				XPos:                -500,
+				YPos:                -270,
+				ValueType:           "string",
+				FunctionName:        "ObserveWorkflowResult",
+				FunctionDescription: "Preserve the result returned through the on-demand Workflow endpoint.\n",
 			},
 
-			TemporalSchedule: cfg.InputStreamConfig{
-				ID:         temporalScheduleStreamID,
-				Name:       "Temporal Schedule",
+			ProcessActivityJob: cfg.MapStreamConfig{
+				ID:                  processActivityJobStreamID,
+				Name:                "Process Activity Job",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            activityPauseStreamID,
+				XPos:                10,
+				YPos:                -720,
+				ValueType:           "string",
+				FunctionName:        "ProcessActivityJob",
+				FunctionDescription: "Record Activity progress with DurableCallHeartbeat and return the processed job result.\n",
+			},
+
+			ProcessScheduledActivity: cfg.MapStreamConfig{
+				ID:                  processScheduledActivityStreamID,
+				Name:                "Process Scheduled Activity",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            scheduledActivityPauseStreamID,
+				XPos:                -250,
+				YPos:                -60,
+				ValueType:           "string",
+				FunctionName:        "ProcessScheduledActivity",
+				FunctionDescription: "Return the visible result of one scheduled Activity execution.\n",
+			},
+
+			ProcessScheduledWorkflow: cfg.MapStreamConfig{
+				ID:                  processScheduledWorkflowStreamID,
+				Name:                "Process Scheduled Workflow",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            scheduledWorkflowPauseStreamID,
+				XPos:                -250,
+				YPos:                240,
+				ValueType:           "string",
+				FunctionName:        "ProcessScheduledWorkflow",
+				FunctionDescription: "Return the visible result of one scheduled Workflow execution.\n",
+			},
+
+			ProcessWorkflowJob: cfg.MapStreamConfig{
+				ID:                  processWorkflowJobStreamID,
+				Name:                "Process Workflow Job",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            workflowPauseStreamID,
+				XPos:                10,
+				YPos:                -420,
+				ValueType:           "string",
+				FunctionName:        "ProcessWorkflowJob",
+				FunctionDescription: "Continue the Workflow as new once, then return its final result.\n",
+			},
+
+			ScheduledActivityPause: cfg.DelayStreamConfig{
+				ID:                  scheduledActivityPauseStreamID,
+				Name:                "Scheduled Activity Pause",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            temporalActivityScheduleStreamID,
+				XPos:                -500,
+				YPos:                -60,
+				Duration:            250,
+				FunctionName:        "ScheduledActivityPause",
+				FunctionDescription: "Apply the ordinary local Delay inside an Activity started by Temporal Schedule.\n",
+			},
+
+			ScheduledWorkflowPause: cfg.DelayStreamConfig{
+				ID:                  scheduledWorkflowPauseStreamID,
+				Name:                "Scheduled Workflow Pause",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            temporalWorkflowScheduleStreamID,
+				XPos:                -500,
+				YPos:                240,
+				Duration:            250,
+				FunctionName:        "ScheduledWorkflowPause",
+				FunctionDescription: "Use the official Temporal Workflow timer for a scheduled Workflow.\n",
+			},
+
+			SplitOnDemandJobs: cfg.SplitStreamConfig{
+				ID:        splitOnDemandJobsStreamID,
+				Name:      "Split On-Demand Jobs",
+				Pipeline:  "automation",
+				IdService: automationServiceServiceID,
+				IdSource:  localScheduleStreamID,
+				XPos:      -1010,
+				YPos:      -570,
+			},
+
+			SubmitActivityJob: cfg.SinkStreamConfig{
+				ID:         submitActivityJobStreamID,
+				Name:       "Submit Activity Job",
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
-				XPos:       -1050,
-				YPos:       -180,
+				IdSource:   splitOnDemandJobsStreamID,
+				XPos:       -760,
+				YPos:       -720,
 				ValueType:  "string",
-				IdEndpoint: temporalScheduleEndpointID,
+				IdEndpoint: activityJobEndpointID,
+			},
+
+			SubmitWorkflowJob: cfg.SinkStreamConfig{
+				ID:         submitWorkflowJobStreamID,
+				Name:       "Submit Workflow Job",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   splitOnDemandJobsStreamID,
+				XPos:       -760,
+				YPos:       -420,
+				ValueType:  "string",
+				IdEndpoint: workflowJobEndpointID,
+			},
+
+			TemporalActivitySchedule: cfg.InputStreamConfig{
+				ID:         temporalActivityScheduleStreamID,
+				Name:       "Temporal Activity Schedule",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   processScheduledActivityStreamID,
+				XPos:       -760,
+				YPos:       -60,
+				ValueType:  "string",
+				IdEndpoint: temporalActivityScheduleEndpointID,
+			},
+
+			TemporalWorkflowSchedule: cfg.InputStreamConfig{
+				ID:         temporalWorkflowScheduleStreamID,
+				Name:       "Temporal Workflow Schedule",
+				Pipeline:   "automation",
+				IdService:  automationServiceServiceID,
+				IdSource:   processScheduledWorkflowStreamID,
+				XPos:       -760,
+				YPos:       240,
+				ValueType:  "string",
+				IdEndpoint: temporalWorkflowScheduleEndpointID,
+			},
+
+			WorkflowPause: cfg.DelayStreamConfig{
+				ID:                  workflowPauseStreamID,
+				Name:                "Workflow Pause",
+				Pipeline:            "automation",
+				IdService:           automationServiceServiceID,
+				IdSource:            consumeWorkflowJobStreamID,
+				XPos:                -250,
+				YPos:                -420,
+				Duration:            250,
+				FunctionName:        "WorkflowPause",
+				FunctionDescription: "Use the same Delay contract backed by the Temporal Workflow timer.\n",
 			},
 		},
 		DataConnectors: struct {
@@ -477,16 +762,19 @@ func MakeConfig() *Config {
 			},
 		},
 		Endpoints: struct {
-			DurableJob       cfg.TemporalEndpointConfig `yaml:"durableJob" mapstructure:"durableJob"`
-			LocalSchedule    cfg.CronEndpointConfig     `yaml:"localSchedule" mapstructure:"localSchedule"`
-			TemporalSchedule cfg.TemporalEndpointConfig `yaml:"temporalSchedule" mapstructure:"temporalSchedule"`
+			ActivityJob              cfg.TemporalEndpointConfig `yaml:"activityJob" mapstructure:"activityJob"`
+			LocalSchedule            cfg.CronEndpointConfig     `yaml:"localSchedule" mapstructure:"localSchedule"`
+			TemporalActivitySchedule cfg.TemporalEndpointConfig `yaml:"temporalActivitySchedule" mapstructure:"temporalActivitySchedule"`
+			TemporalWorkflowSchedule cfg.TemporalEndpointConfig `yaml:"temporalWorkflowSchedule" mapstructure:"temporalWorkflowSchedule"`
+			WorkflowJob              cfg.TemporalEndpointConfig `yaml:"workflowJob" mapstructure:"workflowJob"`
 		}{
-			DurableJob: cfg.TemporalEndpointConfig{
-				ID:                          durableJobEndpointID,
-				Name:                        "Durable Job",
+			ActivityJob: cfg.TemporalEndpointConfig{
+				ID:                          activityJobEndpointID,
+				Name:                        "Activity Job",
 				IdDataConnector:             temporalConnectorID,
 				Enabled:                     true,
-				TaskQueue:                   "automation-jobs",
+				TaskQueue:                   "automation-activity-jobs",
+				TemporalExecutionType:       api.Activity,
 				WorkflowExecutionTimeout:    60000,
 				ActivityStartToCloseTimeout: 30000,
 				ActivityHeartbeatTimeout:    5000,
@@ -504,14 +792,15 @@ func MakeConfig() *Config {
 				MissedRunPolicy: api.ScheduleMissedRunPolicyFireOnce,
 			},
 
-			TemporalSchedule: cfg.TemporalEndpointConfig{
-				ID:                          temporalScheduleEndpointID,
-				Name:                        "Temporal Schedule",
+			TemporalActivitySchedule: cfg.TemporalEndpointConfig{
+				ID:                          temporalActivityScheduleEndpointID,
+				Name:                        "Temporal Activity Schedule",
 				IdDataConnector:             temporalConnectorID,
 				Enabled:                     true,
-				TaskQueue:                   "automation-schedules",
+				TaskQueue:                   "automation-activity-schedules",
+				TemporalExecutionType:       api.Activity,
 				Schedule:                    "*/10 * * * *",
-				ScheduleID:                  "example-automation-schedule",
+				ScheduleID:                  "example-automation-activity-schedule",
 				Timezone:                    "UTC",
 				OverlapPolicy:               api.ScheduleOverlapPolicySkip,
 				MissedRunPolicy:             api.ScheduleMissedRunPolicyFireOnce,
@@ -520,24 +809,52 @@ func MakeConfig() *Config {
 				ActivityHeartbeatTimeout:    5000,
 				MaximumAttempts:             3,
 			},
+
+			TemporalWorkflowSchedule: cfg.TemporalEndpointConfig{
+				ID:                       temporalWorkflowScheduleEndpointID,
+				Name:                     "Temporal Workflow Schedule",
+				IdDataConnector:          temporalConnectorID,
+				Enabled:                  true,
+				TaskQueue:                "automation-workflow-schedules",
+				TemporalExecutionType:    api.Workflow,
+				Schedule:                 "*/10 * * * *",
+				ScheduleID:               "example-automation-workflow-schedule",
+				Timezone:                 "UTC",
+				OverlapPolicy:            api.ScheduleOverlapPolicySkip,
+				MissedRunPolicy:          api.ScheduleMissedRunPolicyFireOnce,
+				WorkflowExecutionTimeout: 60000,
+				MaximumAttempts:          3,
+			},
+
+			WorkflowJob: cfg.TemporalEndpointConfig{
+				ID:                       workflowJobEndpointID,
+				Name:                     "Workflow Job",
+				IdDataConnector:          temporalConnectorID,
+				Enabled:                  true,
+				TaskQueue:                "automation-workflow-jobs",
+				TemporalExecutionType:    api.Workflow,
+				WorkflowExecutionTimeout: 60000,
+				MaximumAttempts:          3,
+			},
 		},
 		Pools: struct {
 		}{},
 		Links: struct {
-			ConsumeDurableJobToDurablePause cfg.LinkConfig `yaml:"consumeDurableJobToDurablePause" mapstructure:"consumeDurableJobToDurablePause"`
+			ConsumeActivityJobToActivityPause cfg.LinkConfig `yaml:"consumeActivityJobToActivityPause" mapstructure:"consumeActivityJobToActivityPause"`
+			ConsumeWorkflowJobToWorkflowPause cfg.LinkConfig `yaml:"consumeWorkflowJobToWorkflowPause" mapstructure:"consumeWorkflowJobToWorkflowPause"`
 		}{
-			ConsumeDurableJobToDurablePause: cfg.LinkConfig{
-				From: consumeDurableJobStreamID,
-				To:   durablePauseStreamID,
+			ConsumeActivityJobToActivityPause: cfg.LinkConfig{
+				From: consumeActivityJobStreamID,
+				To:   activityPauseStreamID,
 				CallSemantics: &cfg.CallSemanticsGroup{
-					DurableCall: &cfg.DurableCallSemanticsConfig{
-						IdDataConnector:             temporalConnectorID,
-						TaskQueue:                   "automation-durable-calls",
-						WorkflowExecutionTimeout:    60000,
-						ActivityStartToCloseTimeout: 30000,
-						ActivityHeartbeatTimeout:    5000,
-						MaximumAttempts:             3,
-					},
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
+				},
+			},
+			ConsumeWorkflowJobToWorkflowPause: cfg.LinkConfig{
+				From: consumeWorkflowJobStreamID,
+				To:   workflowPauseStreamID,
+				CallSemantics: &cfg.CallSemanticsGroup{
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
 				},
 			},
 		},

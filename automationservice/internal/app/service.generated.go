@@ -31,33 +31,62 @@ import (
 
 type serviceMakers struct {
 	//stream function makers
-	durablePauseMaker      func(ctx context.Context, cfg *runtimecfg.DelayStreamConfig, env environment.ServiceEnvironment) (*functions.DurablePause, error)
-	processDurableJobMaker func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ProcessDurableJob, error)
+	activityPauseMaker            func(ctx context.Context, cfg *runtimecfg.DelayStreamConfig, env environment.ServiceEnvironment) (*functions.ActivityPause, error)
+	processActivityJobMaker       func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ProcessActivityJob, error)
+	workflowPauseMaker            func(ctx context.Context, cfg *runtimecfg.DelayStreamConfig, env environment.ServiceEnvironment) (*functions.WorkflowPause, error)
+	processWorkflowJobMaker       func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ProcessWorkflowJob, error)
+	observeActivityResultMaker    func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ObserveActivityResult, error)
+	observeWorkflowResultMaker    func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ObserveWorkflowResult, error)
+	scheduledActivityPauseMaker   func(ctx context.Context, cfg *runtimecfg.DelayStreamConfig, env environment.ServiceEnvironment) (*functions.ScheduledActivityPause, error)
+	processScheduledActivityMaker func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ProcessScheduledActivity, error)
+	scheduledWorkflowPauseMaker   func(ctx context.Context, cfg *runtimecfg.DelayStreamConfig, env environment.ServiceEnvironment) (*functions.ScheduledWorkflowPause, error)
+	processScheduledWorkflowMaker func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ProcessScheduledWorkflow, error)
 	//data source function makers
-	localScheduleMaker    func(ctx context.Context, cfg *runtimecfg.CronEndpointConfig, env environment.ServiceEnvironment) (*functions.LocalSchedule, error)
-	temporalScheduleMaker func(ctx context.Context, cfg *runtimecfg.TemporalEndpointConfig, env environment.ServiceEnvironment) (*functions.TemporalSchedule, error)
+	localScheduleMaker            func(ctx context.Context, cfg *runtimecfg.CronEndpointConfig, env environment.ServiceEnvironment) (*functions.LocalSchedule, error)
+	temporalActivityScheduleMaker func(ctx context.Context, cfg *runtimecfg.TemporalEndpointConfig, env environment.ServiceEnvironment) (*functions.TemporalActivitySchedule, error)
+	temporalWorkflowScheduleMaker func(ctx context.Context, cfg *runtimecfg.TemporalEndpointConfig, env environment.ServiceEnvironment) (*functions.TemporalWorkflowSchedule, error)
 	//data sink function makers
 }
 
 type serviceFunctions struct {
 	//stream functions
-	durablePause      *functions.DurablePause
-	processDurableJob *functions.ProcessDurableJob
+	activityPause            *functions.ActivityPause
+	processActivityJob       *functions.ProcessActivityJob
+	workflowPause            *functions.WorkflowPause
+	processWorkflowJob       *functions.ProcessWorkflowJob
+	observeActivityResult    *functions.ObserveActivityResult
+	observeWorkflowResult    *functions.ObserveWorkflowResult
+	scheduledActivityPause   *functions.ScheduledActivityPause
+	processScheduledActivity *functions.ProcessScheduledActivity
+	scheduledWorkflowPause   *functions.ScheduledWorkflowPause
+	processScheduledWorkflow *functions.ProcessScheduledWorkflow
 	//data source functions
-	localSchedule    *functions.LocalSchedule
-	temporalSchedule *functions.TemporalSchedule
+	localSchedule            *functions.LocalSchedule
+	temporalActivitySchedule *functions.TemporalActivitySchedule
+	temporalWorkflowSchedule *functions.TemporalWorkflowSchedule
 	//data sink functions
 }
 
 type serviceStreams struct {
 	//streams
-	consumeDurableJob   runtime.TypedInputStream[string, string, error]
-	durablePause        runtime.TypedConsumedStream[string]
-	processDurableJob   runtime.TypedTransformConsumedStream[string, string]
-	localSchedule       runtime.TypedInputStream[string, any, error]
-	temporalSchedule    runtime.TypedInputStream[string, any, error]
-	mergeJobSubmissions runtime.TypedConsumedStream[string]
-	submitDurableJob    runtime.TypedSinkStream[string, error]
+	consumeActivityJob       runtime.TypedInputStream[string, string, error]
+	activityPause            runtime.TypedConsumedStream[string]
+	processActivityJob       runtime.TypedTransformConsumedStream[string, string]
+	consumeWorkflowJob       runtime.TypedInputStream[string, string, error]
+	workflowPause            runtime.TypedConsumedStream[string]
+	processWorkflowJob       runtime.TypedTransformConsumedStream[string, string]
+	localSchedule            runtime.TypedInputStream[string, any, error]
+	splitOnDemandJobs        runtime.TypedSplitStream[string]
+	submitActivityJob        runtime.TypedSinkStreamWithResult[string, string, error]
+	observeActivityResult    runtime.TypedTransformConsumedStream[string, string]
+	submitWorkflowJob        runtime.TypedSinkStreamWithResult[string, string, error]
+	observeWorkflowResult    runtime.TypedTransformConsumedStream[string, string]
+	temporalActivitySchedule runtime.TypedInputStream[string, string, error]
+	scheduledActivityPause   runtime.TypedConsumedStream[string]
+	processScheduledActivity runtime.TypedTransformConsumedStream[string, string]
+	temporalWorkflowSchedule runtime.TypedInputStream[string, string, error]
+	scheduledWorkflowPause   runtime.TypedConsumedStream[string]
+	processScheduledWorkflow runtime.TypedTransformConsumedStream[string, string]
 }
 
 type serviceHandlers struct {
@@ -66,11 +95,14 @@ type serviceHandlers struct {
 
 type serviceDataConnectors struct {
 	//data sources
-	durableJob       runtime.Consumer[string]
-	localSchedule    runtime.Consumer[string]
-	temporalSchedule runtime.Consumer[string]
+	activityJob              runtime.Consumer[string]
+	workflowJob              runtime.Consumer[string]
+	localSchedule            runtime.Consumer[string]
+	temporalActivitySchedule runtime.Consumer[string]
+	temporalWorkflowSchedule runtime.Consumer[string]
 	//data sinks
-	submitDurableJobDurableJob runtime.Consumer[string]
+	submitActivityJobActivityJob runtime.Consumer[string]
+	submitWorkflowJobWorkflowJob runtime.Consumer[string]
 }
 
 type Service struct {
@@ -111,14 +143,54 @@ func (s *Service) Config() *config.Config {
 }
 
 func (s *Service) initMakers(ctx context.Context) error {
-	if s.makers.durablePauseMaker == nil {
-		s.makers.durablePauseMaker = func(ctx context.Context, cfg *runtimecfg.DelayStreamConfig, env environment.ServiceEnvironment) (*functions.DurablePause, error) {
-			return functions.MakeDurablePause(ctx, env, cfg)
+	if s.makers.activityPauseMaker == nil {
+		s.makers.activityPauseMaker = func(ctx context.Context, cfg *runtimecfg.DelayStreamConfig, env environment.ServiceEnvironment) (*functions.ActivityPause, error) {
+			return functions.MakeActivityPause(ctx, env, cfg)
 		}
 	}
-	if s.makers.processDurableJobMaker == nil {
-		s.makers.processDurableJobMaker = func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ProcessDurableJob, error) {
-			return functions.MakeProcessDurableJob(ctx, env, cfg)
+	if s.makers.processActivityJobMaker == nil {
+		s.makers.processActivityJobMaker = func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ProcessActivityJob, error) {
+			return functions.MakeProcessActivityJob(ctx, env, cfg)
+		}
+	}
+	if s.makers.workflowPauseMaker == nil {
+		s.makers.workflowPauseMaker = func(ctx context.Context, cfg *runtimecfg.DelayStreamConfig, env environment.ServiceEnvironment) (*functions.WorkflowPause, error) {
+			return functions.MakeWorkflowPause(ctx, env, cfg)
+		}
+	}
+	if s.makers.processWorkflowJobMaker == nil {
+		s.makers.processWorkflowJobMaker = func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ProcessWorkflowJob, error) {
+			return functions.MakeProcessWorkflowJob(ctx, env, cfg)
+		}
+	}
+	if s.makers.observeActivityResultMaker == nil {
+		s.makers.observeActivityResultMaker = func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ObserveActivityResult, error) {
+			return functions.MakeObserveActivityResult(ctx, env, cfg)
+		}
+	}
+	if s.makers.observeWorkflowResultMaker == nil {
+		s.makers.observeWorkflowResultMaker = func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ObserveWorkflowResult, error) {
+			return functions.MakeObserveWorkflowResult(ctx, env, cfg)
+		}
+	}
+	if s.makers.scheduledActivityPauseMaker == nil {
+		s.makers.scheduledActivityPauseMaker = func(ctx context.Context, cfg *runtimecfg.DelayStreamConfig, env environment.ServiceEnvironment) (*functions.ScheduledActivityPause, error) {
+			return functions.MakeScheduledActivityPause(ctx, env, cfg)
+		}
+	}
+	if s.makers.processScheduledActivityMaker == nil {
+		s.makers.processScheduledActivityMaker = func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ProcessScheduledActivity, error) {
+			return functions.MakeProcessScheduledActivity(ctx, env, cfg)
+		}
+	}
+	if s.makers.scheduledWorkflowPauseMaker == nil {
+		s.makers.scheduledWorkflowPauseMaker = func(ctx context.Context, cfg *runtimecfg.DelayStreamConfig, env environment.ServiceEnvironment) (*functions.ScheduledWorkflowPause, error) {
+			return functions.MakeScheduledWorkflowPause(ctx, env, cfg)
+		}
+	}
+	if s.makers.processScheduledWorkflowMaker == nil {
+		s.makers.processScheduledWorkflowMaker = func(ctx context.Context, cfg *runtimecfg.MapStreamConfig, env environment.ServiceEnvironment) (*functions.ProcessScheduledWorkflow, error) {
+			return functions.MakeProcessScheduledWorkflow(ctx, env, cfg)
 		}
 	}
 	if s.makers.localScheduleMaker == nil {
@@ -126,9 +198,14 @@ func (s *Service) initMakers(ctx context.Context) error {
 			return functions.MakeLocalSchedule(ctx, env, cfg)
 		}
 	}
-	if s.makers.temporalScheduleMaker == nil {
-		s.makers.temporalScheduleMaker = func(ctx context.Context, cfg *runtimecfg.TemporalEndpointConfig, env environment.ServiceEnvironment) (*functions.TemporalSchedule, error) {
-			return functions.MakeTemporalSchedule(ctx, env, cfg)
+	if s.makers.temporalActivityScheduleMaker == nil {
+		s.makers.temporalActivityScheduleMaker = func(ctx context.Context, cfg *runtimecfg.TemporalEndpointConfig, env environment.ServiceEnvironment) (*functions.TemporalActivitySchedule, error) {
+			return functions.MakeTemporalActivitySchedule(ctx, env, cfg)
+		}
+	}
+	if s.makers.temporalWorkflowScheduleMaker == nil {
+		s.makers.temporalWorkflowScheduleMaker = func(ctx context.Context, cfg *runtimecfg.TemporalEndpointConfig, env environment.ServiceEnvironment) (*functions.TemporalWorkflowSchedule, error) {
+			return functions.MakeTemporalWorkflowSchedule(ctx, env, cfg)
 		}
 	}
 
@@ -175,40 +252,91 @@ func (s *Service) buildRuntime(ctx context.Context) error {
 func (s *Service) initStreams(ctx context.Context) error {
 	cfg := s.Config()
 	var err error
-	if s.streams.consumeDurableJob, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeDurableJob, s); err != nil {
+	if s.streams.consumeActivityJob, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeActivityJob, s); err != nil {
 		return err
 	}
-	if s.streams.durablePause, err = transformation.Delay[string](&cfg.Streams.DurablePause, s.streams.consumeDurableJob, s.functions.durablePause); err != nil {
+	if s.streams.activityPause, err = transformation.Delay[string](&cfg.Streams.ActivityPause, s.streams.consumeActivityJob, s.functions.activityPause); err != nil {
 		return err
 	}
-	if s.streams.processDurableJob, err = transformation.Map[string, string](&cfg.Streams.ProcessDurableJob, s.streams.durablePause, s.functions.processDurableJob); err != nil {
+	if s.streams.processActivityJob, err = transformation.Map[string, string](&cfg.Streams.ProcessActivityJob, s.streams.activityPause, s.functions.processActivityJob); err != nil {
+		return err
+	}
+	if s.streams.consumeWorkflowJob, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeWorkflowJob, s); err != nil {
+		return err
+	}
+	if s.streams.workflowPause, err = transformation.Delay[string](&cfg.Streams.WorkflowPause, s.streams.consumeWorkflowJob, s.functions.workflowPause); err != nil {
+		return err
+	}
+	if s.streams.processWorkflowJob, err = transformation.Map[string, string](&cfg.Streams.ProcessWorkflowJob, s.streams.workflowPause, s.functions.processWorkflowJob); err != nil {
 		return err
 	}
 	if s.streams.localSchedule, err = transformation.Input[string, any, error](&cfg.Streams.LocalSchedule, s); err != nil {
 		return err
 	}
-	if s.streams.temporalSchedule, err = transformation.Input[string, any, error](&cfg.Streams.TemporalSchedule, s); err != nil {
+	if s.streams.splitOnDemandJobs, err = transformation.Split[string](&cfg.Streams.SplitOnDemandJobs, s.streams.localSchedule); err != nil {
 		return err
 	}
-	if s.streams.mergeJobSubmissions, err = transformation.Merge[string](&cfg.Streams.MergeJobSubmissions, s.streams.localSchedule, s.streams.temporalSchedule); err != nil {
+	if s.streams.submitActivityJob, err = transformation.SinkWithResult[string, string, error](&cfg.Streams.SubmitActivityJob, s.streams.splitOnDemandJobs.AddStream()); err != nil {
 		return err
 	}
-	if s.streams.submitDurableJob, err = transformation.Sink[string, error](&cfg.Streams.SubmitDurableJob, s.streams.mergeJobSubmissions); err != nil {
+	if s.streams.observeActivityResult, err = transformation.Map[string, string](&cfg.Streams.ObserveActivityResult, s.streams.submitActivityJob, s.functions.observeActivityResult); err != nil {
 		return err
 	}
-	if err = s.streams.consumeDurableJob.SetSource(s.streams.processDurableJob); err != nil {
+	if s.streams.submitWorkflowJob, err = transformation.SinkWithResult[string, string, error](&cfg.Streams.SubmitWorkflowJob, s.streams.splitOnDemandJobs.AddStream()); err != nil {
 		return err
 	}
-	if s.dataConnectors.durableJob, err = datasource.TemporalEndpointConsumer(s.streams.consumeDurableJob); err != nil {
+	if s.streams.observeWorkflowResult, err = transformation.Map[string, string](&cfg.Streams.ObserveWorkflowResult, s.streams.submitWorkflowJob, s.functions.observeWorkflowResult); err != nil {
+		return err
+	}
+	if s.streams.temporalActivitySchedule, err = transformation.Input[string, string, error](&cfg.Streams.TemporalActivitySchedule, s); err != nil {
+		return err
+	}
+	if s.streams.scheduledActivityPause, err = transformation.Delay[string](&cfg.Streams.ScheduledActivityPause, s.streams.temporalActivitySchedule, s.functions.scheduledActivityPause); err != nil {
+		return err
+	}
+	if s.streams.processScheduledActivity, err = transformation.Map[string, string](&cfg.Streams.ProcessScheduledActivity, s.streams.scheduledActivityPause, s.functions.processScheduledActivity); err != nil {
+		return err
+	}
+	if s.streams.temporalWorkflowSchedule, err = transformation.Input[string, string, error](&cfg.Streams.TemporalWorkflowSchedule, s); err != nil {
+		return err
+	}
+	if s.streams.scheduledWorkflowPause, err = transformation.Delay[string](&cfg.Streams.ScheduledWorkflowPause, s.streams.temporalWorkflowSchedule, s.functions.scheduledWorkflowPause); err != nil {
+		return err
+	}
+	if s.streams.processScheduledWorkflow, err = transformation.Map[string, string](&cfg.Streams.ProcessScheduledWorkflow, s.streams.scheduledWorkflowPause, s.functions.processScheduledWorkflow); err != nil {
+		return err
+	}
+	if err = s.streams.consumeActivityJob.SetSource(s.streams.processActivityJob); err != nil {
+		return err
+	}
+	if err = s.streams.consumeWorkflowJob.SetSource(s.streams.processWorkflowJob); err != nil {
+		return err
+	}
+	if err = s.streams.temporalActivitySchedule.SetSource(s.streams.processScheduledActivity); err != nil {
+		return err
+	}
+	if err = s.streams.temporalWorkflowSchedule.SetSource(s.streams.processScheduledWorkflow); err != nil {
+		return err
+	}
+	if s.dataConnectors.activityJob, err = datasource.TemporalEndpointConsumer(s.streams.consumeActivityJob); err != nil {
+		return err
+	}
+	if s.dataConnectors.workflowJob, err = datasource.TemporalEndpointConsumer(s.streams.consumeWorkflowJob); err != nil {
 		return err
 	}
 	if s.dataConnectors.localSchedule, err = functions.MakeEndpointConsumerLocalSchedule(s.streams.localSchedule, s.functions.localSchedule); err != nil {
 		return err
 	}
-	if s.dataConnectors.temporalSchedule, err = functions.MakeEndpointConsumerTemporalSchedule(s.streams.temporalSchedule, s.functions.temporalSchedule); err != nil {
+	if s.dataConnectors.temporalActivitySchedule, err = functions.MakeEndpointConsumerTemporalActivitySchedule(s.streams.temporalActivitySchedule, s.functions.temporalActivitySchedule); err != nil {
 		return err
 	}
-	if s.dataConnectors.submitDurableJobDurableJob, err = datasink.TemporalEndpointConsumer(s.streams.submitDurableJob); err != nil {
+	if s.dataConnectors.temporalWorkflowSchedule, err = functions.MakeEndpointConsumerTemporalWorkflowSchedule(s.streams.temporalWorkflowSchedule, s.functions.temporalWorkflowSchedule); err != nil {
+		return err
+	}
+	if s.dataConnectors.submitActivityJobActivityJob, err = datasink.TemporalEndpointConsumerWithResult(s.streams.submitActivityJob); err != nil {
+		return err
+	}
+	if s.dataConnectors.submitWorkflowJobWorkflowJob, err = datasink.TemporalEndpointConsumerWithResult(s.streams.submitWorkflowJob); err != nil {
 		return err
 	}
 	_ = err
@@ -218,17 +346,73 @@ func (s *Service) initStreams(ctx context.Context) error {
 
 func (s *Service) initFunctions(ctx context.Context, cfg *config.Config) error {
 	eg, egCtx := errgroup.WithContext(ctx)
-	if s.makers.durablePauseMaker != nil {
+	if s.makers.activityPauseMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.durablePause, err = s.makers.durablePauseMaker(egCtx, &cfg.Streams.DurablePause, s)
+			s.functions.activityPause, err = s.makers.activityPauseMaker(egCtx, &cfg.Streams.ActivityPause, s)
 			return err
 		})
 	}
-	if s.makers.processDurableJobMaker != nil {
+	if s.makers.processActivityJobMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.processDurableJob, err = s.makers.processDurableJobMaker(egCtx, &cfg.Streams.ProcessDurableJob, s)
+			s.functions.processActivityJob, err = s.makers.processActivityJobMaker(egCtx, &cfg.Streams.ProcessActivityJob, s)
+			return err
+		})
+	}
+	if s.makers.workflowPauseMaker != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.workflowPause, err = s.makers.workflowPauseMaker(egCtx, &cfg.Streams.WorkflowPause, s)
+			return err
+		})
+	}
+	if s.makers.processWorkflowJobMaker != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.processWorkflowJob, err = s.makers.processWorkflowJobMaker(egCtx, &cfg.Streams.ProcessWorkflowJob, s)
+			return err
+		})
+	}
+	if s.makers.observeActivityResultMaker != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.observeActivityResult, err = s.makers.observeActivityResultMaker(egCtx, &cfg.Streams.ObserveActivityResult, s)
+			return err
+		})
+	}
+	if s.makers.observeWorkflowResultMaker != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.observeWorkflowResult, err = s.makers.observeWorkflowResultMaker(egCtx, &cfg.Streams.ObserveWorkflowResult, s)
+			return err
+		})
+	}
+	if s.makers.scheduledActivityPauseMaker != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.scheduledActivityPause, err = s.makers.scheduledActivityPauseMaker(egCtx, &cfg.Streams.ScheduledActivityPause, s)
+			return err
+		})
+	}
+	if s.makers.processScheduledActivityMaker != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.processScheduledActivity, err = s.makers.processScheduledActivityMaker(egCtx, &cfg.Streams.ProcessScheduledActivity, s)
+			return err
+		})
+	}
+	if s.makers.scheduledWorkflowPauseMaker != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.scheduledWorkflowPause, err = s.makers.scheduledWorkflowPauseMaker(egCtx, &cfg.Streams.ScheduledWorkflowPause, s)
+			return err
+		})
+	}
+	if s.makers.processScheduledWorkflowMaker != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.processScheduledWorkflow, err = s.makers.processScheduledWorkflowMaker(egCtx, &cfg.Streams.ProcessScheduledWorkflow, s)
 			return err
 		})
 	}
@@ -239,10 +423,17 @@ func (s *Service) initFunctions(ctx context.Context, cfg *config.Config) error {
 			return err
 		})
 	}
-	if s.makers.temporalScheduleMaker != nil {
+	if s.makers.temporalActivityScheduleMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.temporalSchedule, err = s.makers.temporalScheduleMaker(egCtx, &cfg.Endpoints.TemporalSchedule, s)
+			s.functions.temporalActivitySchedule, err = s.makers.temporalActivityScheduleMaker(egCtx, &cfg.Endpoints.TemporalActivitySchedule, s)
+			return err
+		})
+	}
+	if s.makers.temporalWorkflowScheduleMaker != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.temporalWorkflowSchedule, err = s.makers.temporalWorkflowScheduleMaker(egCtx, &cfg.Endpoints.TemporalWorkflowSchedule, s)
 			return err
 		})
 	}

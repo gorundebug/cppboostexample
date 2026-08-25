@@ -11,7 +11,12 @@ import (
 func TestLocalScheduleOnTrigger(t *testing.T) {
 	function := &LocalSchedule{}
 	var collected []string
-	out := runtime.CollectFunc[string](func(_ context.Context, value string) { collected = append(collected, value) })
-	function.OnTrigger(context.Background(), runtime.ScheduleTrigger{ScheduleID: "local-cleanup", TriggerID: "trigger-1"}, out)
+	out := runtime.CollectFunc[string](func(_ context.Context, value string) {
+		collected = append(collected, value)
+	})
+	trigger := runtime.ScheduleTrigger{ScheduleID: "local-cleanup", TriggerID: "trigger-1"}
+
+	function.OnTrigger(context.Background(), trigger, out)
+
 	assert.Equal(t, []string{"local:local-cleanup:trigger-1"}, collected)
 }

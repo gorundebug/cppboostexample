@@ -1,4 +1,4 @@
-# Task 2/4: `LocalSchedule`
+# Task 2/13: `LocalSchedule`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
