@@ -19,7 +19,7 @@ spec:
       interval: {{ .Values.metrics.serviceMonitor.interval }}
       honorLabels: true
     {{- if .Values.metrics.temporalSdk.enabled }}
-    - port: temporal-metrics
+    - port: temporal-sdk
       path: {{ .Values.metrics.temporalSdk.path }}
       interval: {{ .Values.metrics.temporalSdk.interval }}
       honorLabels: true

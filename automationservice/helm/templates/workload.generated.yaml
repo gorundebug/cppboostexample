@@ -60,7 +60,7 @@ spec:
             - name: grpc
               containerPort: 9204
               protocol: TCP
-            - name: temporal-metrics
+            - name: temporal-sdk
               containerPort: 9464
               protocol: TCP
           {{- if .Values.probes.startup.enabled }}
