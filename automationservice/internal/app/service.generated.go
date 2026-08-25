@@ -315,7 +315,7 @@ func (s *Service) buildRuntime(ctx context.Context) error {
 		}
 	}
 
-	if err := s.initFunctions(ctx, cfg); err != nil {
+	if err := s.initFunctions(ctx, cfg, s); err != nil {
 		return fmt.Errorf("init functions failed: %w", err)
 	}
 
@@ -323,17 +323,16 @@ func (s *Service) buildRuntime(ctx context.Context) error {
 		return fmt.Errorf("custom functions init failed: %w", err)
 	}
 
-	if err := s.initStreams(ctx); err != nil {
+	if err := s.initStreams(ctx, cfg, s); err != nil {
 		return fmt.Errorf("init streams failed: %w", err)
 	}
 
 	return nil
 }
 
-func (s *Service) initStreams(ctx context.Context) error {
-	cfg := s.Config()
+func (s *Service) initStreams(ctx context.Context, cfg *config.Config, env runtime.RuntimeEnvironment) error {
 	var err error
-	if s.streams.consumeActivityJob, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeActivityJob, s); err != nil {
+	if s.streams.consumeActivityJob, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeActivityJob, env); err != nil {
 		return err
 	}
 	if s.streams.activityPause, err = transformation.Delay[string](&cfg.Streams.ActivityPause, s.streams.consumeActivityJob, s.functions.activityPause); err != nil {
@@ -342,25 +341,25 @@ func (s *Service) initStreams(ctx context.Context) error {
 	if s.streams.processActivityJob, err = transformation.Map[string, string](&cfg.Streams.ProcessActivityJob, s.streams.activityPause, s.functions.processActivityJob); err != nil {
 		return err
 	}
-	if s.streams.consumeFanOutActivityA, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeFanOutActivityA, s); err != nil {
+	if s.streams.consumeFanOutActivityA, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeFanOutActivityA, env); err != nil {
 		return err
 	}
 	if s.streams.processFanOutActivityA, err = transformation.Map[string, string](&cfg.Streams.ProcessFanOutActivityA, s.streams.consumeFanOutActivityA, s.functions.processFanoutActivityA); err != nil {
 		return err
 	}
-	if s.streams.consumeFanOutActivityB, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeFanOutActivityB, s); err != nil {
+	if s.streams.consumeFanOutActivityB, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeFanOutActivityB, env); err != nil {
 		return err
 	}
 	if s.streams.processFanOutActivityB, err = transformation.Map[string, string](&cfg.Streams.ProcessFanOutActivityB, s.streams.consumeFanOutActivityB, s.functions.processFanoutActivityB); err != nil {
 		return err
 	}
-	if s.streams.consumeFanOutActivityC, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeFanOutActivityC, s); err != nil {
+	if s.streams.consumeFanOutActivityC, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeFanOutActivityC, env); err != nil {
 		return err
 	}
 	if s.streams.processFanOutActivityC, err = transformation.Map[string, string](&cfg.Streams.ProcessFanOutActivityC, s.streams.consumeFanOutActivityC, s.functions.processFanoutActivityC); err != nil {
 		return err
 	}
-	if s.streams.consumeFanOutWorkflowJob, err = transformation.Input[string, any, error](&cfg.Streams.ConsumeFanOutWorkflowJob, s); err != nil {
+	if s.streams.consumeFanOutWorkflowJob, err = transformation.Input[string, any, error](&cfg.Streams.ConsumeFanOutWorkflowJob, env); err != nil {
 		return err
 	}
 	if s.streams.callFanOutActivityA, err = transformation.SinkWithResult[string, string, error](&cfg.Streams.CallFanOutActivityA, s.streams.consumeFanOutWorkflowJob); err != nil {
@@ -381,19 +380,19 @@ func (s *Service) initStreams(ctx context.Context) error {
 	if s.streams.observeFanOutActivityC, err = transformation.Map[string, string](&cfg.Streams.ObserveFanOutActivityC, s.streams.callFanOutActivityC, s.functions.observeFanoutActivityC); err != nil {
 		return err
 	}
-	if s.streams.consumeSequentialActivityA, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeSequentialActivityA, s); err != nil {
+	if s.streams.consumeSequentialActivityA, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeSequentialActivityA, env); err != nil {
 		return err
 	}
 	if s.streams.processSequentialActivityA, err = transformation.Map[string, string](&cfg.Streams.ProcessSequentialActivityA, s.streams.consumeSequentialActivityA, s.functions.processSequentialActivityA); err != nil {
 		return err
 	}
-	if s.streams.consumeSequentialActivityB, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeSequentialActivityB, s); err != nil {
+	if s.streams.consumeSequentialActivityB, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeSequentialActivityB, env); err != nil {
 		return err
 	}
 	if s.streams.processSequentialActivityB, err = transformation.Map[string, string](&cfg.Streams.ProcessSequentialActivityB, s.streams.consumeSequentialActivityB, s.functions.processSequentialActivityB); err != nil {
 		return err
 	}
-	if s.streams.consumeWorkflowJob, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeWorkflowJob, s); err != nil {
+	if s.streams.consumeWorkflowJob, err = transformation.Input[string, string, error](&cfg.Streams.ConsumeWorkflowJob, env); err != nil {
 		return err
 	}
 	if s.streams.workflowPause, err = transformation.Delay[string](&cfg.Streams.WorkflowPause, s.streams.consumeWorkflowJob, s.functions.workflowPause); err != nil {
@@ -408,7 +407,7 @@ func (s *Service) initStreams(ctx context.Context) error {
 	if s.streams.processWorkflowJob, err = transformation.Map[string, string](&cfg.Streams.ProcessWorkflowJob, s.streams.callSequentialActivityB, s.functions.processWorkflowJob); err != nil {
 		return err
 	}
-	if s.streams.localSchedule, err = transformation.Input[string, any, error](&cfg.Streams.LocalSchedule, s); err != nil {
+	if s.streams.localSchedule, err = transformation.Input[string, any, error](&cfg.Streams.LocalSchedule, env); err != nil {
 		return err
 	}
 	if s.streams.splitOnDemandJobs, err = transformation.Split[string](&cfg.Streams.SplitOnDemandJobs, s.streams.localSchedule); err != nil {
@@ -429,7 +428,7 @@ func (s *Service) initStreams(ctx context.Context) error {
 	if s.streams.observeWorkflowResult, err = transformation.Map[string, string](&cfg.Streams.ObserveWorkflowResult, s.streams.submitWorkflowJob, s.functions.observeWorkflowResult); err != nil {
 		return err
 	}
-	if s.streams.temporalActivitySchedule, err = transformation.Input[string, string, error](&cfg.Streams.TemporalActivitySchedule, s); err != nil {
+	if s.streams.temporalActivitySchedule, err = transformation.Input[string, string, error](&cfg.Streams.TemporalActivitySchedule, env); err != nil {
 		return err
 	}
 	if s.streams.scheduledActivityPause, err = transformation.Delay[string](&cfg.Streams.ScheduledActivityPause, s.streams.temporalActivitySchedule, s.functions.scheduledActivityPause); err != nil {
@@ -438,7 +437,7 @@ func (s *Service) initStreams(ctx context.Context) error {
 	if s.streams.processScheduledActivity, err = transformation.Map[string, string](&cfg.Streams.ProcessScheduledActivity, s.streams.scheduledActivityPause, s.functions.processScheduledActivity); err != nil {
 		return err
 	}
-	if s.streams.temporalWorkflowSchedule, err = transformation.Input[string, string, error](&cfg.Streams.TemporalWorkflowSchedule, s); err != nil {
+	if s.streams.temporalWorkflowSchedule, err = transformation.Input[string, string, error](&cfg.Streams.TemporalWorkflowSchedule, env); err != nil {
 		return err
 	}
 	if s.streams.scheduledWorkflowPause, err = transformation.Delay[string](&cfg.Streams.ScheduledWorkflowPause, s.streams.temporalWorkflowSchedule, s.functions.scheduledWorkflowPause); err != nil {
@@ -486,7 +485,7 @@ func (s *Service) initStreams(ctx context.Context) error {
 	if s.dataConnectors.fanOutActivityC, err = datasource.TemporalEndpointConsumer(s.streams.consumeFanOutActivityC); err != nil {
 		return err
 	}
-	if s.dataConnectors.fanOutWorkflowJob, err = datasource.TemporalEndpointConsumer(s.streams.consumeFanOutWorkflowJob); err != nil {
+	if s.dataConnectors.fanOutWorkflowJob, err = datasource.TemporalWorkflowEndpointConsumer(s.streams.consumeFanOutWorkflowJob, temporalWorkflowFanOutWorkflowJob); err != nil {
 		return err
 	}
 	if s.dataConnectors.sequentialActivityA, err = datasource.TemporalEndpointConsumer(s.streams.consumeSequentialActivityA); err != nil {
@@ -495,7 +494,7 @@ func (s *Service) initStreams(ctx context.Context) error {
 	if s.dataConnectors.sequentialActivityB, err = datasource.TemporalEndpointConsumer(s.streams.consumeSequentialActivityB); err != nil {
 		return err
 	}
-	if s.dataConnectors.workflowJob, err = datasource.TemporalEndpointConsumer(s.streams.consumeWorkflowJob); err != nil {
+	if s.dataConnectors.workflowJob, err = datasource.TemporalWorkflowEndpointConsumer(s.streams.consumeWorkflowJob, temporalWorkflowWorkflowJob); err != nil {
 		return err
 	}
 	if s.dataConnectors.localSchedule, err = functions.MakeEndpointConsumerLocalSchedule(s.streams.localSchedule, s.functions.localSchedule); err != nil {
@@ -504,7 +503,7 @@ func (s *Service) initStreams(ctx context.Context) error {
 	if s.dataConnectors.temporalActivitySchedule, err = functions.MakeEndpointConsumerTemporalActivitySchedule(s.streams.temporalActivitySchedule, s.functions.temporalActivitySchedule); err != nil {
 		return err
 	}
-	if s.dataConnectors.temporalWorkflowSchedule, err = functions.MakeEndpointConsumerTemporalWorkflowSchedule(s.streams.temporalWorkflowSchedule, s.functions.temporalWorkflowSchedule); err != nil {
+	if s.dataConnectors.temporalWorkflowSchedule, err = datasource.TemporalScheduleWorkflowEndpointConsumer(s.streams.temporalWorkflowSchedule, s.functions.temporalWorkflowSchedule, temporalWorkflowTemporalWorkflowSchedule); err != nil {
 		return err
 	}
 	if s.dataConnectors.callFanOutActivityAFanOutActivityA, err = datasink.TemporalEndpointConsumerWithResult(s.streams.callFanOutActivityA); err != nil {
@@ -536,150 +535,318 @@ func (s *Service) initStreams(ctx context.Context) error {
 	return nil
 }
 
-func (s *Service) initFunctions(ctx context.Context, cfg *config.Config) error {
+func (s *Service) initFunctions(ctx context.Context, cfg *config.Config, env runtime.RuntimeEnvironment) error {
 	eg, egCtx := errgroup.WithContext(ctx)
 	if s.makers.activityPauseMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.activityPause, err = s.makers.activityPauseMaker(egCtx, &cfg.Streams.ActivityPause, s)
+			s.functions.activityPause, err = s.makers.activityPauseMaker(egCtx, &cfg.Streams.ActivityPause, env)
 			return err
 		})
 	}
 	if s.makers.processActivityJobMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.processActivityJob, err = s.makers.processActivityJobMaker(egCtx, &cfg.Streams.ProcessActivityJob, s)
+			s.functions.processActivityJob, err = s.makers.processActivityJobMaker(egCtx, &cfg.Streams.ProcessActivityJob, env)
 			return err
 		})
 	}
 	if s.makers.processFanoutActivityAMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.processFanoutActivityA, err = s.makers.processFanoutActivityAMaker(egCtx, &cfg.Streams.ProcessFanOutActivityA, s)
+			s.functions.processFanoutActivityA, err = s.makers.processFanoutActivityAMaker(egCtx, &cfg.Streams.ProcessFanOutActivityA, env)
 			return err
 		})
 	}
 	if s.makers.processFanoutActivityBMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.processFanoutActivityB, err = s.makers.processFanoutActivityBMaker(egCtx, &cfg.Streams.ProcessFanOutActivityB, s)
+			s.functions.processFanoutActivityB, err = s.makers.processFanoutActivityBMaker(egCtx, &cfg.Streams.ProcessFanOutActivityB, env)
 			return err
 		})
 	}
 	if s.makers.processFanoutActivityCMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.processFanoutActivityC, err = s.makers.processFanoutActivityCMaker(egCtx, &cfg.Streams.ProcessFanOutActivityC, s)
+			s.functions.processFanoutActivityC, err = s.makers.processFanoutActivityCMaker(egCtx, &cfg.Streams.ProcessFanOutActivityC, env)
 			return err
 		})
 	}
 	if s.makers.observeFanoutActivityBMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.observeFanoutActivityB, err = s.makers.observeFanoutActivityBMaker(egCtx, &cfg.Streams.ObserveFanOutActivityB, s)
+			s.functions.observeFanoutActivityB, err = s.makers.observeFanoutActivityBMaker(egCtx, &cfg.Streams.ObserveFanOutActivityB, env)
 			return err
 		})
 	}
 	if s.makers.observeFanoutActivityCMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.observeFanoutActivityC, err = s.makers.observeFanoutActivityCMaker(egCtx, &cfg.Streams.ObserveFanOutActivityC, s)
+			s.functions.observeFanoutActivityC, err = s.makers.observeFanoutActivityCMaker(egCtx, &cfg.Streams.ObserveFanOutActivityC, env)
 			return err
 		})
 	}
 	if s.makers.processSequentialActivityAMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.processSequentialActivityA, err = s.makers.processSequentialActivityAMaker(egCtx, &cfg.Streams.ProcessSequentialActivityA, s)
+			s.functions.processSequentialActivityA, err = s.makers.processSequentialActivityAMaker(egCtx, &cfg.Streams.ProcessSequentialActivityA, env)
 			return err
 		})
 	}
 	if s.makers.processSequentialActivityBMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.processSequentialActivityB, err = s.makers.processSequentialActivityBMaker(egCtx, &cfg.Streams.ProcessSequentialActivityB, s)
+			s.functions.processSequentialActivityB, err = s.makers.processSequentialActivityBMaker(egCtx, &cfg.Streams.ProcessSequentialActivityB, env)
 			return err
 		})
 	}
 	if s.makers.workflowPauseMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.workflowPause, err = s.makers.workflowPauseMaker(egCtx, &cfg.Streams.WorkflowPause, s)
+			s.functions.workflowPause, err = s.makers.workflowPauseMaker(egCtx, &cfg.Streams.WorkflowPause, env)
 			return err
 		})
 	}
 	if s.makers.processWorkflowJobMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.processWorkflowJob, err = s.makers.processWorkflowJobMaker(egCtx, &cfg.Streams.ProcessWorkflowJob, s)
+			s.functions.processWorkflowJob, err = s.makers.processWorkflowJobMaker(egCtx, &cfg.Streams.ProcessWorkflowJob, env)
 			return err
 		})
 	}
 	if s.makers.observeActivityResultMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.observeActivityResult, err = s.makers.observeActivityResultMaker(egCtx, &cfg.Streams.ObserveActivityResult, s)
+			s.functions.observeActivityResult, err = s.makers.observeActivityResultMaker(egCtx, &cfg.Streams.ObserveActivityResult, env)
 			return err
 		})
 	}
 	if s.makers.observeWorkflowResultMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.observeWorkflowResult, err = s.makers.observeWorkflowResultMaker(egCtx, &cfg.Streams.ObserveWorkflowResult, s)
+			s.functions.observeWorkflowResult, err = s.makers.observeWorkflowResultMaker(egCtx, &cfg.Streams.ObserveWorkflowResult, env)
 			return err
 		})
 	}
 	if s.makers.scheduledActivityPauseMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.scheduledActivityPause, err = s.makers.scheduledActivityPauseMaker(egCtx, &cfg.Streams.ScheduledActivityPause, s)
+			s.functions.scheduledActivityPause, err = s.makers.scheduledActivityPauseMaker(egCtx, &cfg.Streams.ScheduledActivityPause, env)
 			return err
 		})
 	}
 	if s.makers.processScheduledActivityMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.processScheduledActivity, err = s.makers.processScheduledActivityMaker(egCtx, &cfg.Streams.ProcessScheduledActivity, s)
+			s.functions.processScheduledActivity, err = s.makers.processScheduledActivityMaker(egCtx, &cfg.Streams.ProcessScheduledActivity, env)
 			return err
 		})
 	}
 	if s.makers.scheduledWorkflowPauseMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.scheduledWorkflowPause, err = s.makers.scheduledWorkflowPauseMaker(egCtx, &cfg.Streams.ScheduledWorkflowPause, s)
+			s.functions.scheduledWorkflowPause, err = s.makers.scheduledWorkflowPauseMaker(egCtx, &cfg.Streams.ScheduledWorkflowPause, env)
 			return err
 		})
 	}
 	if s.makers.processScheduledWorkflowMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.processScheduledWorkflow, err = s.makers.processScheduledWorkflowMaker(egCtx, &cfg.Streams.ProcessScheduledWorkflow, s)
+			s.functions.processScheduledWorkflow, err = s.makers.processScheduledWorkflowMaker(egCtx, &cfg.Streams.ProcessScheduledWorkflow, env)
 			return err
 		})
 	}
 	if s.makers.localScheduleMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.localSchedule, err = s.makers.localScheduleMaker(egCtx, &cfg.Endpoints.LocalSchedule, s)
+			s.functions.localSchedule, err = s.makers.localScheduleMaker(egCtx, &cfg.Endpoints.LocalSchedule, env)
 			return err
 		})
 	}
 	if s.makers.temporalActivityScheduleMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.temporalActivitySchedule, err = s.makers.temporalActivityScheduleMaker(egCtx, &cfg.Endpoints.TemporalActivitySchedule, s)
+			s.functions.temporalActivitySchedule, err = s.makers.temporalActivityScheduleMaker(egCtx, &cfg.Endpoints.TemporalActivitySchedule, env)
 			return err
 		})
 	}
 	if s.makers.temporalWorkflowScheduleMaker != nil {
 		eg.Go(func() error {
 			var err error
-			s.functions.temporalWorkflowSchedule, err = s.makers.temporalWorkflowScheduleMaker(egCtx, &cfg.Endpoints.TemporalWorkflowSchedule, s)
+			s.functions.temporalWorkflowSchedule, err = s.makers.temporalWorkflowScheduleMaker(egCtx, &cfg.Endpoints.TemporalWorkflowSchedule, env)
 			return err
 		})
 	}
 	if err := eg.Wait(); err != nil {
 		return err
+	}
+	return nil
+}
+
+// buildWorkflowGraph constructs a fresh graph without creating process-owned
+// servers, clients, exporters, watchers or OS-backed executors.
+func (s *Service) buildWorkflowGraph(ctx context.Context, cfg *config.Config, env runtime.RuntimeEnvironment) error {
+	if err := s.initMakers(ctx); err != nil {
+		return fmt.Errorf("init Workflow makers failed: %w", err)
+	}
+	if err := s.customMakersInit(ctx); err != nil {
+		return fmt.Errorf("custom Workflow makers failed: %w", err)
+	}
+	if err := s.initWorkflowFunctions(ctx, cfg, env); err != nil {
+		return fmt.Errorf("init Workflow functions failed: %w", err)
+	}
+	if err := s.customFunctionsInit(ctx); err != nil {
+		return fmt.Errorf("custom Workflow functions failed: %w", err)
+	}
+	if err := s.initStreams(ctx, cfg, env); err != nil {
+		return fmt.Errorf("init Workflow streams failed: %w", err)
+	}
+	return nil
+}
+
+// Workflow function makers run in a stable generated order. The ordinary
+// service keeps initializer-group goroutines; a Temporal Workflow must not use
+// process goroutines during replayable graph construction.
+func (s *Service) initWorkflowFunctions(ctx context.Context, cfg *config.Config, env runtime.RuntimeEnvironment) error {
+	if s.makers.activityPauseMaker != nil {
+		value, err := s.makers.activityPauseMaker(ctx, &cfg.Streams.ActivityPause, env)
+		if err != nil {
+			return err
+		}
+		s.functions.activityPause = value
+	}
+	if s.makers.processActivityJobMaker != nil {
+		value, err := s.makers.processActivityJobMaker(ctx, &cfg.Streams.ProcessActivityJob, env)
+		if err != nil {
+			return err
+		}
+		s.functions.processActivityJob = value
+	}
+	if s.makers.processFanoutActivityAMaker != nil {
+		value, err := s.makers.processFanoutActivityAMaker(ctx, &cfg.Streams.ProcessFanOutActivityA, env)
+		if err != nil {
+			return err
+		}
+		s.functions.processFanoutActivityA = value
+	}
+	if s.makers.processFanoutActivityBMaker != nil {
+		value, err := s.makers.processFanoutActivityBMaker(ctx, &cfg.Streams.ProcessFanOutActivityB, env)
+		if err != nil {
+			return err
+		}
+		s.functions.processFanoutActivityB = value
+	}
+	if s.makers.processFanoutActivityCMaker != nil {
+		value, err := s.makers.processFanoutActivityCMaker(ctx, &cfg.Streams.ProcessFanOutActivityC, env)
+		if err != nil {
+			return err
+		}
+		s.functions.processFanoutActivityC = value
+	}
+	if s.makers.observeFanoutActivityBMaker != nil {
+		value, err := s.makers.observeFanoutActivityBMaker(ctx, &cfg.Streams.ObserveFanOutActivityB, env)
+		if err != nil {
+			return err
+		}
+		s.functions.observeFanoutActivityB = value
+	}
+	if s.makers.observeFanoutActivityCMaker != nil {
+		value, err := s.makers.observeFanoutActivityCMaker(ctx, &cfg.Streams.ObserveFanOutActivityC, env)
+		if err != nil {
+			return err
+		}
+		s.functions.observeFanoutActivityC = value
+	}
+	if s.makers.processSequentialActivityAMaker != nil {
+		value, err := s.makers.processSequentialActivityAMaker(ctx, &cfg.Streams.ProcessSequentialActivityA, env)
+		if err != nil {
+			return err
+		}
+		s.functions.processSequentialActivityA = value
+	}
+	if s.makers.processSequentialActivityBMaker != nil {
+		value, err := s.makers.processSequentialActivityBMaker(ctx, &cfg.Streams.ProcessSequentialActivityB, env)
+		if err != nil {
+			return err
+		}
+		s.functions.processSequentialActivityB = value
+	}
+	if s.makers.workflowPauseMaker != nil {
+		value, err := s.makers.workflowPauseMaker(ctx, &cfg.Streams.WorkflowPause, env)
+		if err != nil {
+			return err
+		}
+		s.functions.workflowPause = value
+	}
+	if s.makers.processWorkflowJobMaker != nil {
+		value, err := s.makers.processWorkflowJobMaker(ctx, &cfg.Streams.ProcessWorkflowJob, env)
+		if err != nil {
+			return err
+		}
+		s.functions.processWorkflowJob = value
+	}
+	if s.makers.observeActivityResultMaker != nil {
+		value, err := s.makers.observeActivityResultMaker(ctx, &cfg.Streams.ObserveActivityResult, env)
+		if err != nil {
+			return err
+		}
+		s.functions.observeActivityResult = value
+	}
+	if s.makers.observeWorkflowResultMaker != nil {
+		value, err := s.makers.observeWorkflowResultMaker(ctx, &cfg.Streams.ObserveWorkflowResult, env)
+		if err != nil {
+			return err
+		}
+		s.functions.observeWorkflowResult = value
+	}
+	if s.makers.scheduledActivityPauseMaker != nil {
+		value, err := s.makers.scheduledActivityPauseMaker(ctx, &cfg.Streams.ScheduledActivityPause, env)
+		if err != nil {
+			return err
+		}
+		s.functions.scheduledActivityPause = value
+	}
+	if s.makers.processScheduledActivityMaker != nil {
+		value, err := s.makers.processScheduledActivityMaker(ctx, &cfg.Streams.ProcessScheduledActivity, env)
+		if err != nil {
+			return err
+		}
+		s.functions.processScheduledActivity = value
+	}
+	if s.makers.scheduledWorkflowPauseMaker != nil {
+		value, err := s.makers.scheduledWorkflowPauseMaker(ctx, &cfg.Streams.ScheduledWorkflowPause, env)
+		if err != nil {
+			return err
+		}
+		s.functions.scheduledWorkflowPause = value
+	}
+	if s.makers.processScheduledWorkflowMaker != nil {
+		value, err := s.makers.processScheduledWorkflowMaker(ctx, &cfg.Streams.ProcessScheduledWorkflow, env)
+		if err != nil {
+			return err
+		}
+		s.functions.processScheduledWorkflow = value
+	}
+	if s.makers.localScheduleMaker != nil {
+		value, err := s.makers.localScheduleMaker(ctx, &cfg.Endpoints.LocalSchedule, env)
+		if err != nil {
+			return err
+		}
+		s.functions.localSchedule = value
+	}
+	if s.makers.temporalActivityScheduleMaker != nil {
+		value, err := s.makers.temporalActivityScheduleMaker(ctx, &cfg.Endpoints.TemporalActivitySchedule, env)
+		if err != nil {
+			return err
+		}
+		s.functions.temporalActivitySchedule = value
+	}
+	if s.makers.temporalWorkflowScheduleMaker != nil {
+		value, err := s.makers.temporalWorkflowScheduleMaker(ctx, &cfg.Endpoints.TemporalWorkflowSchedule, env)
+		if err != nil {
+			return err
+		}
+		s.functions.temporalWorkflowSchedule = value
 	}
 	return nil
 }
