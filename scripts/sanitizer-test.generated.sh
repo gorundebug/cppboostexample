@@ -28,25 +28,8 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
   'set -euo pipefail
    source scripts/configure-git-auth.generated.sh
    build_dir="build/sanitizers/$SERVICEGEN_CPP_SANITIZER"
-   conan_dir="build/conan-sanitizers/$SERVICEGEN_CPP_SANITIZER"
-   case "$SERVICEGEN_CPP_SANITIZER" in
-     asan)
-       conan_sanitizer="Address"
-       conan_compile_flags="[\"-fsanitize=address\",\"-fno-omit-frame-pointer\"]"
-       conan_link_flags="[\"-fsanitize=address\"]"
-       ;;
-     tsan)
-       conan_sanitizer="Thread"
-       conan_compile_flags="[\"-fsanitize=thread\",\"-fno-omit-frame-pointer\"]"
-       conan_link_flags="[\"-fsanitize=thread\"]"
-       ;;
-   esac
-   ./scripts/conan-install.generated.sh RelWithDebInfo "$conan_dir" \
-     -s:h "compiler.sanitizer=$conan_sanitizer" \
-     -c:h "tools.build:cflags=$conan_compile_flags" \
-     -c:h "tools.build:cxxflags=$conan_compile_flags" \
-     -c:h "tools.build:sharedlinkflags=$conan_link_flags" \
-     -c:h "tools.build:exelinkflags=$conan_link_flags"
+   conan_dir="build/conan-relwithdebinfo"
+   ./scripts/conan-install.generated.sh RelWithDebInfo "$conan_dir"
    conan_toolchain="$(cat "$conan_dir/toolchain.path")"
    cmake -S . -B "$build_dir" -G Ninja \
      --fresh \
