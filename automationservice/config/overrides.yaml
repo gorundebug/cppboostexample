@@ -2,11 +2,15 @@ dataConnectors:
   temporal:
     address: temporal:7233
 endpoints:
-  durableJob:
+  activityJob:
     enabled: true
   localSchedule:
     enabled: true
-  temporalSchedule:
+  temporalActivitySchedule:
+    enabled: true
+  temporalWorkflowSchedule:
+    enabled: true
+  workflowJob:
     enabled: true
 services:
   automationService:
