@@ -17,7 +17,7 @@ func TestProcessWorkflowJob_Map(t *testing.T) {
 	out := runtime.CollectFunc[string](func(_ context.Context, v string) {
 		collected = append(collected, v)
 	})
-	durable := runtime.NewDurableWorkflowContext("workflow-1", func(_ time.Duration) error { return nil }, nil)
+	durable := runtime.NewDurableWorkflowContext("workflow-1", func(_ context.Context, _ time.Duration) error { return nil }, nil)
 	ctx := runtime.WithDurableCallContext(context.Background(), durable)
 
 	var panicValue any
