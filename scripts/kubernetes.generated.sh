@@ -61,6 +61,17 @@ helm() {
   "${COMPOSE[@]}" --profile tools run --rm --no-deps helm "$@"
 }
 
+ensure_helm_repo() {
+  local name="$1"
+  local url="$2"
+  if helm repo list 2>/dev/null | awk -v name="${name}" -v url="${url}" \
+    'NR > 1 && $1 == name && $2 == url { found = 1 } END { exit !found }'; then
+    progress "reusing cached Helm repository index for ${name}"
+    return 0
+  fi
+  helm repo add "${name}" "${url}" --force-update
+}
+
 kubectl() {
   "${COMPOSE[@]}" exec -T kubernetes kubectl "$@"
 }
@@ -205,11 +216,10 @@ deploy_observability() {
   progress "generating Grafana dashboards"
   make grafana-dashboards
   progress "installing pinned Prometheus and Grafana stack"
-  helm repo add prometheus-community "${SERVICEGEN_HELM_PROMETHEUS_URL:-https://prometheus-community.github.io/helm-charts}" --force-update
-  helm repo add open-telemetry "${SERVICEGEN_HELM_OPENTELEMETRY_URL:-https://open-telemetry.github.io/opentelemetry-helm-charts}" --force-update
-  helm repo add jaegertracing "${SERVICEGEN_HELM_JAEGER_URL:-https://jaegertracing.github.io/helm-charts}" --force-update
-  helm repo add grafana "${SERVICEGEN_HELM_GRAFANA_URL:-https://grafana.github.io/helm-charts}" --force-update
-  helm repo update prometheus-community open-telemetry jaegertracing grafana
+  ensure_helm_repo prometheus-community "${SERVICEGEN_HELM_PROMETHEUS_URL:-https://prometheus-community.github.io/helm-charts}"
+  ensure_helm_repo open-telemetry "${SERVICEGEN_HELM_OPENTELEMETRY_URL:-https://open-telemetry.github.io/opentelemetry-helm-charts}"
+  ensure_helm_repo jaegertracing "${SERVICEGEN_HELM_JAEGER_URL:-https://jaegertracing.github.io/helm-charts}"
+  ensure_helm_repo grafana "${SERVICEGEN_HELM_GRAFANA_URL:-https://grafana.github.io/helm-charts}"
 
   helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
     --version 88.5.3 \
@@ -240,8 +250,7 @@ deploy_infrastructure() {
   deploy_observability
   configure_kafka_secrets
   progress "installing pinned Redpanda chart"
-  helm repo add redpanda "${SERVICEGEN_HELM_REDPANDA_URL:-https://charts.redpanda.com}" --force-update
-  helm repo update redpanda
+  ensure_helm_repo redpanda "${SERVICEGEN_HELM_REDPANDA_URL:-https://charts.redpanda.com}"
   set --
   if [[ "${KAFKA_SASL_ENABLED}" == "true" ]]; then
     set -- \
@@ -267,10 +276,8 @@ deploy_infrastructure() {
     statefulset/temporal-postgresql --timeout="${TIMEOUT}"
 
   progress "installing pinned Temporal chart"
-  helm repo add temporal \
-    "${SERVICEGEN_HELM_TEMPORAL_URL:-https://go.temporal.io/helm-charts}" \
-    --force-update
-  helm repo update temporal
+  ensure_helm_repo temporal \
+    "${SERVICEGEN_HELM_TEMPORAL_URL:-https://go.temporal.io/helm-charts}"
   helm upgrade --install temporal temporal/temporal \
     --version 1.6.0 \
     --namespace "${NAMESPACE}" --create-namespace \
