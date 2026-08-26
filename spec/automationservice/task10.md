@@ -20,8 +20,8 @@ Return Activity C's typed fan-out result.
 
 
 ## Stream types
-- Input: `string`
-- Output: `string`
+- Input: `AutomationJob`
+- Output: `AutomationJob`
 
 ## Checklist
 

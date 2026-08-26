@@ -20,8 +20,8 @@ Apply the ordinary local Delay inside an Activity started by Temporal Schedule.
 
 
 ## Stream types
-- Input: `string`
-- Output: `string`
+- Input: `AutomationJob`
+- Output: `AutomationJob`
 
 ## Checklist
 

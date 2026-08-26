@@ -227,7 +227,16 @@ pools:
         name: Inventory Priority Workers
 services:
     analyticsService:
-        color: '#05ABF7'
+        appearance:
+            color: '#05ABF7'
+            pipelines:
+                analytics:
+                    consumeOrderProcessed:
+                        x: -1190
+                        "y": -205
+                    countOrderProcessed:
+                        x: -1390
+                        "y": -19
         defaultCallSemantics: FunctionCall
         environment: ""
         golangVersion: 1.25.4
@@ -248,8 +257,6 @@ services:
                     source: countOrderProcessed
                     type: Input
                     valueType: orderProcessed
-                    xPos: -1190
-                    yPos: -205
                 countOrderProcessed:
                     functionDescription: |
                         Count successful and unsuccessful orders independently, then return the event unchanged.
@@ -261,15 +268,130 @@ services:
                     source: consumeOrderProcessed
                     type: Process
                     valueType: orderProcessed
-                    xPos: -1390
-                    yPos: -19
         programmingLanguage: CppBoost
         readinessHandler: health/ready
         shutdownTimeout: 30000
         startupHandler: health/startup
         statusHandler: status
     automationService:
-        color: '#00A86B'
+        appearance:
+            color: '#00A86B'
+            pipelines:
+                automation:
+                    activityPause:
+                        x: -250
+                        "y": 350
+                    callFanOutActivityA:
+                        x: -250
+                        "y": 1870
+                    callFanOutActivityB:
+                        x: 270
+                        "y": 1790
+                    callFanOutActivityC:
+                        x: 270
+                        "y": 1950
+                    callSequentialActivityA:
+                        x: 10
+                        "y": 650
+                    callSequentialActivityB:
+                        x: 270
+                        "y": 650
+                    consumeActivityJob:
+                        x: -500
+                        "y": 350
+                    consumeFanOutActivityA:
+                        x: -500
+                        "y": 2120
+                    consumeFanOutActivityB:
+                        x: -500
+                        "y": 2270
+                    consumeFanOutActivityC:
+                        x: -500
+                        "y": 2420
+                    consumeFanOutWorkflowJob:
+                        x: -500
+                        "y": 1870
+                    consumeSequentialActivityA:
+                        x: -500
+                        "y": 1570
+                    consumeSequentialActivityB:
+                        x: -500
+                        "y": 1720
+                    consumeWorkflowJob:
+                        x: -500
+                        "y": 650
+                    localSchedule:
+                        x: -1250
+                        "y": 500
+                    observeActivityResult:
+                        x: -500
+                        "y": 500
+                    observeFanOutActivityB:
+                        x: 530
+                        "y": 1790
+                    observeFanOutActivityC:
+                        x: 530
+                        "y": 1950
+                    observeWorkflowResult:
+                        x: -500
+                        "y": 800
+                    processActivityJob:
+                        x: 10
+                        "y": 350
+                    processFanOutActivityA:
+                        x: -250
+                        "y": 2120
+                    processFanOutActivityB:
+                        x: -250
+                        "y": 2270
+                    processFanOutActivityC:
+                        x: -250
+                        "y": 2420
+                    processScheduledActivity:
+                        x: -250
+                        "y": 1010
+                    processScheduledWorkflow:
+                        x: -250
+                        "y": 1310
+                    processSequentialActivityA:
+                        x: -250
+                        "y": 1570
+                    processSequentialActivityB:
+                        x: -250
+                        "y": 1720
+                    processWorkflowJob:
+                        x: 530
+                        "y": 650
+                    scheduledActivityPause:
+                        x: -500
+                        "y": 1010
+                    scheduledWorkflowPause:
+                        x: -500
+                        "y": 1310
+                    splitActivityAResult:
+                        x: 10
+                        "y": 1870
+                    splitOnDemandJobs:
+                        x: -1010
+                        "y": 500
+                    submitActivityJob:
+                        x: -760
+                        "y": 350
+                    submitFanOutWorkflowJob:
+                        x: -760
+                        "y": 1870
+                    submitWorkflowJob:
+                        x: -760
+                        "y": 650
+                    temporalActivitySchedule:
+                        x: -760
+                        "y": 1010
+                    temporalWorkflowSchedule:
+                        x: -760
+                        "y": 1310
+                    workflowPause:
+                        x: -250
+                        "y": 650
         defaultCallSemantics: FunctionCall
         environment: ""
         golangVersion: 1.25.4
@@ -357,118 +479,88 @@ services:
                     name: Activity Pause
                     source: consumeActivityJob
                     type: Delay
-                    xPos: -250
-                    yPos: -720
                 callFanOutActivityA:
                     endpoint: fanOutActivityA
                     name: Call Fan-Out Activity A
                     source: consumeFanOutWorkflowJob
                     type: Sink
-                    valueType: string
-                    xPos: -250
-                    yPos: 800
+                    valueType: automationJob
                 callFanOutActivityB:
                     endpoint: fanOutActivityB
                     name: Call Fan-Out Activity B
                     source: splitActivityAResult
                     type: Sink
-                    valueType: string
-                    xPos: 270
-                    yPos: 720
+                    valueType: automationJob
                 callFanOutActivityC:
                     endpoint: fanOutActivityC
                     name: Call Fan-Out Activity C
                     source: splitActivityAResult
                     type: Sink
-                    valueType: string
-                    xPos: 270
-                    yPos: 880
+                    valueType: automationJob
                 callSequentialActivityA:
                     endpoint: sequentialActivityA
                     name: Call Sequential Activity A
                     source: workflowPause
                     type: Sink
-                    valueType: string
-                    xPos: 10
-                    yPos: -420
+                    valueType: automationJob
                 callSequentialActivityB:
                     endpoint: sequentialActivityB
                     name: Call Sequential Activity B
                     source: callSequentialActivityA
                     type: Sink
-                    valueType: string
-                    xPos: 270
-                    yPos: -420
+                    valueType: automationJob
                 consumeActivityJob:
                     endpoint: activityJob
                     name: Consume Activity Job
                     source: processActivityJob
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: -720
+                    valueType: automationJob
                 consumeFanOutActivityA:
                     endpoint: fanOutActivityA
                     name: Consume Fan-Out Activity A
                     source: processFanOutActivityA
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: 1050
+                    valueType: automationJob
                 consumeFanOutActivityB:
                     endpoint: fanOutActivityB
                     name: Consume Fan-Out Activity B
                     source: processFanOutActivityB
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: 1200
+                    valueType: automationJob
                 consumeFanOutActivityC:
                     endpoint: fanOutActivityC
                     name: Consume Fan-Out Activity C
                     source: processFanOutActivityC
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: 1350
+                    valueType: automationJob
                 consumeFanOutWorkflowJob:
                     endpoint: fanOutWorkflowJob
                     name: Consume Fan-Out Workflow Job
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: 800
+                    valueType: automationJob
                 consumeSequentialActivityA:
                     endpoint: sequentialActivityA
                     name: Consume Sequential Activity A
                     source: processSequentialActivityA
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: 500
+                    valueType: automationJob
                 consumeSequentialActivityB:
                     endpoint: sequentialActivityB
                     name: Consume Sequential Activity B
                     source: processSequentialActivityB
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: 650
+                    valueType: automationJob
                 consumeWorkflowJob:
                     endpoint: workflowJob
                     name: Consume Workflow Job
                     source: processWorkflowJob
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: -420
+                    valueType: automationJob
                 localSchedule:
                     endpoint: localSchedule
                     name: Local Schedule
                     type: Input
-                    valueType: string
-                    xPos: -1250
-                    yPos: -570
+                    valueType: automationJob
                 observeActivityResult:
                     functionDescription: |
                         Preserve the result returned through the on-demand Activity endpoint.
@@ -479,9 +571,7 @@ services:
                     name: Observe Activity Result
                     source: submitActivityJob
                     type: Map
-                    valueType: string
-                    xPos: -500
-                    yPos: -570
+                    valueType: automationJob
                 observeFanOutActivityB:
                     functionDescription: |
                         Observe the typed result returned by the Activity B fan-out branch.
@@ -492,9 +582,7 @@ services:
                     name: Observe Fan-Out Activity B
                     source: callFanOutActivityB
                     type: Map
-                    valueType: string
-                    xPos: 530
-                    yPos: 720
+                    valueType: automationJob
                 observeFanOutActivityC:
                     functionDescription: |
                         Observe the typed result returned by the Activity C fan-out branch.
@@ -505,9 +593,7 @@ services:
                     name: Observe Fan-Out Activity C
                     source: callFanOutActivityC
                     type: Map
-                    valueType: string
-                    xPos: 530
-                    yPos: 880
+                    valueType: automationJob
                 observeWorkflowResult:
                     functionDescription: |
                         Preserve the result returned through the on-demand Workflow endpoint.
@@ -518,9 +604,7 @@ services:
                     name: Observe Workflow Result
                     source: submitWorkflowJob
                     type: Map
-                    valueType: string
-                    xPos: -500
-                    yPos: -270
+                    valueType: automationJob
                 processActivityJob:
                     functionDescription: |
                         Record Activity progress with DurableCallHeartbeat and return the processed job result.
@@ -531,9 +615,7 @@ services:
                     name: Process Activity Job
                     source: activityPause
                     type: Map
-                    valueType: string
-                    xPos: 10
-                    yPos: -720
+                    valueType: automationJob
                 processFanOutActivityA:
                     functionDescription: |
                         Return Activity A's typed result before the Workflow Split.
@@ -544,9 +626,7 @@ services:
                     name: Process Fan-Out Activity A
                     source: consumeFanOutActivityA
                     type: Map
-                    valueType: string
-                    xPos: -250
-                    yPos: 1050
+                    valueType: automationJob
                 processFanOutActivityB:
                     functionDescription: |
                         Return Activity B's typed fan-out result.
@@ -557,9 +637,7 @@ services:
                     name: Process Fan-Out Activity B
                     source: consumeFanOutActivityB
                     type: Map
-                    valueType: string
-                    xPos: -250
-                    yPos: 1200
+                    valueType: automationJob
                 processFanOutActivityC:
                     functionDescription: |
                         Return Activity C's typed fan-out result.
@@ -570,9 +648,7 @@ services:
                     name: Process Fan-Out Activity C
                     source: consumeFanOutActivityC
                     type: Map
-                    valueType: string
-                    xPos: -250
-                    yPos: 1350
+                    valueType: automationJob
                 processScheduledActivity:
                     functionDescription: |
                         Return the visible result of one scheduled Activity execution.
@@ -583,9 +659,7 @@ services:
                     name: Process Scheduled Activity
                     source: scheduledActivityPause
                     type: Map
-                    valueType: string
-                    xPos: -250
-                    yPos: -60
+                    valueType: automationJob
                 processScheduledWorkflow:
                     functionDescription: |
                         Return the visible result of one scheduled Workflow execution.
@@ -596,9 +670,7 @@ services:
                     name: Process Scheduled Workflow
                     source: scheduledWorkflowPause
                     type: Map
-                    valueType: string
-                    xPos: -250
-                    yPos: 240
+                    valueType: automationJob
                 processSequentialActivityA:
                     functionDescription: |
                         Return sequential Activity A's typed result to its Temporal sink.
@@ -609,9 +681,7 @@ services:
                     name: Process Sequential Activity A
                     source: consumeSequentialActivityA
                     type: Map
-                    valueType: string
-                    xPos: -250
-                    yPos: 500
+                    valueType: automationJob
                 processSequentialActivityB:
                     functionDescription: |
                         Return sequential Activity B's typed result to its Temporal sink.
@@ -622,9 +692,7 @@ services:
                     name: Process Sequential Activity B
                     source: consumeSequentialActivityB
                     type: Map
-                    valueType: string
-                    xPos: -250
-                    yPos: 650
+                    valueType: automationJob
                 processWorkflowJob:
                     functionDescription: |
                         Continue the Workflow as new once, then return its final result.
@@ -635,9 +703,7 @@ services:
                     name: Process Workflow Job
                     source: callSequentialActivityB
                     type: Map
-                    valueType: string
-                    xPos: 530
-                    yPos: -420
+                    valueType: automationJob
                 scheduledActivityPause:
                     duration: 250
                     functionDescription: |
@@ -649,8 +715,6 @@ services:
                     name: Scheduled Activity Pause
                     source: temporalActivitySchedule
                     type: Delay
-                    xPos: -500
-                    yPos: -60
                 scheduledWorkflowPause:
                     duration: 250
                     functionDescription: |
@@ -662,60 +726,44 @@ services:
                     name: Scheduled Workflow Pause
                     source: temporalWorkflowSchedule
                     type: Delay
-                    xPos: -500
-                    yPos: 240
                 splitActivityAResult:
                     name: Split Activity A Result
                     source: callFanOutActivityA
                     type: Split
-                    xPos: 10
-                    yPos: 800
                 splitOnDemandJobs:
                     name: Split On-Demand Jobs
                     source: localSchedule
                     type: Split
-                    xPos: -1010
-                    yPos: -570
                 submitActivityJob:
                     endpoint: activityJob
                     name: Submit Activity Job
                     source: splitOnDemandJobs
                     type: Sink
-                    valueType: string
-                    xPos: -760
-                    yPos: -720
+                    valueType: automationJob
                 submitFanOutWorkflowJob:
                     endpoint: fanOutWorkflowJob
                     name: Submit Fan-Out Workflow Job
                     source: splitOnDemandJobs
                     type: Sink
-                    valueType: string
-                    xPos: -760
-                    yPos: 800
+                    valueType: automationJob
                 submitWorkflowJob:
                     endpoint: workflowJob
                     name: Submit Workflow Job
                     source: splitOnDemandJobs
                     type: Sink
-                    valueType: string
-                    xPos: -760
-                    yPos: -420
+                    valueType: automationJob
                 temporalActivitySchedule:
                     endpoint: temporalActivitySchedule
                     name: Temporal Activity Schedule
                     source: processScheduledActivity
                     type: Input
-                    valueType: string
-                    xPos: -760
-                    yPos: -60
+                    valueType: automationJob
                 temporalWorkflowSchedule:
                     endpoint: temporalWorkflowSchedule
                     name: Temporal Workflow Schedule
                     source: processScheduledWorkflow
                     type: Input
-                    valueType: string
-                    xPos: -760
-                    yPos: 240
+                    valueType: automationJob
                 workflowPause:
                     duration: 250
                     functionDescription: |
@@ -727,15 +775,28 @@ services:
                     name: Workflow Pause
                     source: consumeWorkflowJob
                     type: Delay
-                    xPos: -250
-                    yPos: -420
         programmingLanguage: GoLang
         readinessHandler: health/ready
         shutdownTimeout: 30000
         startupHandler: health/startup
         statusHandler: status
     inventoryService:
-        color: '#6800FF'
+        appearance:
+            color: '#6800FF'
+            pipelines:
+                inventoryItem:
+                    getInventoryItemData:
+                        x: 527
+                        "y": -562
+                    getInventoryItemError:
+                        x: 733
+                        "y": -263
+                    mergeInventoryResult:
+                        x: 542
+                        "y": 33
+                    processInventoryItem:
+                        x: 250
+                        "y": -400
         defaultCallSemantics: FunctionCall
         environment: ""
         golangVersion: 1.25.4
@@ -776,8 +837,6 @@ services:
                     source: processInventoryItem
                     type: Process
                     valueType: orderItemResult
-                    xPos: 527
-                    yPos: -562
                 getInventoryItemError:
                     functionDescription: |
                         When inventory processing fails, return an OUT_OF_STOCK result with no available quantity.
@@ -790,31 +849,65 @@ services:
                     source: getInventoryItemData
                     type: Error
                     valueType: orderItemResult
-                    xPos: 733
-                    yPos: -263
                 mergeInventoryResult:
                     name: Merge Inventory Result
                     sources:
                         - getInventoryItemData
                         - getInventoryItemError
                     type: Merge
-                    xPos: 542
-                    yPos: 33
                 processInventoryItem:
                     endpoint: processOrderItem
                     name: 'Process Inventory Item '
                     source: mergeInventoryResult
                     type: Input
                     valueType: orderItem
-                    xPos: 250
-                    yPos: -400
         programmingLanguage: CppBoost
         readinessHandler: health/ready
         shutdownTimeout: 30000
         startupHandler: health/startup
         statusHandler: status
     orderService:
-        color: '#FF5C00'
+        appearance:
+            color: '#FF5C00'
+            pipelines:
+                default:
+                    processOrderItemError:
+                        x: -134
+                        "y": -129
+                order:
+                    mapOrderItemResultToOrderState:
+                        x: 103
+                        "y": -52
+                    mapToOrderProcessed:
+                        x: -821
+                        "y": -26
+                    mapToOrderState:
+                        x: -368
+                        "y": -227
+                    mergeResults:
+                        x: -228
+                        "y": 130
+                    processOrder:
+                        x: -760
+                        "y": -367
+                    processOrderItem:
+                        x: -60
+                        "y": -375
+                    processOrderItems:
+                        x: -198
+                        "y": -662
+                    publishOrderProcessed:
+                        x: -944
+                        "y": -255
+                    softDeadline:
+                        x: -477
+                        "y": -444
+                    splitOrderResult:
+                        x: -671
+                        "y": -129
+                    splitPipeline:
+                        x: -640
+                        "y": -597
         defaultCallSemantics: FunctionCall
         defaultGrpcTimeout: 5000
         environment: ""
@@ -854,8 +947,6 @@ services:
                     source: processOrderItem
                     type: Error
                     valueType: orderState
-                    xPos: -134
-                    yPos: -129
             order:
                 mapOrderItemResultToOrderState:
                     functionDescription: |
@@ -870,8 +961,6 @@ services:
                     source: processOrderItem
                     type: Map
                     valueType: orderState
-                    xPos: 103
-                    yPos: -52
                 mapToOrderProcessed:
                     functionDescription: |
                         Create an OrderProcessed event from the final order state.
@@ -884,8 +973,6 @@ services:
                     source: splitOrderResult
                     type: Map
                     valueType: orderProcessed
-                    xPos: -821
-                    yPos: -26
                 mapToOrderState:
                     functionDescription: |
                         Produce a TIMED_OUT order result that preserves the order ID and submitted total.
@@ -898,8 +985,6 @@ services:
                     source: softDeadline
                     type: Map
                     valueType: orderState
-                    xPos: -368
-                    yPos: -227
                 mergeResults:
                     name: Merge Results
                     sources:
@@ -907,16 +992,12 @@ services:
                         - mapOrderItemResultToOrderState
                         - processOrderItemError
                     type: Merge
-                    xPos: -228
-                    yPos: 130
                 processOrder:
                     endpoint: processOrder
                     name: Process Order
                     source: splitOrderResult
                     type: Input
                     valueType: order
-                    xPos: -760
-                    yPos: -367
                 processOrderItem:
                     endpoint: processOrderItem
                     errorStream: processOrderItemError
@@ -924,8 +1005,6 @@ services:
                     source: processOrderItems
                     type: Sink
                     valueType: orderItemResult
-                    xPos: -60
-                    yPos: -375
                 processOrderItems:
                     functionDescription: |
                         Emit every order item independently for inventory processing.
@@ -938,16 +1017,12 @@ services:
                     source: splitPipeline
                     type: FlatMap
                     valueType: orderItem
-                    xPos: -198
-                    yPos: -662
                 publishOrderProcessed:
                     endpoint: orderProcessed
                     name: Publish Order Processed
                     source: mapToOrderProcessed
                     type: Sink
                     valueType: orderProcessed
-                    xPos: -944
-                    yPos: -255
                 softDeadline:
                     duration: 1000
                     functionDescription: |
@@ -960,20 +1035,14 @@ services:
                     name: Soft Deadline
                     source: splitPipeline
                     type: Delay
-                    xPos: -477
-                    yPos: -444
                 splitOrderResult:
                     name: Split Order Result
                     source: mergeResults
                     type: Split
-                    xPos: -671
-                    yPos: -129
                 splitPipeline:
                     name: Split Pipeline
                     source: processOrder
                     type: Split
-                    xPos: -640
-                    yPos: -597
         programmingLanguage: CppBoost
         readinessHandler: health/ready
         shutdownTimeout: 30000
@@ -984,6 +1053,11 @@ settings:
     name: Example
     repoPath: github.com/gorundebug/cppboostexample
 types:
+    automationJob:
+        description: Automation job payload and result.
+        name: AutomationJob
+        publicType: false
+        type: string
     order:
         definitionFormat: Native
         description: 'E-commerce order submitted by a customer. Fields: ID string, CustomerID string, Items []OrderItem, CreatedAt time.Time.'
@@ -1022,11 +1096,6 @@ types:
         publicType: false
         transferByValue: false
         type: struct
-    string:
-        description: Automation job payload and result.
-        publicType: false
-        type: string
-        useAlias: false
     unknownType:
         name: UnknownType
         publicType: false

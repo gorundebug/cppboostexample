@@ -20,8 +20,8 @@ Apply the ordinary local Delay while processing an on-demand Temporal Activity.
 
 
 ## Stream types
-- Input: `string`
-- Output: `string`
+- Input: `AutomationJob`
+- Output: `AutomationJob`
 
 ## Checklist
 

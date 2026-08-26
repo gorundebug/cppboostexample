@@ -81,7 +81,47 @@ pools:
         name: Default Pool
 services:
     orderService:
-        color: '#FF5C00'
+        appearance:
+            color: '#FF5C00'
+            pipelines:
+                default:
+                    processOrderItemError:
+                        x: -134
+                        "y": -129
+                order:
+                    mapOrderItemResultToOrderState:
+                        x: 103
+                        "y": -52
+                    mapToOrderProcessed:
+                        x: -821
+                        "y": -26
+                    mapToOrderState:
+                        x: -368
+                        "y": -227
+                    mergeResults:
+                        x: -228
+                        "y": 130
+                    processOrder:
+                        x: -760
+                        "y": -367
+                    processOrderItem:
+                        x: -60
+                        "y": -375
+                    processOrderItems:
+                        x: -198
+                        "y": -662
+                    publishOrderProcessed:
+                        x: -944
+                        "y": -255
+                    softDeadline:
+                        x: -477
+                        "y": -444
+                    splitOrderResult:
+                        x: -671
+                        "y": -129
+                    splitPipeline:
+                        x: -640
+                        "y": -597
         defaultCallSemantics: FunctionCall
         defaultGrpcTimeout: 5000
         environment: ""
@@ -121,8 +161,6 @@ services:
                     source: processOrderItem
                     type: Error
                     valueType: orderState
-                    xPos: -134
-                    yPos: -129
             order:
                 mapOrderItemResultToOrderState:
                     functionDescription: |
@@ -137,8 +175,6 @@ services:
                     source: processOrderItem
                     type: Map
                     valueType: orderState
-                    xPos: 103
-                    yPos: -52
                 mapToOrderProcessed:
                     functionDescription: |
                         Create an OrderProcessed event from the final order state.
@@ -151,8 +187,6 @@ services:
                     source: splitOrderResult
                     type: Map
                     valueType: orderProcessed
-                    xPos: -821
-                    yPos: -26
                 mapToOrderState:
                     functionDescription: |
                         Produce a TIMED_OUT order result that preserves the order ID and submitted total.
@@ -165,8 +199,6 @@ services:
                     source: softDeadline
                     type: Map
                     valueType: orderState
-                    xPos: -368
-                    yPos: -227
                 mergeResults:
                     name: Merge Results
                     sources:
@@ -174,16 +206,12 @@ services:
                         - mapOrderItemResultToOrderState
                         - processOrderItemError
                     type: Merge
-                    xPos: -228
-                    yPos: 130
                 processOrder:
                     endpoint: processOrder
                     name: Process Order
                     source: splitOrderResult
                     type: Input
                     valueType: order
-                    xPos: -760
-                    yPos: -367
                 processOrderItem:
                     endpoint: processOrderItem
                     errorStream: processOrderItemError
@@ -191,8 +219,6 @@ services:
                     source: processOrderItems
                     type: Sink
                     valueType: orderItemResult
-                    xPos: -60
-                    yPos: -375
                 processOrderItems:
                     functionDescription: |
                         Emit every order item independently for inventory processing.
@@ -205,16 +231,12 @@ services:
                     source: splitPipeline
                     type: FlatMap
                     valueType: orderItem
-                    xPos: -198
-                    yPos: -662
                 publishOrderProcessed:
                     endpoint: orderProcessed
                     name: Publish Order Processed
                     source: mapToOrderProcessed
                     type: Sink
                     valueType: orderProcessed
-                    xPos: -944
-                    yPos: -255
                 softDeadline:
                     duration: 1000
                     functionDescription: |
@@ -227,20 +249,14 @@ services:
                     name: Soft Deadline
                     source: splitPipeline
                     type: Delay
-                    xPos: -477
-                    yPos: -444
                 splitOrderResult:
                     name: Split Order Result
                     source: mergeResults
                     type: Split
-                    xPos: -671
-                    yPos: -129
                 splitPipeline:
                     name: Split Pipeline
                     source: processOrder
                     type: Split
-                    xPos: -640
-                    yPos: -597
         programmingLanguage: CppBoost
         readinessHandler: health/ready
         shutdownTimeout: 30000

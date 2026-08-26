@@ -19,7 +19,7 @@ Create a job message identifying the local scheduled firing.
 
 
 ## Stream types
-- Input: `string`
+- Input: `AutomationJob`
 
 ## Checklist
 

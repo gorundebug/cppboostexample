@@ -20,8 +20,8 @@ Return sequential Activity A's typed result to its Temporal sink.
 
 
 ## Stream types
-- Input: `string`
-- Output: `string`
+- Input: `AutomationJob`
+- Output: `AutomationJob`
 
 ## Checklist
 

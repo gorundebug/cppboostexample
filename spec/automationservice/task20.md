@@ -20,8 +20,8 @@ Use the same Delay contract backed by the Temporal Workflow timer.
 
 
 ## Stream types
-- Input: `string`
-- Output: `string`
+- Input: `AutomationJob`
+- Output: `AutomationJob`
 
 ## Checklist
 

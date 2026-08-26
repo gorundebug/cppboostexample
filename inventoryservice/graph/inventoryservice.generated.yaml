@@ -28,7 +28,22 @@ pools:
         name: Inventory Priority Workers
 services:
     inventoryService:
-        color: '#6800FF'
+        appearance:
+            color: '#6800FF'
+            pipelines:
+                inventoryItem:
+                    getInventoryItemData:
+                        x: 527
+                        "y": -562
+                    getInventoryItemError:
+                        x: 733
+                        "y": -263
+                    mergeInventoryResult:
+                        x: 542
+                        "y": 33
+                    processInventoryItem:
+                        x: 250
+                        "y": -400
         defaultCallSemantics: FunctionCall
         environment: ""
         golangVersion: 1.25.4
@@ -69,8 +84,6 @@ services:
                     source: processInventoryItem
                     type: Process
                     valueType: orderItemResult
-                    xPos: 527
-                    yPos: -562
                 getInventoryItemError:
                     functionDescription: |
                         When inventory processing fails, return an OUT_OF_STOCK result with no available quantity.
@@ -83,24 +96,18 @@ services:
                     source: getInventoryItemData
                     type: Error
                     valueType: orderItemResult
-                    xPos: 733
-                    yPos: -263
                 mergeInventoryResult:
                     name: Merge Inventory Result
                     sources:
                         - getInventoryItemData
                         - getInventoryItemError
                     type: Merge
-                    xPos: 542
-                    yPos: 33
                 processInventoryItem:
                     endpoint: processOrderItem
                     name: 'Process Inventory Item '
                     source: mergeInventoryResult
                     type: Input
                     valueType: orderItem
-                    xPos: 250
-                    yPos: -400
         programmingLanguage: CppBoost
         readinessHandler: health/ready
         shutdownTimeout: 30000

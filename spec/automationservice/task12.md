@@ -20,8 +20,8 @@ Return the visible result of one scheduled Workflow execution.
 
 
 ## Stream types
-- Input: `string`
-- Output: `string`
+- Input: `AutomationJob`
+- Output: `AutomationJob`
 
 ## Checklist
 

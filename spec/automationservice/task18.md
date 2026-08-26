@@ -19,8 +19,8 @@ Create an Activity job message identifying the durable scheduled firing.
 
 
 ## Stream types
-- Input: `string`
-- Output: `string`
+- Input: `AutomationJob`
+- Output: `AutomationJob`
 
 ## Checklist
 

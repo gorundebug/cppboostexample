@@ -20,8 +20,8 @@ Return Activity A's typed result before the Workflow Split.
 
 
 ## Stream types
-- Input: `string`
-- Output: `string`
+- Input: `AutomationJob`
+- Output: `AutomationJob`
 
 ## Checklist
 

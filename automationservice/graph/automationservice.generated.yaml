@@ -135,7 +135,124 @@ pools:
         name: Default Pool
 services:
     automationService:
-        color: '#00A86B'
+        appearance:
+            color: '#00A86B'
+            pipelines:
+                automation:
+                    activityPause:
+                        x: -250
+                        "y": 350
+                    callFanOutActivityA:
+                        x: -250
+                        "y": 1870
+                    callFanOutActivityB:
+                        x: 270
+                        "y": 1790
+                    callFanOutActivityC:
+                        x: 270
+                        "y": 1950
+                    callSequentialActivityA:
+                        x: 10
+                        "y": 650
+                    callSequentialActivityB:
+                        x: 270
+                        "y": 650
+                    consumeActivityJob:
+                        x: -500
+                        "y": 350
+                    consumeFanOutActivityA:
+                        x: -500
+                        "y": 2120
+                    consumeFanOutActivityB:
+                        x: -500
+                        "y": 2270
+                    consumeFanOutActivityC:
+                        x: -500
+                        "y": 2420
+                    consumeFanOutWorkflowJob:
+                        x: -500
+                        "y": 1870
+                    consumeSequentialActivityA:
+                        x: -500
+                        "y": 1570
+                    consumeSequentialActivityB:
+                        x: -500
+                        "y": 1720
+                    consumeWorkflowJob:
+                        x: -500
+                        "y": 650
+                    localSchedule:
+                        x: -1250
+                        "y": 500
+                    observeActivityResult:
+                        x: -500
+                        "y": 500
+                    observeFanOutActivityB:
+                        x: 530
+                        "y": 1790
+                    observeFanOutActivityC:
+                        x: 530
+                        "y": 1950
+                    observeWorkflowResult:
+                        x: -500
+                        "y": 800
+                    processActivityJob:
+                        x: 10
+                        "y": 350
+                    processFanOutActivityA:
+                        x: -250
+                        "y": 2120
+                    processFanOutActivityB:
+                        x: -250
+                        "y": 2270
+                    processFanOutActivityC:
+                        x: -250
+                        "y": 2420
+                    processScheduledActivity:
+                        x: -250
+                        "y": 1010
+                    processScheduledWorkflow:
+                        x: -250
+                        "y": 1310
+                    processSequentialActivityA:
+                        x: -250
+                        "y": 1570
+                    processSequentialActivityB:
+                        x: -250
+                        "y": 1720
+                    processWorkflowJob:
+                        x: 530
+                        "y": 650
+                    scheduledActivityPause:
+                        x: -500
+                        "y": 1010
+                    scheduledWorkflowPause:
+                        x: -500
+                        "y": 1310
+                    splitActivityAResult:
+                        x: 10
+                        "y": 1870
+                    splitOnDemandJobs:
+                        x: -1010
+                        "y": 500
+                    submitActivityJob:
+                        x: -760
+                        "y": 350
+                    submitFanOutWorkflowJob:
+                        x: -760
+                        "y": 1870
+                    submitWorkflowJob:
+                        x: -760
+                        "y": 650
+                    temporalActivitySchedule:
+                        x: -760
+                        "y": 1010
+                    temporalWorkflowSchedule:
+                        x: -760
+                        "y": 1310
+                    workflowPause:
+                        x: -250
+                        "y": 650
         defaultCallSemantics: FunctionCall
         environment: ""
         golangVersion: 1.25.4
@@ -223,118 +340,88 @@ services:
                     name: Activity Pause
                     source: consumeActivityJob
                     type: Delay
-                    xPos: -250
-                    yPos: -720
                 callFanOutActivityA:
                     endpoint: fanOutActivityA
                     name: Call Fan-Out Activity A
                     source: consumeFanOutWorkflowJob
                     type: Sink
-                    valueType: string
-                    xPos: -250
-                    yPos: 800
+                    valueType: automationJob
                 callFanOutActivityB:
                     endpoint: fanOutActivityB
                     name: Call Fan-Out Activity B
                     source: splitActivityAResult
                     type: Sink
-                    valueType: string
-                    xPos: 270
-                    yPos: 720
+                    valueType: automationJob
                 callFanOutActivityC:
                     endpoint: fanOutActivityC
                     name: Call Fan-Out Activity C
                     source: splitActivityAResult
                     type: Sink
-                    valueType: string
-                    xPos: 270
-                    yPos: 880
+                    valueType: automationJob
                 callSequentialActivityA:
                     endpoint: sequentialActivityA
                     name: Call Sequential Activity A
                     source: workflowPause
                     type: Sink
-                    valueType: string
-                    xPos: 10
-                    yPos: -420
+                    valueType: automationJob
                 callSequentialActivityB:
                     endpoint: sequentialActivityB
                     name: Call Sequential Activity B
                     source: callSequentialActivityA
                     type: Sink
-                    valueType: string
-                    xPos: 270
-                    yPos: -420
+                    valueType: automationJob
                 consumeActivityJob:
                     endpoint: activityJob
                     name: Consume Activity Job
                     source: processActivityJob
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: -720
+                    valueType: automationJob
                 consumeFanOutActivityA:
                     endpoint: fanOutActivityA
                     name: Consume Fan-Out Activity A
                     source: processFanOutActivityA
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: 1050
+                    valueType: automationJob
                 consumeFanOutActivityB:
                     endpoint: fanOutActivityB
                     name: Consume Fan-Out Activity B
                     source: processFanOutActivityB
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: 1200
+                    valueType: automationJob
                 consumeFanOutActivityC:
                     endpoint: fanOutActivityC
                     name: Consume Fan-Out Activity C
                     source: processFanOutActivityC
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: 1350
+                    valueType: automationJob
                 consumeFanOutWorkflowJob:
                     endpoint: fanOutWorkflowJob
                     name: Consume Fan-Out Workflow Job
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: 800
+                    valueType: automationJob
                 consumeSequentialActivityA:
                     endpoint: sequentialActivityA
                     name: Consume Sequential Activity A
                     source: processSequentialActivityA
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: 500
+                    valueType: automationJob
                 consumeSequentialActivityB:
                     endpoint: sequentialActivityB
                     name: Consume Sequential Activity B
                     source: processSequentialActivityB
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: 650
+                    valueType: automationJob
                 consumeWorkflowJob:
                     endpoint: workflowJob
                     name: Consume Workflow Job
                     source: processWorkflowJob
                     type: Input
-                    valueType: string
-                    xPos: -500
-                    yPos: -420
+                    valueType: automationJob
                 localSchedule:
                     endpoint: localSchedule
                     name: Local Schedule
                     type: Input
-                    valueType: string
-                    xPos: -1250
-                    yPos: -570
+                    valueType: automationJob
                 observeActivityResult:
                     functionDescription: |
                         Preserve the result returned through the on-demand Activity endpoint.
@@ -345,9 +432,7 @@ services:
                     name: Observe Activity Result
                     source: submitActivityJob
                     type: Map
-                    valueType: string
-                    xPos: -500
-                    yPos: -570
+                    valueType: automationJob
                 observeFanOutActivityB:
                     functionDescription: |
                         Observe the typed result returned by the Activity B fan-out branch.
@@ -358,9 +443,7 @@ services:
                     name: Observe Fan-Out Activity B
                     source: callFanOutActivityB
                     type: Map
-                    valueType: string
-                    xPos: 530
-                    yPos: 720
+                    valueType: automationJob
                 observeFanOutActivityC:
                     functionDescription: |
                         Observe the typed result returned by the Activity C fan-out branch.
@@ -371,9 +454,7 @@ services:
                     name: Observe Fan-Out Activity C
                     source: callFanOutActivityC
                     type: Map
-                    valueType: string
-                    xPos: 530
-                    yPos: 880
+                    valueType: automationJob
                 observeWorkflowResult:
                     functionDescription: |
                         Preserve the result returned through the on-demand Workflow endpoint.
@@ -384,9 +465,7 @@ services:
                     name: Observe Workflow Result
                     source: submitWorkflowJob
                     type: Map
-                    valueType: string
-                    xPos: -500
-                    yPos: -270
+                    valueType: automationJob
                 processActivityJob:
                     functionDescription: |
                         Record Activity progress with DurableCallHeartbeat and return the processed job result.
@@ -397,9 +476,7 @@ services:
                     name: Process Activity Job
                     source: activityPause
                     type: Map
-                    valueType: string
-                    xPos: 10
-                    yPos: -720
+                    valueType: automationJob
                 processFanOutActivityA:
                     functionDescription: |
                         Return Activity A's typed result before the Workflow Split.
@@ -410,9 +487,7 @@ services:
                     name: Process Fan-Out Activity A
                     source: consumeFanOutActivityA
                     type: Map
-                    valueType: string
-                    xPos: -250
-                    yPos: 1050
+                    valueType: automationJob
                 processFanOutActivityB:
                     functionDescription: |
                         Return Activity B's typed fan-out result.
@@ -423,9 +498,7 @@ services:
                     name: Process Fan-Out Activity B
                     source: consumeFanOutActivityB
                     type: Map
-                    valueType: string
-                    xPos: -250
-                    yPos: 1200
+                    valueType: automationJob
                 processFanOutActivityC:
                     functionDescription: |
                         Return Activity C's typed fan-out result.
@@ -436,9 +509,7 @@ services:
                     name: Process Fan-Out Activity C
                     source: consumeFanOutActivityC
                     type: Map
-                    valueType: string
-                    xPos: -250
-                    yPos: 1350
+                    valueType: automationJob
                 processScheduledActivity:
                     functionDescription: |
                         Return the visible result of one scheduled Activity execution.
@@ -449,9 +520,7 @@ services:
                     name: Process Scheduled Activity
                     source: scheduledActivityPause
                     type: Map
-                    valueType: string
-                    xPos: -250
-                    yPos: -60
+                    valueType: automationJob
                 processScheduledWorkflow:
                     functionDescription: |
                         Return the visible result of one scheduled Workflow execution.
@@ -462,9 +531,7 @@ services:
                     name: Process Scheduled Workflow
                     source: scheduledWorkflowPause
                     type: Map
-                    valueType: string
-                    xPos: -250
-                    yPos: 240
+                    valueType: automationJob
                 processSequentialActivityA:
                     functionDescription: |
                         Return sequential Activity A's typed result to its Temporal sink.
@@ -475,9 +542,7 @@ services:
                     name: Process Sequential Activity A
                     source: consumeSequentialActivityA
                     type: Map
-                    valueType: string
-                    xPos: -250
-                    yPos: 500
+                    valueType: automationJob
                 processSequentialActivityB:
                     functionDescription: |
                         Return sequential Activity B's typed result to its Temporal sink.
@@ -488,9 +553,7 @@ services:
                     name: Process Sequential Activity B
                     source: consumeSequentialActivityB
                     type: Map
-                    valueType: string
-                    xPos: -250
-                    yPos: 650
+                    valueType: automationJob
                 processWorkflowJob:
                     functionDescription: |
                         Continue the Workflow as new once, then return its final result.
@@ -501,9 +564,7 @@ services:
                     name: Process Workflow Job
                     source: callSequentialActivityB
                     type: Map
-                    valueType: string
-                    xPos: 530
-                    yPos: -420
+                    valueType: automationJob
                 scheduledActivityPause:
                     duration: 250
                     functionDescription: |
@@ -515,8 +576,6 @@ services:
                     name: Scheduled Activity Pause
                     source: temporalActivitySchedule
                     type: Delay
-                    xPos: -500
-                    yPos: -60
                 scheduledWorkflowPause:
                     duration: 250
                     functionDescription: |
@@ -528,60 +587,44 @@ services:
                     name: Scheduled Workflow Pause
                     source: temporalWorkflowSchedule
                     type: Delay
-                    xPos: -500
-                    yPos: 240
                 splitActivityAResult:
                     name: Split Activity A Result
                     source: callFanOutActivityA
                     type: Split
-                    xPos: 10
-                    yPos: 800
                 splitOnDemandJobs:
                     name: Split On-Demand Jobs
                     source: localSchedule
                     type: Split
-                    xPos: -1010
-                    yPos: -570
                 submitActivityJob:
                     endpoint: activityJob
                     name: Submit Activity Job
                     source: splitOnDemandJobs
                     type: Sink
-                    valueType: string
-                    xPos: -760
-                    yPos: -720
+                    valueType: automationJob
                 submitFanOutWorkflowJob:
                     endpoint: fanOutWorkflowJob
                     name: Submit Fan-Out Workflow Job
                     source: splitOnDemandJobs
                     type: Sink
-                    valueType: string
-                    xPos: -760
-                    yPos: 800
+                    valueType: automationJob
                 submitWorkflowJob:
                     endpoint: workflowJob
                     name: Submit Workflow Job
                     source: splitOnDemandJobs
                     type: Sink
-                    valueType: string
-                    xPos: -760
-                    yPos: -420
+                    valueType: automationJob
                 temporalActivitySchedule:
                     endpoint: temporalActivitySchedule
                     name: Temporal Activity Schedule
                     source: processScheduledActivity
                     type: Input
-                    valueType: string
-                    xPos: -760
-                    yPos: -60
+                    valueType: automationJob
                 temporalWorkflowSchedule:
                     endpoint: temporalWorkflowSchedule
                     name: Temporal Workflow Schedule
                     source: processScheduledWorkflow
                     type: Input
-                    valueType: string
-                    xPos: -760
-                    yPos: 240
+                    valueType: automationJob
                 workflowPause:
                     duration: 250
                     functionDescription: |
@@ -593,8 +636,6 @@ services:
                     name: Workflow Pause
                     source: consumeWorkflowJob
                     type: Delay
-                    xPos: -250
-                    yPos: -420
         programmingLanguage: GoLang
         readinessHandler: health/ready
         shutdownTimeout: 30000
@@ -605,8 +646,8 @@ settings:
     name: Example
     repoPath: github.com/gorundebug/cppboostexample
 types:
-    string:
+    automationJob:
         description: Automation job payload and result.
+        name: AutomationJob
         publicType: false
         type: string
-        useAlias: false

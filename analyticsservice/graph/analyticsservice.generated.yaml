@@ -31,7 +31,16 @@ dataConnectors:
         version: 2.8.0
 services:
     analyticsService:
-        color: '#05ABF7'
+        appearance:
+            color: '#05ABF7'
+            pipelines:
+                analytics:
+                    consumeOrderProcessed:
+                        x: -1190
+                        "y": -205
+                    countOrderProcessed:
+                        x: -1390
+                        "y": -19
         defaultCallSemantics: FunctionCall
         environment: ""
         golangVersion: 1.25.4
@@ -52,8 +61,6 @@ services:
                     source: countOrderProcessed
                     type: Input
                     valueType: orderProcessed
-                    xPos: -1190
-                    yPos: -205
                 countOrderProcessed:
                     functionDescription: |
                         Count successful and unsuccessful orders independently, then return the event unchanged.
@@ -65,8 +72,6 @@ services:
                     source: consumeOrderProcessed
                     type: Process
                     valueType: orderProcessed
-                    xPos: -1390
-                    yPos: -19
         programmingLanguage: CppBoost
         readinessHandler: health/ready
         shutdownTimeout: 30000

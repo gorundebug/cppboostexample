@@ -20,8 +20,8 @@ Record Activity progress with DurableCallHeartbeat and return the processed job 
 
 
 ## Stream types
-- Input: `string`
-- Output: `string`
+- Input: `AutomationJob`
+- Output: `AutomationJob`
 
 ## Checklist
 

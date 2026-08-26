@@ -92,6 +92,30 @@ def repositories() -> list[tuple[str, str, dict]]:
         ("raw", "github-raw", github),
         ("raw", "gitlab-raw", gitlab),
     ]
+    for name, remote_url in (
+        ("conan-source-archives-boost", "https://archives.boost.io"),
+        ("conan-source-cmake", "https://cmake.org"),
+        ("conan-source-curl", "https://curl.se"),
+        ("conan-source-schmorp", "http://dist.schmorp.de"),
+        ("conan-source-ariadne", "https://distfiles.ariadne.space"),
+        ("conan-source-gnu-ftp", "https://ftp.gnu.org"),
+        ("conan-source-gnu-mirror", "https://ftpmirror.gnu.org"),
+        ("conan-source-savannah-git", "https://https.git.savannah.gnu.org"),
+        ("conan-source-kernel", "https://mirrors.kernel.org"),
+        ("conan-source-sourceforge", "https://sourceforge.net"),
+        ("conan-source-sourceware", "https://sourceware.org"),
+        ("conan-source-mirrorservice", "https://www.mirrorservice.org"),
+        ("conan-source-zlib", "https://zlib.net"),
+    ):
+        raw_source = common(name, remote_url)
+        raw_source["proxy"]["contentMaxAge"] = -1
+        raw_source["proxy"]["metadataMaxAge"] = -1
+        raw_source["raw"] = {
+            "contentDisposition": "ATTACHMENT",
+            "forwardQueryParameters": True,
+            "excludedQueryParameters": [],
+        }
+        definitions.append(("raw", name, raw_source))
     conan = common("conan-proxy", "https://center2.conan.io")
     conan["conanProxy"] = {"conanVersion": "V2"}
     definitions.append(("conan", "conan-proxy", conan))

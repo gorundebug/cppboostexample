@@ -20,8 +20,8 @@ Preserve the result returned through the on-demand Activity endpoint.
 
 
 ## Stream types
-- Input: `string`
-- Output: `string`
+- Input: `AutomationJob`
+- Output: `AutomationJob`
 
 ## Checklist
 

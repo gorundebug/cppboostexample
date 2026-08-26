@@ -20,8 +20,8 @@ Observe the typed result returned by the Activity B fan-out branch.
 
 
 ## Stream types
-- Input: `string`
-- Output: `string`
+- Input: `AutomationJob`
+- Output: `AutomationJob`
 
 ## Checklist
 

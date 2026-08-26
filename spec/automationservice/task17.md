@@ -20,8 +20,8 @@ Use the official Temporal Workflow timer for a scheduled Workflow.
 
 
 ## Stream types
-- Input: `string`
-- Output: `string`
+- Input: `AutomationJob`
+- Output: `AutomationJob`
 
 ## Checklist
 

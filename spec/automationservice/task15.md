@@ -20,8 +20,8 @@ Continue the Workflow as new once, then return its final result.
 
 
 ## Stream types
-- Input: `string`
-- Output: `string`
+- Input: `AutomationJob`
+- Output: `AutomationJob`
 
 ## Checklist
 
