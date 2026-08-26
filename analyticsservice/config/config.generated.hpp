@@ -165,6 +165,7 @@ inline Config MakeConfig() {
     value.implementation = DataConnectorImplementation::kLibrdkafka;
     value.brokers = "redpanda:9092";
     value.version = "2.8.0";
+    value.dialTimeout = 5000;
     value.securityProtocol = KafkaSecurityProtocol::kPLAINTEXT;
     value.saslMechanism = KafkaSaslMechanism::kSCRAMSHA512;
     value.username = "";

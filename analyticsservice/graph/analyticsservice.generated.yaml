@@ -1,6 +1,7 @@
 dataConnectors:
     orderEvents:
         brokers: redpanda:9092
+        dialTimeout: 5000
         endpoints:
             orderProcessed:
                 consumerGroup: analytics-service

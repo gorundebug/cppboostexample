@@ -148,7 +148,7 @@ inline Config MakeConfig() {
     value.name = "Order Service";
     value.color = "#FF5C00";
     value.defaultCallSemantics = MakeCallSemanticsGroup(CallSemantics::kFunctionCall, "", 0, false);
-    value.defaultGrpcTimeout = 5000;
+    value.defaultGrpcTimeout = 0;
     value.environment = Environment::kUndefined;
     value.golangVersion = "1.25.4";
     value.grpcHost = "0.0.0.0";
@@ -292,7 +292,7 @@ inline Config MakeConfig() {
     value.idSource = kSplitPipelineStreamId;
     value.xPos = -477;
     value.yPos = -444;
-    value.duration = 1000;
+    value.duration = 0;
     value.functionPackage = "";
     value.functionName = "SoftDeadline";
     value.functionDescription = "Trigger the timeout branch shortly before the request deadline, leaving the configured duration to assemble a response.\nWhen no request deadline exists, use the configured duration itself. Never wait past an existing deadline.\n";
@@ -339,6 +339,7 @@ inline Config MakeConfig() {
     value.implementation = DataConnectorImplementation::kLibrdkafka;
     value.brokers = "redpanda:9092";
     value.version = "2.8.0";
+    value.dialTimeout = 5000;
     value.securityProtocol = KafkaSecurityProtocol::kPLAINTEXT;
     value.saslMechanism = KafkaSaslMechanism::kSCRAMSHA512;
     value.username = "";

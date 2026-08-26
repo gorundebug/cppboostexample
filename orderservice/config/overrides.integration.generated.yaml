@@ -16,7 +16,7 @@ pools:
     executorsCount: 2
 services:
   orderService:
-    defaultGrpcTimeout: 5000
+    defaultGrpcTimeout: 0
     environment: ""
     grpcHost: 0.0.0.0
     grpcPort: 9201
@@ -24,4 +24,4 @@ services:
     httpPort: 9091
 streams:
   softDeadline:
-    duration: 1000
+    duration: 0

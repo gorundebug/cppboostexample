@@ -4,26 +4,37 @@ dataConnectors:
 endpoints:
   activityJob:
     enabled: $activityJobEnabled
+    tracingEnabled: $activityJobTracingEnabled
   fanOutActivityA:
     enabled: $fanOutActivityAEnabled
+    tracingEnabled: $fanOutActivityATracingEnabled
   fanOutActivityB:
     enabled: $fanOutActivityBEnabled
+    tracingEnabled: $fanOutActivityBTracingEnabled
   fanOutActivityC:
     enabled: $fanOutActivityCEnabled
+    tracingEnabled: $fanOutActivityCTracingEnabled
   fanOutWorkflowJob:
     enabled: $fanOutWorkflowJobEnabled
+    tracingEnabled: $fanOutWorkflowJobTracingEnabled
   localSchedule:
     enabled: $localScheduleEnabled
+    tracingEnabled: $localScheduleTracingEnabled
   sequentialActivityA:
     enabled: $sequentialActivityAEnabled
+    tracingEnabled: $sequentialActivityATracingEnabled
   sequentialActivityB:
     enabled: $sequentialActivityBEnabled
+    tracingEnabled: $sequentialActivityBTracingEnabled
   temporalActivitySchedule:
     enabled: $temporalActivityScheduleEnabled
+    tracingEnabled: $temporalActivityScheduleTracingEnabled
   temporalWorkflowSchedule:
     enabled: $temporalWorkflowScheduleEnabled
+    tracingEnabled: $temporalWorkflowScheduleTracingEnabled
   workflowJob:
     enabled: $workflowJobEnabled
+    tracingEnabled: $workflowJobTracingEnabled
 pools:
   defaultPool:
     executorsCount: $defaultPoolExecutorsCount

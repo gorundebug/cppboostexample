@@ -28,12 +28,16 @@ dataConnectors:
                 enabled: true
                 functionDescription: |
                     Create a job message identifying the local scheduled firing.
+                functionInitializerGroup: ""
                 functionName: LocalSchedule
+                functionPackage: ""
                 missedRunPolicy: FireOnce
                 name: Local Schedule
                 overlapPolicy: Skip
+                publicFunction: false
                 schedule: '*/5 * * * *'
                 timezone: UTC
+                tracingEnabled: false
         goImplementation: go/gocron
         name: Local Cron
         pythonImplementation: python/apscheduler
@@ -42,6 +46,7 @@ dataConnectors:
         typeScriptImplementation: node/croner
     orderEvents:
         brokers: redpanda:9092
+        dialTimeout: 5000
         endpoints:
             orderProcessed:
                 consumerGroup: analytics-service
@@ -95,67 +100,138 @@ dataConnectors:
         useDedicatedListener: false
     temporal:
         address: temporal:7233
+        apiKey: ""
         endpoints:
             activityJob:
                 activityHeartbeatTimeout: 5000
                 activityStartToCloseTimeout: 30000
                 enabled: true
+                functionDescription: ""
+                functionInitializerGroup: ""
+                functionPackage: ""
                 maximumAttempts: 3
+                missedRunPolicy: FireOnce
                 name: Activity Job
+                overlapPolicy: Skip
+                publicFunction: false
+                schedule: ""
+                scheduleId: ""
                 taskQueue: automation-activity-jobs
                 temporalExecutionType: Activity
+                timezone: UTC
+                tracingEnabled: false
                 workflowExecutionTimeout: 60000
             fanOutActivityA:
                 activityHeartbeatTimeout: 5000
                 activityStartToCloseTimeout: 30000
                 enabled: true
+                functionDescription: ""
+                functionInitializerGroup: ""
+                functionPackage: ""
                 maximumAttempts: 3
+                missedRunPolicy: FireOnce
                 name: Fan-Out Activity A
+                overlapPolicy: Skip
+                publicFunction: false
+                schedule: ""
+                scheduleId: ""
                 taskQueue: automation-activity-jobs
                 temporalExecutionType: Activity
+                timezone: UTC
+                tracingEnabled: false
                 workflowExecutionTimeout: 60000
             fanOutActivityB:
                 activityHeartbeatTimeout: 5000
                 activityStartToCloseTimeout: 30000
                 enabled: true
+                functionDescription: ""
+                functionInitializerGroup: ""
+                functionPackage: ""
                 maximumAttempts: 3
+                missedRunPolicy: FireOnce
                 name: Fan-Out Activity B
+                overlapPolicy: Skip
+                publicFunction: false
+                schedule: ""
+                scheduleId: ""
                 taskQueue: automation-activity-jobs
                 temporalExecutionType: Activity
+                timezone: UTC
+                tracingEnabled: false
                 workflowExecutionTimeout: 60000
             fanOutActivityC:
                 activityHeartbeatTimeout: 5000
                 activityStartToCloseTimeout: 30000
                 enabled: true
+                functionDescription: ""
+                functionInitializerGroup: ""
+                functionPackage: ""
                 maximumAttempts: 3
+                missedRunPolicy: FireOnce
                 name: Fan-Out Activity C
+                overlapPolicy: Skip
+                publicFunction: false
+                schedule: ""
+                scheduleId: ""
                 taskQueue: automation-activity-jobs
                 temporalExecutionType: Activity
+                timezone: UTC
+                tracingEnabled: false
                 workflowExecutionTimeout: 60000
             fanOutWorkflowJob:
                 enabled: true
+                functionDescription: ""
+                functionInitializerGroup: ""
+                functionPackage: ""
                 maximumAttempts: 3
+                missedRunPolicy: FireOnce
                 name: Fan-Out Workflow Job
+                overlapPolicy: Skip
+                publicFunction: false
+                schedule: ""
+                scheduleId: ""
                 taskQueue: automation-workflow-jobs
                 temporalExecutionType: Workflow
+                timezone: UTC
+                tracingEnabled: false
                 workflowExecutionTimeout: 60000
             sequentialActivityA:
                 activityHeartbeatTimeout: 5000
                 activityStartToCloseTimeout: 30000
                 enabled: true
+                functionDescription: ""
+                functionInitializerGroup: ""
+                functionPackage: ""
                 maximumAttempts: 3
+                missedRunPolicy: FireOnce
                 name: Sequential Activity A
+                overlapPolicy: Skip
+                publicFunction: false
+                schedule: ""
+                scheduleId: ""
                 taskQueue: automation-activity-jobs
                 temporalExecutionType: Activity
+                timezone: UTC
+                tracingEnabled: false
                 workflowExecutionTimeout: 60000
             sequentialActivityB:
                 activityHeartbeatTimeout: 5000
                 activityStartToCloseTimeout: 30000
                 enabled: true
+                functionDescription: ""
+                functionInitializerGroup: ""
+                functionPackage: ""
                 maximumAttempts: 3
+                missedRunPolicy: FireOnce
                 name: Sequential Activity B
+                overlapPolicy: Skip
+                publicFunction: false
+                schedule: ""
+                scheduleId: ""
                 taskQueue: automation-activity-jobs
                 temporalExecutionType: Activity
+                timezone: UTC
+                tracingEnabled: false
                 workflowExecutionTimeout: 60000
             temporalActivitySchedule:
                 activityHeartbeatTimeout: 5000
@@ -163,38 +239,56 @@ dataConnectors:
                 enabled: true
                 functionDescription: |
                     Create an Activity job message identifying the durable scheduled firing.
+                functionInitializerGroup: ""
                 functionName: TemporalActivitySchedule
+                functionPackage: ""
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Temporal Activity Schedule
                 overlapPolicy: Skip
+                publicFunction: false
                 schedule: '*/10 * * * *'
                 scheduleId: example-automation-activity-schedule
                 taskQueue: automation-activity-schedules
                 temporalExecutionType: Activity
                 timezone: UTC
+                tracingEnabled: false
                 workflowExecutionTimeout: 60000
             temporalWorkflowSchedule:
                 enabled: true
                 functionDescription: |
                     Create a Workflow job message identifying the durable scheduled firing.
+                functionInitializerGroup: ""
                 functionName: TemporalWorkflowSchedule
+                functionPackage: ""
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Temporal Workflow Schedule
                 overlapPolicy: Skip
+                publicFunction: false
                 schedule: '*/10 * * * *'
                 scheduleId: example-automation-workflow-schedule
                 taskQueue: automation-workflow-schedules
                 temporalExecutionType: Workflow
                 timezone: UTC
+                tracingEnabled: false
                 workflowExecutionTimeout: 60000
             workflowJob:
                 enabled: true
+                functionDescription: ""
+                functionInitializerGroup: ""
+                functionPackage: ""
                 maximumAttempts: 3
+                missedRunPolicy: FireOnce
                 name: Workflow Job
+                overlapPolicy: Skip
+                publicFunction: false
+                schedule: ""
+                scheduleId: ""
                 taskQueue: automation-workflow-jobs
                 temporalExecutionType: Workflow
+                timezone: UTC
+                tracingEnabled: false
                 workflowExecutionTimeout: 60000
         goImplementation: temporal/go
         identity: example-automation
@@ -203,6 +297,7 @@ dataConnectors:
         name: Temporal
         namespace: default
         pythonImplementation: temporal/python
+        tlsEnabled: false
         type: Temporal
         typeScriptImplementation: temporal/typescript
 modules:
@@ -279,20 +374,20 @@ services:
             pipelines:
                 automation:
                     activityPause:
-                        x: -250
-                        "y": 350
+                        x: -251
+                        "y": 219
                     callFanOutActivityA:
-                        x: -250
-                        "y": 1870
+                        x: -271
+                        "y": 1284
                     callFanOutActivityB:
-                        x: 270
-                        "y": 1790
+                        x: 7
+                        "y": 990
                     callFanOutActivityC:
-                        x: 270
-                        "y": 1950
+                        x: 317
+                        "y": 1313
                     callSequentialActivityA:
-                        x: 10
-                        "y": 650
+                        x: 49
+                        "y": 473
                     callSequentialActivityB:
                         x: 270
                         "y": 650
@@ -300,26 +395,26 @@ services:
                         x: -500
                         "y": 350
                     consumeFanOutActivityA:
-                        x: -500
-                        "y": 2120
+                        x: -277
+                        "y": 1051
                     consumeFanOutActivityB:
-                        x: -500
-                        "y": 2270
+                        x: 295
+                        "y": 996
                     consumeFanOutActivityC:
-                        x: -500
-                        "y": 2420
+                        x: 553
+                        "y": 1503
                     consumeFanOutWorkflowJob:
-                        x: -500
-                        "y": 1870
+                        x: -635
+                        "y": 1287
                     consumeSequentialActivityA:
-                        x: -500
-                        "y": 1570
+                        x: 302
+                        "y": 489
                     consumeSequentialActivityB:
-                        x: -500
-                        "y": 1720
+                        x: 503
+                        "y": 658
                     consumeWorkflowJob:
-                        x: -500
-                        "y": 650
+                        x: -515
+                        "y": 635
                     localSchedule:
                         x: -1250
                         "y": 500
@@ -327,50 +422,50 @@ services:
                         x: -500
                         "y": 500
                     observeFanOutActivityB:
-                        x: 530
-                        "y": 1790
+                        x: -11
+                        "y": 793
                     observeFanOutActivityC:
-                        x: 530
-                        "y": 1950
+                        x: 587
+                        "y": 1121
                     observeWorkflowResult:
-                        x: -500
-                        "y": 800
+                        x: -650
+                        "y": 788
                     processActivityJob:
                         x: 10
                         "y": 350
                     processFanOutActivityA:
-                        x: -250
-                        "y": 2120
+                        x: -268
+                        "y": 819
                     processFanOutActivityB:
-                        x: -250
-                        "y": 2270
+                        x: 705
+                        "y": 1001
                     processFanOutActivityC:
-                        x: -250
-                        "y": 2420
+                        x: 931
+                        "y": 1493
                     processScheduledActivity:
-                        x: -250
-                        "y": 1010
+                        x: -1442
+                        "y": 655
                     processScheduledWorkflow:
-                        x: -250
-                        "y": 1310
+                        x: -1411
+                        "y": 856
                     processSequentialActivityA:
-                        x: -250
-                        "y": 1570
+                        x: 568
+                        "y": 486
                     processSequentialActivityB:
-                        x: -250
-                        "y": 1720
+                        x: 804
+                        "y": 660
                     processWorkflowJob:
-                        x: 530
-                        "y": 650
+                        x: -59
+                        "y": 654
                     scheduledActivityPause:
-                        x: -500
-                        "y": 1010
+                        x: -1661
+                        "y": 402
                     scheduledWorkflowPause:
-                        x: -500
-                        "y": 1310
+                        x: -1684
+                        "y": 1167
                     splitActivityAResult:
-                        x: 10
-                        "y": 1870
+                        x: 40
+                        "y": 1312
                     splitOnDemandJobs:
                         x: -1010
                         "y": 500
@@ -378,20 +473,20 @@ services:
                         x: -760
                         "y": 350
                     submitFanOutWorkflowJob:
-                        x: -760
-                        "y": 1870
+                        x: -967
+                        "y": 1034
                     submitWorkflowJob:
-                        x: -760
-                        "y": 650
+                        x: -807
+                        "y": 629
                     temporalActivitySchedule:
-                        x: -760
-                        "y": 1010
+                        x: -1917
+                        "y": 639
                     temporalWorkflowSchedule:
-                        x: -760
-                        "y": 1310
+                        x: -1906
+                        "y": 846
                     workflowPause:
-                        x: -250
-                        "y": 650
+                        x: -233
+                        "y": 504
         defaultCallSemantics: FunctionCall
         environment: ""
         golangVersion: 1.25.4
@@ -909,7 +1004,6 @@ services:
                         x: -640
                         "y": -597
         defaultCallSemantics: FunctionCall
-        defaultGrpcTimeout: 5000
         environment: ""
         golangVersion: 1.25.4
         grpcHost: 0.0.0.0
@@ -1024,7 +1118,7 @@ services:
                     type: Sink
                     valueType: orderProcessed
                 softDeadline:
-                    duration: 1000
+                    duration: 0
                     functionDescription: |
                         Trigger the timeout branch shortly before the request deadline, leaving the configured duration to assemble a response.
                         When no request deadline exists, use the configured duration itself. Never wait past an existing deadline.
@@ -1058,6 +1152,7 @@ types:
         name: AutomationJob
         publicType: false
         type: string
+        useAlias: false
     order:
         definitionFormat: Native
         description: 'E-commerce order submitted by a customer. Fields: ID string, CustomerID string, Items []OrderItem, CreatedAt time.Time.'

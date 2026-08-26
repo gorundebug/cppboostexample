@@ -307,6 +307,9 @@ func (c *Config) ApplyEnvironment() error {
 	if err := c.applyActivityJobEnabled(); err != nil {
 		return err
 	}
+	if err := c.applyActivityJobTracingEnabled(); err != nil {
+		return err
+	}
 	if err := c.applyActivityPauseDuration(); err != nil {
 		return err
 	}
@@ -334,16 +337,31 @@ func (c *Config) ApplyEnvironment() error {
 	if err := c.applyFanOutActivityAEnabled(); err != nil {
 		return err
 	}
+	if err := c.applyFanOutActivityATracingEnabled(); err != nil {
+		return err
+	}
 	if err := c.applyFanOutActivityBEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityBTracingEnabled(); err != nil {
 		return err
 	}
 	if err := c.applyFanOutActivityCEnabled(); err != nil {
 		return err
 	}
+	if err := c.applyFanOutActivityCTracingEnabled(); err != nil {
+		return err
+	}
 	if err := c.applyFanOutWorkflowJobEnabled(); err != nil {
 		return err
 	}
+	if err := c.applyFanOutWorkflowJobTracingEnabled(); err != nil {
+		return err
+	}
 	if err := c.applyLocalScheduleEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyLocalScheduleTracingEnabled(); err != nil {
 		return err
 	}
 	if err := c.applyScheduledActivityPauseDuration(); err != nil {
@@ -355,10 +373,19 @@ func (c *Config) ApplyEnvironment() error {
 	if err := c.applySequentialActivityAEnabled(); err != nil {
 		return err
 	}
+	if err := c.applySequentialActivityATracingEnabled(); err != nil {
+		return err
+	}
 	if err := c.applySequentialActivityBEnabled(); err != nil {
 		return err
 	}
+	if err := c.applySequentialActivityBTracingEnabled(); err != nil {
+		return err
+	}
 	if err := c.applyTemporalActivityScheduleEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalActivityScheduleTracingEnabled(); err != nil {
 		return err
 	}
 	if err := c.applyTemporalAddress(); err != nil {
@@ -367,7 +394,13 @@ func (c *Config) ApplyEnvironment() error {
 	if err := c.applyTemporalWorkflowScheduleEnabled(); err != nil {
 		return err
 	}
+	if err := c.applyTemporalWorkflowScheduleTracingEnabled(); err != nil {
+		return err
+	}
 	if err := c.applyWorkflowJobEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyWorkflowJobTracingEnabled(); err != nil {
 		return err
 	}
 	if err := c.applyWorkflowPauseDuration(); err != nil {
@@ -387,6 +420,21 @@ func (c *Config) applyActivityJobEnabled() error {
 		return fmt.Errorf("failed to convert ACTIVITY_JOB_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.ActivityJob.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyActivityJobTracingEnabled() error {
+	value, exists := os.LookupEnv("ACTIVITY_JOB_TRACING_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert ACTIVITY_JOB_TRACING_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.ActivityJob.TracingEnabled = boolVal
 
 	return nil
 }
@@ -514,6 +562,21 @@ func (c *Config) applyFanOutActivityAEnabled() error {
 	return nil
 }
 
+func (c *Config) applyFanOutActivityATracingEnabled() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_A_TRACING_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_A_TRACING_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.FanOutActivityA.TracingEnabled = boolVal
+
+	return nil
+}
+
 func (c *Config) applyFanOutActivityBEnabled() error {
 	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_B_ENABLED")
 	if !exists {
@@ -525,6 +588,21 @@ func (c *Config) applyFanOutActivityBEnabled() error {
 		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_B_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.FanOutActivityB.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityBTracingEnabled() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_B_TRACING_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_B_TRACING_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.FanOutActivityB.TracingEnabled = boolVal
 
 	return nil
 }
@@ -544,6 +622,21 @@ func (c *Config) applyFanOutActivityCEnabled() error {
 	return nil
 }
 
+func (c *Config) applyFanOutActivityCTracingEnabled() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_C_TRACING_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_C_TRACING_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.FanOutActivityC.TracingEnabled = boolVal
+
+	return nil
+}
+
 func (c *Config) applyFanOutWorkflowJobEnabled() error {
 	value, exists := os.LookupEnv("FAN_OUT_WORKFLOW_JOB_ENABLED")
 	if !exists {
@@ -559,6 +652,21 @@ func (c *Config) applyFanOutWorkflowJobEnabled() error {
 	return nil
 }
 
+func (c *Config) applyFanOutWorkflowJobTracingEnabled() error {
+	value, exists := os.LookupEnv("FAN_OUT_WORKFLOW_JOB_TRACING_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_WORKFLOW_JOB_TRACING_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.FanOutWorkflowJob.TracingEnabled = boolVal
+
+	return nil
+}
+
 func (c *Config) applyLocalScheduleEnabled() error {
 	value, exists := os.LookupEnv("LOCAL_SCHEDULE_ENABLED")
 	if !exists {
@@ -570,6 +678,21 @@ func (c *Config) applyLocalScheduleEnabled() error {
 		return fmt.Errorf("failed to convert LOCAL_SCHEDULE_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.LocalSchedule.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyLocalScheduleTracingEnabled() error {
+	value, exists := os.LookupEnv("LOCAL_SCHEDULE_TRACING_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert LOCAL_SCHEDULE_TRACING_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.LocalSchedule.TracingEnabled = boolVal
 
 	return nil
 }
@@ -619,6 +742,21 @@ func (c *Config) applySequentialActivityAEnabled() error {
 	return nil
 }
 
+func (c *Config) applySequentialActivityATracingEnabled() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_A_TRACING_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_A_TRACING_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.SequentialActivityA.TracingEnabled = boolVal
+
+	return nil
+}
+
 func (c *Config) applySequentialActivityBEnabled() error {
 	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_B_ENABLED")
 	if !exists {
@@ -634,6 +772,21 @@ func (c *Config) applySequentialActivityBEnabled() error {
 	return nil
 }
 
+func (c *Config) applySequentialActivityBTracingEnabled() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_B_TRACING_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_B_TRACING_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.SequentialActivityB.TracingEnabled = boolVal
+
+	return nil
+}
+
 func (c *Config) applyTemporalActivityScheduleEnabled() error {
 	value, exists := os.LookupEnv("TEMPORAL_ACTIVITY_SCHEDULE_ENABLED")
 	if !exists {
@@ -645,6 +798,21 @@ func (c *Config) applyTemporalActivityScheduleEnabled() error {
 		return fmt.Errorf("failed to convert TEMPORAL_ACTIVITY_SCHEDULE_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.TemporalActivitySchedule.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyTemporalActivityScheduleTracingEnabled() error {
+	value, exists := os.LookupEnv("TEMPORAL_ACTIVITY_SCHEDULE_TRACING_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert TEMPORAL_ACTIVITY_SCHEDULE_TRACING_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.TemporalActivitySchedule.TracingEnabled = boolVal
 
 	return nil
 }
@@ -675,6 +843,21 @@ func (c *Config) applyTemporalWorkflowScheduleEnabled() error {
 	return nil
 }
 
+func (c *Config) applyTemporalWorkflowScheduleTracingEnabled() error {
+	value, exists := os.LookupEnv("TEMPORAL_WORKFLOW_SCHEDULE_TRACING_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert TEMPORAL_WORKFLOW_SCHEDULE_TRACING_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.TemporalWorkflowSchedule.TracingEnabled = boolVal
+
+	return nil
+}
+
 func (c *Config) applyWorkflowJobEnabled() error {
 	value, exists := os.LookupEnv("WORKFLOW_JOB_ENABLED")
 	if !exists {
@@ -686,6 +869,21 @@ func (c *Config) applyWorkflowJobEnabled() error {
 		return fmt.Errorf("failed to convert WORKFLOW_JOB_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.WorkflowJob.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyWorkflowJobTracingEnabled() error {
+	value, exists := os.LookupEnv("WORKFLOW_JOB_TRACING_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert WORKFLOW_JOB_TRACING_ENABLED to bool: %w", err)
+	}
+	c.Endpoints.WorkflowJob.TracingEnabled = boolVal
 
 	return nil
 }
@@ -778,8 +976,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            consumeActivityJobStreamID,
-				XPos:                -250,
-				YPos:                350,
+				XPos:                -251,
+				YPos:                219,
 				Duration:            250,
 				FunctionName:        "ActivityPause",
 				FunctionDescription: "Apply the ordinary local Delay while processing an on-demand Temporal Activity.\n",
@@ -791,8 +989,8 @@ func MakeConfig() *Config {
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
 				IdSource:   consumeFanOutWorkflowJobStreamID,
-				XPos:       -250,
-				YPos:       1870,
+				XPos:       -271,
+				YPos:       1284,
 				ValueType:  "AutomationJob",
 				IdEndpoint: fanOutActivityAEndpointID,
 			},
@@ -803,8 +1001,8 @@ func MakeConfig() *Config {
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
 				IdSource:   splitActivityAResultStreamID,
-				XPos:       270,
-				YPos:       1790,
+				XPos:       7,
+				YPos:       990,
 				ValueType:  "AutomationJob",
 				IdEndpoint: fanOutActivityBEndpointID,
 			},
@@ -815,8 +1013,8 @@ func MakeConfig() *Config {
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
 				IdSource:   splitActivityAResultStreamID,
-				XPos:       270,
-				YPos:       1950,
+				XPos:       317,
+				YPos:       1313,
 				ValueType:  "AutomationJob",
 				IdEndpoint: fanOutActivityCEndpointID,
 			},
@@ -827,8 +1025,8 @@ func MakeConfig() *Config {
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
 				IdSource:   workflowPauseStreamID,
-				XPos:       10,
-				YPos:       650,
+				XPos:       49,
+				YPos:       473,
 				ValueType:  "AutomationJob",
 				IdEndpoint: sequentialActivityAEndpointID,
 			},
@@ -863,8 +1061,8 @@ func MakeConfig() *Config {
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
 				IdSource:   processFanOutActivityAStreamID,
-				XPos:       -500,
-				YPos:       2120,
+				XPos:       -277,
+				YPos:       1051,
 				ValueType:  "AutomationJob",
 				IdEndpoint: fanOutActivityAEndpointID,
 			},
@@ -875,8 +1073,8 @@ func MakeConfig() *Config {
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
 				IdSource:   processFanOutActivityBStreamID,
-				XPos:       -500,
-				YPos:       2270,
+				XPos:       295,
+				YPos:       996,
 				ValueType:  "AutomationJob",
 				IdEndpoint: fanOutActivityBEndpointID,
 			},
@@ -887,8 +1085,8 @@ func MakeConfig() *Config {
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
 				IdSource:   processFanOutActivityCStreamID,
-				XPos:       -500,
-				YPos:       2420,
+				XPos:       553,
+				YPos:       1503,
 				ValueType:  "AutomationJob",
 				IdEndpoint: fanOutActivityCEndpointID,
 			},
@@ -898,8 +1096,8 @@ func MakeConfig() *Config {
 				Name:       "Consume Fan-Out Workflow Job",
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
-				XPos:       -500,
-				YPos:       1870,
+				XPos:       -635,
+				YPos:       1287,
 				ValueType:  "AutomationJob",
 				IdEndpoint: fanOutWorkflowJobEndpointID,
 			},
@@ -910,8 +1108,8 @@ func MakeConfig() *Config {
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
 				IdSource:   processSequentialActivityAStreamID,
-				XPos:       -500,
-				YPos:       1570,
+				XPos:       302,
+				YPos:       489,
 				ValueType:  "AutomationJob",
 				IdEndpoint: sequentialActivityAEndpointID,
 			},
@@ -922,8 +1120,8 @@ func MakeConfig() *Config {
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
 				IdSource:   processSequentialActivityBStreamID,
-				XPos:       -500,
-				YPos:       1720,
+				XPos:       503,
+				YPos:       658,
 				ValueType:  "AutomationJob",
 				IdEndpoint: sequentialActivityBEndpointID,
 			},
@@ -934,8 +1132,8 @@ func MakeConfig() *Config {
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
 				IdSource:   processWorkflowJobStreamID,
-				XPos:       -500,
-				YPos:       650,
+				XPos:       -515,
+				YPos:       635,
 				ValueType:  "AutomationJob",
 				IdEndpoint: workflowJobEndpointID,
 			},
@@ -970,8 +1168,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            callFanOutActivityBStreamID,
-				XPos:                530,
-				YPos:                1790,
+				XPos:                -11,
+				YPos:                793,
 				ValueType:           "AutomationJob",
 				FunctionName:        "ObserveFanoutActivityB",
 				FunctionDescription: "Observe the typed result returned by the Activity B fan-out branch.\n",
@@ -983,8 +1181,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            callFanOutActivityCStreamID,
-				XPos:                530,
-				YPos:                1950,
+				XPos:                587,
+				YPos:                1121,
 				ValueType:           "AutomationJob",
 				FunctionName:        "ObserveFanoutActivityC",
 				FunctionDescription: "Observe the typed result returned by the Activity C fan-out branch.\n",
@@ -996,8 +1194,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            submitWorkflowJobStreamID,
-				XPos:                -500,
-				YPos:                800,
+				XPos:                -650,
+				YPos:                788,
 				ValueType:           "AutomationJob",
 				FunctionName:        "ObserveWorkflowResult",
 				FunctionDescription: "Preserve the result returned through the on-demand Workflow endpoint.\n",
@@ -1022,8 +1220,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            consumeFanOutActivityAStreamID,
-				XPos:                -250,
-				YPos:                2120,
+				XPos:                -268,
+				YPos:                819,
 				ValueType:           "AutomationJob",
 				FunctionName:        "ProcessFanoutActivityA",
 				FunctionDescription: "Return Activity A's typed result before the Workflow Split.\n",
@@ -1035,8 +1233,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            consumeFanOutActivityBStreamID,
-				XPos:                -250,
-				YPos:                2270,
+				XPos:                705,
+				YPos:                1001,
 				ValueType:           "AutomationJob",
 				FunctionName:        "ProcessFanoutActivityB",
 				FunctionDescription: "Return Activity B's typed fan-out result.\n",
@@ -1048,8 +1246,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            consumeFanOutActivityCStreamID,
-				XPos:                -250,
-				YPos:                2420,
+				XPos:                931,
+				YPos:                1493,
 				ValueType:           "AutomationJob",
 				FunctionName:        "ProcessFanoutActivityC",
 				FunctionDescription: "Return Activity C's typed fan-out result.\n",
@@ -1061,8 +1259,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            scheduledActivityPauseStreamID,
-				XPos:                -250,
-				YPos:                1010,
+				XPos:                -1442,
+				YPos:                655,
 				ValueType:           "AutomationJob",
 				FunctionName:        "ProcessScheduledActivity",
 				FunctionDescription: "Return the visible result of one scheduled Activity execution.\n",
@@ -1074,8 +1272,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            scheduledWorkflowPauseStreamID,
-				XPos:                -250,
-				YPos:                1310,
+				XPos:                -1411,
+				YPos:                856,
 				ValueType:           "AutomationJob",
 				FunctionName:        "ProcessScheduledWorkflow",
 				FunctionDescription: "Return the visible result of one scheduled Workflow execution.\n",
@@ -1087,8 +1285,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            consumeSequentialActivityAStreamID,
-				XPos:                -250,
-				YPos:                1570,
+				XPos:                568,
+				YPos:                486,
 				ValueType:           "AutomationJob",
 				FunctionName:        "ProcessSequentialActivityA",
 				FunctionDescription: "Return sequential Activity A's typed result to its Temporal sink.\n",
@@ -1100,8 +1298,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            consumeSequentialActivityBStreamID,
-				XPos:                -250,
-				YPos:                1720,
+				XPos:                804,
+				YPos:                660,
 				ValueType:           "AutomationJob",
 				FunctionName:        "ProcessSequentialActivityB",
 				FunctionDescription: "Return sequential Activity B's typed result to its Temporal sink.\n",
@@ -1113,8 +1311,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            callSequentialActivityBStreamID,
-				XPos:                530,
-				YPos:                650,
+				XPos:                -59,
+				YPos:                654,
 				ValueType:           "AutomationJob",
 				FunctionName:        "ProcessWorkflowJob",
 				FunctionDescription: "Continue the Workflow as new once, then return its final result.\n",
@@ -1126,8 +1324,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            temporalActivityScheduleStreamID,
-				XPos:                -500,
-				YPos:                1010,
+				XPos:                -1661,
+				YPos:                402,
 				Duration:            250,
 				FunctionName:        "ScheduledActivityPause",
 				FunctionDescription: "Apply the ordinary local Delay inside an Activity started by Temporal Schedule.\n",
@@ -1139,8 +1337,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            temporalWorkflowScheduleStreamID,
-				XPos:                -500,
-				YPos:                1310,
+				XPos:                -1684,
+				YPos:                1167,
 				Duration:            250,
 				FunctionName:        "ScheduledWorkflowPause",
 				FunctionDescription: "Use the official Temporal Workflow timer for a scheduled Workflow.\n",
@@ -1152,8 +1350,8 @@ func MakeConfig() *Config {
 				Pipeline:  "automation",
 				IdService: automationServiceServiceID,
 				IdSource:  callFanOutActivityAStreamID,
-				XPos:      10,
-				YPos:      1870,
+				XPos:      40,
+				YPos:      1312,
 			},
 
 			SplitOnDemandJobs: cfg.SplitStreamConfig{
@@ -1184,8 +1382,8 @@ func MakeConfig() *Config {
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
 				IdSource:   splitOnDemandJobsStreamID,
-				XPos:       -760,
-				YPos:       1870,
+				XPos:       -967,
+				YPos:       1034,
 				ValueType:  "AutomationJob",
 				IdEndpoint: fanOutWorkflowJobEndpointID,
 			},
@@ -1196,8 +1394,8 @@ func MakeConfig() *Config {
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
 				IdSource:   splitOnDemandJobsStreamID,
-				XPos:       -760,
-				YPos:       650,
+				XPos:       -807,
+				YPos:       629,
 				ValueType:  "AutomationJob",
 				IdEndpoint: workflowJobEndpointID,
 			},
@@ -1208,8 +1406,8 @@ func MakeConfig() *Config {
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
 				IdSource:   processScheduledActivityStreamID,
-				XPos:       -760,
-				YPos:       1010,
+				XPos:       -1917,
+				YPos:       639,
 				ValueType:  "AutomationJob",
 				IdEndpoint: temporalActivityScheduleEndpointID,
 			},
@@ -1220,8 +1418,8 @@ func MakeConfig() *Config {
 				Pipeline:   "automation",
 				IdService:  automationServiceServiceID,
 				IdSource:   processScheduledWorkflowStreamID,
-				XPos:       -760,
-				YPos:       1310,
+				XPos:       -1906,
+				YPos:       846,
 				ValueType:  "AutomationJob",
 				IdEndpoint: temporalWorkflowScheduleEndpointID,
 			},
@@ -1232,8 +1430,8 @@ func MakeConfig() *Config {
 				Pipeline:            "automation",
 				IdService:           automationServiceServiceID,
 				IdSource:            consumeWorkflowJobStreamID,
-				XPos:                -250,
-				YPos:                650,
+				XPos:                -233,
+				YPos:                504,
 				Duration:            250,
 				FunctionName:        "WorkflowPause",
 				FunctionDescription: "Use the same Delay contract backed by the Temporal Workflow timer.\n",
@@ -1280,6 +1478,9 @@ func MakeConfig() *Config {
 				Enabled:                     true,
 				TaskQueue:                   "automation-activity-jobs",
 				TemporalExecutionType:       api.Activity,
+				Timezone:                    "UTC",
+				OverlapPolicy:               api.ScheduleOverlapPolicySkip,
+				MissedRunPolicy:             api.ScheduleMissedRunPolicyFireOnce,
 				WorkflowExecutionTimeout:    60000,
 				ActivityStartToCloseTimeout: 30000,
 				ActivityHeartbeatTimeout:    5000,
@@ -1293,6 +1494,9 @@ func MakeConfig() *Config {
 				Enabled:                     true,
 				TaskQueue:                   "automation-activity-jobs",
 				TemporalExecutionType:       api.Activity,
+				Timezone:                    "UTC",
+				OverlapPolicy:               api.ScheduleOverlapPolicySkip,
+				MissedRunPolicy:             api.ScheduleMissedRunPolicyFireOnce,
 				WorkflowExecutionTimeout:    60000,
 				ActivityStartToCloseTimeout: 30000,
 				ActivityHeartbeatTimeout:    5000,
@@ -1306,6 +1510,9 @@ func MakeConfig() *Config {
 				Enabled:                     true,
 				TaskQueue:                   "automation-activity-jobs",
 				TemporalExecutionType:       api.Activity,
+				Timezone:                    "UTC",
+				OverlapPolicy:               api.ScheduleOverlapPolicySkip,
+				MissedRunPolicy:             api.ScheduleMissedRunPolicyFireOnce,
 				WorkflowExecutionTimeout:    60000,
 				ActivityStartToCloseTimeout: 30000,
 				ActivityHeartbeatTimeout:    5000,
@@ -1319,6 +1526,9 @@ func MakeConfig() *Config {
 				Enabled:                     true,
 				TaskQueue:                   "automation-activity-jobs",
 				TemporalExecutionType:       api.Activity,
+				Timezone:                    "UTC",
+				OverlapPolicy:               api.ScheduleOverlapPolicySkip,
+				MissedRunPolicy:             api.ScheduleMissedRunPolicyFireOnce,
 				WorkflowExecutionTimeout:    60000,
 				ActivityStartToCloseTimeout: 30000,
 				ActivityHeartbeatTimeout:    5000,
@@ -1332,6 +1542,9 @@ func MakeConfig() *Config {
 				Enabled:                  true,
 				TaskQueue:                "automation-workflow-jobs",
 				TemporalExecutionType:    api.Workflow,
+				Timezone:                 "UTC",
+				OverlapPolicy:            api.ScheduleOverlapPolicySkip,
+				MissedRunPolicy:          api.ScheduleMissedRunPolicyFireOnce,
 				WorkflowExecutionTimeout: 60000,
 				MaximumAttempts:          3,
 			},
@@ -1354,6 +1567,9 @@ func MakeConfig() *Config {
 				Enabled:                     true,
 				TaskQueue:                   "automation-activity-jobs",
 				TemporalExecutionType:       api.Activity,
+				Timezone:                    "UTC",
+				OverlapPolicy:               api.ScheduleOverlapPolicySkip,
+				MissedRunPolicy:             api.ScheduleMissedRunPolicyFireOnce,
 				WorkflowExecutionTimeout:    60000,
 				ActivityStartToCloseTimeout: 30000,
 				ActivityHeartbeatTimeout:    5000,
@@ -1367,6 +1583,9 @@ func MakeConfig() *Config {
 				Enabled:                     true,
 				TaskQueue:                   "automation-activity-jobs",
 				TemporalExecutionType:       api.Activity,
+				Timezone:                    "UTC",
+				OverlapPolicy:               api.ScheduleOverlapPolicySkip,
+				MissedRunPolicy:             api.ScheduleMissedRunPolicyFireOnce,
 				WorkflowExecutionTimeout:    60000,
 				ActivityStartToCloseTimeout: 30000,
 				ActivityHeartbeatTimeout:    5000,
@@ -1414,6 +1633,9 @@ func MakeConfig() *Config {
 				Enabled:                  true,
 				TaskQueue:                "automation-workflow-jobs",
 				TemporalExecutionType:    api.Workflow,
+				Timezone:                 "UTC",
+				OverlapPolicy:            api.ScheduleOverlapPolicySkip,
+				MissedRunPolicy:          api.ScheduleMissedRunPolicyFireOnce,
 				WorkflowExecutionTimeout: 60000,
 				MaximumAttempts:          3,
 			},

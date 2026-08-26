@@ -64,8 +64,11 @@ elif [ "$refresh_seconds" -gt 0 ]; then
   now=$(date +%s)
   refreshed=$(stat -c %Y "$mirror/servicegen-last-refresh" 2>/dev/null || printf 0)
   if [ $((now - refreshed)) -ge "$refresh_seconds" ]; then
-    git -C "$mirror" remote update --prune >&2
-    touch "$mirror/servicegen-last-refresh"
+    if git -C "$mirror" remote update --prune >&2; then
+      touch "$mirror/servicegen-last-refresh"
+    else
+      echo "[dependency-cache] upstream refresh failed; serving cached $repository_path" >&2
+    fi
   fi
 fi
 
