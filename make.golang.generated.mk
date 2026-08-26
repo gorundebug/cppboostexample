@@ -103,21 +103,33 @@ go-mod-sync: ## Sync Go modules with published versions after git-push
 $(BUF):
 	@mkdir -p "$(TOOLS_DIR)"
 	@echo "Downloading buf $(BUF_VERSION)..."
-	@curl -sSL "$(SERVICEGEN_GITHUB_RAW_URL)/bufbuild/buf/releases/download/$(BUF_VERSION)/buf-$(OS)-$(ARCH)" -o "$(BUF)"
-	@chmod +x "$(BUF)"
+	@set -eu; \
+	tmp=$$(mktemp "$(TOOLS_DIR)/.buf.XXXXXX"); \
+	trap 'rm -f "$$tmp"' EXIT INT TERM; \
+	curl --fail --location --silent --show-error \
+	  "$(SERVICEGEN_GITHUB_RAW_URL)/bufbuild/buf/releases/download/$(BUF_VERSION)/buf-$(OS)-$(ARCH)" \
+	  --output "$$tmp"; \
+	chmod +x "$$tmp"; \
+	mv "$$tmp" "$(BUF)"; \
+	trap - EXIT INT TERM
 
 $(PROTOC):
 	@mkdir -p "$(TOOLS_DIR)"
 	@echo "Downloading protoc $(PROTOC_VERSION)..."
-	@_os=$$(uname -s | sed 's/Darwin/osx/;s/Linux/linux/'); \
+	@set -eu; \
+	tmp=$$(mktemp -d); \
+	trap 'rm -rf "$$tmp"' EXIT INT TERM; \
+	_os=$$(uname -s | sed 's/Darwin/osx/;s/Linux/linux/'); \
 	_arch=$$(uname -m | sed 's/arm64/aarch_64/;s/aarch64/aarch_64/'); \
 	_ver=$$(echo "$(PROTOC_VERSION)" | sed 's/v//'); \
-	curl -sSL "$(SERVICEGEN_GITHUB_RAW_URL)/protocolbuffers/protobuf/releases/download/$(PROTOC_VERSION)/protoc-$${_ver}-$${_os}-$${_arch}.zip" -o /tmp/protoc.zip; \
-	rm -rf /tmp/protoc_extract; \
-	unzip -q /tmp/protoc.zip bin/protoc -d /tmp/protoc_extract; \
-	mv /tmp/protoc_extract/bin/protoc "$(PROTOC)"; \
-	rm -rf /tmp/protoc.zip /tmp/protoc_extract
-	@chmod +x "$(PROTOC)"
+	curl --fail --location --silent --show-error \
+	  "$(SERVICEGEN_GITHUB_RAW_URL)/protocolbuffers/protobuf/releases/download/$(PROTOC_VERSION)/protoc-$${_ver}-$${_os}-$${_arch}.zip" \
+	  --output "$$tmp/protoc.zip"; \
+	unzip -q "$$tmp/protoc.zip" bin/protoc -d "$$tmp/extract"; \
+	chmod +x "$$tmp/extract/bin/protoc"; \
+	mv "$$tmp/extract/bin/protoc" "$(PROTOC)"; \
+	trap - EXIT INT TERM; \
+	rm -rf "$$tmp"
 
 $(PROTOC_GEN_GO):
 	@mkdir -p "$(TOOLS_DIR)"
