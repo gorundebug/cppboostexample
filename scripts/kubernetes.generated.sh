@@ -25,6 +25,42 @@ TEMPORAL_POSTGRES_PASSWORD="${KUBERNETES_TEMPORAL_POSTGRES_PASSWORD:-temporal}"
 
 progress() { printf '==> [kubernetes] %s\n' "$*"; }
 
+container_proxy_url() {
+  local value="$1"
+  local host="${SERVICEGEN_DEPENDENCY_PROXY_HOST:-localhost}"
+  local container_host="${SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST:-host.docker.internal}"
+  case "${value}" in
+    "http://${host}:"*)
+      printf 'http://%s:%s' "${container_host}" "${value#http://${host}:}"
+      ;;
+    "https://${host}:"*)
+      printf 'https://%s:%s' "${container_host}" "${value#https://${host}:}"
+      ;;
+    *) printf '%s' "${value}" ;;
+  esac
+}
+
+# `dependency-cache.generated.sh env` deliberately exports host-reachable URLs
+# because host tools use them too. Helm runs in a Compose container, so direct
+# script invocation needs the same host-to-container translation that the
+# generated Make targets already apply. URLs already using the container host
+# are left unchanged.
+if [[ -n "${SERVICEGEN_DEPENDENCY_PROXY_DIR:-}" ]]; then
+  for proxy_url_name in \
+    SERVICEGEN_HELM_PROMETHEUS_URL \
+    SERVICEGEN_HELM_GRAFANA_URL \
+    SERVICEGEN_HELM_OPENTELEMETRY_URL \
+    SERVICEGEN_HELM_JAEGER_URL \
+    SERVICEGEN_HELM_REDPANDA_URL \
+    SERVICEGEN_HELM_TEMPORAL_URL; do
+    if [[ -n "${!proxy_url_name:-}" ]]; then
+      printf -v "${proxy_url_name}" '%s' \
+        "$(container_proxy_url "${!proxy_url_name}")"
+      export "${proxy_url_name}"
+    fi
+  done
+fi
+
 json_escape() {
   local value="$1"
   value="${value//\\/\\\\}"
