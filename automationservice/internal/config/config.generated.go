@@ -156,16 +156,23 @@ type Config struct {
 	} `yaml:"endpoints" mapstructure:"endpoints"`
 
 	Pools struct {
+		DefaultPool cfg.PoolConfig `yaml:"defaultPool" mapstructure:"defaultPool"`
 	} `yaml:"pools" mapstructure:"pools"`
 
 	Links struct {
+		CallSequentialActivityAToCallSequentialActivityB       cfg.LinkConfig `yaml:"callSequentialActivityAToCallSequentialActivityB" mapstructure:"callSequentialActivityAToCallSequentialActivityB"`
+		CallSequentialActivityBToProcessWorkflowJob            cfg.LinkConfig `yaml:"callSequentialActivityBToProcessWorkflowJob" mapstructure:"callSequentialActivityBToProcessWorkflowJob"`
 		ConsumeActivityJobToActivityPause                      cfg.LinkConfig `yaml:"consumeActivityJobToActivityPause" mapstructure:"consumeActivityJobToActivityPause"`
 		ConsumeFanOutActivityAToProcessFanOutActivityA         cfg.LinkConfig `yaml:"consumeFanOutActivityAToProcessFanOutActivityA" mapstructure:"consumeFanOutActivityAToProcessFanOutActivityA"`
 		ConsumeFanOutActivityBToProcessFanOutActivityB         cfg.LinkConfig `yaml:"consumeFanOutActivityBToProcessFanOutActivityB" mapstructure:"consumeFanOutActivityBToProcessFanOutActivityB"`
 		ConsumeFanOutActivityCToProcessFanOutActivityC         cfg.LinkConfig `yaml:"consumeFanOutActivityCToProcessFanOutActivityC" mapstructure:"consumeFanOutActivityCToProcessFanOutActivityC"`
+		ConsumeFanOutWorkflowJobToCallFanOutActivityA          cfg.LinkConfig `yaml:"consumeFanOutWorkflowJobToCallFanOutActivityA" mapstructure:"consumeFanOutWorkflowJobToCallFanOutActivityA"`
 		ConsumeSequentialActivityAToProcessSequentialActivityA cfg.LinkConfig `yaml:"consumeSequentialActivityAToProcessSequentialActivityA" mapstructure:"consumeSequentialActivityAToProcessSequentialActivityA"`
 		ConsumeSequentialActivityBToProcessSequentialActivityB cfg.LinkConfig `yaml:"consumeSequentialActivityBToProcessSequentialActivityB" mapstructure:"consumeSequentialActivityBToProcessSequentialActivityB"`
 		ConsumeWorkflowJobToWorkflowPause                      cfg.LinkConfig `yaml:"consumeWorkflowJobToWorkflowPause" mapstructure:"consumeWorkflowJobToWorkflowPause"`
+		SplitActivityAResultToCallFanOutActivityB              cfg.LinkConfig `yaml:"splitActivityAResultToCallFanOutActivityB" mapstructure:"splitActivityAResultToCallFanOutActivityB"`
+		SplitActivityAResultToCallFanOutActivityC              cfg.LinkConfig `yaml:"splitActivityAResultToCallFanOutActivityC" mapstructure:"splitActivityAResultToCallFanOutActivityC"`
+		WorkflowPauseToCallSequentialActivityA                 cfg.LinkConfig `yaml:"workflowPauseToCallSequentialActivityA" mapstructure:"workflowPauseToCallSequentialActivityA"`
 	} `yaml:"links" mapstructure:"links"`
 
 	Modules struct {
@@ -259,18 +266,26 @@ func (c *Config) GetEndpoints() []cfg.EndpointConfig {
 }
 
 func (c *Config) GetPools() []*cfg.PoolConfig {
-	return []*cfg.PoolConfig{}
+	return []*cfg.PoolConfig{
+		&c.Pools.DefaultPool,
+	}
 }
 
 func (c *Config) GetLinks() []*cfg.LinkConfig {
 	return []*cfg.LinkConfig{
+		&c.Links.CallSequentialActivityAToCallSequentialActivityB,
+		&c.Links.CallSequentialActivityBToProcessWorkflowJob,
 		&c.Links.ConsumeActivityJobToActivityPause,
 		&c.Links.ConsumeFanOutActivityAToProcessFanOutActivityA,
 		&c.Links.ConsumeFanOutActivityBToProcessFanOutActivityB,
 		&c.Links.ConsumeFanOutActivityCToProcessFanOutActivityC,
+		&c.Links.ConsumeFanOutWorkflowJobToCallFanOutActivityA,
 		&c.Links.ConsumeSequentialActivityAToProcessSequentialActivityA,
 		&c.Links.ConsumeSequentialActivityBToProcessSequentialActivityB,
 		&c.Links.ConsumeWorkflowJobToWorkflowPause,
+		&c.Links.SplitActivityAResultToCallFanOutActivityB,
+		&c.Links.SplitActivityAResultToCallFanOutActivityC,
+		&c.Links.WorkflowPauseToCallSequentialActivityA,
 	}
 }
 
@@ -311,6 +326,9 @@ func (c *Config) ApplyEnvironment() error {
 		return err
 	}
 	if err := c.applyAutomationServiceHttpPort(); err != nil {
+		return err
+	}
+	if err := c.applyDefaultPoolExecutorsCount(); err != nil {
 		return err
 	}
 	if err := c.applyFanOutActivityAEnabled(); err != nil {
@@ -462,6 +480,21 @@ func (c *Config) applyAutomationServiceHttpPort() error {
 		return fmt.Errorf("failed to convert AUTOMATION_SERVICE_HTTP_PORT to int: %w", err)
 	}
 	c.Services.AutomationService.HttpPort = intVal
+
+	return nil
+}
+
+func (c *Config) applyDefaultPoolExecutorsCount() error {
+	value, exists := os.LookupEnv("DEFAULT_POOL_EXECUTORS_COUNT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert DEFAULT_POOL_EXECUTORS_COUNT to int: %w", err)
+	}
+	c.Pools.DefaultPool.ExecutorsCount = intVal
 
 	return nil
 }
@@ -1386,16 +1419,42 @@ func MakeConfig() *Config {
 			},
 		},
 		Pools: struct {
-		}{},
+			DefaultPool cfg.PoolConfig `yaml:"defaultPool" mapstructure:"defaultPool"`
+		}{
+			DefaultPool: cfg.PoolConfig{
+				Name:           "Default Pool",
+				ExecutorsCount: 2,
+			},
+		},
 		Links: struct {
+			CallSequentialActivityAToCallSequentialActivityB       cfg.LinkConfig `yaml:"callSequentialActivityAToCallSequentialActivityB" mapstructure:"callSequentialActivityAToCallSequentialActivityB"`
+			CallSequentialActivityBToProcessWorkflowJob            cfg.LinkConfig `yaml:"callSequentialActivityBToProcessWorkflowJob" mapstructure:"callSequentialActivityBToProcessWorkflowJob"`
 			ConsumeActivityJobToActivityPause                      cfg.LinkConfig `yaml:"consumeActivityJobToActivityPause" mapstructure:"consumeActivityJobToActivityPause"`
 			ConsumeFanOutActivityAToProcessFanOutActivityA         cfg.LinkConfig `yaml:"consumeFanOutActivityAToProcessFanOutActivityA" mapstructure:"consumeFanOutActivityAToProcessFanOutActivityA"`
 			ConsumeFanOutActivityBToProcessFanOutActivityB         cfg.LinkConfig `yaml:"consumeFanOutActivityBToProcessFanOutActivityB" mapstructure:"consumeFanOutActivityBToProcessFanOutActivityB"`
 			ConsumeFanOutActivityCToProcessFanOutActivityC         cfg.LinkConfig `yaml:"consumeFanOutActivityCToProcessFanOutActivityC" mapstructure:"consumeFanOutActivityCToProcessFanOutActivityC"`
+			ConsumeFanOutWorkflowJobToCallFanOutActivityA          cfg.LinkConfig `yaml:"consumeFanOutWorkflowJobToCallFanOutActivityA" mapstructure:"consumeFanOutWorkflowJobToCallFanOutActivityA"`
 			ConsumeSequentialActivityAToProcessSequentialActivityA cfg.LinkConfig `yaml:"consumeSequentialActivityAToProcessSequentialActivityA" mapstructure:"consumeSequentialActivityAToProcessSequentialActivityA"`
 			ConsumeSequentialActivityBToProcessSequentialActivityB cfg.LinkConfig `yaml:"consumeSequentialActivityBToProcessSequentialActivityB" mapstructure:"consumeSequentialActivityBToProcessSequentialActivityB"`
 			ConsumeWorkflowJobToWorkflowPause                      cfg.LinkConfig `yaml:"consumeWorkflowJobToWorkflowPause" mapstructure:"consumeWorkflowJobToWorkflowPause"`
+			SplitActivityAResultToCallFanOutActivityB              cfg.LinkConfig `yaml:"splitActivityAResultToCallFanOutActivityB" mapstructure:"splitActivityAResultToCallFanOutActivityB"`
+			SplitActivityAResultToCallFanOutActivityC              cfg.LinkConfig `yaml:"splitActivityAResultToCallFanOutActivityC" mapstructure:"splitActivityAResultToCallFanOutActivityC"`
+			WorkflowPauseToCallSequentialActivityA                 cfg.LinkConfig `yaml:"workflowPauseToCallSequentialActivityA" mapstructure:"workflowPauseToCallSequentialActivityA"`
 		}{
+			CallSequentialActivityAToCallSequentialActivityB: cfg.LinkConfig{
+				From: callSequentialActivityAStreamID,
+				To:   callSequentialActivityBStreamID,
+				CallSemantics: &cfg.CallSemanticsGroup{
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
+				},
+			},
+			CallSequentialActivityBToProcessWorkflowJob: cfg.LinkConfig{
+				From: callSequentialActivityBStreamID,
+				To:   processWorkflowJobStreamID,
+				CallSemantics: &cfg.CallSemanticsGroup{
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
+				},
+			},
 			ConsumeActivityJobToActivityPause: cfg.LinkConfig{
 				From: consumeActivityJobStreamID,
 				To:   activityPauseStreamID,
@@ -1424,6 +1483,13 @@ func MakeConfig() *Config {
 					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
 				},
 			},
+			ConsumeFanOutWorkflowJobToCallFanOutActivityA: cfg.LinkConfig{
+				From: consumeFanOutWorkflowJobStreamID,
+				To:   callFanOutActivityAStreamID,
+				CallSemantics: &cfg.CallSemanticsGroup{
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
+				},
+			},
 			ConsumeSequentialActivityAToProcessSequentialActivityA: cfg.LinkConfig{
 				From: consumeSequentialActivityAStreamID,
 				To:   processSequentialActivityAStreamID,
@@ -1441,6 +1507,27 @@ func MakeConfig() *Config {
 			ConsumeWorkflowJobToWorkflowPause: cfg.LinkConfig{
 				From: consumeWorkflowJobStreamID,
 				To:   workflowPauseStreamID,
+				CallSemantics: &cfg.CallSemanticsGroup{
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
+				},
+			},
+			SplitActivityAResultToCallFanOutActivityB: cfg.LinkConfig{
+				From: splitActivityAResultStreamID,
+				To:   callFanOutActivityBStreamID,
+				CallSemantics: &cfg.CallSemanticsGroup{
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
+				},
+			},
+			SplitActivityAResultToCallFanOutActivityC: cfg.LinkConfig{
+				From: splitActivityAResultStreamID,
+				To:   callFanOutActivityCStreamID,
+				CallSemantics: &cfg.CallSemanticsGroup{
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
+				},
+			},
+			WorkflowPauseToCallSequentialActivityA: cfg.LinkConfig{
+				From: workflowPauseStreamID,
+				To:   callSequentialActivityAStreamID,
 				CallSemantics: &cfg.CallSemanticsGroup{
 					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
 				},

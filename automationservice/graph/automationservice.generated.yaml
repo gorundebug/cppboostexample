@@ -129,6 +129,10 @@ dataConnectors:
         pythonImplementation: temporal/python
         type: Temporal
         typeScriptImplementation: temporal/typescript
+pools:
+    defaultPool:
+        executorsCount: 2
+        name: Default Pool
 services:
     automationService:
         color: '#00A86B'
@@ -143,32 +147,65 @@ services:
         links:
             link1:
                 callSemantics: FunctionCall
+                from: callSequentialActivityA
+                poolName: Default Pool
+                priority: 2
+                to: callSequentialActivityB
+            link2:
+                callSemantics: FunctionCall
+                from: callSequentialActivityB
+                poolName: Default Pool
+                to: processWorkflowJob
+            link3:
+                callSemantics: FunctionCall
                 from: consumeActivityJob
                 to: activityPause
-            link2:
+            link4:
                 callSemantics: FunctionCall
                 from: consumeFanOutActivityA
                 to: processFanOutActivityA
-            link3:
+            link5:
                 callSemantics: FunctionCall
                 from: consumeFanOutActivityB
                 to: processFanOutActivityB
-            link4:
+            link6:
                 callSemantics: FunctionCall
                 from: consumeFanOutActivityC
                 to: processFanOutActivityC
-            link5:
+            link7:
+                callSemantics: FunctionCall
+                from: consumeFanOutWorkflowJob
+                poolName: Default Pool
+                to: callFanOutActivityA
+            link8:
                 callSemantics: FunctionCall
                 from: consumeSequentialActivityA
                 to: processSequentialActivityA
-            link6:
+            link9:
                 callSemantics: FunctionCall
                 from: consumeSequentialActivityB
                 to: processSequentialActivityB
-            link7:
+            link10:
                 callSemantics: FunctionCall
                 from: consumeWorkflowJob
                 to: workflowPause
+            link11:
+                callSemantics: FunctionCall
+                from: splitActivityAResult
+                poolName: Default Pool
+                priority: 2
+                to: callFanOutActivityB
+            link12:
+                callSemantics: FunctionCall
+                from: splitActivityAResult
+                poolName: Default Pool
+                priority: 7
+                to: callFanOutActivityC
+            link13:
+                callSemantics: FunctionCall
+                from: workflowPause
+                poolName: Default Pool
+                to: callSequentialActivityA
         livenessHandler: health/live
         metricsHandler: metrics
         modulePath: github.com/gorundebug/cppboostexample-automationservice

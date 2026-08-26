@@ -24,6 +24,9 @@ endpoints:
     enabled: $temporalWorkflowScheduleEnabled
   workflowJob:
     enabled: $workflowJobEnabled
+pools:
+  defaultPool:
+    executorsCount: $defaultPoolExecutorsCount
 services:
   automationService:
     defaultGrpcTimeout: $automationServiceDefaultGrpcTimeout
