@@ -111,4 +111,34 @@ func temporalWorkflowWorkflowJob(
 	)
 }
 
+// RegisterTemporalWorkflowDefinitions registers the statically generated
+// Workflow functions under the same stable names used by the service Worker.
+// It is intentionally usable by the generated history-replay command.
+func RegisterTemporalWorkflowDefinitions(registrar interface {
+	RegisterWorkflowWithOptions(any, workflow.RegisterOptions)
+}) {
+
+	registrar.RegisterWorkflowWithOptions(
+		temporalWorkflowFanOutWorkflowJob,
+		workflow.RegisterOptions{
+			Name: "temporal.endpoint.fan_out_workflow_job.workflow.v1",
+		},
+	)
+
+	registrar.RegisterWorkflowWithOptions(
+		temporalWorkflowTemporalWorkflowSchedule,
+		workflow.RegisterOptions{
+			Name: "temporal.endpoint.temporal_workflow_schedule.workflow.v1",
+		},
+	)
+
+	registrar.RegisterWorkflowWithOptions(
+		temporalWorkflowWorkflowJob,
+		workflow.RegisterOptions{
+			Name: "temporal.endpoint.workflow_job.workflow.v1",
+		},
+	)
+
+}
+
 var _ runtime.RuntimeEnvironment = (*workflowRuntimeEnvironment)(nil)
