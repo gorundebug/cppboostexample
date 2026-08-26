@@ -15,7 +15,7 @@ ACT_VERSION := v0.2.124
 ACT := $(TOOLS_DIR)/act
 OS := $(shell uname -s)
 ARCH := $(shell uname -m)
-GOSERVICELIB_SOURCE_CONTEXT ?= https://github.com/gorundebug/servicelib.git#v0.2.12
+GOSERVICELIB_SOURCE_CONTEXT ?= https://github.com/gorundebug/servicelib.git\#v0.2.12
 SERVICEGEN_RUNTIME_STRIP ?= ON
 SERVICEGEN_GITHUB_RAW_URL ?= https://github.com
 

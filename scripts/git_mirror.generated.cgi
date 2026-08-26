@@ -4,14 +4,28 @@ set -eu
 
 request_path=${PATH_INFO:-}
 case "$request_path" in
-  /github.com/*.git/*|/gitlab.com/*.git/*) ;;
+  /github.com/*/info/refs|/gitlab.com/*/info/refs)
+    service_path=/info/refs
+    repository_path=${request_path%/info/refs}
+    ;;
+  /github.com/*/git-upload-pack|/gitlab.com/*/git-upload-pack)
+    service_path=/git-upload-pack
+    repository_path=${request_path%/git-upload-pack}
+    ;;
+  /github.com/*/git-receive-pack|/gitlab.com/*/git-receive-pack)
+    service_path=/git-receive-pack
+    repository_path=${request_path%/git-receive-pack}
+    ;;
   *)
     printf 'Status: 400 Bad Request\r\nContent-Type: text/plain\r\n\r\ninvalid Git mirror path\n'
     exit 0
     ;;
 esac
 
-repository_path=${request_path%%.git/*}.git
+case "$repository_path" in
+  *.git) ;;
+  *) repository_path=${repository_path}.git ;;
+esac
 case "$repository_path" in
   *..*|*//*|*[!A-Za-z0-9._/-]*)
     printf 'Status: 400 Bad Request\r\nContent-Type: text/plain\r\n\r\ninvalid Git repository path\n'
@@ -59,4 +73,5 @@ trap - EXIT HUP INT TERM
 rmdir "$lock"
 export GIT_PROJECT_ROOT=/mirrors
 export GIT_HTTP_EXPORT_ALL=1
+export PATH_INFO="${repository_path}${service_path}"
 exec git http-backend

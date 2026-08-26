@@ -137,17 +137,17 @@ services:
                 from: mergeResults
                 to: splitOrderResult
             link2:
-                callSemantics: FunctionCall
+                callSemantics: PriorityTaskPool
                 from: processOrder
                 poolName: Default Pool
                 priority: 1
                 to: splitPipeline
             link3:
-                callSemantics: FunctionCall
+                callSemantics: ParallelCall
                 from: splitPipeline
                 to: processOrderItems
             link4:
-                callSemantics: FunctionCall
+                callSemantics: ParallelCall
                 from: splitPipeline
                 to: softDeadline
         livenessHandler: health/live

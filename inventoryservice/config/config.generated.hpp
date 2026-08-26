@@ -210,14 +210,14 @@ inline Config MakeConfig() {
     LinkConfig value{};
     value.from = kGetInventoryItemDataStreamId;
     value.to = kMergeInventoryResultStreamId;
-    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kFunctionCall, "", 0, false);
+    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kParallelCall, "", 0, false);
     return value;
   }();
   cfg.links.processInventoryItemToGetInventoryItemData = [] {
     LinkConfig value{};
     value.from = kProcessInventoryItemStreamId;
     value.to = kGetInventoryItemDataStreamId;
-    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kFunctionCall, "Inventory Priority Workers", 10, false);
+    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kTaskPool, "Inventory Priority Workers", 10, false);
     return value;
   }();
   cfg.modules.inventoryServiceApi = [] {
