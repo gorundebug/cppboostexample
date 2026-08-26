@@ -24,6 +24,9 @@ endpoints:
     enabled: true
   workflowJob:
     enabled: true
+pools:
+  defaultPool:
+    executorsCount: 2
 services:
   automationService:
     defaultGrpcTimeout: 0
@@ -32,3 +35,12 @@ services:
     grpcPort: 9204
     httpHost: 0.0.0.0
     httpPort: 9094
+streams:
+  activityPause:
+    duration: 250
+  scheduledActivityPause:
+    duration: 250
+  scheduledWorkflowPause:
+    duration: 250
+  workflowPause:
+    duration: 250
