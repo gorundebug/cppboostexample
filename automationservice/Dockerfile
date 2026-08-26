@@ -49,6 +49,13 @@ RUN --mount=type=cache,id=servicegen-go-mod-v1-${TARGETARCH},target=/go/pkg/mod,
     fi \
     && CGO_ENABLED=0 GOOS=linux go build -ldflags="${GO_LINKER_FLAGS}" -o /app/service ./cmd/service/main.go
 
+# Replay target: compile the generated history checker with the same sources
+# and dependency cache as the service, without adding it to the runtime image.
+FROM builder AS temporal-replay
+RUN --mount=type=cache,id=servicegen-go-mod-v1-${TARGETARCH},target=/go/pkg/mod,sharing=locked \
+    --mount=type=cache,id=servicegen-go-build-v1-${TARGETARCH},target=/root/.cache/go-build,sharing=locked \
+    CGO_ENABLED=0 GOOS=linux go build -o /app/temporal-replay ./cmd/temporal-replay
+
 # Stage 2: Runtime
 FROM debian:bookworm-slim AS runtime
 
