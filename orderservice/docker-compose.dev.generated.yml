@@ -1,0 +1,21 @@
+services:
+  orderservice:
+    image: orderservice-cpp-build
+    working_dir: /workspace
+    command:
+      - /workspace/build/example_order_service
+      - --config
+      - /workspace/config/config.yaml
+      - --values
+      - /workspace/config/overrides.integration.generated.yaml
+    volumes:
+      - .:/workspace
+      - cpp-dev-cmake-build:/workspace/build
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
+
+volumes:
+  cpp-dev-cmake-build:
+    name: ${SERVICEGEN_CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.24}
