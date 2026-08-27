@@ -3,20 +3,23 @@ services:
     image: automationservice-development:latest
     build:
       target: development
-    working_dir: /workspace
+    working_dir: /workspace/service
     command:
       - /bin/sh
       - -c
       - |
+        prepare-local-build /workspace/source /workspace/service
         if [ "$${DEBUG:-0}" = "1" ]; then
           exec dlv debug ./cmd/service/main.go --headless --listen=:2345 --api-version=2 --accept-multiclient -- -config ./config/config.yaml -values ./config/overrides.yaml
         fi
         exec go run ./cmd/service/main.go -config ./config/config.yaml -values ./config/overrides.yaml
     volumes:
-      - .:/workspace:ro
+      - .:/workspace/source:ro
+      - go-worktree:/workspace/service
       - go-mod:/go/pkg/mod
       - go-build:/root/.cache/go-build
 
 volumes:
+  go-worktree:
   go-mod:
   go-build:

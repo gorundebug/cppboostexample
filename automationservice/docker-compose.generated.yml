@@ -11,6 +11,7 @@ services:
         GOPROXY: ${GOPROXY:-direct}
         GOSUMDB: ${GOSUMDB:-sum.golang.org}
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
+        DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-https://github.com}
         DEPENDENCY_APT_DEBIAN_URL: ${DEPENDENCY_APT_DEBIAN_URL:-}
         DEPENDENCY_APT_DEBIAN_SECURITY_URL: ${DEPENDENCY_APT_DEBIAN_SECURITY_URL:-}
       additional_contexts:

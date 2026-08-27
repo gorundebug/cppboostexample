@@ -111,7 +111,7 @@ refresh_git_mirrors() {
   fi
 }
 
-bootstrap() {
+nexus_password() {
   password=$(compose exec -T nexus sh -c 'cat /nexus-data/admin.password 2>/dev/null || true')
   if [ -z "$password" ]; then
     password=${DEPENDENCY_PROXY_ADMIN_PASSWORD:-}
@@ -120,6 +120,31 @@ bootstrap() {
     echo "[dependency-cache] Set DEPENDENCY_PROXY_ADMIN_PASSWORD for an already initialized Nexus volume" >&2
     exit 1
   fi
+  printf '%s' "$password"
+}
+
+refresh_nexus_proxy_caches() {
+  compose up -d nexus
+  wait_ready
+  password=$(nexus_password)
+  repositories=$(curl --fail --show-error --silent \
+    --retry 8 --retry-delay 2 --retry-max-time 180 --retry-all-errors \
+    --user "admin:$password" \
+    "$nexus_url/service/rest/v1/repositories" | \
+    python3 -c 'import json, sys; print("\n".join(repository["name"] for repository in json.load(sys.stdin) if repository.get("type") in {"proxy", "group"}))')
+  printf '%s\n' "$repositories" | while IFS= read -r repository; do
+    [ -n "$repository" ] || continue
+    echo "[dependency-cache] invalidating Nexus cache: $repository"
+    curl --fail --show-error --silent \
+      --retry 8 --retry-delay 2 --retry-max-time 180 --retry-all-errors \
+      --user "admin:$password" \
+      --request POST \
+      "$nexus_url/service/rest/v1/repositories/$repository/invalidate-cache"
+  done
+}
+
+bootstrap() {
+  password=$(nexus_password)
   accept_eula_arg=
   if [ "${DEPENDENCY_PROXY_ACCEPT_EULA:-false}" = "true" ]; then
     accept_eula_arg=--accept-eula
@@ -181,6 +206,7 @@ case "${1:-up}" in
     compose ps
     ;;
   refresh)
+    refresh_nexus_proxy_caches
     refresh_git_mirrors "$@"
     ;;
   env)

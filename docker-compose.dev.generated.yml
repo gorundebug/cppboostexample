@@ -30,12 +30,13 @@ services:
   automationservice:
     image: automationservice-development:latest
     build: !reset null
-    working_dir: /workspace
+    working_dir: /workspace/service
     command:
       - /bin/sh
       - -c
       - >-
-        if [ "$${DEBUG:-0}" = "1" ]; then
+        prepare-local-build /workspace/source /workspace/service
+        && if [ "$${DEBUG:-0}" = "1" ]; then
           exec dlv debug ./cmd/service/main.go
           --headless --listen=:2345 --api-version=2 --accept-multiclient --continue --
           -config ./config/config.yaml -values ./config/overrides.yaml;
@@ -52,7 +53,8 @@ services:
       GIT_CONFIG_KEY_1: ${GIT_CONFIG_KEY_1:-}
       GIT_CONFIG_VALUE_1: ${GIT_CONFIG_VALUE_1:-}
     volumes:
-      - ./automationservice:/workspace:ro
+      - ./automationservice:/workspace/source:ro
+      - go-dev-worktree-automationservice:/workspace/service
       - go-dev-mod-cache:/go/pkg/mod
       - go-dev-build-cache:/root/.cache/go-build
     security_opt:
@@ -117,6 +119,7 @@ volumes:
   rust-dev-cargo-git:
   cpp-dev-cmake-build-analyticsservice:
     name: cppboostexample_analyticsservice_cpp-cmake-build
+  go-dev-worktree-automationservice:
   cpp-dev-cmake-build-inventoryservice:
     name: cppboostexample_inventoryservice_cpp-cmake-build
   cpp-dev-cmake-build-orderservice:
