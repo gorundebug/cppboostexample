@@ -3,6 +3,73 @@
 set -eu
 
 request_path=${PATH_INFO:-}
+if [ "$request_path" = "/__servicegen_refresh" ]; then
+  if [ "${REQUEST_METHOD:-GET}" != "POST" ]; then
+    printf 'Status: 405 Method Not Allowed\r\nContent-Type: text/plain\r\n\r\nPOST required\n'
+    exit 0
+  fi
+  output="/tmp/servicegen-git-refresh.$$"
+  mirrors="/tmp/servicegen-git-mirrors.$$"
+  active_lock=
+  trap 'rm -f "$output" "$mirrors"; [ -z "$active_lock" ] || rmdir "$active_lock" 2>/dev/null || true' EXIT HUP INT TERM
+  status=0
+  if [ "${CONTENT_LENGTH:-0}" -gt 0 ]; then
+    request="/tmp/servicegen-git-refresh-request.$$"
+    trap 'rm -f "$output" "$mirrors" "$request"; [ -z "$active_lock" ] || rmdir "$active_lock" 2>/dev/null || true' EXIT HUP INT TERM
+    dd bs=1 count="$CONTENT_LENGTH" of="$request" 2>/dev/null
+    : >"$mirrors"
+    while IFS= read -r repository || [ -n "$repository" ]; do
+      case "$repository" in
+        github.com/*|gitlab.com/*) ;;
+        *) echo "[dependency-cache] invalid Git repository: $repository" >>"$output"; status=1; break ;;
+      esac
+      cached_mirror="/mirrors/${repository%.git}.git"
+      if [ ! -d "$cached_mirror" ]; then
+        echo "[dependency-cache] Git mirror is not cached: $repository" >>"$output"
+        status=1
+        break
+      fi
+      printf '%s\n' "$cached_mirror" >>"$mirrors"
+    done <"$request"
+  else
+    find /mirrors -type d -name '*.git' -prune -print >"$mirrors"
+  fi
+  while [ "$status" -eq 0 ] && IFS= read -r cached_mirror; do
+    [ -n "$cached_mirror" ] || continue
+    cached_lock="${cached_mirror}.lock"
+    active_lock=$cached_lock
+    attempt=0
+    until mkdir "$cached_lock" 2>/dev/null; do
+      attempt=$((attempt + 1))
+      if [ "$attempt" -ge 1200 ]; then
+        echo "[dependency-cache] lock timeout: $cached_mirror" >>"$output"
+        status=1
+        break
+      fi
+      sleep 0.1
+    done
+    [ "$status" -eq 0 ] || break
+    echo "[dependency-cache] refreshing ${cached_mirror#/mirrors/}" >>"$output"
+    if git -C "$cached_mirror" remote update --prune >>"$output" 2>&1; then
+      touch "$cached_mirror/servicegen-last-refresh"
+      rmdir "$cached_lock"
+      active_lock=
+    else
+      status=1
+      rmdir "$cached_lock"
+      active_lock=
+      break
+    fi
+  done <"$mirrors"
+  if [ "$status" -eq 0 ]; then
+    printf 'Content-Type: text/plain\r\n\r\n'
+    if [ -s "$output" ]; then cat "$output"; else echo '[dependency-cache] no cached Git mirrors to refresh'; fi
+  else
+    printf 'Status: 502 Bad Gateway\r\nContent-Type: text/plain\r\n\r\n'
+    cat "$output"
+  fi
+  exit 0
+fi
 case "$request_path" in
   /github.com/*/info/refs|/gitlab.com/*/info/refs)
     service_path=/info/refs
@@ -36,7 +103,6 @@ esac
 mirror="/mirrors${repository_path}"
 upstream="https://${repository_path#/}"
 lock="${mirror}.lock"
-refresh_seconds=${SERVICEGEN_GIT_MIRROR_REFRESH_SECONDS:-3600}
 mkdir -p "$(dirname "$mirror")"
 
 attempt=0
@@ -60,16 +126,6 @@ if [ ! -d "$mirror" ]; then
   fi
   mv "$temporary" "$mirror"
   touch "$mirror/servicegen-last-refresh"
-elif [ "$refresh_seconds" -gt 0 ]; then
-  now=$(date +%s)
-  refreshed=$(stat -c %Y "$mirror/servicegen-last-refresh" 2>/dev/null || printf 0)
-  if [ $((now - refreshed)) -ge "$refresh_seconds" ]; then
-    if git -C "$mirror" remote update --prune >&2; then
-      touch "$mirror/servicegen-last-refresh"
-    else
-      echo "[dependency-cache] upstream refresh failed; serving cached $repository_path" >&2
-    fi
-  fi
 fi
 
 trap - EXIT HUP INT TERM

@@ -63,11 +63,10 @@ build does not fetch it from the public upstream again.
 
 GitHub and GitLab HTTPS clone URLs are rewritten process-locally to the mirror;
 the user's global Git configuration is never modified. A repository is cloned
-from upstream once and refreshed after
-`SERVICEGEN_GIT_MIRROR_REFRESH_SECONDS` (one hour by default). Run
-`make dependency-cache-refresh` to fetch and prune every existing mirror
-immediately. Set the refresh interval to `0` for a fully offline immutable
-mirror; the explicit refresh command remains available.
+from upstream once. Existing mirrors are always served immediately and ordinary
+builds never wait for an upstream refresh. Run `make dependency-cache-refresh`
+explicitly to fetch and prune every existing mirror before consuming newly
+published commits or tags.
 
 Ordinary dependencies are added through the language's native manifest and
 need no proxy configuration. If a package runs its own downloader and bypasses

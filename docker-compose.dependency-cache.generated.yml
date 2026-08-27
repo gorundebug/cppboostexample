@@ -11,7 +11,6 @@ services:
     ports:
       - "${SERVICEGEN_GIT_MIRROR_BIND_HOST:-127.0.0.1}:${SERVICEGEN_GIT_MIRROR_PORT:-18084}:8080"
     environment:
-      SERVICEGEN_GIT_MIRROR_REFRESH_SECONDS: ${SERVICEGEN_GIT_MIRROR_REFRESH_SECONDS:-3600}
       SERVICEGEN_GITHUB_CREDENTIAL_FILE: /run/secrets/servicegen_github_credential
       GIT_ASKPASS: /www/git-askpass.generated.sh
       GIT_TERMINAL_PROMPT: "0"

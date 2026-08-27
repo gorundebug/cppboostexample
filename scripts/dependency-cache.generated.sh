@@ -95,57 +95,17 @@ wait_git_mirror() {
 
 refresh_git_mirrors() {
   shift
-  mkdir -p "$git_mirror_dir"
-  chmod 0777 "$git_mirror_dir"
   compose up -d git-mirror
   wait_git_mirror
-  compose exec -T git-mirror sh -s -- "$@" <<'SERVICEGEN_REFRESH_GIT_MIRRORS'
-set -eu
-mirror_list="/tmp/servicegen-git-mirrors.$$"
-trap 'rm -f "$mirror_list"' EXIT HUP INT TERM
-if [ "$#" -gt 0 ]; then
-  : >"$mirror_list"
-  for repository in "$@"; do
-    case "$repository" in
-      github.com/*|gitlab.com/*) ;;
-      *) echo "[dependency-cache] invalid Git repository: $repository" >&2; exit 2 ;;
-    esac
-    mirror="/mirrors/${repository%.git}.git"
-    if [ ! -d "$mirror" ]; then
-      echo "[dependency-cache] Git mirror is not cached: $repository" >&2
-      exit 1
-    fi
-    printf '%s\n' "$mirror" >>"$mirror_list"
-  done
-else
-  find /mirrors -type d -name '*.git' -prune -print >"$mirror_list"
-fi
-if [ ! -s "$mirror_list" ]; then
-  echo "[dependency-cache] no cached Git mirrors to refresh"
-  exit 0
-fi
-while IFS= read -r mirror; do
-  lock="${mirror}.lock"
-  attempt=0
-  until mkdir "$lock" 2>/dev/null; do
-    attempt=$((attempt + 1))
-    if [ "$attempt" -ge 1200 ]; then
-      echo "[dependency-cache] lock timeout: $mirror" >&2
-      exit 1
-    fi
-    sleep 0.1
-  done
-  echo "[dependency-cache] refreshing ${mirror#/mirrors/}"
-  if git -C "$mirror" remote update --prune; then
-    touch "$mirror/servicegen-last-refresh"
-    rmdir "$lock"
+  if [ "$#" -gt 0 ]; then
+    payload=$(printf '%s\n' "$@")
+    curl --fail --show-error --silent --request POST \
+      --data-binary "$payload" \
+      "$git_mirror_url/cgi-bin/git/__servicegen_refresh"
   else
-    status=$?
-    rmdir "$lock"
-    exit "$status"
+    curl --fail --show-error --silent --request POST \
+      "$git_mirror_url/cgi-bin/git/__servicegen_refresh"
   fi
-done <"$mirror_list"
-SERVICEGEN_REFRESH_GIT_MIRRORS
 }
 
 bootstrap() {
