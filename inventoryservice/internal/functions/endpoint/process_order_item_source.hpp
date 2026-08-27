@@ -1,7 +1,8 @@
 #pragma once
 
-#include <exception>
 #include <memory>
+
+#include <exception>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -31,12 +32,33 @@ struct ProcessOrderItemSource final {
       servicelib::MessageContext context, auto& stream_context, State&,
       const processorderitem::ProcessOrderItemRequest& request, auto result_context,
       auto& sender) const {
-    (void)context;
-    (void)stream_context;
-    (void)request;
-    (void)result_context;
     (void)sender;
-    throw std::logic_error("ProcessOrderItemSource is not implemented");
+    result_context.setResultCallback(
+        request.item_id(),
+        [](
+            servicelib::MessageContext callback_context,
+            auto& callback_stream_context, State&,
+            const example::model::types::OrderItemResult& result,
+            auto& callback_sender) {
+          (void)callback_context;
+          (void)callback_stream_context;
+          processorderitem::ProcessOrderItemResponse response;
+          response.set_available_qty(result.available_qty);
+          response.set_reserved(result.reserved);
+          response.set_status(result.status);
+          callback_sender.send(std::move(response));
+          return true;
+        });
+
+    stream_context.collect(
+        std::move(context),
+        example::model::types::OrderItem{
+            request.order_id(),
+            request.item_id(),
+            request.sku(),
+            request.quantity(),
+            0.0,
+        });
   }
 
   std::string getMessageId(
@@ -44,8 +66,7 @@ struct ProcessOrderItemSource final {
       const example::model::types::OrderItemResult& result) const {
     (void)context;
     (void)stream_context;
-    (void)result;
-    throw std::logic_error("ProcessOrderItemSource::getMessageId is not implemented");
+    return result.item_id;
   }
 
   void eof(servicelib::MessageContext, auto&, State&) const noexcept {}
@@ -57,9 +78,7 @@ struct ProcessOrderItemSource final {
 inline std::unique_ptr<ProcessOrderItemSource> MakeProcessOrderItemSource(
     servicelib::Context context, servicelib::IServiceEnvironment& environment,
     const servicelib::config::GrpcEndpointConfig& config) {
-  (void)context;
-  (void)config;
-  (void)environment;
+  (void)context; (void)environment; (void)config;
   return std::make_unique<ProcessOrderItemSource>();
 }
 

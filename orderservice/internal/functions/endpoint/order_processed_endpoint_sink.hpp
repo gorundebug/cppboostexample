@@ -1,13 +1,14 @@
 #pragma once
 
-#include <cstdint>
-#include <exception>
 #include <memory>
-#include <optional>
+
+#include <exception>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <variant>
+
+#include <boost/json.hpp>
 
 #include <servicelib/runtime/common.hpp>
 #include <servicelib/runtime/config/endpoint_types.hpp>
@@ -22,10 +23,10 @@ struct OrderProcessedEndpointSink final {
   using State = std::monostate;
 
   std::string getStreamId(
-      servicelib::MessageContext, const example::model::types::OrderProcessed&) const {
-    return {};
+      servicelib::MessageContext,
+      const example::model::types::OrderProcessed& value) const {
+    return value.order_id;
   }
-
 
   servicelib::BeginResult<State> beginRequest(
       servicelib::MessageContext context, auto&) const {
@@ -33,9 +34,12 @@ struct OrderProcessedEndpointSink final {
   }
 
   void consumeMessage(
-      servicelib::MessageContext, auto&, State&, const example::model::types::OrderProcessed&,
-      servicelib::datasink::kafka::SinkMessage<std::monostate>&) const {
-    throw std::logic_error("OrderProcessedEndpointSink is not implemented");
+      servicelib::MessageContext, auto&, State&,
+      const example::model::types::OrderProcessed& value,
+      servicelib::datasink::kafka::SinkMessage<std::monostate>& message) const {
+    message.key = value.order_id;
+    message.value = boost::json::serialize(boost::json::value_from(value));
+    message.send([](const auto&) { return std::monostate{}; });
   }
 
   void endRequest(
@@ -46,9 +50,7 @@ struct OrderProcessedEndpointSink final {
 inline std::unique_ptr<OrderProcessedEndpointSink> MakeOrderProcessedEndpointSink(
     servicelib::Context context, servicelib::IServiceEnvironment& environment,
     const servicelib::config::KafkaEndpointConfig& config) {
-  (void)context;
-  (void)config;
-  (void)environment;
+  (void)context; (void)environment; (void)config;
   return std::make_unique<OrderProcessedEndpointSink>();
 }
 

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <exception>
 #include <memory>
+
+#include <exception>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -20,44 +21,92 @@ namespace example::order_service::functions {
 // User-owned transport mapping. The generated endpoint owns request
 // correlation, cancellation, metrics and graceful shutdown.
 struct ProcessOrderItemSink final {
-  using State = std::monostate;
+  struct State final {
+    std::string order_id;
+    std::string item_id;
+    std::string sku;
+    std::int32_t requested_qty{0};
+    double unit_price{0.0};
+  };
 
   servicelib::BeginResult<State> beginRequest(
       servicelib::MessageContext context, auto&) const {
-    return {std::move(context), {}};
+    return {std::move(context), State{}};
   }
 
   void consumeMessage(
-      servicelib::MessageContext context, auto& stream_context, State&,
-      const example::model::types::OrderItem& value, auto& sender,
-      auto result_context) const {
+      servicelib::MessageContext context, auto& stream_context,
+      State& state, const example::model::types::OrderItem& value,
+      auto& sender, auto result_context) const {
     (void)context;
     (void)stream_context;
-    (void)value;
-    (void)sender;
     (void)result_context;
-    throw std::logic_error("ProcessOrderItemSink is not implemented");
+    state.order_id = value.order_id;
+    state.item_id = value.item_id;
+    state.sku = value.sku;
+    state.requested_qty = value.quantity;
+    state.unit_price = value.unit_price;
+
+    processorderitem::ProcessOrderItemRequest request;
+    request.set_order_id(value.order_id);
+    request.set_item_id(value.item_id);
+    request.set_sku(value.sku);
+    request.set_quantity(value.quantity);
+    sender.send(std::move(request));
   }
 
   void handleResponse(
-      servicelib::MessageContext context, auto& stream_context, State&,
+      servicelib::MessageContext context, auto& stream_context, State& state,
       const processorderitem::ProcessOrderItemResponse& response) const {
-    (void)context;
-    (void)stream_context;
-    (void)response;
-    throw std::logic_error("ProcessOrderItemSink::handleResponse is not implemented");
+    stream_context.collect(
+        std::move(context),
+        example::model::types::OrderItemResult{
+            state.order_id,
+            state.item_id,
+            state.sku,
+            state.requested_qty,
+            response.available_qty(),
+            response.reserved(),
+            response.status(),
+            state.unit_price,
+            {},
+        });
   }
 
-  void endRequest(servicelib::MessageContext, auto&, std::exception_ptr,
-                  State&) const noexcept {}
+  void endRequest(servicelib::MessageContext context, auto& stream_context,
+                  std::exception_ptr error, State& state) const noexcept {
+    if (!error) return;
+    try {
+      std::string message{"unknown processing error"};
+      try {
+        std::rethrow_exception(error);
+      } catch (const std::exception& exception) {
+        message = exception.what();
+      } catch (...) {
+      }
+      stream_context.collect(
+          std::move(context),
+          example::model::types::OrderItemResult{
+              state.order_id,
+              state.item_id,
+              state.sku,
+              state.requested_qty,
+              0,
+              false,
+              "PROCESSING_ERROR",
+              state.unit_price,
+              std::move(message),
+          });
+    } catch (...) {
+      // endRequest is noexcept by contract; downstream shutdown must continue.
+    }
+  }
 };
 
 inline std::unique_ptr<ProcessOrderItemSink> MakeProcessOrderItemSink(
     servicelib::Context context, servicelib::IServiceEnvironment& environment,
     const servicelib::config::GrpcEndpointConfig& config) {
-  (void)context;
-  (void)config;
-  (void)environment;
+  (void)context; (void)environment; (void)config;
   return std::make_unique<ProcessOrderItemSink>();
 }
 
