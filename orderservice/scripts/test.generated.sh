@@ -27,7 +27,7 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
    ./scripts/run_with_progress.generated.sh "Configure $SERVICEGEN_CPP_CMAKE_PRESET" cmake --preset "$SERVICEGEN_CPP_CMAKE_PRESET" \
      --fresh \
      -DCMAKE_TOOLCHAIN_FILE="$conan_toolchain" \
-     -DSERVICEGEN_FETCH_CPP_DEPENDENCIES=OFF \
+     -DFETCH_CPP_DEPENDENCIES=OFF \
      -DCPPBOOSTSERVICELIB_PROFILING="$CPPBOOSTSERVICELIB_PROFILING" \
      -DCPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS="$CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS" &&
    ./scripts/run_with_progress.generated.sh "Build $SERVICEGEN_CPP_CMAKE_PRESET" cmake --build --preset "$SERVICEGEN_CPP_CMAKE_PRESET" --parallel &&

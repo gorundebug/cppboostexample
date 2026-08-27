@@ -18,7 +18,7 @@ endif()
 
 set(CPPBOOSTSERVICELIB_SOURCE_DIR "" CACHE PATH
     "Path to a cppboostservicelib source checkout")
-option(SERVICEGEN_FETCH_CPP_DEPENDENCIES
+option(FETCH_CPP_DEPENDENCIES
        "Fetch the pinned cppboostservicelib source tree when absent" OFF)
 set(CPPBOOSTSERVICELIB_REPOSITORY
     "https://github.com/gorundebug/cppboostservicelib.git" CACHE STRING
@@ -43,7 +43,7 @@ if(CPPBOOSTSERVICELIB_SOURCE_DIR)
       "${CPPBOOSTSERVICELIB_SOURCE_DIR}"
       "${CMAKE_BINARY_DIR}/_deps/cppboostservicelib-build"
       EXCLUDE_FROM_ALL)
-elseif(SERVICEGEN_FETCH_CPP_DEPENDENCIES)
+elseif(FETCH_CPP_DEPENDENCIES)
   include(FetchContent)
   FetchContent_Declare(servicegen_cppboostservicelib
       GIT_REPOSITORY "${CPPBOOSTSERVICELIB_REPOSITORY}"

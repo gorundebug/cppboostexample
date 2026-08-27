@@ -13,7 +13,7 @@
       "binaryDir": "${sourceDir}/build/host",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "SERVICEGEN_FETCH_CPP_DEPENDENCIES": "ON",
+        "FETCH_CPP_DEPENDENCIES": "ON",
         "CPPBOOSTSERVICELIB_SOURCE_DIR": "$env{CPPBOOSTSERVICELIB_SOURCE_DIR}"
       }
     },
@@ -24,7 +24,7 @@
       "binaryDir": "${sourceDir}/build/host",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "SERVICEGEN_FETCH_CPP_DEPENDENCIES": "ON",
+        "FETCH_CPP_DEPENDENCIES": "ON",
         "CPPBOOSTSERVICELIB_SOURCE_DIR": "$env{CPPBOOSTSERVICELIB_SOURCE_DIR}"
       }
     },
@@ -35,7 +35,7 @@
       "binaryDir": "/workspace/build",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "SERVICEGEN_FETCH_CPP_DEPENDENCIES": "OFF",
+        "FETCH_CPP_DEPENDENCIES": "OFF",
         "CPPBOOSTSERVICELIB_SOURCE_DIR": "$env{CPPBOOSTSERVICELIB_SOURCE_DIR}"
       }
     },
@@ -46,7 +46,7 @@
       "binaryDir": "/workspace/build",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "SERVICEGEN_FETCH_CPP_DEPENDENCIES": "OFF",
+        "FETCH_CPP_DEPENDENCIES": "OFF",
         "CPPBOOSTSERVICELIB_SOURCE_DIR": "$env{CPPBOOSTSERVICELIB_SOURCE_DIR}"
       }
     }

@@ -20,9 +20,9 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   set(CPPBOOSTSERVICELIB_SOURCE_DIR "" CACHE PATH
       "Path to a cppboostservicelib source checkout")
   set(_servicegen_modules_root_default "${CMAKE_CURRENT_SOURCE_DIR}/modules")
-  set(SERVICEGEN_MODULES_ROOT "${_servicegen_modules_root_default}" CACHE PATH
+  set(MODULES_ROOT "${_servicegen_modules_root_default}" CACHE PATH
       "Path containing local generated contract modules")
-  option(SERVICEGEN_FETCH_CPP_DEPENDENCIES
+  option(FETCH_CPP_DEPENDENCIES
          "Fetch pinned cppboostservicelib and missing contract modules" ON)
   set(CPPBOOSTSERVICELIB_REPOSITORY "https://github.com/gorundebug/cppboostservicelib.git" CACHE STRING
       "Standalone cppboostservicelib repository")
@@ -48,7 +48,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
         "${CPPBOOSTSERVICELIB_SOURCE_DIR}"
         "${CMAKE_BINARY_DIR}/_deps/cppboostservicelib-build"
         EXCLUDE_FROM_ALL)
-  elseif(SERVICEGEN_FETCH_CPP_DEPENDENCIES)
+  elseif(FETCH_CPP_DEPENDENCIES)
     include(FetchContent)
     if(DEFINED ENV{DEPENDENCY_GITHUB_RAW_URL} AND
        NOT "$ENV{DEPENDENCY_GITHUB_RAW_URL}" STREQUAL "" AND
@@ -83,11 +83,11 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   endif()
 
   if(NOT TARGET example_model)
-    set(_servicegen_module_source "${SERVICEGEN_MODULES_ROOT}/model")
+    set(_servicegen_module_source "${MODULES_ROOT}/model")
     if(EXISTS "${_servicegen_module_source}/CMakeLists.txt")
       add_subdirectory("${_servicegen_module_source}"
           "${CMAKE_BINARY_DIR}/_modules/model")
-    elseif(SERVICEGEN_FETCH_CPP_DEPENDENCIES)
+    elseif(FETCH_CPP_DEPENDENCIES)
       include(FetchContent)
       FetchContent_Declare(servicegen_module_model
           GIT_REPOSITORY "https://github.com/gorundebug/cppboostexample-model.git"

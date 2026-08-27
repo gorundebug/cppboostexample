@@ -30,6 +30,7 @@ analyticsservice/helm/Chart.yaml
 analyticsservice/helm/values.schema.json
 analyticsservice/helm/templates/NOTES.txt
 analyticsservice/CMakeLists.txt
+analyticsservice/CMakePresets.json
 analyticsservice/Dockerfile
 analyticsservice/pyproject.toml
 analyticsservice/src/analytics_service/internal/functions/__init__.py
@@ -57,6 +58,7 @@ inventoryservice/helm/Chart.yaml
 inventoryservice/helm/values.schema.json
 inventoryservice/helm/templates/NOTES.txt
 inventoryservice/CMakeLists.txt
+inventoryservice/CMakePresets.json
 inventoryservice/Dockerfile
 inventoryservice/pyproject.toml
 inventoryservice/src/inventory_service/internal/functions/__init__.py
@@ -71,6 +73,7 @@ orderservice/helm/Chart.yaml
 orderservice/helm/values.schema.json
 orderservice/helm/templates/NOTES.txt
 orderservice/CMakeLists.txt
+orderservice/CMakePresets.json
 orderservice/Dockerfile
 orderservice/pyproject.toml
 orderservice/src/order_service/internal/functions/__init__.py

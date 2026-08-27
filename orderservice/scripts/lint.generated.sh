@@ -9,7 +9,7 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm cpp-b
     conan_toolchain="$(cat /workspace/build/conan-debug/toolchain.path)"
     cmake --fresh --preset docker-debug \
       -DCMAKE_TOOLCHAIN_FILE="$conan_toolchain" \
-      -DSERVICEGEN_FETCH_CPP_DEPENDENCIES=OFF \
+      -DFETCH_CPP_DEPENDENCIES=OFF \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
     mapfile -d "" sources < <(

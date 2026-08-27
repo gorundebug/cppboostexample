@@ -85,7 +85,7 @@ RUN --mount=type=cache,id=cppboostexample-runtime-build-${TARGETARCH}-${SERVICEG
     && CCACHE_DIR=/ccache ./scripts/run_with_progress.generated.sh "Release configure" cmake --preset docker-release \
       --fresh \
       -DCMAKE_TOOLCHAIN_FILE="${conan_toolchain}" \
-      -DSERVICEGEN_FETCH_CPP_DEPENDENCIES=OFF \
+      -DFETCH_CPP_DEPENDENCIES=OFF \
       -DCPPBOOSTSERVICELIB_PROFILING="${CPPBOOSTSERVICELIB_PROFILING}" \
       -DCPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS="${CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS}" \
     && ./scripts/run_with_progress.generated.sh "Release build" cmake --build --preset docker-release \

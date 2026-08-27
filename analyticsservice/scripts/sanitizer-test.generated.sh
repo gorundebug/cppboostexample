@@ -55,7 +55,7 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
      -DCMAKE_BUILD_TYPE=Debug \
      -DCMAKE_TOOLCHAIN_FILE="$conan_toolchain" \
      -DCPPBOOSTSERVICELIB_SOURCE_DIR="$CPPBOOSTSERVICELIB_SOURCE_DIR" \
-     -DSERVICEGEN_FETCH_CPP_DEPENDENCIES=OFF \
+     -DFETCH_CPP_DEPENDENCIES=OFF \
      $SERVICEGEN_CPP_SANITIZER_OPTIONS
    cmake --build "$build_dir" --parallel
    case "$SERVICEGEN_CPP_SANITIZER" in

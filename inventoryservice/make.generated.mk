@@ -2,7 +2,7 @@
 
 .DEFAULT_GOAL := build
 
-export SERVICEGEN_FETCH_CPP_DEPENDENCIES := OFF
+export FETCH_CPP_DEPENDENCIES := OFF
 STANDALONE_COMPOSE := $(if $(wildcard docker-compose.yml),docker-compose.yml,docker-compose.generated.yml)
 STANDALONE_DEV_COMPOSE := $(if $(wildcard docker-compose.dev.yml),docker-compose.dev.yml,docker-compose.dev.generated.yml)
 DEPENDENCY_DOCKER_TARGETS := build test release-build release-test asan-test tsan-test lint \
