@@ -3,6 +3,10 @@
 set -eu
 
 request_path=${PATH_INFO:-}
+if [ "$request_path" = "/__servicegen_health" ]; then
+  printf 'Content-Type: text/plain\r\n\r\nok\n'
+  exit 0
+fi
 if [ "$request_path" = "/__servicegen_refresh" ]; then
   if [ "${REQUEST_METHOD:-GET}" != "POST" ]; then
     printf 'Status: 405 Method Not Allowed\r\nContent-Type: text/plain\r\n\r\nPOST required\n'

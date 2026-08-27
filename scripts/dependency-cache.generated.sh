@@ -8,6 +8,7 @@ nexus_port=${DEPENDENCY_PROXY_PORT:-18081}
 nexus_url="http://localhost:$nexus_port"
 git_mirror_port=${DEPENDENCY_GIT_MIRROR_PORT:-18084}
 git_mirror_url="http://localhost:$git_mirror_port"
+git_mirror_health_url="$git_mirror_url/cgi-bin/git/__servicegen_health"
 proxy_dir=${DEPENDENCY_PROXY_DIR:-}
 if [ -z "$proxy_dir" ]; then
   echo "[dependency-cache] DEPENDENCY_PROXY_DIR must point to the shared proxy data directory" >&2
@@ -67,7 +68,7 @@ wait_ready() {
     sleep 2
   done
   attempts=0
-  until curl --fail --silent --output /dev/null "$git_mirror_url/"; do
+  until curl --fail --silent --output /dev/null "$git_mirror_health_url"; do
     attempts=$((attempts + 1))
     if [ "$attempts" -ge 60 ]; then
       echo "[dependency-cache] Git mirror did not become ready at $git_mirror_url" >&2
@@ -80,7 +81,7 @@ wait_ready() {
 
 wait_git_mirror() {
   attempts=0
-  until curl --fail --silent --output /dev/null "$git_mirror_url/"; do
+  until curl --fail --silent --output /dev/null "$git_mirror_health_url"; do
     attempts=$((attempts + 1))
     if [ "$attempts" -ge 60 ]; then
       echo "[dependency-cache] Git mirror did not become ready at $git_mirror_url" >&2
@@ -93,7 +94,7 @@ wait_git_mirror() {
 
 refresh_git_mirrors() {
   shift
-  compose up -d git-mirror
+  compose up -d --build git-mirror
   wait_git_mirror
   if [ "$#" -gt 0 ]; then
     payload=$(printf '%s\n' "$@")
@@ -167,7 +168,7 @@ case "${1:-up}" in
   up)
     mkdir -p "$cache_dir" "$git_mirror_dir"
     chmod 0777 "$cache_dir" "$git_mirror_dir"
-    compose up -d nexus git-mirror
+    compose up -d --build nexus git-mirror
     wait_ready
     bootstrap
     echo "[dependency-cache] ready: $nexus_url"
