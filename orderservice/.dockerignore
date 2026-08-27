@@ -1,0 +1,10 @@
+.git
+.github
+.gitlab-ci.yml
+.editorconfig
+.actrc
+.artifacts/
+grafana/
+*.md
+build/
+dist/
