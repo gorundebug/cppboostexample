@@ -20,22 +20,20 @@ export SERVICEGEN_GITHUB_CREDENTIAL_FILE="$github_credential_file"
 
 prepare_git_credentials() {
   mkdir -p "$git_mirror_dir"
+  credential=
   if command -v git >/dev/null 2>&1; then
     credential=$(printf 'protocol=https\nhost=github.com\n\n' | \
       GIT_TERMINAL_PROMPT=0 git credential fill 2>/dev/null || true)
-    username=$(printf '%s\n' "$credential" | sed -n 's/^username=//p' | head -n 1)
-    password=$(printf '%s\n' "$credential" | sed -n 's/^password=//p' | head -n 1)
-    if [ -n "$password" ]; then
-      umask 077
-      temporary="$github_credential_file.tmp.$$"
-      printf '%s\n%s\n' "$username" "$password" >"$temporary"
-      mv "$temporary" "$github_credential_file"
-    fi
   fi
-  if [ ! -f "$github_credential_file" ]; then
-    umask 077
+  username=$(printf '%s\n' "$credential" | sed -n 's/^username=//p' | head -n 1)
+  password=$(printf '%s\n' "$credential" | sed -n 's/^password=//p' | head -n 1)
+  umask 077
+  if [ -n "$password" ]; then
+    printf '%s\n%s\n' "$username" "$password" >"$github_credential_file"
+  else
     : >"$github_credential_file"
   fi
+  chmod 0600 "$github_credential_file"
 }
 
 prepare_git_credentials
