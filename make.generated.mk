@@ -324,9 +324,9 @@ define git-push-dir
 	host="$(3)"; \
 	repo="$(4)"; \
 	if [ "$$host" = "gitlab.com" ]; then \
-	  $(GLAB) repo create $$repo --private 2>/dev/null || true; \
+	  $(GLAB) repo create $$repo --public 2>/dev/null || true; \
 	else \
-	  $(GH) repo create $$repo --private 2>/dev/null || true; \
+	  $(GH) repo create $$repo --public 2>/dev/null || true; \
 	fi; \
 	tmp=$$(mktemp -d); \
 	trap 'rm -rf "$$tmp"' EXIT INT TERM; \
