@@ -10,7 +10,7 @@ services:
     stop_grace_period: 30000ms
     restart: unless-stopped
     environment:
-      - DEBUG=${INVENTORY_SERVICE_DEBUG:-0}
+      - DEBUG=${DEBUG:-0}
     ports:
       - "9092:9092"
       - "9202:9202"
