@@ -19,8 +19,8 @@ if [ -f ./dependency-download-mirrors.generated.env ]; then
   default_catalog=./dependency-download-mirrors.generated.env
 fi
 for file in \
-  "${SERVICEGEN_DOWNLOAD_MIRROR_OVERRIDES:-$default_overrides}" \
-  "${SERVICEGEN_DOWNLOAD_MIRROR_CATALOG:-$default_catalog}"; do
+  "${DEPENDENCY_DOWNLOAD_MIRROR_OVERRIDES:-$default_overrides}" \
+  "${DEPENDENCY_DOWNLOAD_MIRROR_CATALOG:-$default_catalog}"; do
   [ -f "$file" ] || continue
   while IFS= read -r line || [ -n "$line" ]; do
     case "$line" in ''|'#'*) continue ;; esac
@@ -30,10 +30,10 @@ for file in \
     esac
     key=${line%%=*}
     value=${line#*=}
-    prefix='${SERVICEGEN_GITHUB_RAW_URL}'
+    prefix='${DEPENDENCY_GITHUB_RAW_URL}'
     case "$value" in
       "$prefix"*)
-        value="${SERVICEGEN_GITHUB_RAW_URL:-https://github.com}${value#"$prefix"}"
+        value="${DEPENDENCY_GITHUB_RAW_URL:-https://github.com}${value#"$prefix"}"
         ;;
     esac
     set -- "$key=$value" "$@"

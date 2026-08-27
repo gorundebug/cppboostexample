@@ -11,57 +11,9 @@ OS := $(shell uname -s)
 ARCH := $(shell uname -m)
 DOCKER_COMPOSE_RUNTIME_FILES :=
 DOCKER_COMPOSE_DEV_FILES := docker-compose.dev.generated.yml
-SERVICEGEN_GITHUB_RAW_URL ?= https://github.com
-SERVICEGEN_GITLAB_RAW_URL ?= https://gitlab.com
-SERVICEGEN_DOWNLOAD_MIRROR_ENV := $(abspath ./dependency-download-env.generated.sh)
-SHELL := $(SERVICEGEN_DOWNLOAD_MIRROR_ENV)
+DEPENDENCY_DOWNLOAD_ENV := $(abspath ./dependency-download-env.generated.sh)
+SHELL := $(DEPENDENCY_DOWNLOAD_ENV)
 .SHELLFLAGS := -c
-
-# A shared dependency proxy is opt-in through one host directory. Merely
-# setting the variable makes all generated host commands use the long-running
-# Nexus instance; Docker/Kubernetes targets switch to its Docker-reachable
-# address below.
-ifneq ($(strip $(SERVICEGEN_DEPENDENCY_PROXY_DIR)),)
-SERVICEGEN_DEPENDENCY_PROXY_HOST ?= localhost
-SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST ?= host.docker.internal
-SERVICEGEN_DEPENDENCY_PROXY_PORT ?= $(SERVICEGEN_NEXUS_PORT)
-SERVICEGEN_DEPENDENCY_PROXY_PORT := $(if $(SERVICEGEN_DEPENDENCY_PROXY_PORT),$(SERVICEGEN_DEPENDENCY_PROXY_PORT),18081)
-SERVICEGEN_GIT_MIRROR_PORT ?= 18084
-SERVICEGEN_DEPENDENCY_PROXY_BASE := http://$(SERVICEGEN_DEPENDENCY_PROXY_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository
-SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository
-SERVICEGEN_GIT_MIRROR_BASE := http://$(SERVICEGEN_DEPENDENCY_PROXY_HOST):$(SERVICEGEN_GIT_MIRROR_PORT)/cgi-bin/git
-SERVICEGEN_GIT_MIRROR_DOCKER_BASE := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_GIT_MIRROR_PORT)/cgi-bin/git
-export SERVICEGEN_CONAN_HOME := $(SERVICEGEN_DEPENDENCY_PROXY_DIR)/conan2
-export SERVICEGEN_GIT_MIRROR_URL := $(SERVICEGEN_GIT_MIRROR_BASE)
-export GIT_CONFIG_COUNT := 2
-export GIT_CONFIG_KEY_0 := url.$(SERVICEGEN_GIT_MIRROR_BASE)/github.com/.insteadOf
-export GIT_CONFIG_VALUE_0 := https://github.com/
-export GIT_CONFIG_KEY_1 := url.$(SERVICEGEN_GIT_MIRROR_BASE)/gitlab.com/.insteadOf
-export GIT_CONFIG_VALUE_1 := https://gitlab.com/
-export GOPROXY := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/go-proxy/
-export GOSUMDB := off
-export NPM_CONFIG_REGISTRY := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/npm-proxy/
-export PIP_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/pypi-proxy/simple
-export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_HOST)
-export UV_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/pypi-proxy/simple
-export CARGO_REGISTRIES_CRATES_IO_INDEX := sparse+$(SERVICEGEN_DEPENDENCY_PROXY_BASE)/cargo-proxy/
-export SERVICEGEN_MAVEN_CENTRAL_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/maven-central
-export SERVICEGEN_CONAN_REMOTE_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/conan-proxy
-export SERVICEGEN_GITHUB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/github-raw
-export SERVICEGEN_GITLAB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/gitlab-raw
-export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-ubuntu-archive
-export SERVICEGEN_APT_UBUNTU_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-ubuntu-security
-export SERVICEGEN_APT_UBUNTU_PORTS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-ubuntu-ports
-export SERVICEGEN_APT_DEBIAN_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-debian
-export SERVICEGEN_APT_DEBIAN_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-debian-security
-export GOSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/servicelib/archive/refs/tags/v0.2.24.tar.gz
-export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.24.tar.gz
-export SERVICEGEN_HELM_PROMETHEUS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-prometheus
-export SERVICEGEN_HELM_GRAFANA_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-grafana
-export SERVICEGEN_HELM_OPENTELEMETRY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-opentelemetry
-export SERVICEGEN_HELM_JAEGER_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-jaeger
-export SERVICEGEN_HELM_REDPANDA_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-redpanda
-endif
 
 LANG_BUILD_TARGETS :=
 LANG_TEST_TARGETS :=
@@ -78,28 +30,18 @@ LANG_INTEGRATION_TARGETS :=
 include make.golang.generated.mk
 include make.cpp.generated.mk
 
-# Docker targets use the proxy address reachable from containers. GNU Make
-# propagates target-specific variables to prerequisites, so host-side code
-# generation must explicitly restore the host address. Otherwise a target
-# such as docker-build makes curl/cargo/pnpm on macOS try to resolve
-# host.docker.internal.
-ifneq ($(strip $(SERVICEGEN_DEPENDENCY_PROXY_DIR)),)
-$(LANG_HOST_PREP_TARGETS): export GOPROXY := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/go-proxy/
-$(LANG_HOST_PREP_TARGETS): export GOSUMDB := off
-$(LANG_HOST_PREP_TARGETS): export NPM_CONFIG_REGISTRY := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/npm-proxy/
-$(LANG_HOST_PREP_TARGETS): export PIP_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/pypi-proxy/simple
-$(LANG_HOST_PREP_TARGETS): export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_HOST)
-$(LANG_HOST_PREP_TARGETS): export UV_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/pypi-proxy/simple
-$(LANG_HOST_PREP_TARGETS): export CARGO_REGISTRIES_CRATES_IO_INDEX := sparse+$(SERVICEGEN_DEPENDENCY_PROXY_BASE)/cargo-proxy/
-$(LANG_HOST_PREP_TARGETS): export SERVICEGEN_MAVEN_CENTRAL_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/maven-central
-$(LANG_HOST_PREP_TARGETS): export SERVICEGEN_GITHUB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/github-raw
-$(LANG_HOST_PREP_TARGETS): export SERVICEGEN_GITLAB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/gitlab-raw
-$(LANG_HOST_PREP_TARGETS): export SERVICEGEN_GIT_MIRROR_URL := $(SERVICEGEN_GIT_MIRROR_BASE)
-$(LANG_HOST_PREP_TARGETS): export GIT_CONFIG_COUNT := 2
-$(LANG_HOST_PREP_TARGETS): export GIT_CONFIG_KEY_0 := url.$(SERVICEGEN_GIT_MIRROR_BASE)/github.com/.insteadOf
-$(LANG_HOST_PREP_TARGETS): export GIT_CONFIG_VALUE_0 := https://github.com/
-$(LANG_HOST_PREP_TARGETS): export GIT_CONFIG_KEY_1 := url.$(SERVICEGEN_GIT_MIRROR_BASE)/gitlab.com/.insteadOf
-$(LANG_HOST_PREP_TARGETS): export GIT_CONFIG_VALUE_1 := https://gitlab.com/
+DEBUG_TARGETS := debug-analyticsservice debug-automationservice debug-inventoryservice debug-orderservice
+DEPENDENCY_DOCKER_TARGETS := $(LANG_DOCKER_BUILD_TARGETS) $(LANG_DOCKER_DEV_BUILD_TARGETS) \
+	$(DEBUG_TARGETS) docker-build docker-build-local docker-build-dev docker-up docker-up-dev \
+	kubernetes-up kubernetes-build kubernetes-deploy \
+	cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test \
+	cpp-lint cpp-integration-test
+DEPENDENCY_HOST_TARGETS := $(LANG_HOST_PREP_TARGETS)
+include dependency-proxy.generated.mk
+
+ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
+export GOSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/servicelib/archive/refs/tags/v0.2.24.tar.gz
+export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.24.tar.gz
 endif
 
 export SERVICEGEN_DOCKER_TARGET := runtime
@@ -125,7 +67,7 @@ GLAB := $(TOOLS_DIR)/glab
 	dependency-cache-docker-env dependency-cache-docker-build \
 	dependency-cache-down dependency-cache-clean \
 	dependency-source-cache-invalidate \
-	git-push git-delete git-push-inventory_service_api git-delete-inventory_service_api git-push-model git-delete-model git-push-order_service_api git-delete-order_service_api git-push-analyticsservice git-delete-analyticsservice git-push-automationservice git-delete-automationservice git-push-inventoryservice git-delete-inventoryservice git-push-orderservice git-delete-orderservice git-push-project git-delete-project
+	git-push git-delete debug-analyticsservice debug-automationservice debug-inventoryservice debug-orderservice git-push-inventory_service_api git-delete-inventory_service_api git-push-model git-delete-model git-push-order_service_api git-delete-order_service_api git-push-analyticsservice git-delete-analyticsservice git-push-automationservice git-delete-automationservice git-push-inventoryservice git-delete-inventoryservice git-push-orderservice git-delete-orderservice git-push-project git-delete-project
 
 all: build ## Build all services (default)
 
@@ -161,63 +103,6 @@ docker-build-local: docker-build ## Build Docker images for local development
 
 docker-build-dev: $(LANG_DOCKER_DEV_BUILD_TARGETS) ## Build source-mounted development images
 
-ifneq ($(strip $(SERVICEGEN_DEPENDENCY_PROXY_DIR)),)
-DOCKER_PROXY_TARGETS := $(LANG_DOCKER_BUILD_TARGETS) $(LANG_DOCKER_DEV_BUILD_TARGETS)
-$(DOCKER_PROXY_TARGETS): export GOPROXY := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/go-proxy/
-$(DOCKER_PROXY_TARGETS): export GOSUMDB := off
-$(DOCKER_PROXY_TARGETS): export NPM_CONFIG_REGISTRY := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/npm-proxy/
-$(DOCKER_PROXY_TARGETS): export PIP_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/pypi-proxy/simple
-$(DOCKER_PROXY_TARGETS): export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST)
-$(DOCKER_PROXY_TARGETS): export UV_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/pypi-proxy/simple
-$(DOCKER_PROXY_TARGETS): export CARGO_REGISTRIES_CRATES_IO_INDEX := sparse+$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/cargo-proxy/
-$(DOCKER_PROXY_TARGETS): export SERVICEGEN_MAVEN_CENTRAL_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/maven-central
-$(DOCKER_PROXY_TARGETS): export SERVICEGEN_CONAN_REMOTE_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/conan-proxy
-$(DOCKER_PROXY_TARGETS): export SERVICEGEN_GITHUB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw
-$(DOCKER_PROXY_TARGETS): export SERVICEGEN_GITLAB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/gitlab-raw
-$(DOCKER_PROXY_TARGETS): export SERVICEGEN_GIT_MIRROR_URL := $(SERVICEGEN_GIT_MIRROR_DOCKER_BASE)
-$(DOCKER_PROXY_TARGETS): export GIT_CONFIG_KEY_0 := url.$(SERVICEGEN_GIT_MIRROR_DOCKER_BASE)/github.com/.insteadOf
-$(DOCKER_PROXY_TARGETS): export GIT_CONFIG_KEY_1 := url.$(SERVICEGEN_GIT_MIRROR_DOCKER_BASE)/gitlab.com/.insteadOf
-$(DOCKER_PROXY_TARGETS): export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-archive
-$(DOCKER_PROXY_TARGETS): export SERVICEGEN_APT_UBUNTU_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-security
-$(DOCKER_PROXY_TARGETS): export SERVICEGEN_APT_UBUNTU_PORTS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-ports
-$(DOCKER_PROXY_TARGETS): export SERVICEGEN_APT_DEBIAN_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-debian
-$(DOCKER_PROXY_TARGETS): export SERVICEGEN_APT_DEBIAN_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-debian-security
-
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export GOPROXY := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/go-proxy/
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export GOSUMDB := off
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export NPM_CONFIG_REGISTRY := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/npm-proxy/
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export PIP_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/pypi-proxy/simple
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST)
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export UV_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/pypi-proxy/simple
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export CARGO_REGISTRIES_CRATES_IO_INDEX := sparse+$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/cargo-proxy/
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_MAVEN_CENTRAL_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/maven-central
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_CONAN_REMOTE_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/conan-proxy
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy grafana-dashboards: export SERVICEGEN_GITHUB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_GITLAB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/gitlab-raw
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_GIT_MIRROR_URL := $(SERVICEGEN_GIT_MIRROR_DOCKER_BASE)
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export GIT_CONFIG_KEY_0 := url.$(SERVICEGEN_GIT_MIRROR_DOCKER_BASE)/github.com/.insteadOf
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export GIT_CONFIG_KEY_1 := url.$(SERVICEGEN_GIT_MIRROR_DOCKER_BASE)/gitlab.com/.insteadOf
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-archive
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_APT_UBUNTU_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-security
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_APT_UBUNTU_PORTS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-ports
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_APT_DEBIAN_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-debian
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_APT_DEBIAN_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-debian-security
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_HELM_PROMETHEUS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/helm-prometheus
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_HELM_GRAFANA_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/helm-grafana
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_HELM_OPENTELEMETRY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/helm-opentelemetry
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_HELM_JAEGER_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/helm-jaeger
-docker-build docker-build-local docker-build-dev docker-up docker-up-dev kubernetes-up kubernetes-build kubernetes-deploy: export SERVICEGEN_HELM_REDPANDA_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/helm-redpanda
-# C++ build/test targets execute Conan and CMake inside Docker even when
-# invoked directly, so they need the same container-reachable proxy endpoints.
-cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test cpp-lint cpp-integration-test: export SERVICEGEN_CONAN_REMOTE_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/conan-proxy
-cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test cpp-lint cpp-integration-test: export SERVICEGEN_GITHUB_RAW_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw
-cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test cpp-lint cpp-integration-test: export PIP_INDEX_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/pypi-proxy/simple
-cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test cpp-lint cpp-integration-test: export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST)
-cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test cpp-lint cpp-integration-test: export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-archive
-cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test cpp-lint cpp-integration-test: export SERVICEGEN_APT_UBUNTU_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-security
-cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test cpp-lint cpp-integration-test: export SERVICEGEN_APT_UBUNTU_PORTS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/apt-ubuntu-ports
-endif
-
 grafana-dashboards: ## Generate Grafana dashboards for all services
 	@cd analyticsservice/grafana && bash generate.generated.sh
 	@cd automationservice/grafana && bash generate.generated.sh
@@ -229,6 +114,28 @@ docker-up: docker-build grafana-dashboards ## Start all services through Docker 
 
 docker-up-dev: docker-build-dev grafana-dashboards ## Start source-mounted development services
 	@$(DOCKER_COMPOSE_DEV) up -d --no-build
+
+debug-analyticsservice: cpp-build ## Start only Analytics Service with its remote debugger on localhost:2345
+	@ANALYTICS_SERVICE_DEBUG=1 \
+		SERVICEGEN_DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \
+		up -d --no-deps --build --force-recreate analyticsservice
+
+debug-automationservice: ## Start only Automation Service with its remote debugger on localhost:2346
+	@AUTOMATION_SERVICE_DEBUG=1 \
+		SERVICEGEN_DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \
+		up -d --no-deps --build --force-recreate automationservice
+
+debug-inventoryservice: cpp-build ## Start only Inventory Service with its remote debugger on localhost:2347
+	@INVENTORY_SERVICE_DEBUG=1 \
+		SERVICEGEN_DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \
+		up -d --no-deps --build --force-recreate inventoryservice
+
+debug-orderservice: cpp-build ## Start only Order Service with its remote debugger on localhost:2348
+	@ORDER_SERVICE_DEBUG=1 \
+		SERVICEGEN_DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \
+		up -d --no-deps --build --force-recreate orderservice
+
+
 
 docker-down: ## Stop all services
 	@$(DOCKER_COMPOSE) down
@@ -255,11 +162,11 @@ dependency-cache-env: ## Print package-manager environment for the local proxy
 	@bash scripts/dependency-cache.generated.sh env
 
 dependency-cache-docker-env: ## Print proxy environment reachable from Docker Desktop builds
-	@SERVICEGEN_NEXUS_CLIENT_HOST=$${SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST:-$${SERVICEGEN_NEXUS_DOCKER_HOST:-host.docker.internal}} \
+	@DEPENDENCY_PROXY_CLIENT_HOST=$${DEPENDENCY_PROXY_DOCKER_HOST:-host.docker.internal} \
 		bash scripts/dependency-cache.generated.sh env
 
 dependency-cache-docker-build: dependency-cache-up ## Build all images through the shared proxy
-	@eval "$$(SERVICEGEN_NEXUS_CLIENT_HOST=$${SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST:-$${SERVICEGEN_NEXUS_DOCKER_HOST:-host.docker.internal}} \
+	@eval "$$(DEPENDENCY_PROXY_CLIENT_HOST=$${DEPENDENCY_PROXY_DOCKER_HOST:-host.docker.internal} \
 		bash scripts/dependency-cache.generated.sh env)"; \
 	$(MAKE) docker-build
 
@@ -316,7 +223,7 @@ merge-validate: ## Re-run generated/business interface checks
 $(ACT):
 	@mkdir -p "$(TOOLS_DIR)"
 	@echo "Downloading act $(ACT_VERSION)..."
-	@curl -sSL "$(SERVICEGEN_GITHUB_RAW_URL)/nektos/act/releases/download/$(ACT_VERSION)/act_$(OS)_$(ARCH).tar.gz" | tar -xz -C "$(TOOLS_DIR)" act
+	@curl -sSL "$(DEPENDENCY_GITHUB_RAW_URL)/nektos/act/releases/download/$(ACT_VERSION)/act_$(OS)_$(ARCH).tar.gz" | tar -xz -C "$(TOOLS_DIR)" act
 
 $(GH):
 	@mkdir -p "$(TOOLS_DIR)"
@@ -325,13 +232,13 @@ $(GH):
 	_arch=$$(uname -m | sed 's/x86_64/amd64/'); \
 	_ver=$$(echo "$(GH_VERSION)" | sed 's/v//'); \
 	if [ "$$(uname -s)" = "Darwin" ]; then \
-	  curl -sSL "$(SERVICEGEN_GITHUB_RAW_URL)/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.zip" -o /tmp/gh.zip; \
+	  curl -sSL "$(DEPENDENCY_GITHUB_RAW_URL)/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.zip" -o /tmp/gh.zip; \
 	  rm -rf /tmp/gh_extract; \
 	  unzip -q /tmp/gh.zip "gh_$${_ver}_$${_os}_$${_arch}/bin/gh" -d /tmp/gh_extract; \
 	  mv /tmp/gh_extract/gh_$${_ver}_$${_os}_$${_arch}/bin/gh "$(GH)"; \
 	  rm -rf /tmp/gh.zip /tmp/gh_extract; \
 	else \
-	  curl -sSL "$(SERVICEGEN_GITHUB_RAW_URL)/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.tar.gz" | tar -xz -C /tmp; \
+	  curl -sSL "$(DEPENDENCY_GITHUB_RAW_URL)/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.tar.gz" | tar -xz -C /tmp; \
 	  mv /tmp/gh_$${_ver}_$${_os}_$${_arch}/bin/gh "$(GH)"; \
 	  rm -rf /tmp/gh_$${_ver}_$${_os}_$${_arch}; \
 	fi
@@ -343,7 +250,7 @@ $(GLAB):
 	@_os=$$(uname -s | tr '[:upper:]' '[:lower:]'); \
 	_arch=$$(uname -m | sed 's/amd64/x86_64/'); \
 	_ver=$$(echo "$(GLAB_VERSION)" | sed 's/v//'); \
-	curl -sSL "$(SERVICEGEN_GITLAB_RAW_URL)/gitlab-org/cli/-/releases/$(GLAB_VERSION)/downloads/glab_$${_ver}_$${_os}_$${_arch}.tar.gz" | \
+	curl -sSL "$(DEPENDENCY_GITLAB_RAW_URL)/gitlab-org/cli/-/releases/$(GLAB_VERSION)/downloads/glab_$${_ver}_$${_os}_$${_arch}.tar.gz" | \
 	  tar -xz -C "$(TOOLS_DIR)" --strip-components=1 bin/glab
 	@chmod +x "$(GLAB)"
 

@@ -163,7 +163,7 @@ def main() -> int:
             raise RuntimeError(
                 "Nexus Community Edition EULA is not accepted; read "
                 "https://links.sonatype.com/products/nxrm/ce-eula and set "
-                "SERVICEGEN_NEXUS_ACCEPT_EULA=true to accept it"
+                "DEPENDENCY_PROXY_ACCEPT_EULA=true to accept it"
             )
         request(
             base_url,

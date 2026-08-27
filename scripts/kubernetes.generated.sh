@@ -27,8 +27,8 @@ progress() { printf '==> [kubernetes] %s\n' "$*"; }
 
 container_proxy_url() {
   local value="$1"
-  local host="${SERVICEGEN_DEPENDENCY_PROXY_HOST:-localhost}"
-  local container_host="${SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST:-host.docker.internal}"
+  local host="${DEPENDENCY_PROXY_HOST:-localhost}"
+  local container_host="${DEPENDENCY_PROXY_DOCKER_HOST:-host.docker.internal}"
   case "${value}" in
     "http://${host}:"*)
       printf 'http://%s:%s' "${container_host}" "${value#http://${host}:}"
@@ -45,14 +45,14 @@ container_proxy_url() {
 # script invocation needs the same host-to-container translation that the
 # generated Make targets already apply. URLs already using the container host
 # are left unchanged.
-if [[ -n "${SERVICEGEN_DEPENDENCY_PROXY_DIR:-}" ]]; then
+if [[ -n "${DEPENDENCY_PROXY_DIR:-}" ]]; then
   for proxy_url_name in \
-    SERVICEGEN_HELM_PROMETHEUS_URL \
-    SERVICEGEN_HELM_GRAFANA_URL \
-    SERVICEGEN_HELM_OPENTELEMETRY_URL \
-    SERVICEGEN_HELM_JAEGER_URL \
-    SERVICEGEN_HELM_REDPANDA_URL \
-    SERVICEGEN_HELM_TEMPORAL_URL; do
+    DEPENDENCY_HELM_PROMETHEUS_URL \
+    DEPENDENCY_HELM_GRAFANA_URL \
+    DEPENDENCY_HELM_OPENTELEMETRY_URL \
+    DEPENDENCY_HELM_JAEGER_URL \
+    DEPENDENCY_HELM_REDPANDA_URL \
+    DEPENDENCY_HELM_TEMPORAL_URL; do
     if [[ -n "${!proxy_url_name:-}" ]]; then
       printf -v "${proxy_url_name}" '%s' \
         "$(container_proxy_url "${!proxy_url_name}")"
@@ -252,10 +252,10 @@ deploy_observability() {
   progress "generating Grafana dashboards"
   make grafana-dashboards
   progress "installing pinned Prometheus and Grafana stack"
-  ensure_helm_repo prometheus-community "${SERVICEGEN_HELM_PROMETHEUS_URL:-https://prometheus-community.github.io/helm-charts}"
-  ensure_helm_repo open-telemetry "${SERVICEGEN_HELM_OPENTELEMETRY_URL:-https://open-telemetry.github.io/opentelemetry-helm-charts}"
-  ensure_helm_repo jaegertracing "${SERVICEGEN_HELM_JAEGER_URL:-https://jaegertracing.github.io/helm-charts}"
-  ensure_helm_repo grafana "${SERVICEGEN_HELM_GRAFANA_URL:-https://grafana.github.io/helm-charts}"
+  ensure_helm_repo prometheus-community "${DEPENDENCY_HELM_PROMETHEUS_URL:-https://prometheus-community.github.io/helm-charts}"
+  ensure_helm_repo open-telemetry "${DEPENDENCY_HELM_OPENTELEMETRY_URL:-https://open-telemetry.github.io/opentelemetry-helm-charts}"
+  ensure_helm_repo jaegertracing "${DEPENDENCY_HELM_JAEGER_URL:-https://jaegertracing.github.io/helm-charts}"
+  ensure_helm_repo grafana "${DEPENDENCY_HELM_GRAFANA_URL:-https://grafana.github.io/helm-charts}"
 
   helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
     --version 88.5.3 \
@@ -286,7 +286,7 @@ deploy_infrastructure() {
   deploy_observability
   configure_kafka_secrets
   progress "installing pinned Redpanda chart"
-  ensure_helm_repo redpanda "${SERVICEGEN_HELM_REDPANDA_URL:-https://charts.redpanda.com}"
+  ensure_helm_repo redpanda "${DEPENDENCY_HELM_REDPANDA_URL:-https://charts.redpanda.com}"
   set --
   if [[ "${KAFKA_SASL_ENABLED}" == "true" ]]; then
     set -- \
@@ -313,7 +313,7 @@ deploy_infrastructure() {
 
   progress "installing pinned Temporal chart"
   ensure_helm_repo temporal \
-    "${SERVICEGEN_HELM_TEMPORAL_URL:-https://go.temporal.io/helm-charts}"
+    "${DEPENDENCY_HELM_TEMPORAL_URL:-https://go.temporal.io/helm-charts}"
   helm upgrade --install temporal temporal/temporal \
     --version 1.6.0 \
     --namespace "${NAMESPACE}" --create-namespace \

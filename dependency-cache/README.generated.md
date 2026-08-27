@@ -10,10 +10,10 @@ is a compiler or BuildKit cache.
 
 ```bash
 # Configure one global data directory in your shell:
-export SERVICEGEN_DEPENDENCY_PROXY_DIR="$HOME/.servicegen/dependency-proxy"
+export DEPENDENCY_PROXY_DIR="$HOME/.servicegen/dependency-proxy"
 
 # First start only, after reading the EULA:
-make SERVICEGEN_NEXUS_ACCEPT_EULA=true dependency-cache-up
+make DEPENDENCY_PROXY_ACCEPT_EULA=true dependency-cache-up
 
 # Later starts; the container remains running between project builds:
 make dependency-cache-up
@@ -34,8 +34,8 @@ The first command is required once for a new cache directory after reading the
 Later starts do not need the flag.
 
 Downloaded artifacts are stored under
-`$SERVICEGEN_DEPENDENCY_PROXY_DIR/nexus`; bare Git mirrors are stored under
-`$SERVICEGEN_DEPENDENCY_PROXY_DIR/git-mirror`. When this variable is present,
+`$DEPENDENCY_PROXY_DIR/nexus`; bare Git mirrors are stored under
+`$DEPENDENCY_PROXY_DIR/git-mirror`. When this variable is present,
 generated Make targets automatically route all
 supported host and Docker package downloads through that Nexus instance. The
 container has `restart: unless-stopped`; ordinary `docker-down` commands do not
@@ -49,7 +49,7 @@ Host package managers use `localhost`. Container builds use the stable
 Docker/Compose commands add the `host-gateway` mapping required by Docker
 Engine on Linux. On Linux the proxy launcher therefore binds the published
 ports to the host bridge (`0.0.0.0` by default); use the host firewall or set
-`SERVICEGEN_NEXUS_BIND_HOST` explicitly when tighter exposure is required.
+`DEPENDENCY_PROXY_BIND_HOST` explicitly when tighter exposure is required.
 
 Docker image proxying is exposed on port 18083, but Docker Desktop/Engine must
 be configured explicitly to trust/use that registry or registry mirror. The
@@ -72,7 +72,7 @@ Ordinary dependencies are added through the language's native manifest and
 need no proxy configuration. If a package runs its own downloader and bypasses
 that registry, add its documented mirror environment variable to the
 user-owned `dependency-download-mirrors.env` file. Use
-`${SERVICEGEN_GITHUB_RAW_URL}/owner/repository/...` as the URL prefix; the same
+`${DEPENDENCY_GITHUB_RAW_URL}/owner/repository/...` as the URL prefix; the same
 entry is expanded to the host or Docker-reachable Nexus address automatically.
 Framework-owned defaults are generated from the single `downloadMirrors`
 catalog in `servicegen/internal/codegenerator/dependencies.yaml`.

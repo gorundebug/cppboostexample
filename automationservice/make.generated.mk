@@ -2,10 +2,13 @@
 SERVICE_NAME=automationservice
 SERVICE_NAME_UPPER=AUTOMATION_SERVICE
 MODULE_DIR := $(abspath .)
+PROJECT_DIR ?= $(MODULE_DIR)
 GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 BUILD_VERSION := $(shell git describe --tags --always 2>/dev/null || echo "v0.0.0")
 LDFLAGS := -X main.build_version=$(BUILD_VERSION) -X main.build_commit=$(GIT_COMMIT)
 BIN_DIR := $(PROJECT_DIR)/bin
+COMPOSE := docker compose -f $(if $(wildcard docker-compose.yml),docker-compose.yml,docker-compose.generated.yml)
+COMPOSE_DEV := $(COMPOSE) -f docker-compose.dev.generated.yml
 TOOLS_DIR ?= $(abspath ./tools)
 BUF := $(TOOLS_DIR)/buf
 PROTOC ?= $(TOOLS_DIR)/protoc
@@ -17,34 +20,32 @@ OS := $(shell uname -s)
 ARCH := $(shell uname -m)
 GOSERVICELIB_SOURCE_CONTEXT ?= https://github.com/gorundebug/servicelib.git\#v0.2.24
 SERVICEGEN_RUNTIME_STRIP ?= ON
-SERVICEGEN_GITHUB_RAW_URL ?= https://github.com
-SERVICEGEN_DOWNLOAD_MIRROR_ENV := $(or $(wildcard $(abspath ./dependency-download-env.generated.sh)),$(wildcard $(abspath ../dependency-download-env.generated.sh)),/bin/sh)
-SHELL := $(SERVICEGEN_DOWNLOAD_MIRROR_ENV)
+DEPENDENCY_DOWNLOAD_ENV := $(or $(wildcard $(abspath ./dependency-download-env.generated.sh)),$(wildcard $(abspath ../dependency-download-env.generated.sh)),/bin/sh)
+SHELL := $(DEPENDENCY_DOWNLOAD_ENV)
 .SHELLFLAGS := -c
 export
 
-ifneq ($(strip $(SERVICEGEN_DEPENDENCY_PROXY_DIR)),)
-SERVICEGEN_DEPENDENCY_PROXY_HOST ?= localhost
-SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST ?= host.docker.internal
-SERVICEGEN_DEPENDENCY_PROXY_PORT ?= 18081
-SERVICEGEN_DEPENDENCY_PROXY_DOCKER_ARGS := --add-host host.docker.internal:host-gateway
-export GOPROXY := http://$(SERVICEGEN_DEPENDENCY_PROXY_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/go-proxy/
-export GOSUMDB := off
-export SERVICEGEN_GITHUB_RAW_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/github-raw
+DEPENDENCY_DOCKER_TARGETS := docker-build docker-up docker-build-dev docker-up-dev debug
+include dependency-proxy.generated.mk
+
+export GOWORK := off
+ifeq ($(strip $(USE_LOCAL_MODULES)),1)
+export GOWORK := $(abspath ../go.work)
+endif
+
+ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
 # Keep an explicit environment/command-line source context for local framework
 # development. Only replace the generated release default with the proxy URL.
 ifeq ($(origin GOSERVICELIB_SOURCE_CONTEXT),file)
-GOSERVICELIB_SOURCE_CONTEXT := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/github-raw/gorundebug/servicelib/archive/refs/tags/v0.2.24.tar.gz
+GOSERVICELIB_SOURCE_CONTEXT := $(DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/servicelib/archive/refs/tags/v0.2.24.tar.gz
 endif
 export GOSERVICELIB_SOURCE_CONTEXT
-docker-build docker-build-local: export GOPROXY := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/go-proxy/
-docker-build docker-build-local: export GOSUMDB := off
-docker-build docker-build-local: export SERVICEGEN_GITHUB_RAW_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/github-raw
-docker-build docker-build-local: export SERVICEGEN_APT_DEBIAN_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-debian
-docker-build docker-build-local: export SERVICEGEN_APT_DEBIAN_SECURITY_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-debian-security
+ifneq ($(strip $(USE_LOCAL_MODULES)),1)
+endif
 endif
 
-.PHONY: all build clean run test lint lint-fix act gen-proto service_build service_build_linux service_build_linux_debug fmt-proto docker-build docker-build-local hooks
+.PHONY: all build clean run test lint lint-fix act gen-proto service_build service_build_linux fmt-proto \
+	docker-build docker-build-dev docker-up docker-up-dev debug docker-down docker-down-dev hooks
 
 all: build
 
@@ -59,11 +60,6 @@ service_build_linux:
 	@echo "Building $(SERVICE_NAME) for linux/$(shell go env GOARCH)..."
 	mkdir -p $(BIN_DIR)
 	CGO_ENABLED=0 GOOS=linux go build -ldflags="$(LDFLAGS)" -o "$(BIN_DIR)/$(SERVICE_NAME)" "./cmd/service/main.go"
-
-service_build_linux_debug:
-	@echo "Building $(SERVICE_NAME) for linux/$(shell go env GOARCH) [debug]..."
-	mkdir -p $(BIN_DIR)
-	CGO_ENABLED=0 GOOS=linux go build -gcflags="all=-N -l" -ldflags="$(LDFLAGS)" -o "$(BIN_DIR)/$(SERVICE_NAME)" "./cmd/service/main.go"
 
 clean:
 	@echo "Cleaning $(SERVICE_NAME)..."
@@ -85,44 +81,25 @@ fmt-proto:
 	done
 
 docker-build:
-	@if [ -n "$(PROJECT_DIR)" ] && [ -f "$(PROJECT_DIR)/go.work" ]; then \
-		docker build -f "$(MODULE_DIR)/Dockerfile" \
-			$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_ARGS) \
-			--build-context servicelib-source="$(GOSERVICELIB_SOURCE_CONTEXT)" \
-			--build-arg GOPROXY="$${GOPROXY:-direct}" \
-			--build-arg GOSUMDB="$${GOSUMDB:-sum.golang.org}" \
-			--build-arg SERVICEGEN_GITHUB_RAW_URL="$${SERVICEGEN_GITHUB_RAW_URL:-https://github.com}" \
-			--build-arg SERVICEGEN_APT_DEBIAN_URL="$${SERVICEGEN_APT_DEBIAN_URL:-}" \
-			--build-arg SERVICEGEN_APT_DEBIAN_SECURITY_URL="$${SERVICEGEN_APT_DEBIAN_SECURITY_URL:-}" \
-			--build-arg SERVICE_DIR="$(SERVICE_NAME)" \
-			--build-arg SERVICEGEN_RUNTIME_STRIP="$(SERVICEGEN_RUNTIME_STRIP)" \
-			-t $(SERVICE_NAME):latest "$(PROJECT_DIR)"; \
-	else \
-		docker build \
-			$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_ARGS) \
-			--build-context servicelib-source="$(GOSERVICELIB_SOURCE_CONTEXT)" \
-			--build-arg GOPROXY="$${GOPROXY:-direct}" \
-			--build-arg GOSUMDB="$${GOSUMDB:-sum.golang.org}" \
-			--build-arg SERVICEGEN_GITHUB_RAW_URL="$${SERVICEGEN_GITHUB_RAW_URL:-https://github.com}" \
-			--build-arg SERVICEGEN_APT_DEBIAN_URL="$${SERVICEGEN_APT_DEBIAN_URL:-}" \
-			--build-arg SERVICEGEN_APT_DEBIAN_SECURITY_URL="$${SERVICEGEN_APT_DEBIAN_SECURITY_URL:-}" \
-			--build-arg SERVICEGEN_RUNTIME_STRIP="$(SERVICEGEN_RUNTIME_STRIP)" \
-			-t $(SERVICE_NAME):latest .; \
-	fi
+	@$(COMPOSE) build $(SERVICE_NAME)
 
-docker-build-local:
-	@if [ "$($(SERVICE_NAME_UPPER)_DEBUG)" = "1" ]; then \
-		$(MAKE) service_build_linux_debug PROJECT_DIR="$(PROJECT_DIR)" BIN_DIR="$(BIN_DIR)"; \
-	else \
-		$(MAKE) service_build_linux PROJECT_DIR="$(PROJECT_DIR)" BIN_DIR="$(BIN_DIR)"; \
-	fi
-	docker build -f Dockerfile.local \
-		--build-arg GOPROXY="$${GOPROXY:-direct}" \
-		--build-arg GOSUMDB="$${GOSUMDB:-sum.golang.org}" \
-		--build-arg SERVICEGEN_GITHUB_RAW_URL="$${SERVICEGEN_GITHUB_RAW_URL:-https://github.com}" \
-		--build-arg SERVICEGEN_APT_DEBIAN_URL="$${SERVICEGEN_APT_DEBIAN_URL:-}" \
-		--build-arg SERVICEGEN_APT_DEBIAN_SECURITY_URL="$${SERVICEGEN_APT_DEBIAN_SECURITY_URL:-}" \
-		-t $(SERVICE_NAME):latest ..
+docker-build-dev:
+	@$(COMPOSE_DEV) build $(SERVICE_NAME)
+
+docker-up: docker-build
+	@$(COMPOSE) up -d --no-build $(SERVICE_NAME)
+
+docker-up-dev: docker-build-dev
+	@DEBUG=0 $(COMPOSE_DEV) up -d --no-build --force-recreate $(SERVICE_NAME)
+
+debug: docker-build-dev
+	@DEBUG=1 $(COMPOSE_DEV) up -d --no-build --force-recreate $(SERVICE_NAME)
+
+docker-down:
+	@$(COMPOSE) down
+
+docker-down-dev:
+	@$(COMPOSE_DEV) down
 
 test:
 	go test ./...
@@ -141,7 +118,7 @@ $(GOLANGCI_LINT):
 $(ACT):
 	@mkdir -p $(TOOLS_DIR)
 	@echo "Downloading act $(ACT_VERSION)..."
-	@curl -sSL "$(SERVICEGEN_GITHUB_RAW_URL)/nektos/act/releases/download/$(ACT_VERSION)/act_$(OS)_$(ARCH).tar.gz" | tar -xz -C $(TOOLS_DIR) act
+	@curl -sSL "$(DEPENDENCY_GITHUB_RAW_URL)/nektos/act/releases/download/$(ACT_VERSION)/act_$(OS)_$(ARCH).tar.gz" | tar -xz -C $(TOOLS_DIR) act
 
 act: $(ACT) ## Run GitHub Actions locally via act (requires Docker)
 	$(ACT) push

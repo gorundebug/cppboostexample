@@ -1,0 +1,23 @@
+services:
+  automationservice:
+    image: automationservice:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+      extra_hosts:
+        - "host.docker.internal:host-gateway"
+      args:
+        GOPROXY: ${GOPROXY:-direct}
+        GOSUMDB: ${GOSUMDB:-sum.golang.org}
+        SERVICEGEN_RUNTIME_STRIP: ${SERVICEGEN_RUNTIME_STRIP:-ON}
+        DEPENDENCY_APT_DEBIAN_URL: ${DEPENDENCY_APT_DEBIAN_URL:-}
+        DEPENDENCY_APT_DEBIAN_SECURITY_URL: ${DEPENDENCY_APT_DEBIAN_SECURITY_URL:-}
+      additional_contexts:
+        servicelib-source: "${GOSERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/servicelib.git#v0.2.24}"
+    environment:
+      - DEBUG=${DEBUG:-0}
+    ports:
+      - "9094:9094"
+      - "9204:9204"
+      - "2345:2345"

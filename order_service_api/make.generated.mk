@@ -3,12 +3,8 @@ MODULE_DIR := $(abspath .)
 TOOLS_DIR ?= $(abspath ../tools)
 BUF := $(TOOLS_DIR)/buf
 PROTOC ?= $(TOOLS_DIR)/protoc
-ifneq ($(strip $(SERVICEGEN_DEPENDENCY_PROXY_DIR)),)
-SERVICEGEN_DEPENDENCY_PROXY_HOST ?= localhost
-SERVICEGEN_DEPENDENCY_PROXY_PORT ?= 18081
-export GOPROXY := http://$(SERVICEGEN_DEPENDENCY_PROXY_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/go-proxy/
-export GOSUMDB := off
-endif
+DEPENDENCY_DOCKER_TARGETS :=
+include dependency-proxy.generated.mk
 
 .PHONY: all gen-proto fmt-proto
 

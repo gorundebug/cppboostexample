@@ -9,15 +9,15 @@ services:
       dockerfile: dependency-cache/Dockerfile.git-mirror.generated
     restart: unless-stopped
     ports:
-      - "${SERVICEGEN_GIT_MIRROR_BIND_HOST:-127.0.0.1}:${SERVICEGEN_GIT_MIRROR_PORT:-18084}:8080"
+      - "${DEPENDENCY_GIT_MIRROR_BIND_HOST:-127.0.0.1}:${DEPENDENCY_GIT_MIRROR_PORT:-18084}:8080"
     environment:
-      SERVICEGEN_GITHUB_CREDENTIAL_FILE: /run/secrets/servicegen_github_credential
+      DEPENDENCY_GITHUB_CREDENTIAL_FILE: /run/secrets/servicegen_github_credential
       GIT_ASKPASS: /www/git-askpass.generated.sh
       GIT_TERMINAL_PROMPT: "0"
     secrets:
       - servicegen_github_credential
     volumes:
-      - ${SERVICEGEN_DEPENDENCY_PROXY_DIR:?set SERVICEGEN_DEPENDENCY_PROXY_DIR}/git-mirror:/mirrors
+      - ${DEPENDENCY_PROXY_DIR:?set DEPENDENCY_PROXY_DIR}/git-mirror:/mirrors
       - ./scripts/git_mirror.generated.cgi:/www/cgi-bin/git:ro
       - ./scripts/git_mirror_askpass.generated.sh:/www/git-askpass.generated.sh:ro
 
@@ -25,17 +25,17 @@ services:
     image: sonatype/nexus3:3.95.0
     restart: unless-stopped
     ports:
-      - "${SERVICEGEN_NEXUS_BIND_HOST:-127.0.0.1}:${SERVICEGEN_NEXUS_PORT:-18081}:8081"
-      - "${SERVICEGEN_NEXUS_BIND_HOST:-127.0.0.1}:${SERVICEGEN_NEXUS_DOCKER_PORT:-18083}:8082"
+      - "${DEPENDENCY_PROXY_BIND_HOST:-127.0.0.1}:${DEPENDENCY_PROXY_PORT:-18081}:8081"
+      - "${DEPENDENCY_PROXY_BIND_HOST:-127.0.0.1}:${DEPENDENCY_PROXY_DOCKER_PORT:-18083}:8082"
     environment:
       INSTALL4J_ADD_VM_PARAMS: >-
-        -Xms${SERVICEGEN_NEXUS_HEAP_MIN:-1024m}
-        -Xmx${SERVICEGEN_NEXUS_HEAP_MAX:-1024m}
-        -XX:MaxDirectMemorySize=${SERVICEGEN_NEXUS_DIRECT_MEMORY:-1024m}
+        -Xms${DEPENDENCY_PROXY_HEAP_MIN:-1024m}
+        -Xmx${DEPENDENCY_PROXY_HEAP_MAX:-1024m}
+        -XX:MaxDirectMemorySize=${DEPENDENCY_PROXY_DIRECT_MEMORY:-1024m}
         -Djava.util.prefs.userRoot=/nexus-data/javaprefs
     volumes:
-      - ${SERVICEGEN_DEPENDENCY_PROXY_DIR:?set SERVICEGEN_DEPENDENCY_PROXY_DIR}/nexus:/nexus-data
+      - ${DEPENDENCY_PROXY_DIR:?set DEPENDENCY_PROXY_DIR}/nexus:/nexus-data
 
 secrets:
   servicegen_github_credential:
-    file: ${SERVICEGEN_GITHUB_CREDENTIAL_FILE:?set SERVICEGEN_GITHUB_CREDENTIAL_FILE}
+    file: ${DEPENDENCY_GITHUB_CREDENTIAL_FILE:?set DEPENDENCY_GITHUB_CREDENTIAL_FILE}

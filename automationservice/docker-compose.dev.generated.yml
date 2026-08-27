@@ -1,0 +1,22 @@
+services:
+  automationservice:
+    image: automationservice-development:latest
+    build:
+      target: development
+    working_dir: /workspace
+    command:
+      - /bin/sh
+      - -lc
+      - |
+        if [ "$${DEBUG:-0}" = "1" ]; then
+          exec dlv debug ./cmd/service/main.go --headless --listen=:2345 --api-version=2 --accept-multiclient -- -config ./config/config.yaml -values ./config/overrides.yaml
+        fi
+        exec go run ./cmd/service/main.go -config ./config/config.yaml -values ./config/overrides.yaml
+    volumes:
+      - .:/workspace
+      - go-mod:/go/pkg/mod
+      - go-build:/root/.cache/go-build
+
+volumes:
+  go-mod:
+  go-build:

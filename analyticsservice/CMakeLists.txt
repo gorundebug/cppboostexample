@@ -19,10 +19,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 
   set(CPPBOOSTSERVICELIB_SOURCE_DIR "" CACHE PATH
       "Path to a cppboostservicelib source checkout")
-  set(_servicegen_modules_root_default "${CMAKE_CURRENT_SOURCE_DIR}/..")
-  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/modules")
-    set(_servicegen_modules_root_default "${CMAKE_CURRENT_SOURCE_DIR}/modules")
-  endif()
+  set(_servicegen_modules_root_default "${CMAKE_CURRENT_SOURCE_DIR}/modules")
   set(SERVICEGEN_MODULES_ROOT "${_servicegen_modules_root_default}" CACHE PATH
       "Path containing local generated contract modules")
   option(SERVICEGEN_FETCH_CPP_DEPENDENCIES
@@ -53,15 +50,15 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
         EXCLUDE_FROM_ALL)
   elseif(SERVICEGEN_FETCH_CPP_DEPENDENCIES)
     include(FetchContent)
-    if(DEFINED ENV{SERVICEGEN_GITHUB_RAW_URL} AND
-       NOT "$ENV{SERVICEGEN_GITHUB_RAW_URL}" STREQUAL "" AND
+    if(DEFINED ENV{DEPENDENCY_GITHUB_RAW_URL} AND
+       NOT "$ENV{DEPENDENCY_GITHUB_RAW_URL}" STREQUAL "" AND
        CPPBOOSTSERVICELIB_REPOSITORY MATCHES "^https://github.com/")
       string(REGEX REPLACE "^https://github.com/" ""
           _servicegen_framework_path "${CPPBOOSTSERVICELIB_REPOSITORY}")
       string(REGEX REPLACE "\\.git$" ""
           _servicegen_framework_path "${_servicegen_framework_path}")
       FetchContent_Declare(servicegen_cppboostservicelib
-          URL "$ENV{SERVICEGEN_GITHUB_RAW_URL}/${_servicegen_framework_path}/archive/${CPPBOOSTSERVICELIB_REVISION}.tar.gz"
+          URL "$ENV{DEPENDENCY_GITHUB_RAW_URL}/${_servicegen_framework_path}/archive/${CPPBOOSTSERVICELIB_REVISION}.tar.gz"
           DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
     else()
       FetchContent_Declare(servicegen_cppboostservicelib

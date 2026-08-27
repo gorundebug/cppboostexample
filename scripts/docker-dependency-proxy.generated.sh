@@ -6,13 +6,13 @@ if [[ -z "${SERVICEGEN_REAL_DOCKER:-}" ]]; then
   exit 2
 fi
 
-if [[ -z "${SERVICEGEN_DEPENDENCY_PROXY_DIR:-}" ]]; then
+if [[ -z "${DEPENDENCY_PROXY_DIR:-}" ]]; then
   exec "$SERVICEGEN_REAL_DOCKER" "$@"
 fi
 
-docker_host="${SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST:-${SERVICEGEN_NEXUS_DOCKER_HOST:-host.docker.internal}}"
-nexus_port="${SERVICEGEN_NEXUS_PORT:-18081}"
-git_mirror_port="${SERVICEGEN_GIT_MIRROR_PORT:-18084}"
+docker_host="${DEPENDENCY_PROXY_DOCKER_HOST:-host.docker.internal}"
+nexus_port="${DEPENDENCY_PROXY_PORT:-18081}"
+git_mirror_port="${DEPENDENCY_GIT_MIRROR_PORT:-18084}"
 repository_base="http://${docker_host}:${nexus_port}/repository"
 git_mirror_base="http://${docker_host}:${git_mirror_port}/cgi-bin/git"
 
@@ -26,16 +26,16 @@ export PIP_INDEX_URL="${repository_base}/pypi-proxy/simple"
 export PIP_TRUSTED_HOST="$docker_host"
 export UV_INDEX_URL="${repository_base}/pypi-proxy/simple"
 export CARGO_REGISTRIES_CRATES_IO_INDEX="sparse+${repository_base}/cargo-proxy/"
-export SERVICEGEN_MAVEN_CENTRAL_URL="${repository_base}/maven-central"
-export SERVICEGEN_CONAN_REMOTE_URL="${repository_base}/conan-proxy"
-export SERVICEGEN_GITHUB_RAW_URL="${repository_base}/github-raw"
-export SERVICEGEN_GITLAB_RAW_URL="${repository_base}/gitlab-raw"
-export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL="${repository_base}/apt-ubuntu-archive"
-export SERVICEGEN_APT_UBUNTU_SECURITY_URL="${repository_base}/apt-ubuntu-security"
-export SERVICEGEN_APT_UBUNTU_PORTS_URL="${repository_base}/apt-ubuntu-ports"
-export SERVICEGEN_APT_DEBIAN_URL="${repository_base}/apt-debian"
-export SERVICEGEN_APT_DEBIAN_SECURITY_URL="${repository_base}/apt-debian-security"
-export SERVICEGEN_GIT_MIRROR_URL="$git_mirror_base"
+export DEPENDENCY_MAVEN_CENTRAL_URL="${repository_base}/maven-central"
+export DEPENDENCY_CONAN_REMOTE_URL="${repository_base}/conan-proxy"
+export DEPENDENCY_GITHUB_RAW_URL="${repository_base}/github-raw"
+export DEPENDENCY_GITLAB_RAW_URL="${repository_base}/gitlab-raw"
+export DEPENDENCY_APT_UBUNTU_ARCHIVE_URL="${repository_base}/apt-ubuntu-archive"
+export DEPENDENCY_APT_UBUNTU_SECURITY_URL="${repository_base}/apt-ubuntu-security"
+export DEPENDENCY_APT_UBUNTU_PORTS_URL="${repository_base}/apt-ubuntu-ports"
+export DEPENDENCY_APT_DEBIAN_URL="${repository_base}/apt-debian"
+export DEPENDENCY_APT_DEBIAN_SECURITY_URL="${repository_base}/apt-debian-security"
+export DEPENDENCY_GIT_MIRROR_URL="$git_mirror_base"
 export GIT_CONFIG_COUNT=2
 export GIT_CONFIG_KEY_0="url.${git_mirror_base}/github.com/.insteadOf"
 export GIT_CONFIG_VALUE_0=https://github.com/
@@ -45,11 +45,11 @@ export GIT_CONFIG_VALUE_1=https://gitlab.com/
 proxy_build_variables=(
   GOPROXY GOSUMDB NPM_CONFIG_REGISTRY PIP_INDEX_URL PIP_TRUSTED_HOST
   UV_INDEX_URL CARGO_REGISTRIES_CRATES_IO_INDEX
-  SERVICEGEN_MAVEN_CENTRAL_URL SERVICEGEN_CONAN_REMOTE_URL
-  SERVICEGEN_GITHUB_RAW_URL SERVICEGEN_GITLAB_RAW_URL
-  SERVICEGEN_APT_UBUNTU_ARCHIVE_URL SERVICEGEN_APT_UBUNTU_SECURITY_URL
-  SERVICEGEN_APT_UBUNTU_PORTS_URL SERVICEGEN_APT_DEBIAN_URL
-  SERVICEGEN_APT_DEBIAN_SECURITY_URL SERVICEGEN_GIT_MIRROR_URL
+  DEPENDENCY_MAVEN_CENTRAL_URL DEPENDENCY_CONAN_REMOTE_URL
+  DEPENDENCY_GITHUB_RAW_URL DEPENDENCY_GITLAB_RAW_URL
+  DEPENDENCY_APT_UBUNTU_ARCHIVE_URL DEPENDENCY_APT_UBUNTU_SECURITY_URL
+  DEPENDENCY_APT_UBUNTU_PORTS_URL DEPENDENCY_APT_DEBIAN_URL
+  DEPENDENCY_APT_DEBIAN_SECURITY_URL DEPENDENCY_GIT_MIRROR_URL
 )
 
 proxy_build() {

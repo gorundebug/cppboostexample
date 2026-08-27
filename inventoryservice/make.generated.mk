@@ -5,28 +5,23 @@
 export SERVICEGEN_FETCH_CPP_DEPENDENCIES := OFF
 STANDALONE_COMPOSE := $(if $(wildcard docker-compose.yml),docker-compose.yml,docker-compose.generated.yml)
 STANDALONE_DEV_COMPOSE := $(if $(wildcard docker-compose.dev.yml),docker-compose.dev.yml,docker-compose.dev.generated.yml)
+DEPENDENCY_DOCKER_TARGETS := build test release-build release-test asan-test tsan-test lint \
+	docker-build docker-up docker-build-dev docker-up-dev debug
+include dependency-proxy.generated.mk
 
-ifneq ($(strip $(SERVICEGEN_DEPENDENCY_PROXY_DIR)),)
-SERVICEGEN_DEPENDENCY_PROXY_HOST ?= localhost
-SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST ?= host.docker.internal
-SERVICEGEN_DEPENDENCY_PROXY_PORT ?= $(SERVICEGEN_NEXUS_PORT)
-SERVICEGEN_DEPENDENCY_PROXY_PORT := $(if $(SERVICEGEN_DEPENDENCY_PROXY_PORT),$(SERVICEGEN_DEPENDENCY_PROXY_PORT),18081)
-export SERVICEGEN_CONAN_HOME := $(SERVICEGEN_DEPENDENCY_PROXY_DIR)/conan2
-export SERVICEGEN_GITHUB_RAW_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/github-raw
-export SERVICEGEN_CONAN_REMOTE_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/conan-proxy
-export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.24.tar.gz
+ifeq ($(strip $(USE_LOCAL_MODULES)),1)
+export MODULE_INVENTORY_SERVICE_API_SOURCE_CONTEXT := ../inventory_service_api
+export MODULE_MODEL_SOURCE_CONTEXT := ../model
+endif
+
+ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
+export DEPENDENCY_CONAN_HOME := $(DEPENDENCY_PROXY_DIR)/conan2
+export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.24.tar.gz
 export SERVICELIB_SOURCE_CONTEXT ?= $(CPPBOOSTSERVICELIB_SOURCE_CONTEXT)
-build test release-build release-test asan-test tsan-test lint docker-build docker-up docker-build-dev docker-up-dev: export SERVICEGEN_GITHUB_RAW_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/github-raw
-build test release-build release-test asan-test tsan-test lint docker-build docker-up docker-build-dev docker-up-dev: export SERVICEGEN_CONAN_REMOTE_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/conan-proxy
-build test release-build release-test asan-test tsan-test lint docker-build docker-up docker-build-dev docker-up-dev: export PIP_INDEX_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/pypi-proxy/simple
-build test release-build release-test asan-test tsan-test lint docker-build docker-up docker-build-dev docker-up-dev: export PIP_TRUSTED_HOST := $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST)
-build test release-build release-test asan-test tsan-test lint docker-build docker-up docker-build-dev docker-up-dev: export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-archive
-build test release-build release-test asan-test tsan-test lint docker-build docker-up docker-build-dev docker-up-dev: export SERVICEGEN_APT_UBUNTU_SECURITY_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-security
-build test release-build release-test asan-test tsan-test lint docker-build docker-up docker-build-dev docker-up-dev: export SERVICEGEN_APT_UBUNTU_PORTS_URL := http://$(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_HOST):$(SERVICEGEN_DEPENDENCY_PROXY_PORT)/repository/apt-ubuntu-ports
 endif
 
 .PHONY: build test release-build release-test asan-test tsan-test release-up lint fmt clean \
-	docker-build docker-build-dev docker-up docker-up-dev docker-down docker-down-dev docker-clean help
+	docker-build docker-build-dev docker-up docker-up-dev debug docker-down docker-down-dev docker-clean help
 
 build: ## Build the standalone service in the canonical Docker toolchain
 	@./scripts/build.generated.sh docker-debug
@@ -62,14 +57,19 @@ clean: ## Remove CMake build artifacts
 docker-build: ## Build the autonomous Boost C++ runtime image from copied sources
 	@docker compose -f docker-compose.cmake.generated.yml build inventoryservice-runtime
 
-docker-build-dev: build ## Build the source-mounted Boost C++ development image
+docker-build-dev: ## Build this service in the source-mounted Boost C++ development image
 	@docker compose -f docker-compose.cmake.generated.yml build cpp-build
+	@docker compose -f docker-compose.cmake.generated.yml run --rm cpp-build
 
 docker-up: docker-build ## Start this service through Docker Compose
 	@docker compose -f "$(STANDALONE_COMPOSE)" up -d --no-build
 
 docker-up-dev: docker-build-dev ## Start this service with its source directory mounted
 	@docker compose -f "$(STANDALONE_COMPOSE)" -f "$(STANDALONE_DEV_COMPOSE)" up -d --no-build
+
+debug: docker-build-dev ## Start this service under gdbserver on localhost:2345
+	@DEBUG=1 docker compose -f "$(STANDALONE_COMPOSE)" -f "$(STANDALONE_DEV_COMPOSE)" \
+		up -d --no-build --force-recreate
 
 docker-down: ## Stop this service
 	@docker compose -f "$(STANDALONE_COMPOSE)" down

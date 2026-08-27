@@ -3,23 +3,23 @@ services:
     image: orderservice-cpp-build
     build:
       context: .
-      dockerfile: Dockerfile.cmake
-      # The project Dockerfile also contains runtime stages for every service.
-      # A packaged service only needs the shared development toolchain here;
-      # selecting it explicitly keeps an independent build independent.
+      dockerfile: Dockerfile
       target: development
       extra_hosts:
         - "host.docker.internal:host-gateway"
       args:
-        SERVICEGEN_GITHUB_RAW_URL: ${SERVICEGEN_GITHUB_RAW_URL:-}
-        SERVICEGEN_CONAN_REMOTE_URL: ${SERVICEGEN_CONAN_REMOTE_URL:-}
+        DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-}
+        DEPENDENCY_CONAN_REMOTE_URL: ${DEPENDENCY_CONAN_REMOTE_URL:-}
         PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
         PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:-}
-        SERVICEGEN_APT_UBUNTU_ARCHIVE_URL: ${SERVICEGEN_APT_UBUNTU_ARCHIVE_URL:-}
-        SERVICEGEN_APT_UBUNTU_SECURITY_URL: ${SERVICEGEN_APT_UBUNTU_SECURITY_URL:-}
-        SERVICEGEN_APT_UBUNTU_PORTS_URL: ${SERVICEGEN_APT_UBUNTU_PORTS_URL:-}
+        DEPENDENCY_APT_UBUNTU_ARCHIVE_URL: ${DEPENDENCY_APT_UBUNTU_ARCHIVE_URL:-}
+        DEPENDENCY_APT_UBUNTU_SECURITY_URL: ${DEPENDENCY_APT_UBUNTU_SECURITY_URL:-}
+        DEPENDENCY_APT_UBUNTU_PORTS_URL: ${DEPENDENCY_APT_UBUNTU_PORTS_URL:-}
       additional_contexts:
         servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.24}
+        module-inventory_service_api: ${MODULE_INVENTORY_SERVICE_API_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample-inventory-service-api.git#v0.2.14}
+        module-model: ${MODULE_MODEL_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample-model.git#v0.2.14}
+        module-order_service_api: ${MODULE_ORDER_SERVICE_API_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample-order-service-api.git#v0.2.14}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     working_dir: /workspace
@@ -38,18 +38,42 @@ services:
       GIT_CONFIG_KEY_1: ${GIT_CONFIG_KEY_1:-}
       GIT_CONFIG_VALUE_1: ${GIT_CONFIG_VALUE_1:-}
       SERVICEGEN_FETCH_CPP_DEPENDENCIES: ${SERVICEGEN_FETCH_CPP_DEPENDENCIES:-OFF}
-      SERVICEGEN_CONAN_REMOTE_URL: ${SERVICEGEN_CONAN_REMOTE_URL:-}
-      SERVICEGEN_GITHUB_RAW_URL: ${SERVICEGEN_GITHUB_RAW_URL:-}
+      DEPENDENCY_CONAN_REMOTE_URL: ${DEPENDENCY_CONAN_REMOTE_URL:-}
+      DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-}
       CONAN_HOME: /conan
     volumes:
       - .:/workspace
       - cpp-cmake-build:/workspace/build
       - cpp-ccache:/ccache
-      - ${SERVICEGEN_CONAN_HOME:-cpp-conan2}:/conan
+      - ${DEPENDENCY_CONAN_HOME:-cpp-conan2}:/conan
     command:
       - /bin/bash
       - -lc
       - source scripts/configure-git-auth.generated.sh && ./scripts/conan-install.generated.sh Debug /workspace/build/conan-debug && conan_toolchain="$$(cat /workspace/build/conan-debug/toolchain.path)" && cmake --fresh --preset docker-debug -DCMAKE_TOOLCHAIN_FILE="$$conan_toolchain" -DSERVICEGEN_FETCH_CPP_DEPENDENCIES=OFF && cmake --build --preset docker-debug --parallel && ctest --preset docker-debug
+
+  orderservice-runtime:
+    image: cppboostexample-orderservice
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime-orderservice
+      extra_hosts:
+        - "host.docker.internal:host-gateway"
+      args:
+        DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-}
+        DEPENDENCY_APT_UBUNTU_ARCHIVE_URL: ${DEPENDENCY_APT_UBUNTU_ARCHIVE_URL:-}
+        DEPENDENCY_APT_UBUNTU_SECURITY_URL: ${DEPENDENCY_APT_UBUNTU_SECURITY_URL:-}
+        DEPENDENCY_APT_UBUNTU_PORTS_URL: ${DEPENDENCY_APT_UBUNTU_PORTS_URL:-}
+        DEPENDENCY_CONAN_REMOTE_URL: ${DEPENDENCY_CONAN_REMOTE_URL:-}
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
+        PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:-}
+        SERVICEGEN_RUNTIME_STRIP: ${SERVICEGEN_RUNTIME_STRIP:-ON}
+        SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
+      additional_contexts:
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.24}
+        module-inventory_service_api: ${MODULE_INVENTORY_SERVICE_API_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample-inventory-service-api.git#v0.2.14}
+        module-model: ${MODULE_MODEL_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample-model.git#v0.2.14}
+        module-order_service_api: ${MODULE_ORDER_SERVICE_API_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample-order-service-api.git#v0.2.14}
 
 volumes:
   cpp-cmake-build:

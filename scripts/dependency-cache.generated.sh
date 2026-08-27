@@ -4,19 +4,19 @@ set -eu
 
 project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 compose_file="$project_dir/docker-compose.dependency-cache.generated.yml"
-nexus_port=${SERVICEGEN_NEXUS_PORT:-18081}
+nexus_port=${DEPENDENCY_PROXY_PORT:-18081}
 nexus_url="http://localhost:$nexus_port"
-git_mirror_port=${SERVICEGEN_GIT_MIRROR_PORT:-18084}
+git_mirror_port=${DEPENDENCY_GIT_MIRROR_PORT:-18084}
 git_mirror_url="http://localhost:$git_mirror_port"
-proxy_dir=${SERVICEGEN_DEPENDENCY_PROXY_DIR:-}
+proxy_dir=${DEPENDENCY_PROXY_DIR:-}
 if [ -z "$proxy_dir" ]; then
-  echo "[dependency-cache] SERVICEGEN_DEPENDENCY_PROXY_DIR must point to the shared proxy data directory" >&2
+  echo "[dependency-cache] DEPENDENCY_PROXY_DIR must point to the shared proxy data directory" >&2
   exit 2
 fi
 cache_dir="${proxy_dir%/}/nexus"
 git_mirror_dir="${proxy_dir%/}/git-mirror"
 github_credential_file="$git_mirror_dir/github.credential"
-export SERVICEGEN_GITHUB_CREDENTIAL_FILE="$github_credential_file"
+export DEPENDENCY_GITHUB_CREDENTIAL_FILE="$github_credential_file"
 
 prepare_git_credentials() {
   mkdir -p "$git_mirror_dir"
@@ -42,14 +42,14 @@ prepare_git_credentials
 # Docker resolves the same stable name through host-gateway, so Nexus must also
 # listen on the host bridge rather than loopback only.
 if [ "$(uname -s)" = "Linux" ]; then
-  SERVICEGEN_NEXUS_BIND_HOST=${SERVICEGEN_NEXUS_BIND_HOST:-0.0.0.0}
-  SERVICEGEN_GIT_MIRROR_BIND_HOST=${SERVICEGEN_GIT_MIRROR_BIND_HOST:-0.0.0.0}
+  DEPENDENCY_PROXY_BIND_HOST=${DEPENDENCY_PROXY_BIND_HOST:-0.0.0.0}
+  DEPENDENCY_GIT_MIRROR_BIND_HOST=${DEPENDENCY_GIT_MIRROR_BIND_HOST:-0.0.0.0}
 else
-  SERVICEGEN_NEXUS_BIND_HOST=${SERVICEGEN_NEXUS_BIND_HOST:-127.0.0.1}
-  SERVICEGEN_GIT_MIRROR_BIND_HOST=${SERVICEGEN_GIT_MIRROR_BIND_HOST:-127.0.0.1}
+  DEPENDENCY_PROXY_BIND_HOST=${DEPENDENCY_PROXY_BIND_HOST:-127.0.0.1}
+  DEPENDENCY_GIT_MIRROR_BIND_HOST=${DEPENDENCY_GIT_MIRROR_BIND_HOST:-127.0.0.1}
 fi
-export SERVICEGEN_NEXUS_BIND_HOST
-export SERVICEGEN_GIT_MIRROR_BIND_HOST
+export DEPENDENCY_PROXY_BIND_HOST
+export DEPENDENCY_GIT_MIRROR_BIND_HOST
 
 compose() {
   docker compose -f "$compose_file" "$@"
@@ -109,14 +109,14 @@ refresh_git_mirrors() {
 bootstrap() {
   password=$(compose exec -T nexus sh -c 'cat /nexus-data/admin.password 2>/dev/null || true')
   if [ -z "$password" ]; then
-    password=${SERVICEGEN_NEXUS_ADMIN_PASSWORD:-}
+    password=${DEPENDENCY_PROXY_ADMIN_PASSWORD:-}
   fi
   if [ -z "$password" ]; then
-    echo "[dependency-cache] Set SERVICEGEN_NEXUS_ADMIN_PASSWORD for an already initialized Nexus volume" >&2
+    echo "[dependency-cache] Set DEPENDENCY_PROXY_ADMIN_PASSWORD for an already initialized Nexus volume" >&2
     exit 1
   fi
   accept_eula_arg=
-  if [ "${SERVICEGEN_NEXUS_ACCEPT_EULA:-false}" = "true" ]; then
+  if [ "${DEPENDENCY_PROXY_ACCEPT_EULA:-false}" = "true" ]; then
     accept_eula_arg=--accept-eula
   fi
   python3 "$project_dir/scripts/dependency_cache_bootstrap.generated.py" \
@@ -124,7 +124,7 @@ bootstrap() {
 }
 
 print_env() {
-  host=${SERVICEGEN_NEXUS_CLIENT_HOST:-localhost}
+  host=${DEPENDENCY_PROXY_CLIENT_HOST:-localhost}
   base="http://$host:$nexus_port/repository"
   git_mirror="http://$host:$git_mirror_port/cgi-bin/git"
   cat <<EOF
@@ -135,22 +135,22 @@ export PIP_INDEX_URL=$base/pypi-proxy/simple
 export PIP_TRUSTED_HOST=$host
 export UV_INDEX_URL=$base/pypi-proxy/simple
 export CARGO_REGISTRIES_CRATES_IO_INDEX=sparse+$base/cargo-proxy/
-export SERVICEGEN_CONAN_REMOTE_URL=$base/conan-proxy
-export SERVICEGEN_MAVEN_CENTRAL_URL=$base/maven-central
-export SERVICEGEN_GITHUB_RAW_URL=$base/github-raw
-export SERVICEGEN_GITLAB_RAW_URL=$base/gitlab-raw
-export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL=$base/apt-ubuntu-archive
-export SERVICEGEN_APT_UBUNTU_SECURITY_URL=$base/apt-ubuntu-security
-export SERVICEGEN_APT_UBUNTU_PORTS_URL=$base/apt-ubuntu-ports
-export SERVICEGEN_APT_DEBIAN_URL=$base/apt-debian
-export SERVICEGEN_APT_DEBIAN_SECURITY_URL=$base/apt-debian-security
-export SERVICEGEN_HELM_PROMETHEUS_URL=$base/helm-prometheus
-export SERVICEGEN_HELM_GRAFANA_URL=$base/helm-grafana
-export SERVICEGEN_HELM_OPENTELEMETRY_URL=$base/helm-opentelemetry
-export SERVICEGEN_HELM_JAEGER_URL=$base/helm-jaeger
-export SERVICEGEN_HELM_REDPANDA_URL=$base/helm-redpanda
-export SERVICEGEN_NEXUS_DOCKER_REGISTRY=$host:${SERVICEGEN_NEXUS_DOCKER_PORT:-18083}
-export SERVICEGEN_GIT_MIRROR_URL=$git_mirror
+export DEPENDENCY_CONAN_REMOTE_URL=$base/conan-proxy
+export DEPENDENCY_MAVEN_CENTRAL_URL=$base/maven-central
+export DEPENDENCY_GITHUB_RAW_URL=$base/github-raw
+export DEPENDENCY_GITLAB_RAW_URL=$base/gitlab-raw
+export DEPENDENCY_APT_UBUNTU_ARCHIVE_URL=$base/apt-ubuntu-archive
+export DEPENDENCY_APT_UBUNTU_SECURITY_URL=$base/apt-ubuntu-security
+export DEPENDENCY_APT_UBUNTU_PORTS_URL=$base/apt-ubuntu-ports
+export DEPENDENCY_APT_DEBIAN_URL=$base/apt-debian
+export DEPENDENCY_APT_DEBIAN_SECURITY_URL=$base/apt-debian-security
+export DEPENDENCY_HELM_PROMETHEUS_URL=$base/helm-prometheus
+export DEPENDENCY_HELM_GRAFANA_URL=$base/helm-grafana
+export DEPENDENCY_HELM_OPENTELEMETRY_URL=$base/helm-opentelemetry
+export DEPENDENCY_HELM_JAEGER_URL=$base/helm-jaeger
+export DEPENDENCY_HELM_REDPANDA_URL=$base/helm-redpanda
+export DEPENDENCY_PROXY_DOCKER_REGISTRY=$host:${DEPENDENCY_PROXY_DOCKER_PORT:-18083}
+export DEPENDENCY_GIT_MIRROR_URL=$git_mirror
 export GIT_CONFIG_COUNT=2
 export GIT_CONFIG_KEY_0=url.$git_mirror/github.com/.insteadOf
 export GIT_CONFIG_VALUE_0=https://github.com/

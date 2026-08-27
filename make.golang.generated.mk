@@ -30,14 +30,13 @@ LANG_DOCKER_DEV_BUILD_TARGETS += golang-docker-dev-build
 .PHONY: golang-build golang-test golang-lint golang-lint-fix golang-fmt \
 	golang-fmt-go golang-fmt-proto golang-gen golang-codegen golang-gen-proto \
 	golang-clean golang-tools \
-	golang-docker-build golang-docker-dev-build go-mod-tidy go-mod-sync fmt-go fmt-proto gen-proto golang-workflowcheck \
-	 docker-build-local-automationservice debug-automationservice
+	golang-docker-build golang-docker-dev-build go-mod-tidy go-mod-sync fmt-go fmt-proto gen-proto golang-workflowcheck
 
 golang-build: golang-gen ## Generate transport code and build all Go services
-	@$(MAKE) -C ./automationservice -f Makefile service_build PROJECT_DIR="$(PROJECT_DIR)" BIN_DIR="$(BIN_DIR)"
+	@$(MAKE) -C ./automationservice -f Makefile service_build USE_LOCAL_MODULES=1 PROJECT_DIR="$(PROJECT_DIR)" BIN_DIR="$(BIN_DIR)"
 
 golang-test: ## Run tests for all Go services
-	@$(MAKE) -C ./automationservice -f Makefile test
+	@$(MAKE) -C ./automationservice -f Makefile test USE_LOCAL_MODULES=1
 
 golang-lint: $(GOLANGCI_LINT) ## Run Go linters
 	@$(MAKE) -C ./automationservice -f Makefile lint GOLANGCI_LINT="$(GOLANGCI_LINT)"
@@ -75,22 +74,16 @@ golang-clean: ## Remove Go build artifacts
 	@rm -rf "$(BIN_DIR)"
 
 golang-docker-build: golang-codegen ## Build Go service Docker images entirely in Docker
-	@$(MAKE) -C ./automationservice -f Makefile docker-build PROJECT_DIR="$(PROJECT_DIR)"
+	@$(MAKE) -C ./automationservice -f Makefile docker-build USE_LOCAL_MODULES=1
 
 golang-docker-dev-build: golang-codegen ## Build source-mounted Go development images
-	@SERVICEGEN_DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) build automationservice
+	@$(MAKE) -C ./automationservice -f Makefile docker-build-dev USE_LOCAL_MODULES=1
 
 fmt-go: golang-fmt-go ## Format Go code
 
 fmt-proto: golang-fmt-proto ## Format protobuf files
 
 gen-proto: golang-gen-proto ## Generate Go protobuf code
-docker-build-local-automationservice: golang-build
-	@$(MAKE) -C ./automationservice -f Makefile docker-build-local PROJECT_DIR="$(PROJECT_DIR)" BIN_DIR="$(BIN_DIR)"
-
-debug-automationservice: AUTOMATION_SERVICE_DEBUG := 1
-debug-automationservice: docker-build-local-automationservice
-	@docker compose up -d --no-deps --force-recreate automationservice
 go-mod-tidy: ## Run go mod tidy for all Go modules
 	@cd ./automationservice && GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
 	@cd ./inventory_service_api && GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
@@ -111,7 +104,7 @@ $(BUF):
 	tmp=$$(mktemp "$(TOOLS_DIR)/.buf.XXXXXX"); \
 	trap 'rm -f "$$tmp"' EXIT INT TERM; \
 	curl --fail --location --silent --show-error \
-	  "$(SERVICEGEN_GITHUB_RAW_URL)/bufbuild/buf/releases/download/$(BUF_VERSION)/buf-$(OS)-$(ARCH)" \
+	  "$(DEPENDENCY_GITHUB_RAW_URL)/bufbuild/buf/releases/download/$(BUF_VERSION)/buf-$(OS)-$(ARCH)" \
 	  --output "$$tmp"; \
 	chmod +x "$$tmp"; \
 	mv "$$tmp" "$(BUF)"; \
@@ -127,7 +120,7 @@ $(PROTOC):
 	_arch=$$(uname -m | sed 's/arm64/aarch_64/;s/aarch64/aarch_64/'); \
 	_ver=$$(echo "$(PROTOC_VERSION)" | sed 's/v//'); \
 	curl --fail --location --silent --show-error \
-	  "$(SERVICEGEN_GITHUB_RAW_URL)/protocolbuffers/protobuf/releases/download/$(PROTOC_VERSION)/protoc-$${_ver}-$${_os}-$${_arch}.zip" \
+	  "$(DEPENDENCY_GITHUB_RAW_URL)/protocolbuffers/protobuf/releases/download/$(PROTOC_VERSION)/protoc-$${_ver}-$${_os}-$${_arch}.zip" \
 	  --output "$$tmp/protoc.zip"; \
 	unzip -q "$$tmp/protoc.zip" bin/protoc -d "$$tmp/extract"; \
 	chmod +x "$$tmp/extract/bin/protoc"; \
