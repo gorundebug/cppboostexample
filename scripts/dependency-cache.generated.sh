@@ -15,6 +15,30 @@ if [ -z "$proxy_dir" ]; then
 fi
 cache_dir="${proxy_dir%/}/nexus"
 git_mirror_dir="${proxy_dir%/}/git-mirror"
+github_credential_file="$git_mirror_dir/github.credential"
+export SERVICEGEN_GITHUB_CREDENTIAL_FILE="$github_credential_file"
+
+prepare_git_credentials() {
+  mkdir -p "$git_mirror_dir"
+  if command -v git >/dev/null 2>&1; then
+    credential=$(printf 'protocol=https\nhost=github.com\n\n' | \
+      GIT_TERMINAL_PROMPT=0 git credential fill 2>/dev/null || true)
+    username=$(printf '%s\n' "$credential" | sed -n 's/^username=//p' | head -n 1)
+    password=$(printf '%s\n' "$credential" | sed -n 's/^password=//p' | head -n 1)
+    if [ -n "$password" ]; then
+      umask 077
+      temporary="$github_credential_file.tmp.$$"
+      printf '%s\n%s\n' "$username" "$password" >"$temporary"
+      mv "$temporary" "$github_credential_file"
+    fi
+  fi
+  if [ ! -f "$github_credential_file" ]; then
+    umask 077
+    : >"$github_credential_file"
+  fi
+}
+
+prepare_git_credentials
 
 # Docker Desktop forwards host.docker.internal to host loopback. Native Linux
 # Docker resolves the same stable name through host-gateway, so Nexus must also

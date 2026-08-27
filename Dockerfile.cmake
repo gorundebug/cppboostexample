@@ -22,6 +22,10 @@ RUN if [ -n "$SERVICEGEN_APT_UBUNTU_ARCHIVE_URL$SERVICEGEN_APT_UBUNTU_SECURITY_U
     fi
 ENV SERVICEGEN_GITHUB_RAW_URL=${SERVICEGEN_GITHUB_RAW_URL}
 ENV SERVICEGEN_CONAN_REMOTE_URL=${SERVICEGEN_CONAN_REMOTE_URL}
+COPY dependency-download-mirrors.generated.env /etc/servicegen/dependency-download-mirrors.generated.env
+COPY dependency-download-mirrors.env /etc/servicegen/dependency-download-mirrors.env
+COPY dependency-download-env.generated.sh /usr/local/bin/servicegen-download-env
+SHELL ["/usr/local/bin/servicegen-download-env", "/bin/sh", "-c"]
 
 COPY docker/cppboost-packages-ubuntu-24.04.txt /tmp/cppboost-packages.txt
 RUN rm -f /etc/apt/apt.conf.d/docker-clean

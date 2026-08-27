@@ -12,9 +12,15 @@ services:
       - "${SERVICEGEN_GIT_MIRROR_BIND_HOST:-127.0.0.1}:${SERVICEGEN_GIT_MIRROR_PORT:-18084}:8080"
     environment:
       SERVICEGEN_GIT_MIRROR_REFRESH_SECONDS: ${SERVICEGEN_GIT_MIRROR_REFRESH_SECONDS:-3600}
+      SERVICEGEN_GITHUB_CREDENTIAL_FILE: /run/secrets/servicegen_github_credential
+      GIT_ASKPASS: /www/git-askpass.generated.sh
+      GIT_TERMINAL_PROMPT: "0"
+    secrets:
+      - servicegen_github_credential
     volumes:
       - ${SERVICEGEN_DEPENDENCY_PROXY_DIR:?set SERVICEGEN_DEPENDENCY_PROXY_DIR}/git-mirror:/mirrors
       - ./scripts/git_mirror.generated.cgi:/www/cgi-bin/git:ro
+      - ./scripts/git_mirror_askpass.generated.sh:/www/git-askpass.generated.sh:ro
 
   nexus:
     image: sonatype/nexus3:3.95.0
@@ -30,3 +36,7 @@ services:
         -Djava.util.prefs.userRoot=/nexus-data/javaprefs
     volumes:
       - ${SERVICEGEN_DEPENDENCY_PROXY_DIR:?set SERVICEGEN_DEPENDENCY_PROXY_DIR}/nexus:/nexus-data
+
+secrets:
+  servicegen_github_credential:
+    file: ${SERVICEGEN_GITHUB_CREDENTIAL_FILE:?set SERVICEGEN_GITHUB_CREDENTIAL_FILE}

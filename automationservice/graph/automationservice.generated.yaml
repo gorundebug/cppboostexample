@@ -365,13 +365,13 @@ services:
         kubernetesWorkloadType: Deployment
         links:
             link1:
-                callSemantics: FunctionCall
+                callSemantics: PriorityTaskPool
                 from: callSequentialActivityA
                 poolName: Default Pool
                 priority: 2
                 to: callSequentialActivityB
             link2:
-                callSemantics: FunctionCall
+                callSemantics: TaskPool
                 from: callSequentialActivityB
                 poolName: Default Pool
                 to: processWorkflowJob
@@ -392,7 +392,7 @@ services:
                 from: consumeFanOutActivityC
                 to: processFanOutActivityC
             link7:
-                callSemantics: FunctionCall
+                callSemantics: TaskPool
                 from: consumeFanOutWorkflowJob
                 poolName: Default Pool
                 to: callFanOutActivityA
@@ -409,19 +409,19 @@ services:
                 from: consumeWorkflowJob
                 to: workflowPause
             link11:
-                callSemantics: FunctionCall
+                callSemantics: PriorityTaskPool
                 from: splitActivityAResult
                 poolName: Default Pool
                 priority: 2
                 to: callFanOutActivityB
             link12:
-                callSemantics: FunctionCall
+                callSemantics: PriorityTaskPool
                 from: splitActivityAResult
                 poolName: Default Pool
                 priority: 7
                 to: callFanOutActivityC
             link13:
-                callSemantics: FunctionCall
+                callSemantics: TaskPool
                 from: workflowPause
                 poolName: Default Pool
                 to: callSequentialActivityA

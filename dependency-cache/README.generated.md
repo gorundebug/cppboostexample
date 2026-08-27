@@ -69,6 +69,15 @@ from upstream once and refreshed after
 immediately. Set the refresh interval to `0` for a fully offline immutable
 mirror; the explicit refresh command remains available.
 
+Ordinary dependencies are added through the language's native manifest and
+need no proxy configuration. If a package runs its own downloader and bypasses
+that registry, add its documented mirror environment variable to the
+user-owned `dependency-download-mirrors.env` file. Use
+`${SERVICEGEN_GITHUB_RAW_URL}/owner/repository/...` as the URL prefix; the same
+entry is expanded to the host or Docker-reachable Nexus address automatically.
+Framework-owned defaults are generated from the single `downloadMirrors`
+catalog in `servicegen/internal/codegenerator/dependencies.yaml`.
+
 ## Changing C++ dependency versions
 
 After changing a pinned C++ dependency version or its acquisition logic, run:

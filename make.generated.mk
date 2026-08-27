@@ -13,6 +13,9 @@ RUNTIME_IMAGE ?= 0
 DOCKER_COMPOSE_RUNTIME_FILES :=
 SERVICEGEN_GITHUB_RAW_URL ?= https://github.com
 SERVICEGEN_GITLAB_RAW_URL ?= https://gitlab.com
+SERVICEGEN_DOWNLOAD_MIRROR_ENV := $(abspath ./dependency-download-env.generated.sh)
+SHELL := $(SERVICEGEN_DOWNLOAD_MIRROR_ENV)
+.SHELLFLAGS := -c
 
 # A shared dependency proxy is opt-in through one host directory. Merely
 # setting the variable makes all generated host commands use the long-running
@@ -51,8 +54,8 @@ export SERVICEGEN_APT_UBUNTU_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)
 export SERVICEGEN_APT_UBUNTU_PORTS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-ubuntu-ports
 export SERVICEGEN_APT_DEBIAN_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-debian
 export SERVICEGEN_APT_DEBIAN_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-debian-security
-export GOSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/servicelib/archive/refs/tags/v0.2.18.tar.gz
-export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.18.tar.gz
+export GOSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/servicelib/archive/refs/tags/v0.2.20.tar.gz
+export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.20.tar.gz
 export SERVICEGEN_HELM_PROMETHEUS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-prometheus
 export SERVICEGEN_HELM_GRAFANA_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-grafana
 export SERVICEGEN_HELM_OPENTELEMETRY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-opentelemetry
