@@ -16,5 +16,5 @@ if [[ -n "${SERVICEGEN_DEPENDENCY_PROXY_DIR:-}" ]]; then
   export SERVICEGEN_APT_UBUNTU_ARCHIVE_URL="${servicegen_proxy_base}/apt-ubuntu-archive"
   export SERVICEGEN_APT_UBUNTU_SECURITY_URL="${servicegen_proxy_base}/apt-ubuntu-security"
   export SERVICEGEN_APT_UBUNTU_PORTS_URL="${servicegen_proxy_base}/apt-ubuntu-ports"
-  export CPPBOOSTSERVICELIB_SOURCE_CONTEXT="${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${servicegen_proxy_base}/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.13.tar.gz}"
+  export CPPBOOSTSERVICELIB_SOURCE_CONTEXT="${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${servicegen_proxy_base}/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.14.tar.gz}"
 fi

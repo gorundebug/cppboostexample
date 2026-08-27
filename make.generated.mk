@@ -6,7 +6,7 @@ PROJECT_DIR := $(abspath .)
 BIN_DIR := $(PROJECT_DIR)/bin
 TOOLS_DIR := $(PROJECT_DIR)/tools
 GOPRIVATE := github.com
-MODULE_VERSION := v0.2.13
+MODULE_VERSION := v0.2.14
 OS := $(shell uname -s)
 ARCH := $(shell uname -m)
 RUNTIME_IMAGE ?= 0
@@ -51,8 +51,8 @@ export SERVICEGEN_APT_UBUNTU_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)
 export SERVICEGEN_APT_UBUNTU_PORTS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-ubuntu-ports
 export SERVICEGEN_APT_DEBIAN_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-debian
 export SERVICEGEN_APT_DEBIAN_SECURITY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/apt-debian-security
-export GOSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/servicelib/archive/refs/tags/v0.2.13.tar.gz
-export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.13.tar.gz
+export GOSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/servicelib/archive/refs/tags/v0.2.14.tar.gz
+export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(SERVICEGEN_DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.14.tar.gz
 export SERVICEGEN_HELM_PROMETHEUS_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-prometheus
 export SERVICEGEN_HELM_GRAFANA_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-grafana
 export SERVICEGEN_HELM_OPENTELEMETRY_URL := $(SERVICEGEN_DEPENDENCY_PROXY_BASE)/helm-opentelemetry
@@ -105,7 +105,7 @@ else
 DOCKER_COMPOSE := docker compose
 endif
 
-ACT_VERSION := v0.2.134
+ACT_VERSION := v0.2.144
 ACT := $(TOOLS_DIR)/act
 GH_VERSION := v2.67.0
 GH := $(TOOLS_DIR)/gh
