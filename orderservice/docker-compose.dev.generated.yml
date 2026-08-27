@@ -20,4 +20,5 @@ services:
 
 volumes:
   cpp-dev-cmake-build:
-    name: ${CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.24}
+    name: cppboostexample_orderservice_cpp-cmake-build
+    external: true

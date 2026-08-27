@@ -77,5 +77,6 @@ services:
 
 volumes:
   cpp-cmake-build:
+    name: cppboostexample_orderservice_cpp-cmake-build
   cpp-ccache:
   cpp-conan2:
