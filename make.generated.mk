@@ -26,13 +26,14 @@ LANG_TOOL_TARGETS :=
 LANG_HOST_PREP_TARGETS :=
 LANG_DOCKER_BUILD_TARGETS :=
 LANG_DOCKER_DEV_BUILD_TARGETS :=
+LANG_DOCKER_VERIFY_TARGETS :=
 LANG_INTEGRATION_TARGETS :=
 include make.golang.generated.mk
 include make.cpp.generated.mk
 
 DEBUG_TARGETS := debug-analyticsservice debug-automationservice debug-inventoryservice debug-orderservice
 DEPENDENCY_DOCKER_TARGETS := $(LANG_DOCKER_BUILD_TARGETS) $(LANG_DOCKER_DEV_BUILD_TARGETS) \
-	$(DEBUG_TARGETS) docker-build docker-build-local docker-build-dev docker-up docker-up-dev \
+	$(LANG_DOCKER_VERIFY_TARGETS) $(DEBUG_TARGETS) docker-build docker-build-local docker-build-dev docker-up docker-up-dev \
 	kubernetes-up kubernetes-build kubernetes-deploy \
 	cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test \
 	cpp-lint cpp-integration-test

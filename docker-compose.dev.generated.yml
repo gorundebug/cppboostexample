@@ -8,7 +8,7 @@ services:
     working_dir: /workspace
     command:
       - /bin/sh
-      - -lc
+      - -c
       - >-
         if [ "$${DEBUG:-0}" = "1" ]; then
           exec gdbserver :2345
@@ -33,7 +33,7 @@ services:
     working_dir: /workspace
     command:
       - /bin/sh
-      - -lc
+      - -c
       - >-
         if [ "$${DEBUG:-0}" = "1" ]; then
           exec dlv debug ./cmd/service/main.go
@@ -65,7 +65,7 @@ services:
     working_dir: /workspace
     command:
       - /bin/sh
-      - -lc
+      - -c
       - >-
         if [ "$${DEBUG:-0}" = "1" ]; then
           exec gdbserver :2345
@@ -90,7 +90,7 @@ services:
     working_dir: /workspace
     command:
       - /bin/sh
-      - -lc
+      - -c
       - >-
         if [ "$${DEBUG:-0}" = "1" ]; then
           exec gdbserver :2345

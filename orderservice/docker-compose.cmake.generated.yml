@@ -48,7 +48,7 @@ services:
       - ${DEPENDENCY_CONAN_HOME:-cpp-conan2}:/conan
     command:
       - /bin/bash
-      - -lc
+      - -c
       - source scripts/configure-git-auth.generated.sh && ./scripts/conan-install.generated.sh Debug /workspace/build/conan-debug && conan_toolchain="$$(cat /workspace/build/conan-debug/toolchain.path)" && cmake --fresh --preset docker-debug -DCMAKE_TOOLCHAIN_FILE="$$conan_toolchain" -DFETCH_CPP_DEPENDENCIES=OFF && cmake --build --preset docker-debug --parallel && ctest --preset docker-debug
 
   orderservice-runtime:

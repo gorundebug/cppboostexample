@@ -6,7 +6,7 @@ services:
     working_dir: /workspace
     command:
       - /bin/sh
-      - -lc
+      - -c
       - |
         if [ "$${DEBUG:-0}" = "1" ]; then
           exec dlv debug ./cmd/service/main.go --headless --listen=:2345 --api-version=2 --accept-multiclient -- -config ./config/config.yaml -values ./config/overrides.yaml
