@@ -46,6 +46,13 @@ RUN if [ -f /workspace/go.work ]; then \
     fi
 RUN --mount=type=cache,id=servicegen-go-mod-v1-${TARGETARCH},target=/go/pkg/mod,sharing=locked \
     go mod download
+
+# Source-mounted local development stops at this stage. The ordinary
+# docker-build path continues in compiler and copies only the resulting binary
+# into the runtime image.
+FROM builder AS development
+
+FROM builder AS compiler
 RUN --mount=type=cache,id=servicegen-go-mod-v1-${TARGETARCH},target=/go/pkg/mod,sharing=locked \
     --mount=type=cache,id=servicegen-go-build-v1-${TARGETARCH},target=/root/.cache/go-build,sharing=locked \
     if [ "${SERVICEGEN_RUNTIME_STRIP}" = "ON" ]; then \
@@ -57,7 +64,7 @@ RUN --mount=type=cache,id=servicegen-go-mod-v1-${TARGETARCH},target=/go/pkg/mod,
 
 # Replay target: compile the generated history checker with the same sources
 # and dependency cache as the service, without adding it to the runtime image.
-FROM builder AS temporal-replay
+FROM compiler AS temporal-replay
 RUN --mount=type=cache,id=servicegen-go-mod-v1-${TARGETARCH},target=/go/pkg/mod,sharing=locked \
     --mount=type=cache,id=servicegen-go-build-v1-${TARGETARCH},target=/root/.cache/go-build,sharing=locked \
     CGO_ENABLED=0 GOOS=linux go build -o /app/temporal-replay ./cmd/temporal-replay
@@ -82,7 +89,7 @@ RUN --mount=type=cache,id=servicegen-go-apt-lists-v1-${TARGETARCH},target=/var/l
 
 WORKDIR /app
 
-COPY --from=builder /app/service .
+COPY --from=compiler /app/service .
 COPY ${SERVICE_DIR}/config/ ./config/
 
 EXPOSE 9094

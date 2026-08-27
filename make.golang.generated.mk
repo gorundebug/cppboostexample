@@ -25,11 +25,12 @@ LANG_CLEAN_TARGETS += golang-clean
 LANG_TOOL_TARGETS += golang-tools
 LANG_HOST_PREP_TARGETS += golang-gen golang-codegen golang-tools
 LANG_DOCKER_BUILD_TARGETS += golang-docker-build
+LANG_DOCKER_DEV_BUILD_TARGETS += golang-docker-dev-build
 
 .PHONY: golang-build golang-test golang-lint golang-lint-fix golang-fmt \
 	golang-fmt-go golang-fmt-proto golang-gen golang-codegen golang-gen-proto \
 	golang-clean golang-tools \
-	golang-docker-build go-mod-tidy go-mod-sync fmt-go fmt-proto gen-proto golang-workflowcheck \
+	golang-docker-build golang-docker-dev-build go-mod-tidy go-mod-sync fmt-go fmt-proto gen-proto golang-workflowcheck \
 	 docker-build-local-automationservice debug-automationservice
 
 golang-build: golang-gen ## Generate transport code and build all Go services
@@ -75,6 +76,9 @@ golang-clean: ## Remove Go build artifacts
 
 golang-docker-build: golang-codegen ## Build Go service Docker images entirely in Docker
 	@$(MAKE) -C ./automationservice -f Makefile docker-build PROJECT_DIR="$(PROJECT_DIR)"
+
+golang-docker-dev-build: golang-codegen ## Build source-mounted Go development images
+	@SERVICEGEN_DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) build automationservice
 
 fmt-go: golang-fmt-go ## Format Go code
 

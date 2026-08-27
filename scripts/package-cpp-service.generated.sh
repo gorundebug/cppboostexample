@@ -15,7 +15,7 @@ if [[ ! -f "${service_dir}/CMakeLists.txt" ]]; then
   exit 1
 fi
 for file in Makefile make.generated.mk docker-compose.generated.yml \
-  docker-compose.cmake.generated.yml; do
+  docker-compose.dev.generated.yml docker-compose.cmake.generated.yml; do
   if [[ ! -f "${service_dir}/${file}" ]]; then
     echo "C++ service publishing file is missing: ${service_dir}/${file}" >&2
     exit 1
@@ -60,9 +60,12 @@ cp scripts/cmake-docker.generated.sh scripts/build.generated.sh scripts/test.gen
 # workspace; a published repository receives conventional Compose filenames.
 cp "${service_dir}/docker-compose.generated.yml" \
   "${output_dir}/docker-compose.yml"
+cp "${service_dir}/docker-compose.dev.generated.yml" \
+  "${output_dir}/docker-compose.dev.yml"
 cp "${service_dir}/docker-compose.cmake.generated.yml" \
   "${output_dir}/docker-compose.cmake.yml"
 rm -f "${output_dir}/docker-compose.generated.yml" \
+  "${output_dir}/docker-compose.dev.generated.yml" \
   "${output_dir}/docker-compose.cmake.generated.yml"
 
 # The source workspace deliberately marks generated Compose files in their

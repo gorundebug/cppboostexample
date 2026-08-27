@@ -54,11 +54,11 @@ services:
         kubernetesWorkloadType: Deployment
         links:
             link1:
-                callSemantics: ParallelCall
+                callSemantics: FunctionCall
                 from: getInventoryItemData
                 to: mergeInventoryResult
             link2:
-                callSemantics: TaskPool
+                callSemantics: FunctionCall
                 from: processInventoryItem
                 poolName: Inventory Priority Workers
                 priority: 10

@@ -158,7 +158,7 @@ infra_up() {
 
 build_images() {
   progress "building existing minimal runtime images"
-  make docker-build RUNTIME_IMAGE=1
+  make docker-build
   progress "publishing analyticsservice image"
   docker tag "cppboostexample-analyticsservice:latest" \
     "${HOST_REGISTRY}/cppboostexample/analyticsservice:${IMAGE_TAG}"

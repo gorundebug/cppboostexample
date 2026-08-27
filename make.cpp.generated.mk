@@ -9,12 +9,13 @@ LANG_GEN_TARGETS += cpp-gen
 LANG_CLEAN_TARGETS += cpp-clean
 LANG_TOOL_TARGETS += cpp-tools
 LANG_DOCKER_BUILD_TARGETS += cpp-docker-build
+LANG_DOCKER_DEV_BUILD_TARGETS += cpp-docker-dev-build
 LANG_INTEGRATION_TARGETS += cpp-integration-test
 DOCKER_COMPOSE_RUNTIME_FILES += docker-compose.cppboost-runtime.generated.yml
 
 .PHONY: cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test \
 	cpp-release-up cpp-lint cpp-format cpp-gen cpp-clean cpp-tools \
-	cpp-docker-build cpp-integration-test cpp-package
+	cpp-docker-build cpp-docker-dev-build cpp-integration-test cpp-package
 
 CPP_SERVICE_DIRS := analyticsservice inventoryservice orderservice
 
@@ -51,13 +52,10 @@ cpp-format: cpp-tools ## Format C++ sources in Docker
 
 cpp-gen: cpp-build ## Generate C++ protobuf/OpenAPI code through CMake
 
-ifeq ($(RUNTIME_IMAGE),1)
 cpp-docker-build: cpp-tools ## Build a minimal C++ runtime image
 	@docker compose -f docker-compose.cmake.generated.yml build analyticsservice-runtime inventoryservice-runtime orderservice-runtime
-else
-cpp-docker-build: cpp-build ## Build the C++ development image
-	@docker compose -f docker-compose.cmake.generated.yml build cpp-build
-endif
+
+cpp-docker-dev-build: cpp-build ## Build source-mounted C++ development services
 
 cpp-integration-test: cpp-tools ## Run C++ integration tests
 	@./scripts/integration-test.generated.sh

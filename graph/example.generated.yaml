@@ -505,13 +505,13 @@ services:
         kubernetesWorkloadType: Deployment
         links:
             link1:
-                callSemantics: PriorityTaskPool
+                callSemantics: FunctionCall
                 from: callSequentialActivityA
                 poolName: Default Pool
                 priority: 2
                 to: callSequentialActivityB
             link2:
-                callSemantics: TaskPool
+                callSemantics: FunctionCall
                 from: callSequentialActivityB
                 poolName: Default Pool
                 to: processWorkflowJob
@@ -532,7 +532,7 @@ services:
                 from: consumeFanOutActivityC
                 to: processFanOutActivityC
             link7:
-                callSemantics: TaskPool
+                callSemantics: FunctionCall
                 from: consumeFanOutWorkflowJob
                 poolName: Default Pool
                 to: callFanOutActivityA
@@ -549,19 +549,19 @@ services:
                 from: consumeWorkflowJob
                 to: workflowPause
             link11:
-                callSemantics: PriorityTaskPool
+                callSemantics: FunctionCall
                 from: splitActivityAResult
                 poolName: Default Pool
                 priority: 2
                 to: callFanOutActivityB
             link12:
-                callSemantics: PriorityTaskPool
+                callSemantics: FunctionCall
                 from: splitActivityAResult
                 poolName: Default Pool
                 priority: 7
                 to: callFanOutActivityC
             link13:
-                callSemantics: TaskPool
+                callSemantics: FunctionCall
                 from: workflowPause
                 poolName: Default Pool
                 to: callSequentialActivityA
@@ -910,11 +910,11 @@ services:
         kubernetesWorkloadType: Deployment
         links:
             link1:
-                callSemantics: ParallelCall
+                callSemantics: FunctionCall
                 from: getInventoryItemData
                 to: mergeInventoryResult
             link2:
-                callSemantics: TaskPool
+                callSemantics: FunctionCall
                 from: processInventoryItem
                 poolName: Inventory Priority Workers
                 priority: 10
@@ -1025,17 +1025,17 @@ services:
                 from: mergeResults
                 to: splitOrderResult
             link2:
-                callSemantics: PriorityTaskPool
+                callSemantics: FunctionCall
                 from: processOrder
                 poolName: Default Pool
                 priority: 1
                 to: splitPipeline
             link3:
-                callSemantics: ParallelCall
+                callSemantics: FunctionCall
                 from: splitPipeline
                 to: processOrderItems
             link4:
-                callSemantics: ParallelCall
+                callSemantics: FunctionCall
                 from: splitPipeline
                 to: softDeadline
         livenessHandler: health/live

@@ -1,16 +1,12 @@
 services:
   analyticsservice:
-    image: cppboostexample-cpp-build
-    working_dir: /workspace/analyticsservice
+    image: cppboostexample-analyticsservice
+    working_dir: /app
     command:
-      - /workspace/build/analyticsservice/example_analytics_service
       - --config
-      - /workspace/analyticsservice/config/config.yaml
+      - /app/config/config.yaml
       - --values
-      - /workspace/analyticsservice/config/overrides.yaml
-    volumes:
-      - .:/workspace
-      - cpp-cmake-build:/workspace/build
+      - /app/config/overrides.yaml
     stop_grace_period: 30000ms
     restart: unless-stopped
     environment:
@@ -21,10 +17,6 @@ services:
       - "9093:9093"
       - "9203:9203"
       - "2345:2345"
-    security_opt:
-      - seccomp:unconfined
-    cap_add:
-      - SYS_PTRACE
     networks:
       - app_net
 
@@ -43,25 +35,17 @@ services:
     depends_on:
       temporal-create-namespace:
         condition: service_completed_successfully
-    security_opt:
-      - seccomp:unconfined
-    cap_add:
-      - SYS_PTRACE
     networks:
       - app_net
 
   inventoryservice:
-    image: cppboostexample-cpp-build
-    working_dir: /workspace/inventoryservice
+    image: cppboostexample-inventoryservice
+    working_dir: /app
     command:
-      - /workspace/build/inventoryservice/example_inventory_service
       - --config
-      - /workspace/inventoryservice/config/config.yaml
+      - /app/config/config.yaml
       - --values
-      - /workspace/inventoryservice/config/overrides.yaml
-    volumes:
-      - .:/workspace
-      - cpp-cmake-build:/workspace/build
+      - /app/config/overrides.yaml
     stop_grace_period: 30000ms
     restart: unless-stopped
     environment:
@@ -72,25 +56,17 @@ services:
       - "9092:9092"
       - "9202:9202"
       - "2347:2345"
-    security_opt:
-      - seccomp:unconfined
-    cap_add:
-      - SYS_PTRACE
     networks:
       - app_net
 
   orderservice:
-    image: cppboostexample-cpp-build
-    working_dir: /workspace/orderservice
+    image: cppboostexample-orderservice
+    working_dir: /app
     command:
-      - /workspace/build/orderservice/example_order_service
       - --config
-      - /workspace/orderservice/config/config.yaml
+      - /app/config/config.yaml
       - --values
-      - /workspace/orderservice/config/overrides.yaml
-    volumes:
-      - .:/workspace
-      - cpp-cmake-build:/workspace/build
+      - /app/config/overrides.yaml
     stop_grace_period: 30000ms
     restart: unless-stopped
     environment:
@@ -102,10 +78,6 @@ services:
       - "9091:9091"
       - "9201:9201"
       - "2348:2345"
-    security_opt:
-      - seccomp:unconfined
-    cap_add:
-      - SYS_PTRACE
     networks:
       - app_net
 
@@ -257,5 +229,3 @@ networks:
 volumes:
   grafana_data:
   temporal_postgresql_data:
-  cpp-cmake-build:
-    name: ${SERVICEGEN_CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.24}
