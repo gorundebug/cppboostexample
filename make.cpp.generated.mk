@@ -15,7 +15,8 @@ DOCKER_COMPOSE_RUNTIME_FILES += docker-compose.cppboost-runtime.generated.yml
 
 .PHONY: cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test \
 	cpp-release-up cpp-lint cpp-format cpp-gen cpp-clean cpp-tools \
-	cpp-docker-build cpp-docker-dev-build cpp-integration-test cpp-package
+	cpp-docker-build cpp-docker-dev-build cpp-integration-test cpp-package \
+	cpp-workspace-build cpp-workspace-test
 
 CPP_SERVICE_DIRS := analyticsservice inventoryservice orderservice
 
@@ -24,38 +25,45 @@ cpp-tools: ## Verify Docker is available for the canonical C++ toolchain
 	@docker compose version >/dev/null
 
 cpp-build: cpp-tools ## Build all C++ services in Docker
-	@./scripts/build.generated.sh
+	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" build USE_LOCAL_MODULES=1 || exit $$?; done
 
 cpp-test: cpp-tools ## Run all C++ unit tests in Docker
-	@./scripts/test.generated.sh
+	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" test USE_LOCAL_MODULES=1 || exit $$?; done
 
 cpp-release-build: cpp-tools ## Build optimized C++ services in Docker
-	@./scripts/build.generated.sh docker-release
+	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" release-build USE_LOCAL_MODULES=1 || exit $$?; done
 
 cpp-release-test: cpp-tools ## Build and test optimized C++ services in Docker
-	@./scripts/test.generated.sh docker-release
+	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" release-test USE_LOCAL_MODULES=1 || exit $$?; done
 
 cpp-asan-test: cpp-tools ## Run C++ tests with ASan and UBSan
-	@./scripts/sanitizer-test.generated.sh asan
+	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" asan-test USE_LOCAL_MODULES=1 || exit $$?; done
 
 cpp-tsan-test: cpp-tools ## Run C++ tests with TSan
-	@./scripts/sanitizer-test.generated.sh tsan
+	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" tsan-test USE_LOCAL_MODULES=1 || exit $$?; done
 
 cpp-release-up: cpp-release-build ## Start services built with CMake Release
 	@docker compose up -d
 
 cpp-lint: cpp-tools ## Run clang-format and clang-tidy checks in Docker
-	@./scripts/lint.generated.sh
+	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" lint USE_LOCAL_MODULES=1 || exit $$?; done
 
 cpp-format: cpp-tools ## Format C++ sources in Docker
-	@./scripts/format.generated.sh
+	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" fmt USE_LOCAL_MODULES=1 || exit $$?; done
 
 cpp-gen: cpp-build ## Generate C++ protobuf/OpenAPI code through CMake
 
 cpp-docker-build: cpp-tools ## Build a minimal C++ runtime image
-	@docker compose -f docker-compose.cmake.generated.yml build analyticsservice-runtime inventoryservice-runtime orderservice-runtime
+	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" docker-build USE_LOCAL_MODULES=1 || exit $$?; done
 
-cpp-docker-dev-build: cpp-build ## Build source-mounted C++ development services
+cpp-docker-dev-build: cpp-tools ## Build source-mounted C++ development services
+	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" docker-build-dev USE_LOCAL_MODULES=1 || exit $$?; done
+
+cpp-workspace-build: cpp-tools ## Verify the combined Boost C++ workspace build
+	@./scripts/build.generated.sh
+
+cpp-workspace-test: cpp-tools ## Verify the combined Boost C++ workspace tests
+	@./scripts/test.generated.sh
 
 cpp-integration-test: cpp-tools ## Run C++ integration tests
 	@./scripts/integration-test.generated.sh
