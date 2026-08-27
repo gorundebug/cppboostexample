@@ -59,7 +59,7 @@ services:
       DEPENDENCY_HELM_REDPANDA_URL: ${DEPENDENCY_HELM_REDPANDA_URL:-https://charts.redpanda.com}
       DEPENDENCY_HELM_TEMPORAL_URL: ${DEPENDENCY_HELM_TEMPORAL_URL:-https://go.temporal.io/helm-charts}
     volumes:
-      - .:/workspace
+      - .:/workspace:ro
       - kubernetes-kubeconfig:/output:ro
       - kubernetes-helm-cache:/root/.cache/helm
       - kubernetes-helm-config:/root/.config/helm

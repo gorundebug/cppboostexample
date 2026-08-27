@@ -13,7 +13,7 @@ services:
         fi
         exec go run ./cmd/service/main.go -config ./config/config.yaml -values ./config/overrides.yaml
     volumes:
-      - .:/workspace
+      - .:/workspace:ro
       - go-mod:/go/pkg/mod
       - go-build:/root/.cache/go-build
 

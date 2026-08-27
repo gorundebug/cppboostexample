@@ -39,7 +39,7 @@ services:
       DEPENDENCY_CONAN_REMOTE_URL: ${DEPENDENCY_CONAN_REMOTE_URL:-}
       CONAN_HOME: /conan
     volumes:
-      - .:/workspace
+      - .:/workspace:ro
       - cpp-cmake-build:/workspace/build
       - cpp-ccache:/ccache
       - ${DEPENDENCY_CONAN_HOME:-cpp-conan2}:/conan

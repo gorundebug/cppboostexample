@@ -21,7 +21,7 @@ services:
           --values /workspace/config/overrides.yaml;
         fi
     volumes:
-      - ./analyticsservice:/workspace
+      - ./analyticsservice:/workspace:ro
       - cpp-dev-cmake-build-analyticsservice:/workspace/build
     security_opt:
       - seccomp:unconfined
@@ -52,7 +52,7 @@ services:
       GIT_CONFIG_KEY_1: ${GIT_CONFIG_KEY_1:-}
       GIT_CONFIG_VALUE_1: ${GIT_CONFIG_VALUE_1:-}
     volumes:
-      - ./automationservice:/workspace
+      - ./automationservice:/workspace:ro
       - go-dev-mod-cache:/go/pkg/mod
       - go-dev-build-cache:/root/.cache/go-build
     security_opt:
@@ -78,7 +78,7 @@ services:
           --values /workspace/config/overrides.yaml;
         fi
     volumes:
-      - ./inventoryservice:/workspace
+      - ./inventoryservice:/workspace:ro
       - cpp-dev-cmake-build-inventoryservice:/workspace/build
     security_opt:
       - seccomp:unconfined
@@ -103,7 +103,7 @@ services:
           --values /workspace/config/overrides.yaml;
         fi
     volumes:
-      - ./orderservice:/workspace
+      - ./orderservice:/workspace:ro
       - cpp-dev-cmake-build-orderservice:/workspace/build
     security_opt:
       - seccomp:unconfined

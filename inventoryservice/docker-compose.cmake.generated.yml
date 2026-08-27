@@ -41,7 +41,7 @@ services:
       DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-}
       CONAN_HOME: /conan
     volumes:
-      - .:/workspace
+      - .:/workspace:ro
       - cpp-cmake-build:/workspace/build
       - cpp-ccache:/ccache
       - ${DEPENDENCY_CONAN_HOME:-cpp-conan2}:/conan

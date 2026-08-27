@@ -11,7 +11,7 @@ services:
         fi
         exec /workspace/build/example_order_service --config /workspace/config/config.yaml --values /workspace/config/overrides.integration.generated.yaml
     volumes:
-      - .:/workspace
+      - .:/workspace:ro
       - cpp-dev-cmake-build:/workspace/build
     security_opt:
       - seccomp:unconfined

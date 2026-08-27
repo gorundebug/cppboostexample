@@ -9,7 +9,7 @@ services:
       - --values
       - /workspace/analyticsservice/config/overrides.integration.generated.yaml
     volumes:
-      - .:/workspace
+      - .:/workspace:ro
       - cpp-cmake-build:/workspace/build
     depends_on:
       redpanda:
@@ -26,7 +26,7 @@ services:
       - --values
       - /workspace/inventoryservice/config/overrides.integration.generated.yaml
     volumes:
-      - .:/workspace
+      - .:/workspace:ro
       - cpp-cmake-build:/workspace/build
     depends_on:
       redpanda:
@@ -43,7 +43,7 @@ services:
       - --values
       - /workspace/orderservice/config/overrides.integration.generated.yaml
     volumes:
-      - .:/workspace
+      - .:/workspace:ro
       - cpp-cmake-build:/workspace/build
     depends_on:
       redpanda:
