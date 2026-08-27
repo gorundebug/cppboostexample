@@ -54,6 +54,7 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
      --fresh \
      -DCMAKE_BUILD_TYPE=Debug \
      -DCMAKE_TOOLCHAIN_FILE="$conan_toolchain" \
+     -DMODULES_ROOT=/workspace/source \
      -DCPPBOOSTSERVICELIB_SOURCE_DIR="$CPPBOOSTSERVICELIB_SOURCE_DIR" \
      -DFETCH_CPP_DEPENDENCIES=OFF \
      $CPP_SANITIZER_OPTIONS
