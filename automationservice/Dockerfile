@@ -14,7 +14,7 @@ COPY dependency-download-mirrors.generated.env /etc/servicegen/dependency-downlo
 COPY dependency-download-mirrors.env /etc/servicegen/dependency-download-mirrors.env
 COPY dependency-download-env.generated.sh /usr/local/bin/servicegen-download-env
 SHELL ["/usr/local/bin/servicegen-download-env", "/bin/sh", "-c"]
-ARG GOPROXY=https://proxy.golang.org,direct
+ARG GOPROXY=direct
 ENV GOPROXY=${GOPROXY}
 ARG GOSUMDB=sum.golang.org
 ENV GOSUMDB=${GOSUMDB}

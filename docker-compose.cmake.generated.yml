@@ -16,7 +16,7 @@ services:
         SERVICEGEN_APT_UBUNTU_SECURITY_URL: ${SERVICEGEN_APT_UBUNTU_SECURITY_URL:-}
         SERVICEGEN_APT_UBUNTU_PORTS_URL: ${SERVICEGEN_APT_UBUNTU_PORTS_URL:-}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.22}}
+        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.23}}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     working_dir: /workspace
@@ -68,7 +68,7 @@ services:
         SERVICEGEN_RUNTIME_STRIP: ${SERVICEGEN_RUNTIME_STRIP:-ON}
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.22}}
+        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.23}}
   inventoryservice-runtime:
     image: cppboostexample-inventoryservice
     build:
@@ -90,7 +90,7 @@ services:
         SERVICEGEN_RUNTIME_STRIP: ${SERVICEGEN_RUNTIME_STRIP:-ON}
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.22}}
+        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.23}}
   orderservice-runtime:
     image: cppboostexample-orderservice
     build:
@@ -112,11 +112,11 @@ services:
         SERVICEGEN_RUNTIME_STRIP: ${SERVICEGEN_RUNTIME_STRIP:-ON}
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.22}}
+        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.23}}
 
 volumes:
   cpp-cmake-build:
-    name: ${SERVICEGEN_CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.22}
+    name: ${SERVICEGEN_CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.23}
   cpp-ccache:
     name: cppboostexample_cpp-ccache
   cpp-conan2:
