@@ -20,12 +20,12 @@ services:
         module-model: ${MODULE_MODEL_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample-model.git#v0.2.14}
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    working_dir: /workspace
+    working_dir: /workspace/source
     environment:
       CPPBOOSTSERVICELIB_SOURCE_DIR: ${SERVICELIB_CONTAINER_SOURCE_DIR:-/opt/servicelib}
       SERVICELIB_SOURCE_DIR: ${SERVICELIB_CONTAINER_SOURCE_DIR:-/opt/servicelib}
       CCACHE_DIR: /ccache
-      CCACHE_BASEDIR: /workspace
+      CCACHE_BASEDIR: /workspace/source
       CCACHE_COMPILERCHECK: content
       CCACHE_MAXSIZE: ${CCACHE_MAXSIZE:-20G}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
@@ -40,14 +40,14 @@ services:
       DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-}
       CONAN_HOME: /conan
     volumes:
-      - .:/workspace:ro
+      - .:/workspace/source:ro
       - cpp-cmake-build:/workspace/build
       - cpp-ccache:/ccache
       - ${DEPENDENCY_CONAN_HOME:-cpp-conan2}:/conan
     command:
       - /bin/bash
       - -c
-      - source scripts/configure-git-auth.generated.sh && ./scripts/conan-install.generated.sh Debug /workspace/build/conan-debug && conan_toolchain="$$(cat /workspace/build/conan-debug/toolchain.path)" && cmake --fresh --preset docker-debug -DCMAKE_TOOLCHAIN_FILE="$$conan_toolchain" -DFETCH_CPP_DEPENDENCIES=OFF && cmake --build --preset docker-debug --parallel && ctest --preset docker-debug
+      - source scripts/configure-git-auth.generated.sh && ./scripts/conan-install.generated.sh Debug /workspace/build/conan-debug && conan_toolchain="$$(cat /workspace/build/conan-debug/toolchain.path)" && cmake --fresh --preset docker-debug -DCMAKE_TOOLCHAIN_FILE="$$conan_toolchain" -DMODULES_ROOT=/workspace/modules -DFETCH_CPP_DEPENDENCIES=OFF && cmake --build --preset docker-debug --parallel && ctest --preset docker-debug
 
   analyticsservice-runtime:
     image: cppboostexample-analyticsservice

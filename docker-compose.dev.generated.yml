@@ -5,7 +5,7 @@ services:
   analyticsservice:
     image: analyticsservice-cpp-build
     build: !reset null
-    working_dir: /workspace
+    working_dir: /workspace/source
     command:
       - /bin/sh
       - -c
@@ -13,15 +13,15 @@ services:
         if [ "$${DEBUG:-0}" = "1" ]; then
           exec gdbserver :2345
           /workspace/build/example_analytics_service
-          --config /workspace/config/config.yaml
-          --values /workspace/config/overrides.yaml;
+          --config /workspace/source/config/config.yaml
+          --values /workspace/source/config/overrides.yaml;
         else
           exec /workspace/build/example_analytics_service
-          --config /workspace/config/config.yaml
-          --values /workspace/config/overrides.yaml;
+          --config /workspace/source/config/config.yaml
+          --values /workspace/source/config/overrides.yaml;
         fi
     volumes:
-      - ./analyticsservice:/workspace:ro
+      - ./analyticsservice:/workspace/source:ro
       - cpp-dev-cmake-build-analyticsservice:/workspace/build
     security_opt:
       - seccomp:unconfined
@@ -64,7 +64,7 @@ services:
   inventoryservice:
     image: inventoryservice-cpp-build
     build: !reset null
-    working_dir: /workspace
+    working_dir: /workspace/source
     command:
       - /bin/sh
       - -c
@@ -72,15 +72,15 @@ services:
         if [ "$${DEBUG:-0}" = "1" ]; then
           exec gdbserver :2345
           /workspace/build/example_inventory_service
-          --config /workspace/config/config.yaml
-          --values /workspace/config/overrides.yaml;
+          --config /workspace/source/config/config.yaml
+          --values /workspace/source/config/overrides.yaml;
         else
           exec /workspace/build/example_inventory_service
-          --config /workspace/config/config.yaml
-          --values /workspace/config/overrides.yaml;
+          --config /workspace/source/config/config.yaml
+          --values /workspace/source/config/overrides.yaml;
         fi
     volumes:
-      - ./inventoryservice:/workspace:ro
+      - ./inventoryservice:/workspace/source:ro
       - cpp-dev-cmake-build-inventoryservice:/workspace/build
     security_opt:
       - seccomp:unconfined
@@ -89,7 +89,7 @@ services:
   orderservice:
     image: orderservice-cpp-build
     build: !reset null
-    working_dir: /workspace
+    working_dir: /workspace/source
     command:
       - /bin/sh
       - -c
@@ -97,15 +97,15 @@ services:
         if [ "$${DEBUG:-0}" = "1" ]; then
           exec gdbserver :2345
           /workspace/build/example_order_service
-          --config /workspace/config/config.yaml
-          --values /workspace/config/overrides.yaml;
+          --config /workspace/source/config/config.yaml
+          --values /workspace/source/config/overrides.yaml;
         else
           exec /workspace/build/example_order_service
-          --config /workspace/config/config.yaml
-          --values /workspace/config/overrides.yaml;
+          --config /workspace/source/config/config.yaml
+          --values /workspace/source/config/overrides.yaml;
         fi
     volumes:
-      - ./orderservice:/workspace:ro
+      - ./orderservice:/workspace/source:ro
       - cpp-dev-cmake-build-orderservice:/workspace/build
     security_opt:
       - seccomp:unconfined

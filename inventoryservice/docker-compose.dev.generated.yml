@@ -1,17 +1,17 @@
 services:
   inventoryservice:
     image: inventoryservice-cpp-build
-    working_dir: /workspace
+    working_dir: /workspace/source
     command:
       - /bin/sh
       - -c
       - |
         if [ "$${DEBUG:-0}" = "1" ]; then
-          exec gdbserver :2345 /workspace/build/example_inventory_service --config /workspace/config/config.yaml --values /workspace/config/overrides.integration.generated.yaml
+          exec gdbserver :2345 /workspace/build/example_inventory_service --config /workspace/source/config/config.yaml --values /workspace/source/config/overrides.integration.generated.yaml
         fi
-        exec /workspace/build/example_inventory_service --config /workspace/config/config.yaml --values /workspace/config/overrides.integration.generated.yaml
+        exec /workspace/build/example_inventory_service --config /workspace/source/config/config.yaml --values /workspace/source/config/overrides.integration.generated.yaml
     volumes:
-      - .:/workspace:ro
+      - .:/workspace/source:ro
       - cpp-dev-cmake-build:/workspace/build
     security_opt:
       - seccomp:unconfined

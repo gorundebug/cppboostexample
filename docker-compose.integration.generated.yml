@@ -1,15 +1,15 @@
 services:
   analyticsservice:
     image: cppboostexample-cpp-build
-    working_dir: /workspace/analyticsservice
+    working_dir: /workspace/source/analyticsservice
     command:
       - /workspace/build/analyticsservice/example_analytics_service
       - --config
-      - /workspace/analyticsservice/config/config.yaml
+      - /workspace/source/analyticsservice/config/config.yaml
       - --values
-      - /workspace/analyticsservice/config/overrides.integration.generated.yaml
+      - /workspace/source/analyticsservice/config/overrides.integration.generated.yaml
     volumes:
-      - .:/workspace:ro
+      - .:/workspace/source:ro
       - cpp-cmake-build:/workspace/build
     depends_on:
       redpanda:
@@ -18,15 +18,15 @@ services:
     stop_grace_period: 30000ms
   inventoryservice:
     image: cppboostexample-cpp-build
-    working_dir: /workspace/inventoryservice
+    working_dir: /workspace/source/inventoryservice
     command:
       - /workspace/build/inventoryservice/example_inventory_service
       - --config
-      - /workspace/inventoryservice/config/config.yaml
+      - /workspace/source/inventoryservice/config/config.yaml
       - --values
-      - /workspace/inventoryservice/config/overrides.integration.generated.yaml
+      - /workspace/source/inventoryservice/config/overrides.integration.generated.yaml
     volumes:
-      - .:/workspace:ro
+      - .:/workspace/source:ro
       - cpp-cmake-build:/workspace/build
     depends_on:
       redpanda:
@@ -35,15 +35,15 @@ services:
     stop_grace_period: 30000ms
   orderservice:
     image: cppboostexample-cpp-build
-    working_dir: /workspace/orderservice
+    working_dir: /workspace/source/orderservice
     command:
       - /workspace/build/orderservice/example_order_service
       - --config
-      - /workspace/orderservice/config/config.yaml
+      - /workspace/source/orderservice/config/config.yaml
       - --values
-      - /workspace/orderservice/config/overrides.integration.generated.yaml
+      - /workspace/source/orderservice/config/overrides.integration.generated.yaml
     volumes:
-      - .:/workspace:ro
+      - .:/workspace/source:ro
       - cpp-cmake-build:/workspace/build
     depends_on:
       redpanda:
