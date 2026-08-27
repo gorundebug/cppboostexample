@@ -70,15 +70,32 @@ wait_git_mirror() {
 }
 
 refresh_git_mirrors() {
+  shift
   mkdir -p "$git_mirror_dir"
   chmod 0777 "$git_mirror_dir"
   compose up -d git-mirror
   wait_git_mirror
-  compose exec -T git-mirror sh <<'SERVICEGEN_REFRESH_GIT_MIRRORS'
+  compose exec -T git-mirror sh -s -- "$@" <<'SERVICEGEN_REFRESH_GIT_MIRRORS'
 set -eu
 mirror_list="/tmp/servicegen-git-mirrors.$$"
 trap 'rm -f "$mirror_list"' EXIT HUP INT TERM
-find /mirrors -type d -name '*.git' -prune -print >"$mirror_list"
+if [ "$#" -gt 0 ]; then
+  : >"$mirror_list"
+  for repository in "$@"; do
+    case "$repository" in
+      github.com/*|gitlab.com/*) ;;
+      *) echo "[dependency-cache] invalid Git repository: $repository" >&2; exit 2 ;;
+    esac
+    mirror="/mirrors/${repository%.git}.git"
+    if [ ! -d "$mirror" ]; then
+      echo "[dependency-cache] Git mirror is not cached: $repository" >&2
+      exit 1
+    fi
+    printf '%s\n' "$mirror" >>"$mirror_list"
+  done
+else
+  find /mirrors -type d -name '*.git' -prune -print >"$mirror_list"
+fi
 if [ ! -s "$mirror_list" ]; then
   echo "[dependency-cache] no cached Git mirrors to refresh"
   exit 0
@@ -177,7 +194,7 @@ case "${1:-up}" in
     compose ps
     ;;
   refresh)
-    refresh_git_mirrors
+    refresh_git_mirrors "$@"
     ;;
   env)
     print_env

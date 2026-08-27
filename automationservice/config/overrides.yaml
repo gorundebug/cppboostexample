@@ -4,26 +4,37 @@ dataConnectors:
 endpoints:
   activityJob:
     enabled: true
+    tracingEnabled: false
   fanOutActivityA:
     enabled: true
+    tracingEnabled: false
   fanOutActivityB:
     enabled: true
+    tracingEnabled: false
   fanOutActivityC:
     enabled: true
+    tracingEnabled: false
   fanOutWorkflowJob:
     enabled: true
+    tracingEnabled: false
   localSchedule:
     enabled: true
+    tracingEnabled: false
   sequentialActivityA:
     enabled: true
+    tracingEnabled: false
   sequentialActivityB:
     enabled: true
+    tracingEnabled: false
   temporalActivitySchedule:
     enabled: true
+    tracingEnabled: false
   temporalWorkflowSchedule:
     enabled: true
+    tracingEnabled: false
   workflowJob:
     enabled: true
+    tracingEnabled: false
 pools:
   defaultPool:
     executorsCount: 2
