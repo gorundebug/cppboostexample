@@ -23,16 +23,16 @@ esac
 
 options="${cmake_options[*]}"
 exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
-  -e SERVICEGEN_CPP_SANITIZER="$sanitizer" \
-  -e SERVICEGEN_CPP_CONAN_SANITIZER="$conan_sanitizer" \
-  -e SERVICEGEN_SANITIZER_INTEGRATION="${SERVICEGEN_SANITIZER_INTEGRATION:-1}" \
-  -e SERVICEGEN_CPP_SANITIZER_OPTIONS="$options" cpp-build \
+  -e CPP_SANITIZER="$sanitizer" \
+  -e CPP_CONAN_SANITIZER="$conan_sanitizer" \
+  -e SANITIZER_INTEGRATION="${SANITIZER_INTEGRATION:-1}" \
+  -e CPP_SANITIZER_OPTIONS="$options" cpp-build \
   /bin/bash -lc \
   'set -euo pipefail
    source scripts/configure-git-auth.generated.sh
-   build_dir="build/sanitizers/$SERVICEGEN_CPP_SANITIZER"
-   conan_dir="build/conan-debug-$SERVICEGEN_CPP_SANITIZER"
-   case "$SERVICEGEN_CPP_SANITIZER" in
+   build_dir="build/sanitizers/$CPP_SANITIZER"
+   conan_dir="build/conan-debug-$CPP_SANITIZER"
+   case "$CPP_SANITIZER" in
      asan)
        sanitizer_flags='"'"'["-fsanitize=address","-fno-omit-frame-pointer"]'"'"'
        ;;
@@ -41,7 +41,7 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
        ;;
    esac
    conan_sanitizer_args=(
-     -s:h "compiler.sanitizer=$SERVICEGEN_CPP_CONAN_SANITIZER"
+     -s:h "compiler.sanitizer=$CPP_CONAN_SANITIZER"
      -c:h "tools.build:cflags=$sanitizer_flags"
      -c:h "tools.build:cxxflags=$sanitizer_flags"
      -c:h "tools.build:sharedlinkflags=$sanitizer_flags"
@@ -56,9 +56,9 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
      -DCMAKE_TOOLCHAIN_FILE="$conan_toolchain" \
      -DCPPBOOSTSERVICELIB_SOURCE_DIR="$CPPBOOSTSERVICELIB_SOURCE_DIR" \
      -DFETCH_CPP_DEPENDENCIES=OFF \
-     $SERVICEGEN_CPP_SANITIZER_OPTIONS
+     $CPP_SANITIZER_OPTIONS
    cmake --build "$build_dir" --parallel
-   case "$SERVICEGEN_CPP_SANITIZER" in
+   case "$CPP_SANITIZER" in
      asan)
        ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 \
        UBSAN_OPTIONS=halt_on_error=1 \
@@ -69,7 +69,7 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
          ctest --test-dir "$build_dir" --output-on-failure
        ;;
    esac
-   if [[ "$SERVICEGEN_SANITIZER_INTEGRATION" == "1" ]]; then
+   if [[ "$SANITIZER_INTEGRATION" == "1" ]]; then
      scripts/sanitizer-integration.generated.sh \
-       "$build_dir" "$SERVICEGEN_CPP_SANITIZER"
+       "$build_dir" "$CPP_SANITIZER"
    fi'

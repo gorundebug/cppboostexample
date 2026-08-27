@@ -73,7 +73,7 @@ FROM development AS runtime-builder
 
 ARG CPPBOOSTSERVICELIB_PROFILING=OFF
 ARG CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS=OFF
-ARG SERVICEGEN_RUNTIME_STRIP=ON
+ARG RUNTIME_STRIP=ON
 ARG SERVICEGEN_EXAMPLE_PROFILE=function-call
 COPY . /workspace
 RUN --mount=type=cache,id=cppboostexample-runtime-build-${TARGETARCH}-${SERVICEGEN_EXAMPLE_PROFILE},target=/workspace/build,sharing=locked \
@@ -97,7 +97,7 @@ RUN --mount=type=cache,id=cppboostexample-runtime-build-${TARGETARCH}-${SERVICEG
     && cp /workspace/build/inventoryservice/example_inventory_service /opt/service-bin/example_inventory_service \
     && mkdir -p /opt/runtime-libs/orderservice \
     && cp /workspace/build/orderservice/example_order_service /opt/service-bin/example_order_service \
-    && if [ "${SERVICEGEN_RUNTIME_STRIP}" = "ON" ]; then \
+    && if [ "${RUNTIME_STRIP}" = "ON" ]; then \
          strip --strip-unneeded /opt/service-bin/*; \
        fi \
     && ldd /opt/service-bin/example_analytics_service \

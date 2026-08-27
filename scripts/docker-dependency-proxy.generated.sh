@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ -z "${SERVICEGEN_REAL_DOCKER:-}" ]]; then
-  echo "SERVICEGEN_REAL_DOCKER is not set" >&2
+if [[ -z "${DEPENDENCY_REAL_DOCKER:-}" ]]; then
+  echo "DEPENDENCY_REAL_DOCKER is not set" >&2
   exit 2
 fi
 
 if [[ -z "${DEPENDENCY_PROXY_DIR:-}" ]]; then
-  exec "$SERVICEGEN_REAL_DOCKER" "$@"
+  exec "$DEPENDENCY_REAL_DOCKER" "$@"
 fi
 
 docker_host="${DEPENDENCY_PROXY_DOCKER_HOST:-host.docker.internal}"
@@ -77,9 +77,9 @@ proxy_build() {
     fi
   done
   if [[ "$frontend" == buildx ]]; then
-    exec "$SERVICEGEN_REAL_DOCKER" buildx build "${injected[@]}" "${original[@]}"
+    exec "$DEPENDENCY_REAL_DOCKER" buildx build "${injected[@]}" "${original[@]}"
   fi
-  exec "$SERVICEGEN_REAL_DOCKER" build "${injected[@]}" "${original[@]}"
+  exec "$DEPENDENCY_REAL_DOCKER" build "${injected[@]}" "${original[@]}"
 }
 
 if [[ "${1:-}" == build ]]; then
@@ -94,8 +94,8 @@ fi
 
 if [[ "${1:-}" == run ]]; then
   shift
-  exec "$SERVICEGEN_REAL_DOCKER" run \
+  exec "$DEPENDENCY_REAL_DOCKER" run \
     --add-host "host.docker.internal:host-gateway" "$@"
 fi
 
-exec "$SERVICEGEN_REAL_DOCKER" "$@"
+exec "$DEPENDENCY_REAL_DOCKER" "$@"

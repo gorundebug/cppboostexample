@@ -7,7 +7,7 @@ FROM golang:1.25-bookworm AS builder
 
 ARG SERVICE_DIR=.
 ARG TARGETARCH
-ARG SERVICEGEN_RUNTIME_STRIP=ON
+ARG RUNTIME_STRIP=ON
 ARG DEPENDENCY_GITHUB_RAW_URL=https://github.com
 ENV DEPENDENCY_GITHUB_RAW_URL=${DEPENDENCY_GITHUB_RAW_URL}
 COPY dependency-download-mirrors.generated.env /etc/servicegen/dependency-download-mirrors.generated.env
@@ -50,7 +50,7 @@ RUN go install github.com/go-delve/delve/cmd/dlv@v1.25.2
 FROM builder AS compiler
 RUN --mount=type=cache,id=servicegen-go-mod-v1-${TARGETARCH},target=/go/pkg/mod,sharing=locked \
     --mount=type=cache,id=servicegen-go-build-v1-${TARGETARCH},target=/root/.cache/go-build,sharing=locked \
-    if [ "${SERVICEGEN_RUNTIME_STRIP}" = "ON" ]; then \
+    if [ "${RUNTIME_STRIP}" = "ON" ]; then \
       GO_LINKER_FLAGS="-s -w"; \
     else \
       GO_LINKER_FLAGS=""; \

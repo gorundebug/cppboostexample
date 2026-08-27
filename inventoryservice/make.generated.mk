@@ -36,10 +36,10 @@ release-test: ## Build and test the optimized standalone service
 	@./scripts/test.generated.sh docker-release
 
 asan-test: ## Run standalone service tests with ASan and UBSan
-	@SERVICEGEN_SANITIZER_INTEGRATION=0 ./scripts/sanitizer-test.generated.sh asan
+	@SANITIZER_INTEGRATION=0 ./scripts/sanitizer-test.generated.sh asan
 
 tsan-test: ## Run standalone service tests with TSan
-	@SERVICEGEN_SANITIZER_INTEGRATION=0 ./scripts/sanitizer-test.generated.sh tsan
+	@SANITIZER_INTEGRATION=0 ./scripts/sanitizer-test.generated.sh tsan
 
 release-up: release-build ## Build the optimized service
 
