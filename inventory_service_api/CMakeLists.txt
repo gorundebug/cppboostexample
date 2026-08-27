@@ -18,7 +18,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     include(FetchContent)
     FetchContent_Declare(servicegen_servicelib
         GIT_REPOSITORY "https://github.com/gorundebug/cppboostservicelib.git"
-        GIT_TAG "v0.2.20"
+        GIT_TAG "v0.2.21"
         GIT_SHALLOW TRUE)
     FetchContent_MakeAvailable(servicegen_servicelib)
   endif()
