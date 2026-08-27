@@ -30,8 +30,8 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
   /bin/bash -lc \
   'set -euo pipefail
    source scripts/configure-git-auth.generated.sh
-   build_dir="build/sanitizers/$CPP_SANITIZER"
-   conan_dir="build/conan-debug-$CPP_SANITIZER"
+   build_dir="/workspace/build/sanitizers/$CPP_SANITIZER"
+   conan_dir="/workspace/build/conan-debug-$CPP_SANITIZER"
    case "$CPP_SANITIZER" in
      asan)
        sanitizer_flags='"'"'["-fsanitize=address","-fno-omit-frame-pointer"]'"'"'
