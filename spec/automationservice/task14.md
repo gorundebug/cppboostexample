@@ -1,19 +1,19 @@
-# Task 14/20: `ProcessSequentialActivityB`
+# Task 14/36: `ActivityPause`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `Go` |
-| Kind | `map` |
-| File | `automationservice/internal/functions/processsequentialactivityb.go` |
-| Test | `automationservice/internal/functions/processsequentialactivityb_test.go` |
+| Kind | `delay` |
+| File | `automationservice/internal/functions/automation/activitypause.go` |
+| Test | `automationservice/internal/functions/automation/activitypause_test.go` |
 | Service | `Automation Service` |
 
 
 ## Behaviour
 
-Return sequential Activity B's typed result to its Temporal sink.
+Apply the ordinary local Delay while processing an on-demand Temporal Activity.
 
 
 
@@ -26,9 +26,9 @@ Return sequential Activity B's typed result to its Temporal sink.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/processsequentialactivityb.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/automation/activitypause.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/processsequentialactivityb_test.go`
+- [ ] Implement meaningful assertions in `automationservice/internal/functions/automation/activitypause_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task14.md — ProcessSequentialActivityB — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task14.md — ActivityPause — Go — done`

@@ -1,19 +1,13 @@
-# Task 4/20: `ObserveFanoutActivityB`
+# Task 4/36: `FanoutActivityAEndpointSource`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `Go` |
-| Kind | `map` |
-| File | `automationservice/internal/functions/observefanoutactivityb.go` |
-| Test | `automationservice/internal/functions/observefanoutactivityb_test.go` |
+| Kind | `schedule-source` |
+| File | `automationservice/internal/functions/activity/fanoutactivityaendpointsource.go` |
 | Service | `Automation Service` |
-
-
-## Behaviour
-
-Observe the typed result returned by the Activity B fan-out branch.
 
 
 
@@ -26,9 +20,8 @@ Observe the typed result returned by the Activity B fan-out branch.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/observefanoutactivityb.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/activity/fanoutactivityaendpointsource.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/observefanoutactivityb_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task4.md — ObserveFanoutActivityB — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task4.md — FanoutActivityAEndpointSource — Go — done`

@@ -21,8 +21,8 @@
 #include <servicelib/datasource/grpc/asio.hpp>
 #include <servicelib/datasource/http/beast.hpp>
 
-#include <inventoryservice/internal/functions/get_inventory_item_data.hpp>
-#include <inventoryservice/internal/functions/process_order_item.hpp>
+#include <inventoryservice/internal/functions/endpoint/process_order_item_source.hpp>
+#include <inventoryservice/internal/functions/inventory_item/get_inventory_item_data.hpp>
 #include <model/include/example/model/types/order_item.hpp>
 #include <model/include/example/model/types/order_item_result.hpp>
 #include <proto/inventoryserviceapi/inventoryserviceapi.generated.grpc.pb.h>
@@ -60,13 +60,13 @@ class ServiceGenerated
     std::function<std::unique_ptr<functions::GetInventoryItemData>(
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::ProcessStreamConfig&)> get_inventory_item_data;
-    std::function<std::unique_ptr<functions::ProcessOrderItem>(
+    std::function<std::unique_ptr<functions::ProcessOrderItemSource>(
         servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::GrpcEndpointConfig&)> process_order_item;
+        const servicelib::config::GrpcEndpointConfig&)> process_order_item_source;
   };
   struct ServiceFunctions final {
     std::unique_ptr<functions::GetInventoryItemData> get_inventory_item_data;
-    std::unique_ptr<functions::ProcessOrderItem> process_order_item;
+    std::unique_ptr<functions::ProcessOrderItemSource> process_order_item_source;
   };
 
   ServiceMakers makers_;
@@ -109,10 +109,10 @@ class ServiceGenerated
   using ProcessInventoryItemGrpcSourceEndpoint =
       servicelib::datasource::grpc::NoStreamingEndpoint<
           processorderitem::ProcessOrderItemRequest, processorderitem::ProcessOrderItemResponse, example::model::types::OrderItem, example::model::types::OrderItemResult,
-          functions::ProcessOrderItem, std::exception_ptr>;
+          functions::ProcessOrderItemSource, std::exception_ptr>;
   using ProcessInventoryItemGrpcSourceConsumer =
       servicelib::datasource::grpc::EndpointConsumer<
-          ProcessInventoryItemInput, ProcessInventoryItemGrpcSourceEndpoint, functions::ProcessOrderItem>;
+          ProcessInventoryItemInput, ProcessInventoryItemGrpcSourceEndpoint, functions::ProcessOrderItemSource>;
 
  public:
   std::shared_ptr<ProcessInventoryItemGrpcSourceEndpoint> grpcSourceEndpointProcessInventoryItem() const noexcept {

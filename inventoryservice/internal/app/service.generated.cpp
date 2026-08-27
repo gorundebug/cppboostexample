@@ -70,10 +70,10 @@ void ServiceGenerated::initMakers() {
     return functions::MakeGetInventoryItemData(
         std::move(context), environment, config);
   };
-  makers_.process_order_item = [](
+  makers_.process_order_item_source = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
       const servicelib::config::GrpcEndpointConfig& config) {
-    return functions::MakeProcessOrderItem(
+    return functions::MakeProcessOrderItemSource(
         std::move(context), environment, config);
   };
 }
@@ -87,13 +87,13 @@ void ServiceGenerated::initFunctions(const config::Config& cfg) {
   if (!functions_.get_inventory_item_data) {
     throw std::logic_error("function maker GetInventoryItemData returned null");
   }
-  if (!makers_.process_order_item) {
-    throw std::logic_error("function maker ProcessOrderItem is not configured");
+  if (!makers_.process_order_item_source) {
+    throw std::logic_error("function maker ProcessOrderItemSource is not configured");
   }
-  functions_.process_order_item = makers_.process_order_item(
+  functions_.process_order_item_source = makers_.process_order_item_source(
       servicelib::Context{}, *this, cfg.endpoints.processOrderItem);
-  if (!functions_.process_order_item) {
-    throw std::logic_error("function maker ProcessOrderItem returned null");
+  if (!functions_.process_order_item_source) {
+    throw std::logic_error("function maker ProcessOrderItemSource returned null");
   }
 }
 
@@ -160,7 +160,7 @@ void ServiceGenerated::initDataSources(
           *this, *streams_.process_inventory_item);
   endpoints_.process_inventory_item = ProcessInventoryItemGrpcSourceConsumer::make(
       *this, *streams_.process_inventory_item,
-      *functions_.process_order_item);
+      *functions_.process_order_item_source);
   connectors_.inventory_service_api_source->addEndpoint(endpoints_.process_inventory_item->endpoint());
   registerDataSource(connectors_.inventory_service_api_source);
 

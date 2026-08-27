@@ -1,19 +1,19 @@
-# Task 16/20: `ScheduledActivityPause`
+# Task 16/36: `ObserveFanoutActivityB`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `Go` |
-| Kind | `delay` |
-| File | `automationservice/internal/functions/scheduledactivitypause.go` |
-| Test | `automationservice/internal/functions/scheduledactivitypause_test.go` |
+| Kind | `map` |
+| File | `automationservice/internal/functions/automation/observefanoutactivityb.go` |
+| Test | `automationservice/internal/functions/automation/observefanoutactivityb_test.go` |
 | Service | `Automation Service` |
 
 
 ## Behaviour
 
-Apply the ordinary local Delay inside an Activity started by Temporal Schedule.
+Observe the typed result returned by the Activity B fan-out branch.
 
 
 
@@ -26,9 +26,9 @@ Apply the ordinary local Delay inside an Activity started by Temporal Schedule.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/scheduledactivitypause.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/automation/observefanoutactivityb.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/scheduledactivitypause_test.go`
+- [ ] Implement meaningful assertions in `automationservice/internal/functions/automation/observefanoutactivityb_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task16.md — ScheduledActivityPause — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task16.md — ObserveFanoutActivityB — Go — done`

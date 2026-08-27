@@ -1,19 +1,13 @@
-# Task 5/20: `ObserveFanoutActivityC`
+# Task 5/36: `FanoutActivityBEndpointSink`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `Go` |
-| Kind | `map` |
-| File | `automationservice/internal/functions/observefanoutactivityc.go` |
-| Test | `automationservice/internal/functions/observefanoutactivityc_test.go` |
+| Kind | `custom-sink` |
+| File | `automationservice/internal/functions/activity/fanoutactivitybendpointsink.go` |
 | Service | `Automation Service` |
-
-
-## Behaviour
-
-Observe the typed result returned by the Activity C fan-out branch.
 
 
 
@@ -26,9 +20,8 @@ Observe the typed result returned by the Activity C fan-out branch.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/observefanoutactivityc.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/activity/fanoutactivitybendpointsink.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/observefanoutactivityc_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task5.md — ObserveFanoutActivityC — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task5.md — FanoutActivityBEndpointSink — Go — done`

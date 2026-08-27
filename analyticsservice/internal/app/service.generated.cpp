@@ -68,10 +68,10 @@ void ServiceGenerated::initMakers() {
     return functions::MakeCountOrderProcessed(
         std::move(context), environment, config);
   };
-  makers_.order_processed_endpoint = [](
+  makers_.order_processed_endpoint_source = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
       const servicelib::config::KafkaEndpointConfig& config) {
-    return functions::MakeOrderProcessedEndpoint(
+    return functions::MakeOrderProcessedEndpointSource(
         std::move(context), environment, config);
   };
 }
@@ -85,13 +85,13 @@ void ServiceGenerated::initFunctions(const config::Config& cfg) {
   if (!functions_.count_order_processed) {
     throw std::logic_error("function maker CountOrderProcessed returned null");
   }
-  if (!makers_.order_processed_endpoint) {
-    throw std::logic_error("function maker OrderProcessedEndpoint is not configured");
+  if (!makers_.order_processed_endpoint_source) {
+    throw std::logic_error("function maker OrderProcessedEndpointSource is not configured");
   }
-  functions_.order_processed_endpoint = makers_.order_processed_endpoint(
+  functions_.order_processed_endpoint_source = makers_.order_processed_endpoint_source(
       servicelib::Context{}, *this, cfg.endpoints.orderProcessed);
-  if (!functions_.order_processed_endpoint) {
-    throw std::logic_error("function maker OrderProcessedEndpoint returned null");
+  if (!functions_.order_processed_endpoint_source) {
+    throw std::logic_error("function maker OrderProcessedEndpointSource returned null");
   }
 }
 
@@ -158,7 +158,7 @@ void ServiceGenerated::initDataSources(
           *this, cfg.endpoints.orderProcessed.id);
   endpoints_.consume_order_processed = ConsumeOrderProcessedKafkaSourceEndpoint::make(
       *this, *streams_.consume_order_processed, connectors_.consume_order_processed_consumer->client,
-      *functions_.order_processed_endpoint);
+      *functions_.order_processed_endpoint_source);
   registerDataSource(endpoints_.consume_order_processed);
 
 

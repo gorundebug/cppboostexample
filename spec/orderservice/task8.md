@@ -1,4 +1,4 @@
-# Task 8/8: `OrderProcessedEndpoint`
+# Task 8/8: `OrderProcessedEndpointSink`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
@@ -6,8 +6,8 @@
 |-------|-------|
 | Language | `C++/Boost` |
 | Kind | `kafka-sink` |
-| File | `orderservice/internal/functions/order_processed_endpoint.hpp` |
-| Test | `orderservice/internal/functions/order_processed_endpoint_test.cpp` |
+| File | `orderservice/internal/functions/endpoint/order_processed_endpoint_sink.hpp` |
+| Test | `orderservice/internal/functions/endpoint/order_processed_endpoint_sink_test.cpp` |
 | Service | `Order Service` |
 
 
@@ -27,10 +27,10 @@ Consumers decode the event and mark its Kafka message processed only after the p
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `orderservice/internal/functions/order_processed_endpoint.hpp` and preserve its generated contract
+- [ ] Open `orderservice/internal/functions/endpoint/order_processed_endpoint_sink.hpp` and preserve its generated contract
 - [ ] Inspect input type `OrderProcessed` in `model/include/example/model/types/order_processed.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `orderservice/internal/functions/order_processed_endpoint_test.cpp`
+- [ ] Implement meaningful assertions in `orderservice/internal/functions/endpoint/order_processed_endpoint_sink_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] orderservice/task8.md — OrderProcessedEndpoint — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] orderservice/task8.md — OrderProcessedEndpointSink — C++/Boost — done`

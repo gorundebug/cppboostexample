@@ -10,7 +10,7 @@ dataConnectors:
                     If the inventory call fails, the caller returns a non-reserved PROCESSING_ERROR result with the failure message.
                 functionInitializerGroup: ""
                 functionName: ProcessOrderItem
-                functionPackage: ""
+                functionPackage: endpoint
                 grpcMethodType: NoStreaming
                 methodName: ProcessOrderItem
                 name: Process Order Item
@@ -30,7 +30,7 @@ dataConnectors:
                     Create a job message identifying the local scheduled firing.
                 functionInitializerGroup: ""
                 functionName: LocalSchedule
-                functionPackage: ""
+                functionPackage: cron
                 missedRunPolicy: FireOnce
                 name: Local Schedule
                 overlapPolicy: Skip
@@ -58,7 +58,7 @@ dataConnectors:
                     Consumers decode the event and mark its Kafka message processed only after the pipeline handles it successfully.
                 functionInitializerGroup: ""
                 functionName: OrderProcessedEndpoint
-                functionPackage: ""
+                functionPackage: endpoint
                 name: Order Processed
                 partitions: 1
                 publicFunction: false
@@ -85,7 +85,7 @@ dataConnectors:
                     Calculate the total from processed item prices, falling back to the submitted total when no item result arrived, and include individual item failures in the response.
                 functionInitializerGroup: ""
                 functionName: ProcessOrder
-                functionPackage: ""
+                functionPackage: endpoint
                 httpMethodType: POST
                 name: Process Order
                 path: /v1/processorder
@@ -108,7 +108,8 @@ dataConnectors:
                 enabled: true
                 functionDescription: ""
                 functionInitializerGroup: ""
-                functionPackage: ""
+                functionName: ActivityJobEndpoint
+                functionPackage: activity
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Activity Job
@@ -127,7 +128,8 @@ dataConnectors:
                 enabled: true
                 functionDescription: ""
                 functionInitializerGroup: ""
-                functionPackage: ""
+                functionName: FanoutActivityAEndpoint
+                functionPackage: activity
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Fan-Out Activity A
@@ -146,7 +148,8 @@ dataConnectors:
                 enabled: true
                 functionDescription: ""
                 functionInitializerGroup: ""
-                functionPackage: ""
+                functionName: FanoutActivityBEndpoint
+                functionPackage: activity
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Fan-Out Activity B
@@ -165,7 +168,8 @@ dataConnectors:
                 enabled: true
                 functionDescription: ""
                 functionInitializerGroup: ""
-                functionPackage: ""
+                functionName: FanoutActivityCEndpoint
+                functionPackage: activity
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Fan-Out Activity C
@@ -182,7 +186,8 @@ dataConnectors:
                 enabled: true
                 functionDescription: ""
                 functionInitializerGroup: ""
-                functionPackage: ""
+                functionName: FanoutWorkflowJobEndpoint
+                functionPackage: workflow
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Fan-Out Workflow Job
@@ -201,7 +206,8 @@ dataConnectors:
                 enabled: true
                 functionDescription: ""
                 functionInitializerGroup: ""
-                functionPackage: ""
+                functionName: SequentialActivityAEndpoint
+                functionPackage: activity
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Sequential Activity A
@@ -220,7 +226,8 @@ dataConnectors:
                 enabled: true
                 functionDescription: ""
                 functionInitializerGroup: ""
-                functionPackage: ""
+                functionName: SequentialActivityBEndpoint
+                functionPackage: activity
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Sequential Activity B
@@ -241,7 +248,7 @@ dataConnectors:
                     Create an Activity job message identifying the durable scheduled firing.
                 functionInitializerGroup: ""
                 functionName: TemporalActivitySchedule
-                functionPackage: ""
+                functionPackage: activity
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Temporal Activity Schedule
@@ -260,7 +267,7 @@ dataConnectors:
                     Create a Workflow job message identifying the durable scheduled firing.
                 functionInitializerGroup: ""
                 functionName: TemporalWorkflowSchedule
-                functionPackage: ""
+                functionPackage: workflow
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Temporal Workflow Schedule
@@ -277,7 +284,8 @@ dataConnectors:
                 enabled: true
                 functionDescription: ""
                 functionInitializerGroup: ""
-                functionPackage: ""
+                functionName: WorkflowJobEndpoint
+                functionPackage: workflow
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Workflow Job
@@ -358,7 +366,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: CountOrderProcessed
-                    functionPackage: ""
+                    functionPackage: analytics
                     name: Count Order Processed
                     source: consumeOrderProcessed
                     type: Process
@@ -497,13 +505,13 @@ services:
         kubernetesWorkloadType: Deployment
         links:
             link1:
-                callSemantics: PriorityTaskPool
+                callSemantics: FunctionCall
                 from: callSequentialActivityA
                 poolName: Default Pool
                 priority: 2
                 to: callSequentialActivityB
             link2:
-                callSemantics: TaskPool
+                callSemantics: FunctionCall
                 from: callSequentialActivityB
                 poolName: Default Pool
                 to: processWorkflowJob
@@ -524,7 +532,7 @@ services:
                 from: consumeFanOutActivityC
                 to: processFanOutActivityC
             link7:
-                callSemantics: TaskPool
+                callSemantics: FunctionCall
                 from: consumeFanOutWorkflowJob
                 poolName: Default Pool
                 to: callFanOutActivityA
@@ -541,19 +549,19 @@ services:
                 from: consumeWorkflowJob
                 to: workflowPause
             link11:
-                callSemantics: PriorityTaskPool
+                callSemantics: FunctionCall
                 from: splitActivityAResult
                 poolName: Default Pool
                 priority: 2
                 to: callFanOutActivityB
             link12:
-                callSemantics: PriorityTaskPool
+                callSemantics: FunctionCall
                 from: splitActivityAResult
                 poolName: Default Pool
                 priority: 7
                 to: callFanOutActivityC
             link13:
-                callSemantics: TaskPool
+                callSemantics: FunctionCall
                 from: workflowPause
                 poolName: Default Pool
                 to: callSequentialActivityA
@@ -570,7 +578,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ActivityPause
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Activity Pause
                     source: consumeActivityJob
                     type: Delay
@@ -662,7 +670,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ObserveActivityResult
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Observe Activity Result
                     source: submitActivityJob
                     type: Map
@@ -673,7 +681,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ObserveFanoutActivityB
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Observe Fan-Out Activity B
                     source: callFanOutActivityB
                     type: Map
@@ -684,7 +692,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ObserveFanoutActivityC
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Observe Fan-Out Activity C
                     source: callFanOutActivityC
                     type: Map
@@ -695,7 +703,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ObserveWorkflowResult
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Observe Workflow Result
                     source: submitWorkflowJob
                     type: Map
@@ -706,7 +714,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ProcessActivityJob
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Process Activity Job
                     source: activityPause
                     type: Map
@@ -717,7 +725,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ProcessFanoutActivityA
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Process Fan-Out Activity A
                     source: consumeFanOutActivityA
                     type: Map
@@ -728,7 +736,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ProcessFanoutActivityB
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Process Fan-Out Activity B
                     source: consumeFanOutActivityB
                     type: Map
@@ -739,7 +747,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ProcessFanoutActivityC
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Process Fan-Out Activity C
                     source: consumeFanOutActivityC
                     type: Map
@@ -750,7 +758,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ProcessScheduledActivity
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Process Scheduled Activity
                     source: scheduledActivityPause
                     type: Map
@@ -761,7 +769,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ProcessScheduledWorkflow
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Process Scheduled Workflow
                     source: scheduledWorkflowPause
                     type: Map
@@ -772,7 +780,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ProcessSequentialActivityA
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Process Sequential Activity A
                     source: consumeSequentialActivityA
                     type: Map
@@ -783,7 +791,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ProcessSequentialActivityB
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Process Sequential Activity B
                     source: consumeSequentialActivityB
                     type: Map
@@ -794,7 +802,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ProcessWorkflowJob
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Process Workflow Job
                     source: callSequentialActivityB
                     type: Map
@@ -806,7 +814,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ScheduledActivityPause
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Scheduled Activity Pause
                     source: temporalActivitySchedule
                     type: Delay
@@ -817,7 +825,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ScheduledWorkflowPause
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Scheduled Workflow Pause
                     source: temporalWorkflowSchedule
                     type: Delay
@@ -866,7 +874,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: WorkflowPause
-                    functionPackage: ""
+                    functionPackage: automation
                     name: Workflow Pause
                     source: consumeWorkflowJob
                     type: Delay
@@ -902,11 +910,11 @@ services:
         kubernetesWorkloadType: Deployment
         links:
             link1:
-                callSemantics: ParallelCall
+                callSemantics: FunctionCall
                 from: getInventoryItemData
                 to: mergeInventoryResult
             link2:
-                callSemantics: TaskPool
+                callSemantics: FunctionCall
                 from: processInventoryItem
                 poolName: Inventory Priority Workers
                 priority: 10
@@ -927,7 +935,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: GetInventoryItemData
-                    functionPackage: ""
+                    functionPackage: inventoryItem
                     name: Get Inventory Item Data
                     source: processInventoryItem
                     type: Process
@@ -939,7 +947,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: GetInventoryItemError
-                    functionPackage: ""
+                    functionPackage: inventoryItem
                     name: Get Inventory Item Error
                     source: getInventoryItemData
                     type: Error
@@ -1017,17 +1025,17 @@ services:
                 from: mergeResults
                 to: splitOrderResult
             link2:
-                callSemantics: PriorityTaskPool
+                callSemantics: FunctionCall
                 from: processOrder
                 poolName: Default Pool
                 priority: 1
                 to: splitPipeline
             link3:
-                callSemantics: ParallelCall
+                callSemantics: FunctionCall
                 from: splitPipeline
                 to: processOrderItems
             link4:
-                callSemantics: ParallelCall
+                callSemantics: FunctionCall
                 from: splitPipeline
                 to: softDeadline
         livenessHandler: health/live
@@ -1050,7 +1058,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: MapOrderItemResultToOrderState
-                    functionPackage: ""
+                    functionPackage: order
                     name: Map Order Item Result To Order State
                     source: processOrderItem
                     type: Map
@@ -1062,7 +1070,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: MapToOrderProcessed
-                    functionPackage: ""
+                    functionPackage: order
                     name: MapToOrderProcessed
                     source: splitOrderResult
                     type: Map
@@ -1074,7 +1082,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: MapToOrderState
-                    functionPackage: ""
+                    functionPackage: order
                     name: Map to Order State
                     source: softDeadline
                     type: Map
@@ -1106,7 +1114,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ProcessOrderItems
-                    functionPackage: ""
+                    functionPackage: order
                     name: Process Order Items
                     source: splitPipeline
                     type: FlatMap
@@ -1125,7 +1133,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: SoftDeadline
-                    functionPackage: ""
+                    functionPackage: order
                     name: Soft Deadline
                     source: splitPipeline
                     type: Delay

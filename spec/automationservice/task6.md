@@ -1,19 +1,13 @@
-# Task 6/20: `ObserveWorkflowResult`
+# Task 6/36: `FanoutActivityBEndpointSource`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `Go` |
-| Kind | `map` |
-| File | `automationservice/internal/functions/observeworkflowresult.go` |
-| Test | `automationservice/internal/functions/observeworkflowresult_test.go` |
+| Kind | `schedule-source` |
+| File | `automationservice/internal/functions/activity/fanoutactivitybendpointsource.go` |
 | Service | `Automation Service` |
-
-
-## Behaviour
-
-Preserve the result returned through the on-demand Workflow endpoint.
 
 
 
@@ -26,9 +20,8 @@ Preserve the result returned through the on-demand Workflow endpoint.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/observeworkflowresult.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/activity/fanoutactivitybendpointsource.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/observeworkflowresult_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task6.md — ObserveWorkflowResult — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task6.md — FanoutActivityBEndpointSource — Go — done`

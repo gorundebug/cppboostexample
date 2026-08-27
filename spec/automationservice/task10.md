@@ -1,19 +1,13 @@
-# Task 10/20: `ProcessFanoutActivityC`
+# Task 10/36: `SequentialActivityAEndpointSource`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `Go` |
-| Kind | `map` |
-| File | `automationservice/internal/functions/processfanoutactivityc.go` |
-| Test | `automationservice/internal/functions/processfanoutactivityc_test.go` |
+| Kind | `schedule-source` |
+| File | `automationservice/internal/functions/activity/sequentialactivityaendpointsource.go` |
 | Service | `Automation Service` |
-
-
-## Behaviour
-
-Return Activity C's typed fan-out result.
 
 
 
@@ -26,9 +20,8 @@ Return Activity C's typed fan-out result.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/processfanoutactivityc.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/activity/sequentialactivityaendpointsource.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/processfanoutactivityc_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task10.md — ProcessFanoutActivityC — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task10.md — SequentialActivityAEndpointSource — Go — done`

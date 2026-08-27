@@ -13,7 +13,7 @@ dataConnectors:
                     Consumers decode the event and mark its Kafka message processed only after the pipeline handles it successfully.
                 functionInitializerGroup: ""
                 functionName: OrderProcessedEndpoint
-                functionPackage: ""
+                functionPackage: endpoint
                 name: Order Processed
                 partitions: 1
                 publicFunction: false
@@ -68,7 +68,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: CountOrderProcessed
-                    functionPackage: ""
+                    functionPackage: analytics
                     name: Count Order Processed
                     source: consumeOrderProcessed
                     type: Process

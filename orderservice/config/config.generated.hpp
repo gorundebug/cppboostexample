@@ -175,7 +175,7 @@ inline Config MakeConfig() {
     value.xPos = 103;
     value.yPos = -52;
     value.valueType = "OrderState";
-    value.functionPackage = "";
+    value.functionPackage = "order";
     value.functionName = "MapOrderItemResultToOrderState";
     value.functionDescription = "Produce an order result containing one inventory result and preserving its order ID.\nMark it CONFIRMED when the item was reserved; otherwise mark it PARTIALLY_CONFIRMED.\nRecord the time when this result is produced.\n";
     value.functionInitializerGroup = "";
@@ -192,7 +192,7 @@ inline Config MakeConfig() {
     value.xPos = -821;
     value.yPos = -26;
     value.valueType = "OrderProcessed";
-    value.functionPackage = "";
+    value.functionPackage = "order";
     value.functionName = "MapToOrderProcessed";
     value.functionDescription = "Create an OrderProcessed event from the final order state.\nPreserve the order ID, status, and processing time. Count all item results and reserved items; for unsuccessful orders use the final status as the failure reason.\n";
     value.functionInitializerGroup = "";
@@ -209,7 +209,7 @@ inline Config MakeConfig() {
     value.xPos = -368;
     value.yPos = -227;
     value.valueType = "OrderState";
-    value.functionPackage = "";
+    value.functionPackage = "order";
     value.functionName = "MapToOrderState";
     value.functionDescription = "Produce a TIMED_OUT order result that preserves the order ID and submitted total.\nDo not add item results at this stage; results received before the timeout are included in the final response.\n";
     value.functionInitializerGroup = "";
@@ -263,7 +263,7 @@ inline Config MakeConfig() {
     value.xPos = -198;
     value.yPos = -662;
     value.valueType = "OrderItem";
-    value.functionPackage = "";
+    value.functionPackage = "order";
     value.functionName = "ProcessOrderItems";
     value.functionDescription = "Emit every order item independently for inventory processing.\nPreserve each item's data and assign the parent order ID.\n";
     value.functionInitializerGroup = "";
@@ -293,7 +293,7 @@ inline Config MakeConfig() {
     value.xPos = -477;
     value.yPos = -444;
     value.duration = 0;
-    value.functionPackage = "";
+    value.functionPackage = "order";
     value.functionName = "SoftDeadline";
     value.functionDescription = "Trigger the timeout branch shortly before the request deadline, leaving the configured duration to assemble a response.\nWhen no request deadline exists, use the configured duration itself. Never wait past an existing deadline.\n";
     value.functionInitializerGroup = "";
@@ -367,7 +367,7 @@ inline Config MakeConfig() {
     value.consumerGroup = "analytics-service";
     value.replicationFactor = 1;
     value.functionName = "OrderProcessedEndpoint";
-    value.functionPackage = "";
+    value.functionPackage = "endpoint";
     value.publicFunction = false;
     value.functionDescription = "Exchange OrderProcessed events keyed by order ID.\nProducers include the final status, processing time, total and confirmed item counts, and a failure reason for unsuccessful orders.\nConsumers decode the event and mark its Kafka message processed only after the pipeline handles it successfully.\n";
     value.functionInitializerGroup = "";
@@ -381,7 +381,7 @@ inline Config MakeConfig() {
     value.httpMethodType = HTTPMethodType::kPOST;
     value.path = "/v1/processorder";
     value.functionName = "ProcessOrder";
-    value.functionPackage = "";
+    value.functionPackage = "endpoint";
     value.publicFunction = false;
     value.functionDescription = "Accept orders with at least one item and positive quantities; reject malformed or invalid requests as client errors.\nReuse X-Request-ID when supplied, otherwise generate an order ID. Preserve customer, item, price, and X-Trace data, and apply the configured timeout of five seconds by default.\nReturn one response per order. When all items finish, use CONFIRMED only if every item was reserved; otherwise use PARTIALLY_CONFIRMED. If the deadline wins, return TIMED_OUT with the item results received so far.\nCalculate the total from processed item prices, falling back to the submitted total when no item result arrived, and include individual item failures in the response.\n";
     value.functionInitializerGroup = "";
@@ -395,7 +395,7 @@ inline Config MakeConfig() {
     value.grpcMethodType = GrpcMethodType::kNoStreaming;
     value.methodName = "ProcessOrderItem";
     value.functionName = "ProcessOrderItem";
-    value.functionPackage = "";
+    value.functionPackage = "endpoint";
     value.publicFunction = false;
     value.functionDescription = "Reserve inventory for one order item using its order ID, item ID, SKU, and quantity.\nReturn the available quantity, reservation outcome, and status. The caller combines this response with the original identity, requested quantity, and unit price.\nIf the inventory call fails, the caller returns a non-reserved PROCESSING_ERROR result with the failure message.\n";
     value.functionInitializerGroup = "";
@@ -418,21 +418,21 @@ inline Config MakeConfig() {
     LinkConfig value{};
     value.from = kProcessOrderStreamId;
     value.to = kSplitPipelineStreamId;
-    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kPriorityTaskPool, "Default Pool", 1, false);
+    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kFunctionCall, "Default Pool", 1, false);
     return value;
   }();
   cfg.links.splitPipelineToProcessOrderItems = [] {
     LinkConfig value{};
     value.from = kSplitPipelineStreamId;
     value.to = kProcessOrderItemsStreamId;
-    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kParallelCall, "", 0, false);
+    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kFunctionCall, "", 0, false);
     return value;
   }();
   cfg.links.splitPipelineToSoftDeadline = [] {
     LinkConfig value{};
     value.from = kSplitPipelineStreamId;
     value.to = kSoftDeadlineStreamId;
-    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kParallelCall, "", 0, false);
+    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kFunctionCall, "", 0, true);
     return value;
   }();
   cfg.modules.inventoryServiceApi = [] {

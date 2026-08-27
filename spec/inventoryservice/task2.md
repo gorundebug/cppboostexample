@@ -1,4 +1,4 @@
-# Task 2/2: `ProcessOrderItem`
+# Task 2/2: `ProcessOrderItemSource`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
@@ -6,8 +6,8 @@
 |-------|-------|
 | Language | `C++/Boost` |
 | Kind | `grpc-source` |
-| File | `inventoryservice/internal/functions/process_order_item.hpp` |
-| Test | `inventoryservice/internal/functions/process_order_item_test.cpp` |
+| File | `inventoryservice/internal/functions/endpoint/process_order_item_source.hpp` |
+| Test | `inventoryservice/internal/functions/endpoint/process_order_item_source_test.cpp` |
 | Service | `Inventory Service` |
 
 
@@ -36,12 +36,12 @@ If the inventory call fails, the caller returns a non-reserved PROCESSING_ERROR 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `inventoryservice/internal/functions/process_order_item.hpp` and preserve its generated contract
+- [ ] Open `inventoryservice/internal/functions/endpoint/process_order_item_source.hpp` and preserve its generated contract
 - [ ] Inspect input type `OrderItem` in `model/include/example/model/types/order_item.hpp`
 - [ ] Inspect output type `OrderItemResult` in `model/include/example/model/types/order_item_result.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `inventoryservice/internal/functions/process_order_item_test.cpp`
+- [ ] Implement meaningful assertions in `inventoryservice/internal/functions/endpoint/process_order_item_source_test.cpp`
 - [ ] Verify the endpoint/result lifecycle, including completion and error paths
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] inventoryservice/task2.md — ProcessOrderItem — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] inventoryservice/task2.md — ProcessOrderItemSource — C++/Boost — done`

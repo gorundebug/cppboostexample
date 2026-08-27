@@ -1,19 +1,19 @@
-# Task 20/20: `WorkflowPause`
+# Task 20/36: `ProcessFanoutActivityA`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `Go` |
-| Kind | `delay` |
-| File | `automationservice/internal/functions/workflowpause.go` |
-| Test | `automationservice/internal/functions/workflowpause_test.go` |
+| Kind | `map` |
+| File | `automationservice/internal/functions/automation/processfanoutactivitya.go` |
+| Test | `automationservice/internal/functions/automation/processfanoutactivitya_test.go` |
 | Service | `Automation Service` |
 
 
 ## Behaviour
 
-Use the same Delay contract backed by the Temporal Workflow timer.
+Return Activity A's typed result before the Workflow Split.
 
 
 
@@ -26,9 +26,9 @@ Use the same Delay contract backed by the Temporal Workflow timer.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/workflowpause.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/automation/processfanoutactivitya.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/workflowpause_test.go`
+- [ ] Implement meaningful assertions in `automationservice/internal/functions/automation/processfanoutactivitya_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task20.md — WorkflowPause — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task20.md — ProcessFanoutActivityA — Go — done`

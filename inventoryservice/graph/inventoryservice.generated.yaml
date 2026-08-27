@@ -10,7 +10,7 @@ dataConnectors:
                     If the inventory call fails, the caller returns a non-reserved PROCESSING_ERROR result with the failure message.
                 functionInitializerGroup: ""
                 functionName: ProcessOrderItem
-                functionPackage: ""
+                functionPackage: endpoint
                 grpcMethodType: NoStreaming
                 methodName: ProcessOrderItem
                 name: Process Order Item
@@ -54,11 +54,11 @@ services:
         kubernetesWorkloadType: Deployment
         links:
             link1:
-                callSemantics: ParallelCall
+                callSemantics: FunctionCall
                 from: getInventoryItemData
                 to: mergeInventoryResult
             link2:
-                callSemantics: TaskPool
+                callSemantics: FunctionCall
                 from: processInventoryItem
                 poolName: Inventory Priority Workers
                 priority: 10
@@ -79,7 +79,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: GetInventoryItemData
-                    functionPackage: ""
+                    functionPackage: inventoryItem
                     name: Get Inventory Item Data
                     source: processInventoryItem
                     type: Process
@@ -91,7 +91,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: GetInventoryItemError
-                    functionPackage: ""
+                    functionPackage: inventoryItem
                     name: Get Inventory Item Error
                     source: getInventoryItemData
                     type: Error

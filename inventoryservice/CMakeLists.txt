@@ -140,7 +140,7 @@ add_executable(example_inventory_service
     internal/app/grpc_service.generated.cpp
 
     internal/app/service.cpp
-    internal/functions/get_inventory_item_data.cpp
+    internal/functions/inventory_item/get_inventory_item_data.cpp
 )
 target_compile_features(example_inventory_service PRIVATE cxx_std_20)
 target_include_directories(example_inventory_service PRIVATE "${_servicegen_include_root}")
@@ -176,8 +176,8 @@ endif()
 include(GoogleTest)
 
 add_executable(example_inventory_service_unit_tests
-    internal/functions/get_inventory_item_data_test.cpp
-    internal/functions/process_order_item_test.cpp
+    internal/functions/endpoint/process_order_item_source_test.cpp
+    internal/functions/inventory_item/get_inventory_item_data_test.cpp
 )
 target_compile_features(example_inventory_service_unit_tests PRIVATE cxx_std_20)
 target_include_directories(example_inventory_service_unit_tests PRIVATE

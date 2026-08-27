@@ -122,7 +122,7 @@ add_executable(example_analytics_service
     internal/app/service.generated.cpp
 
     internal/app/service.cpp
-    internal/functions/count_order_processed.cpp
+    internal/functions/analytics/count_order_processed.cpp
 )
 target_compile_features(example_analytics_service PRIVATE cxx_std_20)
 target_include_directories(example_analytics_service PRIVATE "${_servicegen_include_root}")
@@ -156,8 +156,8 @@ endif()
 include(GoogleTest)
 
 add_executable(example_analytics_service_unit_tests
-    internal/functions/count_order_processed_test.cpp
-    internal/functions/order_processed_endpoint_test.cpp
+    internal/functions/analytics/count_order_processed_test.cpp
+    internal/functions/endpoint/order_processed_endpoint_source_test.cpp
 )
 target_compile_features(example_analytics_service_unit_tests PRIVATE cxx_std_20)
 target_include_directories(example_analytics_service_unit_tests PRIVATE

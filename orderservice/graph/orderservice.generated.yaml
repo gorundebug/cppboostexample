@@ -10,7 +10,7 @@ dataConnectors:
                     If the inventory call fails, the caller returns a non-reserved PROCESSING_ERROR result with the failure message.
                 functionInitializerGroup: ""
                 functionName: ProcessOrderItem
-                functionPackage: ""
+                functionPackage: endpoint
                 grpcMethodType: NoStreaming
                 methodName: ProcessOrderItem
                 name: Process Order Item
@@ -36,7 +36,7 @@ dataConnectors:
                     Consumers decode the event and mark its Kafka message processed only after the pipeline handles it successfully.
                 functionInitializerGroup: ""
                 functionName: OrderProcessedEndpoint
-                functionPackage: ""
+                functionPackage: endpoint
                 name: Order Processed
                 partitions: 1
                 publicFunction: false
@@ -63,7 +63,7 @@ dataConnectors:
                     Calculate the total from processed item prices, falling back to the submitted total when no item result arrived, and include individual item failures in the response.
                 functionInitializerGroup: ""
                 functionName: ProcessOrder
-                functionPackage: ""
+                functionPackage: endpoint
                 httpMethodType: POST
                 name: Process Order
                 path: /v1/processorder
@@ -137,17 +137,17 @@ services:
                 from: mergeResults
                 to: splitOrderResult
             link2:
-                callSemantics: PriorityTaskPool
+                callSemantics: FunctionCall
                 from: processOrder
                 poolName: Default Pool
                 priority: 1
                 to: splitPipeline
             link3:
-                callSemantics: ParallelCall
+                callSemantics: FunctionCall
                 from: splitPipeline
                 to: processOrderItems
             link4:
-                callSemantics: ParallelCall
+                callSemantics: FunctionCall
                 from: splitPipeline
                 to: softDeadline
         livenessHandler: health/live
@@ -170,7 +170,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: MapOrderItemResultToOrderState
-                    functionPackage: ""
+                    functionPackage: order
                     name: Map Order Item Result To Order State
                     source: processOrderItem
                     type: Map
@@ -182,7 +182,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: MapToOrderProcessed
-                    functionPackage: ""
+                    functionPackage: order
                     name: MapToOrderProcessed
                     source: splitOrderResult
                     type: Map
@@ -194,7 +194,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: MapToOrderState
-                    functionPackage: ""
+                    functionPackage: order
                     name: Map to Order State
                     source: softDeadline
                     type: Map
@@ -226,7 +226,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: ProcessOrderItems
-                    functionPackage: ""
+                    functionPackage: order
                     name: Process Order Items
                     source: splitPipeline
                     type: FlatMap
@@ -245,7 +245,7 @@ services:
                     functionInitializerGroup: ""
                     functionModule: ""
                     functionName: SoftDeadline
-                    functionPackage: ""
+                    functionPackage: order
                     name: Soft Deadline
                     source: splitPipeline
                     type: Delay

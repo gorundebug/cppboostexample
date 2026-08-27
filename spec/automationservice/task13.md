@@ -1,19 +1,18 @@
-# Task 13/20: `ProcessSequentialActivityA`
+# Task 13/36: `TemporalActivityScheduleSource`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `Go` |
-| Kind | `map` |
-| File | `automationservice/internal/functions/processsequentialactivitya.go` |
-| Test | `automationservice/internal/functions/processsequentialactivitya_test.go` |
+| Kind | `schedule-source` |
+| File | `automationservice/internal/functions/activity/temporalactivityschedulesource.go` |
 | Service | `Automation Service` |
 
 
 ## Behaviour
 
-Return sequential Activity A's typed result to its Temporal sink.
+Create an Activity job message identifying the durable scheduled firing.
 
 
 
@@ -26,9 +25,8 @@ Return sequential Activity A's typed result to its Temporal sink.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/processsequentialactivitya.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/activity/temporalactivityschedulesource.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/processsequentialactivitya_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task13.md — ProcessSequentialActivityA — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task13.md — TemporalActivityScheduleSource — Go — done`

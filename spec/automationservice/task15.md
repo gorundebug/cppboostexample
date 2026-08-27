@@ -1,4 +1,4 @@
-# Task 15/20: `ProcessWorkflowJob`
+# Task 15/36: `ObserveActivityResult`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
@@ -6,14 +6,14 @@
 |-------|-------|
 | Language | `Go` |
 | Kind | `map` |
-| File | `automationservice/internal/functions/processworkflowjob.go` |
-| Test | `automationservice/internal/functions/processworkflowjob_test.go` |
+| File | `automationservice/internal/functions/automation/observeactivityresult.go` |
+| Test | `automationservice/internal/functions/automation/observeactivityresult_test.go` |
 | Service | `Automation Service` |
 
 
 ## Behaviour
 
-Continue the Workflow as new once, then return its final result.
+Preserve the result returned through the on-demand Activity endpoint.
 
 
 
@@ -26,9 +26,9 @@ Continue the Workflow as new once, then return its final result.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/processworkflowjob.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/automation/observeactivityresult.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/processworkflowjob_test.go`
+- [ ] Implement meaningful assertions in `automationservice/internal/functions/automation/observeactivityresult_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task15.md — ProcessWorkflowJob — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task15.md — ObserveActivityResult — Go — done`

@@ -82,28 +82,28 @@ void ServiceGenerated::initMakers() {
     return functions::MakeMapToOrderState(
         std::move(context), environment, config);
   };
-  makers_.order_processed_endpoint = [](
+  makers_.order_processed_endpoint_sink = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
       const servicelib::config::KafkaEndpointConfig& config) {
-    return functions::MakeOrderProcessedEndpoint(
+    return functions::MakeOrderProcessedEndpointSink(
         std::move(context), environment, config);
   };
-  makers_.process_order = [](
-      servicelib::Context context, servicelib::IServiceEnvironment& environment,
-      const servicelib::config::HttpEndpointConfig& config) {
-    return functions::MakeProcessOrder(
-        std::move(context), environment, config);
-  };
-  makers_.process_order_item = [](
+  makers_.process_order_item_sink = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
       const servicelib::config::GrpcEndpointConfig& config) {
-    return functions::MakeProcessOrderItem(
+    return functions::MakeProcessOrderItemSink(
         std::move(context), environment, config);
   };
   makers_.process_order_items = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
       const servicelib::config::FlatMapStreamConfig& config) {
     return functions::MakeProcessOrderItems(
+        std::move(context), environment, config);
+  };
+  makers_.process_order_source = [](
+      servicelib::Context context, servicelib::IServiceEnvironment& environment,
+      const servicelib::config::HttpEndpointConfig& config) {
+    return functions::MakeProcessOrderSource(
         std::move(context), environment, config);
   };
   makers_.soft_deadline = [](
@@ -139,29 +139,21 @@ void ServiceGenerated::initFunctions(const config::Config& cfg) {
   if (!functions_.map_to_order_state) {
     throw std::logic_error("function maker MapToOrderState returned null");
   }
-  if (!makers_.order_processed_endpoint) {
-    throw std::logic_error("function maker OrderProcessedEndpoint is not configured");
+  if (!makers_.order_processed_endpoint_sink) {
+    throw std::logic_error("function maker OrderProcessedEndpointSink is not configured");
   }
-  functions_.order_processed_endpoint = makers_.order_processed_endpoint(
+  functions_.order_processed_endpoint_sink = makers_.order_processed_endpoint_sink(
       servicelib::Context{}, *this, cfg.endpoints.orderProcessed);
-  if (!functions_.order_processed_endpoint) {
-    throw std::logic_error("function maker OrderProcessedEndpoint returned null");
+  if (!functions_.order_processed_endpoint_sink) {
+    throw std::logic_error("function maker OrderProcessedEndpointSink returned null");
   }
-  if (!makers_.process_order) {
-    throw std::logic_error("function maker ProcessOrder is not configured");
+  if (!makers_.process_order_item_sink) {
+    throw std::logic_error("function maker ProcessOrderItemSink is not configured");
   }
-  functions_.process_order = makers_.process_order(
-      servicelib::Context{}, *this, cfg.endpoints.processOrder);
-  if (!functions_.process_order) {
-    throw std::logic_error("function maker ProcessOrder returned null");
-  }
-  if (!makers_.process_order_item) {
-    throw std::logic_error("function maker ProcessOrderItem is not configured");
-  }
-  functions_.process_order_item = makers_.process_order_item(
+  functions_.process_order_item_sink = makers_.process_order_item_sink(
       servicelib::Context{}, *this, cfg.endpoints.processOrderItem);
-  if (!functions_.process_order_item) {
-    throw std::logic_error("function maker ProcessOrderItem returned null");
+  if (!functions_.process_order_item_sink) {
+    throw std::logic_error("function maker ProcessOrderItemSink returned null");
   }
   if (!makers_.process_order_items) {
     throw std::logic_error("function maker ProcessOrderItems is not configured");
@@ -170,6 +162,14 @@ void ServiceGenerated::initFunctions(const config::Config& cfg) {
       servicelib::Context{}, *this, cfg.streams.processOrderItems);
   if (!functions_.process_order_items) {
     throw std::logic_error("function maker ProcessOrderItems returned null");
+  }
+  if (!makers_.process_order_source) {
+    throw std::logic_error("function maker ProcessOrderSource is not configured");
+  }
+  functions_.process_order_source = makers_.process_order_source(
+      servicelib::Context{}, *this, cfg.endpoints.processOrder);
+  if (!functions_.process_order_source) {
+    throw std::logic_error("function maker ProcessOrderSource returned null");
   }
   if (!makers_.soft_deadline) {
     throw std::logic_error("function maker SoftDeadline is not configured");
@@ -276,7 +276,7 @@ void ServiceGenerated::initDataSinks(const config::Config& cfg) {
           streams_.process_order_item.get());
   endpoints_.process_order_item = std::make_shared<ProcessOrderItemGrpcSinkEndpoint>(
       streams_.process_order_item.get(),
-      *functions_.process_order_item,
+      *functions_.process_order_item_sink,
       ProcessOrderItemGrpcClientFunction{&*connectors_.inventory_service_api_client});
   bindings_.process_order_item.consume =
       [endpoint = endpoints_.process_order_item.get()](
@@ -293,7 +293,7 @@ void ServiceGenerated::initDataSinks(const config::Config& cfg) {
           getMetrics());
   endpoints_.publish_order_processed = std::make_shared<PublishOrderProcessedKafkaSinkEndpoint>(
       streams_.publish_order_processed.get(), *connectors_.publish_order_processed_producer,
-      *functions_.order_processed_endpoint);
+      *functions_.order_processed_endpoint_sink);
   bindings_.publish_order_processed.consume =
       [endpoint = endpoints_.publish_order_processed.get()](
           servicelib::MessageContext context, const example::model::types::OrderProcessed& value) {
@@ -313,7 +313,7 @@ void ServiceGenerated::initDataSources(
           *this, *streams_.process_order);
   endpoints_.process_order = ProcessOrderHTTPSourceConsumer::make(
       *this, *streams_.process_order,
-      *functions_.process_order);
+      *functions_.process_order_source);
   connectors_.order_service_api_source->addEndpoint(endpoints_.process_order->endpoint());
   connectors_.order_service_api_source->registerRoutes(*http_router_);
   registerDataSource(connectors_.order_service_api_source);

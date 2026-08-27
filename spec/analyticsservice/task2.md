@@ -1,4 +1,4 @@
-# Task 2/2: `OrderProcessedEndpoint`
+# Task 2/2: `OrderProcessedEndpointSource`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
@@ -6,8 +6,8 @@
 |-------|-------|
 | Language | `C++/Boost` |
 | Kind | `kafka-source` |
-| File | `analyticsservice/internal/functions/order_processed_endpoint.hpp` |
-| Test | `analyticsservice/internal/functions/order_processed_endpoint_test.cpp` |
+| File | `analyticsservice/internal/functions/endpoint/order_processed_endpoint_source.hpp` |
+| Test | `analyticsservice/internal/functions/endpoint/order_processed_endpoint_source_test.cpp` |
 | Service | `Analytics Service` |
 
 
@@ -28,11 +28,11 @@ Consumers decode the event and mark its Kafka message processed only after the p
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `analyticsservice/internal/functions/order_processed_endpoint.hpp` and preserve its generated contract
+- [ ] Open `analyticsservice/internal/functions/endpoint/order_processed_endpoint_source.hpp` and preserve its generated contract
 - [ ] Inspect input type `OrderProcessed` in `model/include/example/model/types/order_processed.hpp`
 - [ ] Inspect output type `OrderProcessed` in `model/include/example/model/types/order_processed.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/order_processed_endpoint_test.cpp`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/order_processed_endpoint_source_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task2.md — OrderProcessedEndpoint — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task2.md — OrderProcessedEndpointSource — C++/Boost — done`

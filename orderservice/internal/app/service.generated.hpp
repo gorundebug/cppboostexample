@@ -28,14 +28,14 @@
 #include <model/include/example/model/types/order_item.hpp>
 #include <model/include/example/model/types/order_item_result.hpp>
 #include <model/include/example/model/types/order_processed.hpp>
-#include <orderservice/internal/functions/map_order_item_result_to_order_state.hpp>
-#include <orderservice/internal/functions/map_to_order_processed.hpp>
-#include <orderservice/internal/functions/map_to_order_state.hpp>
-#include <orderservice/internal/functions/order_processed_endpoint.hpp>
-#include <orderservice/internal/functions/process_order.hpp>
-#include <orderservice/internal/functions/process_order_item.hpp>
-#include <orderservice/internal/functions/process_order_items.hpp>
-#include <orderservice/internal/functions/soft_deadline.hpp>
+#include <orderservice/internal/functions/endpoint/order_processed_endpoint_sink.hpp>
+#include <orderservice/internal/functions/endpoint/process_order_item_sink.hpp>
+#include <orderservice/internal/functions/endpoint/process_order_source.hpp>
+#include <orderservice/internal/functions/order/map_order_item_result_to_order_state.hpp>
+#include <orderservice/internal/functions/order/map_to_order_processed.hpp>
+#include <orderservice/internal/functions/order/map_to_order_state.hpp>
+#include <orderservice/internal/functions/order/process_order_items.hpp>
+#include <orderservice/internal/functions/order/soft_deadline.hpp>
 #include <orderservice/internal/types/order.hpp>
 #include <orderservice/internal/types/order_state.hpp>
 #include <proto/inventoryserviceapi/inventoryserviceapi.generated.grpc.pb.h>
@@ -79,18 +79,18 @@ class ServiceGenerated
     std::function<std::unique_ptr<functions::MapToOrderState>(
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::MapStreamConfig&)> map_to_order_state;
-    std::function<std::unique_ptr<functions::OrderProcessedEndpoint>(
+    std::function<std::unique_ptr<functions::OrderProcessedEndpointSink>(
         servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::KafkaEndpointConfig&)> order_processed_endpoint;
-    std::function<std::unique_ptr<functions::ProcessOrder>(
+        const servicelib::config::KafkaEndpointConfig&)> order_processed_endpoint_sink;
+    std::function<std::unique_ptr<functions::ProcessOrderItemSink>(
         servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::HttpEndpointConfig&)> process_order;
-    std::function<std::unique_ptr<functions::ProcessOrderItem>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::GrpcEndpointConfig&)> process_order_item;
+        const servicelib::config::GrpcEndpointConfig&)> process_order_item_sink;
     std::function<std::unique_ptr<functions::ProcessOrderItems>(
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::FlatMapStreamConfig&)> process_order_items;
+    std::function<std::unique_ptr<functions::ProcessOrderSource>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::HttpEndpointConfig&)> process_order_source;
     std::function<std::unique_ptr<functions::SoftDeadline>(
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::DelayStreamConfig&)> soft_deadline;
@@ -99,10 +99,10 @@ class ServiceGenerated
     std::unique_ptr<functions::MapOrderItemResultToOrderState> map_order_item_result_to_order_state;
     std::unique_ptr<functions::MapToOrderProcessed> map_to_order_processed;
     std::unique_ptr<functions::MapToOrderState> map_to_order_state;
-    std::unique_ptr<functions::OrderProcessedEndpoint> order_processed_endpoint;
-    std::unique_ptr<functions::ProcessOrder> process_order;
-    std::unique_ptr<functions::ProcessOrderItem> process_order_item;
+    std::unique_ptr<functions::OrderProcessedEndpointSink> order_processed_endpoint_sink;
+    std::unique_ptr<functions::ProcessOrderItemSink> process_order_item_sink;
     std::unique_ptr<functions::ProcessOrderItems> process_order_items;
+    std::unique_ptr<functions::ProcessOrderSource> process_order_source;
     std::unique_ptr<functions::SoftDeadline> soft_deadline;
   };
 
@@ -208,12 +208,12 @@ class ServiceGenerated
   using ProcessOrderItemGrpcSinkEndpoint =
       servicelib::datasink::grpc::NoStreamingEndpoint<
           processorderitem::ProcessOrderItemRequest, processorderitem::ProcessOrderItemResponse, example::model::types::OrderItem, example::model::types::OrderItemResult,
-          functions::ProcessOrderItem, ProcessOrderItemGrpcClientFunction, example::order_service::types::OrderState>;
+          functions::ProcessOrderItemSink, ProcessOrderItemGrpcClientFunction, example::order_service::types::OrderState>;
 
   using ProcessOrderHTTPSourceConsumer =
       servicelib::datasource::http::BeastEndpointConsumer<
           example::order_service::types::Order, example::order_service::types::OrderState, std::exception_ptr,
-          ServiceGenerated, functions::ProcessOrder>;
+          ServiceGenerated, functions::ProcessOrderSource>;
 
  public:
   std::shared_ptr<servicelib::datasource::http::IBeastEndpoint>
@@ -224,7 +224,7 @@ class ServiceGenerated
 
   using PublishOrderProcessedKafkaSinkEndpoint =
       servicelib::datasink::kafka::Endpoint<
-          example::model::types::OrderProcessed, std::monostate, functions::OrderProcessedEndpoint, std::exception_ptr>;
+          example::model::types::OrderProcessed, std::monostate, functions::OrderProcessedEndpointSink, std::exception_ptr>;
 
 
 

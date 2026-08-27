@@ -1,4 +1,4 @@
-# Task 2/20: `LocalSchedule`
+# Task 2/36: `ActivityJobEndpointSource`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
@@ -6,13 +6,8 @@
 |-------|-------|
 | Language | `Go` |
 | Kind | `schedule-source` |
-| File | `automationservice/internal/functions/localschedule.go` |
+| File | `automationservice/internal/functions/activity/activityjobendpointsource.go` |
 | Service | `Automation Service` |
-
-
-## Behaviour
-
-Create a job message identifying the local scheduled firing.
 
 
 
@@ -20,12 +15,13 @@ Create a job message identifying the local scheduled firing.
 
 ## Stream types
 - Input: `AutomationJob`
+- Output: `AutomationJob`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/localschedule.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/activity/activityjobendpointsource.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task2.md — LocalSchedule — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task2.md — ActivityJobEndpointSource — Go — done`

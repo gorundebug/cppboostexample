@@ -6,8 +6,8 @@
 |-------|-------|
 | Language | `C++/Boost` |
 | Kind | `delay` |
-| File | `orderservice/internal/functions/soft_deadline.hpp` |
-| Test | `orderservice/internal/functions/soft_deadline_test.cpp` |
+| File | `orderservice/internal/functions/order/soft_deadline.hpp` |
+| Test | `orderservice/internal/functions/order/soft_deadline_test.cpp` |
 | Service | `Order Service` |
 
 
@@ -27,11 +27,11 @@ When no request deadline exists, use the configured duration itself. Never wait 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `orderservice/internal/functions/soft_deadline.hpp` and preserve its generated contract
+- [ ] Open `orderservice/internal/functions/order/soft_deadline.hpp` and preserve its generated contract
 - [ ] Inspect input type `Order` in `orderservice/internal/types/order.hpp`
 - [ ] Inspect output type `Order` in `orderservice/internal/types/order.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `orderservice/internal/functions/soft_deadline_test.cpp`
+- [ ] Implement meaningful assertions in `orderservice/internal/functions/order/soft_deadline_test.cpp`
 - [ ] Re-read this checklist
 - [ ] Append to `spec/progress.md`: `- [x] orderservice/task5.md — SoftDeadline — C++/Boost — done`

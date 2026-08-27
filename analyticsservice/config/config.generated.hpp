@@ -151,7 +151,7 @@ inline Config MakeConfig() {
     value.idSource = kConsumeOrderProcessedStreamId;
     value.xPos = -1390;
     value.yPos = -19;
-    value.functionPackage = "";
+    value.functionPackage = "analytics";
     value.functionName = "CountOrderProcessed";
     value.functionDescription = "Count successful and unsuccessful orders independently, then return the event unchanged.\n";
     value.functionInitializerGroup = "";
@@ -184,7 +184,7 @@ inline Config MakeConfig() {
     value.consumerGroup = "analytics-service";
     value.replicationFactor = 1;
     value.functionName = "OrderProcessedEndpoint";
-    value.functionPackage = "";
+    value.functionPackage = "endpoint";
     value.publicFunction = false;
     value.functionDescription = "Exchange OrderProcessed events keyed by order ID.\nProducers include the final status, processing time, total and confirmed item counts, and a failure reason for unsuccessful orders.\nConsumers decode the event and mark its Kafka message processed only after the pipeline handles it successfully.\n";
     value.functionInitializerGroup = "";

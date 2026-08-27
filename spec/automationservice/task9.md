@@ -1,19 +1,13 @@
-# Task 9/20: `ProcessFanoutActivityB`
+# Task 9/36: `SequentialActivityAEndpointSink`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `Go` |
-| Kind | `map` |
-| File | `automationservice/internal/functions/processfanoutactivityb.go` |
-| Test | `automationservice/internal/functions/processfanoutactivityb_test.go` |
+| Kind | `custom-sink` |
+| File | `automationservice/internal/functions/activity/sequentialactivityaendpointsink.go` |
 | Service | `Automation Service` |
-
-
-## Behaviour
-
-Return Activity B's typed fan-out result.
 
 
 
@@ -26,9 +20,8 @@ Return Activity B's typed fan-out result.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/processfanoutactivityb.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/activity/sequentialactivityaendpointsink.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/processfanoutactivityb_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task9.md — ProcessFanoutActivityB — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task9.md — SequentialActivityAEndpointSink — Go — done`

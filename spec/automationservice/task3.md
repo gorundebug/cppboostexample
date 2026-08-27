@@ -1,19 +1,13 @@
-# Task 3/20: `ObserveActivityResult`
+# Task 3/36: `FanoutActivityAEndpointSink`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `Go` |
-| Kind | `map` |
-| File | `automationservice/internal/functions/observeactivityresult.go` |
-| Test | `automationservice/internal/functions/observeactivityresult_test.go` |
+| Kind | `custom-sink` |
+| File | `automationservice/internal/functions/activity/fanoutactivityaendpointsink.go` |
 | Service | `Automation Service` |
-
-
-## Behaviour
-
-Preserve the result returned through the on-demand Activity endpoint.
 
 
 
@@ -26,9 +20,8 @@ Preserve the result returned through the on-demand Activity endpoint.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `Go` section
-- [ ] Open `automationservice/internal/functions/observeactivityresult.go` and preserve its generated contract
+- [ ] Open `automationservice/internal/functions/activity/fanoutactivityaendpointsink.go` and preserve its generated contract
 - [ ] Implement the Go function and propagate the received `context.Context`
 - [ ] Run `make test`
-- [ ] Implement meaningful assertions in `automationservice/internal/functions/observeactivityresult_test.go`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] automationservice/task3.md — ObserveActivityResult — Go — done`
+- [ ] Append to `spec/progress.md`: `- [x] automationservice/task3.md — FanoutActivityAEndpointSink — Go — done`
