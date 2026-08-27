@@ -67,7 +67,7 @@ wait_ready() {
     sleep 2
   done
   attempts=0
-  until curl --silent --output /dev/null "$git_mirror_url/"; do
+  until curl --fail --silent --output /dev/null "$git_mirror_url/"; do
     attempts=$((attempts + 1))
     if [ "$attempts" -ge 60 ]; then
       echo "[dependency-cache] Git mirror did not become ready at $git_mirror_url" >&2
@@ -80,7 +80,7 @@ wait_ready() {
 
 wait_git_mirror() {
   attempts=0
-  until curl --silent --output /dev/null "$git_mirror_url/"; do
+  until curl --fail --silent --output /dev/null "$git_mirror_url/"; do
     attempts=$((attempts + 1))
     if [ "$attempts" -ge 60 ]; then
       echo "[dependency-cache] Git mirror did not become ready at $git_mirror_url" >&2
@@ -97,11 +97,15 @@ refresh_git_mirrors() {
   wait_git_mirror
   if [ "$#" -gt 0 ]; then
     payload=$(printf '%s\n' "$@")
-    curl --fail --show-error --silent --request POST \
+    curl --fail --show-error --silent \
+      --retry 8 --retry-delay 2 --retry-max-time 180 --retry-all-errors \
+      --request POST \
       --data-binary "$payload" \
       "$git_mirror_url/cgi-bin/git/__servicegen_refresh"
   else
-    curl --fail --show-error --silent --request POST \
+    curl --fail --show-error --silent \
+      --retry 8 --retry-delay 2 --retry-max-time 180 --retry-all-errors \
+      --request POST \
       "$git_mirror_url/cgi-bin/git/__servicegen_refresh"
   fi
 }
