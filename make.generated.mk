@@ -33,6 +33,15 @@ include make.golang.generated.mk
 include make.cpp.generated.mk
 
 DEBUG_TARGETS := debug-analyticsservice debug-automationservice debug-inventoryservice debug-orderservice
+ANALYTICS_SERVICE_DEBUG_PORT ?= 2345
+export ANALYTICS_SERVICE_DEBUG_PORT
+AUTOMATION_SERVICE_DEBUG_PORT ?= 2346
+export AUTOMATION_SERVICE_DEBUG_PORT
+INVENTORY_SERVICE_DEBUG_PORT ?= 2347
+export INVENTORY_SERVICE_DEBUG_PORT
+ORDER_SERVICE_DEBUG_PORT ?= 2348
+export ORDER_SERVICE_DEBUG_PORT
+
 DEPENDENCY_DOCKER_TARGETS := $(LANG_DOCKER_BUILD_TARGETS) $(LANG_DOCKER_DEV_BUILD_TARGETS) \
 	$(LANG_DOCKER_VERIFY_TARGETS) $(DEBUG_TARGETS) docker-build docker-build-local docker-build-dev docker-up docker-up-dev \
 	grafana-dashboards kubernetes-up kubernetes-build kubernetes-deploy \
@@ -117,24 +126,24 @@ docker-up: docker-build grafana-dashboards ## Start all services through Docker 
 docker-up-dev: docker-build-dev grafana-dashboards ## Start source-mounted development services
 	@$(DOCKER_COMPOSE_DEV) up -d --no-build
 
-debug-analyticsservice: ## Start only Analytics Service with its remote debugger on localhost:2345
+debug-analyticsservice: ## Debug Analytics Service on $$(ANALYTICS_SERVICE_DEBUG_PORT)
 	@$(MAKE) -C "analyticsservice" docker-build-dev USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)"
 	@ANALYTICS_SERVICE_DEBUG=1 \
 		DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \
 		up -d --no-deps --build --force-recreate analyticsservice
 
-debug-automationservice: ## Start only Automation Service with its remote debugger on localhost:2346
+debug-automationservice: ## Debug Automation Service on $$(AUTOMATION_SERVICE_DEBUG_PORT)
 	@AUTOMATION_SERVICE_DEBUG=1 \
 		DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \
 		up -d --no-deps --build --force-recreate automationservice
 
-debug-inventoryservice: ## Start only Inventory Service with its remote debugger on localhost:2347
+debug-inventoryservice: ## Debug Inventory Service on $$(INVENTORY_SERVICE_DEBUG_PORT)
 	@$(MAKE) -C "inventoryservice" docker-build-dev USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)"
 	@INVENTORY_SERVICE_DEBUG=1 \
 		DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \
 		up -d --no-deps --build --force-recreate inventoryservice
 
-debug-orderservice: ## Start only Order Service with its remote debugger on localhost:2348
+debug-orderservice: ## Debug Order Service on $$(ORDER_SERVICE_DEBUG_PORT)
 	@$(MAKE) -C "orderservice" docker-build-dev USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)"
 	@ORDER_SERVICE_DEBUG=1 \
 		DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \

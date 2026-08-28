@@ -29,6 +29,8 @@ DEPENDENCY_DOCKER_TARGETS := docker-build docker-up docker-build-dev docker-up-d
 include dependency-proxy.generated.mk
 
 USE_LOCAL_MODULES ?= 0
+DEBUG_PORT ?= 2345
+export DEBUG_PORT
 
 export GOWORK := off
 ifeq ($(strip $(USE_LOCAL_MODULES)),1)
@@ -96,7 +98,7 @@ docker-up: docker-build
 docker-up-dev: docker-build-dev
 	@DEBUG=0 $(COMPOSE_DEV) up -d --no-build --force-recreate $(SERVICE_NAME)
 
-debug: docker-build-dev
+debug: docker-build-dev ## Start Delve on host port $(DEBUG_PORT), container port 2345
 	@DEBUG=1 $(COMPOSE_DEV) up -d --no-build --force-recreate $(SERVICE_NAME)
 
 docker-down:

@@ -10,6 +10,8 @@ services:
           exec gdbserver :2345 /workspace/build/example_order_service --config /workspace/source/config/config.yaml --values /workspace/source/config/overrides.integration.generated.yaml
         fi
         exec /workspace/build/example_order_service --config /workspace/source/config/config.yaml --values /workspace/source/config/overrides.integration.generated.yaml
+    ports:
+      - "${DEBUG_PORT:-2345}:2345"
     volumes:
       - .:/workspace/source:ro
       - cpp-dev-cmake-build:/workspace/build

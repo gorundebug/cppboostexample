@@ -13,6 +13,8 @@ services:
           exec dlv debug ./cmd/service/main.go --headless --listen=:2345 --api-version=2 --accept-multiclient --allow-non-terminal-interactive=true -- -config ./config/config.yaml -values ./config/overrides.yaml
         fi
         exec go run ./cmd/service/main.go -config ./config/config.yaml -values ./config/overrides.yaml
+    ports:
+      - "${DEBUG_PORT:-2345}:2345"
     volumes:
       - .:/workspace/source:ro
       - go-worktree:/workspace/service
