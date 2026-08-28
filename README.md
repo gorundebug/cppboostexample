@@ -27,13 +27,17 @@ debugging commands and can be packaged or checked out independently.
 Run `make help` to list the targets generated for the languages present in this
 project.
 
+Every command below states its execution environment explicitly: `[host]`
+uses the caller's language toolchain, `[Docker]` executes through containers,
+and `[mixed]` orchestrates both according to the languages in this project.
+
 ## First local run
 
 ```sh
-make tools
-make build
-make test
-make docker-up
+make tools       # [host] install/check project tooling
+make build       # [mixed] build every language with its documented backend
+make test        # [mixed] run every language test suite with its documented backend
+make docker-up   # [Docker] build copied-source runtime images and start the stack
 ```
 
 The project Makefile explicitly uses `USE_LOCAL_MODULES=1`, so a freshly
@@ -43,9 +47,9 @@ from copied sources, generates Grafana dashboards and starts the complete
 project infrastructure and all services.
 
 ```sh
-make docker-down       # stop the runtime stack, preserve volumes
-make docker-restart    # rebuild and restart the runtime stack
-make docker-clean      # stop the stack and remove project volumes
+make docker-down       # [Docker] stop the runtime stack, preserve volumes
+make docker-restart    # [Docker] rebuild and restart the runtime stack
+make docker-clean      # [Docker] stop the stack and remove project volumes
 ```
 
 ## Build modes
@@ -53,18 +57,18 @@ make docker-clean      # stop the stack and remove project volumes
 Runtime, development and debugger modes are intentionally separate:
 
 ```sh
-make docker-build      # build autonomous runtime images from copied sources
-make docker-up         # build and start the complete runtime stack
-make docker-up-dev     # build/start services with read-only source mounts
-make docker-down-dev   # stop the development stack
+make docker-build      # [Docker] build autonomous runtime images from copied sources
+make docker-up         # [Docker] build and start the complete runtime stack
+make docker-up-dev     # [Docker] build/start services with read-only source mounts
+make docker-down-dev   # [Docker] stop the development stack
 
-make debug-analyticsservice ANALYTICS_SERVICE_DEBUG_PORT=2345 # debug only Analytics Service
+make debug-analyticsservice ANALYTICS_SERVICE_DEBUG_PORT=2345 # [Docker] debug only Analytics Service
 
-make debug-automationservice AUTOMATION_SERVICE_DEBUG_PORT=2346 # debug only Automation Service
+make debug-automationservice AUTOMATION_SERVICE_DEBUG_PORT=2346 # [Docker] debug only Automation Service
 
-make debug-inventoryservice INVENTORY_SERVICE_DEBUG_PORT=2347 # debug only Inventory Service
+make debug-inventoryservice INVENTORY_SERVICE_DEBUG_PORT=2347 # [Docker] debug only Inventory Service
 
-make debug-orderservice ORDER_SERVICE_DEBUG_PORT=2348 # debug only Order Service
+make debug-orderservice ORDER_SERVICE_DEBUG_PORT=2348 # [Docker] debug only Order Service
 
 ```
 
@@ -137,27 +141,27 @@ make -C orderservice docker-build USE_LOCAL_MODULES=1
 ## Quality and generated code
 
 ```sh
-make gen             # regenerate transport and schema-owned sources
-make build           # build every service
-make test            # run every service test suite
-make lint            # run all configured linters/type checks
-make lint-fix        # apply supported automatic fixes
-make fmt             # format generated-language sources
-make ci              # tools + build + test + lint
-make integration-test
-make clean           # remove language build artifacts
+make gen             # [mixed] regenerate transport and schema-owned sources
+make build           # [mixed] build every service
+make test            # [mixed] run every service test suite
+make lint            # [mixed] run all configured linters/type checks
+make lint-fix        # [mixed] apply supported automatic fixes
+make fmt             # [mixed] format generated-language sources
+make ci              # [mixed] tools + build + test + lint
+make integration-test # [Docker] run the integration stack and assertions
+make clean           # [host] remove language build artifacts
 ```
 
 
 ### Go
 
 ```sh
-make golang-build
-make golang-test
-make golang-lint
-make golang-lint-fix
-make golang-codegen
-make go-mod-sync
+make golang-build     # [host]
+make golang-test      # [host]
+make golang-lint      # [host]
+make golang-lint-fix  # [host]
+make golang-codegen   # [host]
+make go-mod-sync      # [host]
 ```
 
 
@@ -166,17 +170,17 @@ make go-mod-sync
 ### C++ / Boost
 
 ```sh
-make cpp-build
-make cpp-test
-make cpp-release-build
-make cpp-release-test
-make cpp-asan-test       # AddressSanitizer + UndefinedBehaviorSanitizer
-make cpp-tsan-test       # ThreadSanitizer
-make cpp-lint
-make cpp-format
-make cpp-workspace-build
-make cpp-workspace-test
-make cpp-package
+make cpp-build           # [Docker] Debug build
+make cpp-test            # [Docker] Debug build and tests
+make cpp-release-build   # [Docker] optimized build
+make cpp-release-test    # [Docker] optimized build and tests
+make cpp-asan-test       # [Docker] AddressSanitizer + UndefinedBehaviorSanitizer
+make cpp-tsan-test       # [Docker] ThreadSanitizer
+make cpp-lint            # [Docker]
+make cpp-format          # [Docker]
+make cpp-workspace-build # [Docker]
+make cpp-workspace-test  # [Docker]
+make cpp-package         # [host] package standalone service directories
 ```
 
 
@@ -192,11 +196,11 @@ Nexus/Git-mirror stack and never bypass it.
 
 ```sh
 export DEPENDENCY_PROXY_DIR=/absolute/path/to/dependency-proxy-data
-make DEPENDENCY_PROXY_ACCEPT_EULA=true dependency-cache-up # first start only
-make dependency-cache-status
-make dependency-cache-refresh  # refresh every mirrored Git repository
-make dependency-cache-docker-build
-make dependency-cache-down     # preserve cached data
+make DEPENDENCY_PROXY_ACCEPT_EULA=true dependency-cache-up # [Docker] first start only
+make dependency-cache-status       # [Docker]
+make dependency-cache-refresh      # [Docker] refresh every mirrored Git repository
+make dependency-cache-docker-build # [Docker] prefetch/cache base images
+make dependency-cache-down         # [Docker] preserve cached data
 ```
 
 See [`dependency-cache/README.generated.md`](./dependency-cache/README.generated.md)
@@ -206,13 +210,13 @@ maintenance.
 ## Kubernetes
 
 ```sh
-make kubernetes-up      # build, deploy and verify the local cluster
-make kubernetes-build   # build and publish images to its local registry
-make kubernetes-deploy  # install infrastructure and service Helm releases
-make kubernetes-test    # verify rollouts and metrics
-make kubernetes-status
-make kubernetes-down    # preserve cluster volumes
-make kubernetes-clean   # remove the cluster and its volumes
+make kubernetes-up      # [Docker] build, deploy and verify the local cluster
+make kubernetes-build   # [Docker] build and publish images to its local registry
+make kubernetes-deploy  # [Docker] install infrastructure and service Helm releases
+make kubernetes-test    # [Docker] verify rollouts and metrics
+make kubernetes-status  # [Docker]
+make kubernetes-down    # [Docker] preserve cluster volumes
+make kubernetes-clean   # [Docker] remove the cluster and its volumes
 ```
 
 The shorter `k8s-*` aliases provide the same operations. Kubernetes-specific

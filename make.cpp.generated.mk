@@ -24,13 +24,13 @@ cpp-tools: ## Verify Docker is available for the canonical C++ toolchain
 	@docker version >/dev/null
 	@docker compose version >/dev/null
 
-cpp-build: cpp-tools ## Build all C++ services in Docker
+cpp-build: cpp-tools ## [Docker] Build all C++ services
 	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" build USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)" || exit $$?; done
 
-cpp-test: cpp-tools ## Run all C++ unit tests in Docker
+cpp-test: cpp-tools ## [Docker] Run all C++ unit tests
 	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" test USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)" || exit $$?; done
 
-cpp-release-build: cpp-tools ## Build optimized C++ services in Docker
+cpp-release-build: cpp-tools ## [Docker] Build optimized C++ services
 	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" release-build USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)" || exit $$?; done
 
 cpp-release-test: cpp-tools ## Build and test optimized C++ services in Docker

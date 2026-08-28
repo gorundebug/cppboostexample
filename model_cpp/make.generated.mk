@@ -8,10 +8,10 @@ BUILD_DIR ?= build
 configure: ## Configure this standalone C++ module
 	@cmake -S . -B "$(BUILD_DIR)" -G Ninja -DCMAKE_BUILD_TYPE=Debug
 
-build: configure ## Build this standalone C++ module
+build: configure ## [host] Build this standalone C++ module
 	@cmake --build "$(BUILD_DIR)" --parallel
 
-test: build ## Run module tests when present
+test: build ## [host] Run module tests when present
 	@ctest --test-dir "$(BUILD_DIR)" --output-on-failure
 
 clean: ## Remove CMake build artifacts

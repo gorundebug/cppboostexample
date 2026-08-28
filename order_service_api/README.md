@@ -1,8 +1,10 @@
 # order_service_api
 
-Standalone generated Boost C++ contract/model module.
+Go module path: `github.com/gorundebug/cppboostexample-order-service-api`
+
+## Make commands
 
 ```bash
-make build
-make test
+make gen-proto           # [host] generate protobuf code
+make fmt-proto           # [host] format .proto files
 ```

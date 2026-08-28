@@ -5,22 +5,22 @@ use the generated Docker toolchain, so the host needs only Make, Docker and
 Docker Compose v2.
 
 ```bash
-make build          # Debug build from copied sources
-make test           # Debug build and unit tests
-make release-build  # optimized autonomous runtime image
-make release-test   # optimized build and tests
-make asan-test      # AddressSanitizer + UndefinedBehaviorSanitizer
-make tsan-test      # ThreadSanitizer
-make lint           # clang-format and clang-tidy checks
-make fmt            # format C++ sources
-make docker-build   # build the production-style runtime image
-make docker-up      # build and start only this service
-make docker-up-dev  # start with sources mounted read-only
-make debug DEBUG_PORT=2345 # start gdbserver using this host port
-make docker-down
-make docker-down-dev
-make docker-clean   # stop and remove standalone volumes/build state
-make help
+make build          # [Docker] Debug compile check from copied sources; no start
+make test           # [Docker] Debug build and unit tests from copied sources
+make release-build  # [Docker] alias of make docker-build
+make release-test   # [Docker] alias of make test
+make asan-test      # [Docker] AddressSanitizer + UndefinedBehaviorSanitizer
+make tsan-test      # [Docker] ThreadSanitizer
+make lint           # [host] clang-format and clang-tidy checks of an existing build
+make fmt            # [host] format C++ sources
+make docker-build   # [Docker] build the optimized autonomous runtime image
+make docker-up      # [Docker] build and start only this service
+make docker-up-dev  # [Docker] start with sources mounted read-only
+make debug DEBUG_PORT=2345 # [Docker] start gdbserver using this host port
+make docker-down    # [Docker] stop the standalone runtime stack
+make docker-down-dev # [Docker] stop the standalone development stack
+make docker-clean   # [Docker] stop and remove standalone volumes/build state
+make help           # [host] list generated targets
 ```
 
 The service defaults to repository modules (`USE_LOCAL_MODULES=0`). A generated

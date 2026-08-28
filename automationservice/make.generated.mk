@@ -55,7 +55,7 @@ endif
 
 all: build
 
-build: gen-proto service_build
+build: gen-proto service_build ## [host] Generate owned bindings and build the service
 
 service_build:
 	@echo "Building $(SERVICE_NAME)..."
@@ -86,7 +86,7 @@ fmt-proto:
 		$(BUF) format -w $$protofile; \
 	done
 
-docker-build:
+docker-build: ## [Docker] Build the autonomous copied-source runtime image
 	@$(COMPOSE) build $(SERVICE_NAME)
 
 docker-build-dev:

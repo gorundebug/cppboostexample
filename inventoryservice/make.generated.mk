@@ -27,15 +27,15 @@ endif
 .PHONY: build test release-build release-test asan-test tsan-test release-up lint fmt clean \
 	docker-build docker-build-dev docker-up docker-up-dev debug docker-down docker-down-dev docker-clean help
 
-build: ## Build the standalone service in the canonical Docker toolchain
+build: ## [Docker] Debug compile check from copied sources; does not start the service
 	@docker compose -f docker-compose.cmake.generated.yml build cpp-check
 
-test: ## Build and run all service tests
+test: ## [Docker] Build and run all service tests from copied sources
 	@docker compose -f docker-compose.cmake.generated.yml build cpp-test
 
-release-build: docker-build ## Build the optimized standalone service in Docker
+release-build: docker-build ## [Docker] Alias of docker-build
 
-release-test: test ## Build and test the standalone service in Docker
+release-test: test ## [Docker] Alias of test
 
 asan-test: ## Run standalone service tests with ASan and UBSan
 	@SANITIZER_INTEGRATION=0 ./scripts/sanitizer-test.generated.sh asan
@@ -56,7 +56,7 @@ clean: ## Remove CMake build artifacts
 	@docker compose -f docker-compose.cmake.generated.yml down --volumes --remove-orphans
 	@rm -rf build
 
-docker-build: ## Build the autonomous Boost C++ runtime image from copied sources
+docker-build: ## [Docker] Build the optimized autonomous runtime image from copied sources
 	@docker compose -f docker-compose.cmake.generated.yml build inventoryservice-runtime
 
 docker-build-dev: ## Build this service in the source-mounted Boost C++ development image

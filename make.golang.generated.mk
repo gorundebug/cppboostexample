@@ -32,10 +32,10 @@ LANG_DOCKER_DEV_BUILD_TARGETS += golang-docker-dev-build
 	golang-clean golang-tools \
 	golang-docker-build golang-docker-dev-build go-mod-tidy go-mod-sync fmt-go fmt-proto gen-proto golang-workflowcheck
 
-golang-build: golang-gen ## Generate transport code and build all Go services
+golang-build: golang-gen ## [host] Generate transport code and build all Go services
 	@$(MAKE) -C ./automationservice -f Makefile service_build USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)" PROJECT_DIR="$(PROJECT_DIR)" BIN_DIR="$(BIN_DIR)"
 
-golang-test: golang-codegen ## Generate transport code and run tests for all Go services
+golang-test: golang-codegen ## [host] Generate transport code and run tests for all Go services
 	@$(MAKE) -C ./automationservice -f Makefile test USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)"
 
 golang-lint: $(GOLANGCI_LINT) ## Run Go linters

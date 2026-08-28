@@ -86,9 +86,9 @@ init: tools gen fmt ## First-time setup: install tools, generate, and format
 
 git-init: gen git-push go-mod-sync ## Generate, publish repositories, and synchronize dependencies
 
-build: $(LANG_BUILD_TARGETS) ## Build all services
+build: $(LANG_BUILD_TARGETS) ## [mixed] Build all services using each language backend
 
-test: $(LANG_TEST_TARGETS) ## Run all tests
+test: $(LANG_TEST_TARGETS) ## [mixed] Run all tests using each language backend
 
 lint: $(LANG_LINT_TARGETS) ## Run all language linters and type checks
 
@@ -108,7 +108,7 @@ integration-test: $(LANG_INTEGRATION_TARGETS) ## Run all integration tests
 
 run: docker-up ## Run all services through Docker Compose
 
-docker-build: $(LANG_DOCKER_BUILD_TARGETS) ## Build all service Docker images
+docker-build: $(LANG_DOCKER_BUILD_TARGETS) ## [Docker] Build all copied-source runtime images
 
 docker-build-local: docker-build ## Build Docker images for local development
 

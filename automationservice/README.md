@@ -12,22 +12,22 @@
 ## Make commands
 
 ```bash
-make build            # generate owned protobuf code and build the service
-make run              # run on the host with generated config files
-make test             # run Go tests
-make lint             # run golangci-lint
-make lint-fix         # apply supported golangci-lint fixes
-make gen-proto        # regenerate service-owned protobuf code
-make fmt-proto        # format service-owned .proto files
-make act              # run repository CI locally through act
-make docker-build     # build the autonomous runtime image from copied sources
-make docker-up        # build and start only this service
-make docker-up-dev    # start with this directory mounted read-only
-make debug DEBUG_PORT=2345 # start Delve; DEBUG_PORT is the host forwarding port
-make docker-down      # stop the standalone runtime stack
-make docker-down-dev  # stop the standalone development stack
-make clean            # remove Go build artifacts
-make help             # list the generated service targets
+make build            # [host] generate owned protobuf code and build the service
+make run              # [host] run with generated config files
+make test             # [host] run Go tests
+make lint             # [host] run golangci-lint
+make lint-fix         # [host] apply supported golangci-lint fixes
+make gen-proto        # [host] regenerate service-owned protobuf code
+make fmt-proto        # [host] format service-owned .proto files
+make act              # [Docker] run repository CI locally through act
+make docker-build     # [Docker] build the autonomous runtime image from copied sources
+make docker-up        # [Docker] build and start only this service
+make docker-up-dev    # [Docker] start with this directory mounted read-only
+make debug DEBUG_PORT=2345 # [Docker] start Delve; DEBUG_PORT is the host port
+make docker-down      # [Docker] stop the standalone runtime stack
+make docker-down-dev  # [Docker] stop the standalone development stack
+make clean            # [host] remove Go build artifacts
+make help             # [host] list the generated service targets
 ```
 
 The service defaults to `USE_LOCAL_MODULES=0`: its framework and contract/model
