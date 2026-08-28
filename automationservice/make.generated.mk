@@ -28,6 +28,8 @@ export
 DEPENDENCY_DOCKER_TARGETS := docker-build docker-up docker-build-dev docker-up-dev debug
 include dependency-proxy.generated.mk
 
+USE_LOCAL_MODULES ?= 0
+
 export GOWORK := off
 ifeq ($(strip $(USE_LOCAL_MODULES)),1)
 export GOWORK := $(abspath ../go.work)

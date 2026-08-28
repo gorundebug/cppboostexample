@@ -9,6 +9,8 @@ DEPENDENCY_DOCKER_TARGETS := build test release-build release-test asan-test tsa
 	docker-build docker-up docker-build-dev docker-up-dev debug
 include dependency-proxy.generated.mk
 
+USE_LOCAL_MODULES ?= 0
+
 ifeq ($(strip $(USE_LOCAL_MODULES)),1)
 export MODULE_INVENTORY_SERVICE_API_SOURCE_CONTEXT := ../inventory_service_api
 export MODULE_MODEL_CPP_SOURCE_CONTEXT := ../model_cpp
