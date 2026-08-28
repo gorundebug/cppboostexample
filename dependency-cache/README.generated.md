@@ -51,13 +51,14 @@ Engine on Linux. On Linux the proxy launcher therefore binds the published
 ports to the host bridge (`0.0.0.0` by default); use the host firewall or set
 `DEPENDENCY_PROXY_BIND_HOST` explicitly when tighter exposure is required.
 
-Docker image proxying is exposed on port 18083, but Docker Desktop/Engine must
-be configured explicitly to trust/use that registry or registry mirror. The
-generated project never edits daemon settings. Pinned C++ sources use immutable
-archives through host-specific raw proxies to populate their separate versioned
-source cache. A Conan hook rejects a previously unknown source host in proxy
-mode, so a dependency update cannot silently bypass Nexus. Generated
-Debian/Ubuntu build stages rewrite their APT sources to Nexus
+Docker image proxying is exposed on port 18083. When proxy mode is enabled,
+generated service builds pass `DEPENDENCY_DOCKER_REGISTRY` to every language's
+Dockerfile, so base images are resolved through Nexus without changing Docker
+Desktop/Engine daemon settings. Without proxy mode the value remains
+`docker.io`. Pinned C++ sources use immutable archives through host-specific raw
+proxies to populate their separate versioned source cache. A Conan hook rejects
+a previously unknown source host in proxy mode, so a dependency update cannot
+silently bypass Nexus. Generated Debian/Ubuntu build stages rewrite their APT sources to Nexus
 when proxy mode is enabled. Once any of these layers contains an artifact, a
 build does not fetch it from the public upstream again.
 

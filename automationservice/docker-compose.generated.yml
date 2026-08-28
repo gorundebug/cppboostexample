@@ -8,6 +8,7 @@ services:
       extra_hosts:
         - "host.docker.internal:host-gateway"
       args:
+        DEPENDENCY_DOCKER_REGISTRY: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}
         GOPROXY: ${GOPROXY:-direct}
         GOSUMDB: ${GOSUMDB:-sum.golang.org}
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}

@@ -8,6 +8,7 @@ services:
       extra_hosts:
         - "host.docker.internal:host-gateway"
       args:
+        DEPENDENCY_DOCKER_REGISTRY: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}
         DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-}
         DEPENDENCY_CONAN_REMOTE_URL: ${DEPENDENCY_CONAN_REMOTE_URL:-}
         PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
@@ -60,6 +61,7 @@ services:
       extra_hosts:
         - "host.docker.internal:host-gateway"
       args:
+        DEPENDENCY_DOCKER_REGISTRY: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}
         DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-}
         DEPENDENCY_APT_UBUNTU_ARCHIVE_URL: ${DEPENDENCY_APT_UBUNTU_ARCHIVE_URL:-}
         DEPENDENCY_APT_UBUNTU_SECURITY_URL: ${DEPENDENCY_APT_UBUNTU_SECURITY_URL:-}
