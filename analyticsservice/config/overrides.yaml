@@ -6,6 +6,9 @@ dataConnectors:
     securityProtocol: PLAINTEXT
     username: ""
 endpoints:
+  analyticsSchedule:
+    enabled: true
+    tracingEnabled: false
   orderProcessed:
     enabled: true
 services:
