@@ -94,7 +94,7 @@ wait_git_mirror() {
 
 refresh_git_mirrors() {
   shift
-  compose up -d --build git-mirror
+  compose up -d git-mirror
   wait_git_mirror
   if [ "$#" -gt 0 ]; then
     payload=$(printf '%s\n' "$@")
