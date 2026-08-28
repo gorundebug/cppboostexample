@@ -6,7 +6,6 @@ PROTOC ?= $(or $(shell command -v protoc 2>/dev/null),$(TOOLS_DIR)/protoc)
 DEPENDENCY_DOCKER_TARGETS :=
 include dependency-proxy.generated.mk
 
-
 .PHONY: all build test gen-proto fmt-proto
 
 all: gen-proto
