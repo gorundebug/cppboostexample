@@ -1,68 +1,220 @@
-# C++ Boost ServiceLib example
+# Example
 
-Generated order-processing example for `cppboostservicelib`.
+Generated ServiceLib project. The root is a development workspace and an
+orchestration layer; every service directory owns its build, Docker and
+debugging commands and can be packaged or checked out independently.
 
-This project mirrors the directory and semantic contract of `cppexample` while
-using Boost.Asio, Boost.Beast and asio-grpc instead of userver.
+## Services
 
-The Docker C++ toolchain enables `ccache` automatically and keeps downloaded
-`apt` packages in the local BuildKit cache. Repeated builds reuse dependency
-downloads and compiled objects. Override the default 20 GiB compiler-cache
-limit with, for example, `CCACHE_MAXSIZE=40G make cpp-build`.
 
-## Clean-machine quickstart
+- [`analyticsservice`](./analyticsservice/README.md) — Analytics Service
 
-After cloning only this repository, run:
+- [`automationservice`](./automationservice/README.md) — Automation Service
 
-```sh
-./scripts/quickstart.generated.sh
-```
+- [`inventoryservice`](./inventoryservice/README.md) — Inventory Service
 
-All service and module sources are part of this repository. The script performs
-the complete Docker Release unit build, starts both services and verifies the live
-HTTP-to-gRPC order scenario. Docker fetches the pinned framework revision when
-`SERVICELIB_SOURCE_CONTEXT` is absent. To test unpublished framework changes,
-point that variable at an absolute local `cppboostservicelib` checkout.
+- [`orderservice`](./orderservice/README.md) — Order Service
 
-For a minimal Release image containing only service binaries, their runtime
-libraries, and configuration, run `make docker-up RUNTIME_IMAGE=1`. It removes
-source/build mounts, debugger ports, and build tools. Benchmark and profiling
-tools select this mode automatically. Plain `make docker-up` keeps the
-development layout.
 
-## Optional order analytics through Kafka
+## Prerequisites
 
-The shared `orderProcessed` Kafka endpoint is disabled in Order Service by
-default and creates no producer while disabled. Enable it in
-`orderservice/config/overrides.yaml`:
+- Git;
+- GNU Make;
+- Docker with Docker Compose v2;
+- language toolchains only for host-side build, test, lint or formatting
+  commands. Docker runtime builds do not require host language toolchains.
 
-```yaml
-endpoints:
-  orderProcessed:
-    enabled: true
-```
+Run `make help` to list the targets generated for the languages present in this
+project.
 
-The Analytics Service consumes `order-processed`, counts successful and
-unsuccessful orders, and uses the included Redpanda broker.
-
-## Sanitizer gates
-
-Run the complete generated unit/config and live HTTP-to-gRPC gates against a
-local framework checkout:
+## First local run
 
 ```sh
-SERVICELIB_SOURCE_CONTEXT=/absolute/path/to/cppboostservicelib \
-  ./scripts/sanitizer-test.generated.sh asan
-
-SERVICELIB_SOURCE_CONTEXT=/absolute/path/to/cppboostservicelib \
-  ./scripts/sanitizer-test.generated.sh tsan
+make tools
+make build
+make test
+make docker-up
 ```
 
-The scripts build the pinned protobuf/gRPC host code generators separately,
-then instrument the complete runtime dependency stack and both services. All
-builds use unrestricted `--parallel`; ASan also enables UBSan and leak checks.
+The project Makefile explicitly uses `USE_LOCAL_MODULES=1`, so a freshly
+generated project builds against its sibling contract/model modules without
+publishing them first. `make docker-up` builds production-style runtime images
+from copied sources, generates Grafana dashboards and starts the complete
+project infrastructure and all services.
 
-Dependency download progress is visible by default. Framework consumers can
-disable the detailed Git progress with
-`-DCPPBOOSTSERVICELIB_FETCH_PROGRESS=OFF`; the sanitizer gate deliberately
-forces `-DFETCHCONTENT_QUIET=OFF` so a clean-machine build cannot appear stuck.
+```sh
+make docker-down       # stop the runtime stack, preserve volumes
+make docker-restart    # rebuild and restart the runtime stack
+make docker-clean      # stop the stack and remove project volumes
+```
+
+## Build modes
+
+Runtime, development and debugger modes are intentionally separate:
+
+```sh
+make docker-build      # build autonomous runtime images from copied sources
+make docker-up         # build and start the complete runtime stack
+make docker-up-dev     # build/start services with read-only source mounts
+make docker-down-dev   # stop the development stack
+
+make debug-analyticsservice ANALYTICS_SERVICE_DEBUG_PORT=2345 # debug only Analytics Service
+
+make debug-automationservice AUTOMATION_SERVICE_DEBUG_PORT=2346 # debug only Automation Service
+
+make debug-inventoryservice INVENTORY_SERVICE_DEBUG_PORT=2347 # debug only Inventory Service
+
+make debug-orderservice ORDER_SERVICE_DEBUG_PORT=2348 # debug only Order Service
+
+```
+
+A debug target changes only the selected service. Other services and shared
+infrastructure keep their ordinary project configuration. Override the shown
+host-port variable directly in the Make invocation to run several debuggers at
+once; the debugger keeps listening on port `2345` inside each container.
+
+Application listener ports and Docker host forwarding are independent:
+
+| Service | Container HTTP | Host HTTP default | Container gRPC | Host gRPC default |
+|---|---:|---:|---:|---:|
+| Analytics Service | 9093 | 9093 | 9203 | 9203 |
+| Automation Service | 9094 | 9094 | 9204 | 9204 |
+| Inventory Service | 9092 | 9092 | 9202 | 9202 |
+| Order Service | 9091 | 9091 | 9201 | 9201 |
+
+
+`<SERVICE>_HTTP_PORT` and `<SERVICE>_GRPC_PORT` override the application
+listeners and the container side of each mapping. `<SERVICE>_HOST_HTTP_PORT`
+and `<SERVICE>_HOST_GRPC_PORT` override only the host side. For example,
+`ORDER_SERVICE_HTTP_PORT=8080 ORDER_SERVICE_HOST_HTTP_PORT=18080 make
+docker-up` makes the service listen on `8080` in its container and publishes it
+as `localhost:18080`. Generated Dockerfiles deliberately do not use static
+`EXPOSE` metadata for configurable ports.
+
+## Local modules and published modules
+
+There is no filesystem auto-detection and no fallback between modes:
+
+- project commands default to `USE_LOCAL_MODULES=1`;
+- a command run inside an independent service defaults to
+  `USE_LOCAL_MODULES=0`;
+- `USE_LOCAL_MODULES=1` requires every referenced unpublished module in the
+  generated sibling layout;
+- `USE_LOCAL_MODULES=0` resolves every module at the repository and revision
+  pinned by the generated service.
+
+To verify this workspace against published modules:
+
+```sh
+make build USE_LOCAL_MODULES=0
+make test USE_LOCAL_MODULES=0
+make docker-up USE_LOCAL_MODULES=0
+```
+
+To move a project from local to repository modules, publish the modules at the
+version declared by the DSL, regenerate the project so every service pins that
+version, then use `USE_LOCAL_MODULES=0`. Do not edit generated dependency files
+by hand.
+
+For a separately obtained service and separately obtained unpublished modules,
+place them under one parent directory using their generated directory names:
+
+```text
+checkout/
+  orderservice/
+  inventory_service_api/
+  model_<language>/
+  order_service_api/
+```
+
+Then run the service's Make command explicitly in local mode, for example:
+
+```sh
+make -C orderservice build USE_LOCAL_MODULES=1
+make -C orderservice docker-build USE_LOCAL_MODULES=1
+```
+
+## Quality and generated code
+
+```sh
+make gen             # regenerate transport and schema-owned sources
+make build           # build every service
+make test            # run every service test suite
+make lint            # run all configured linters/type checks
+make lint-fix        # apply supported automatic fixes
+make fmt             # format generated-language sources
+make ci              # tools + build + test + lint
+make integration-test
+make clean           # remove language build artifacts
+```
+
+
+### Go
+
+```sh
+make golang-build
+make golang-test
+make golang-lint
+make golang-lint-fix
+make golang-codegen
+make go-mod-sync
+```
+
+
+
+
+### C++ / Boost
+
+```sh
+make cpp-build
+make cpp-test
+make cpp-release-build
+make cpp-release-test
+make cpp-asan-test       # AddressSanitizer + UndefinedBehaviorSanitizer
+make cpp-tsan-test       # ThreadSanitizer
+make cpp-lint
+make cpp-format
+make cpp-workspace-build
+make cpp-workspace-test
+make cpp-package
+```
+
+
+
+
+
+## Optional dependency proxy
+
+Proxy use is selected only by the caller environment and does not change local
+module selection. Without `DEPENDENCY_PROXY_DIR`, builds use normal upstream
+registries. With it, package, archive and Git downloads use the persistent
+Nexus/Git-mirror stack and never bypass it.
+
+```sh
+export DEPENDENCY_PROXY_DIR=/absolute/path/to/dependency-proxy-data
+make DEPENDENCY_PROXY_ACCEPT_EULA=true dependency-cache-up # first start only
+make dependency-cache-status
+make dependency-cache-refresh  # refresh every mirrored Git repository
+make dependency-cache-docker-build
+make dependency-cache-down     # preserve cached data
+```
+
+See [`dependency-cache/README.generated.md`](./dependency-cache/README.generated.md)
+for setup, routing, retry, Linux/macOS Docker-host details and cache
+maintenance.
+
+## Kubernetes
+
+```sh
+make kubernetes-up      # build, deploy and verify the local cluster
+make kubernetes-build   # build and publish images to its local registry
+make kubernetes-deploy  # install infrastructure and service Helm releases
+make kubernetes-test    # verify rollouts and metrics
+make kubernetes-status
+make kubernetes-down    # preserve cluster volumes
+make kubernetes-clean   # remove the cluster and its volumes
+```
+
+The shorter `k8s-*` aliases provide the same operations. Kubernetes-specific
+details are in
+[`kubernetes/README.generated.md`](./kubernetes/README.generated.md).
