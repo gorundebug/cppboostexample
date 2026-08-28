@@ -11,14 +11,9 @@ services:
       - -c
       - >-
         if [ "$${DEBUG:-0}" = "1" ]; then
-          exec gdbserver :2345
-          /workspace/build/example_analytics_service
-          --config /workspace/source/config/config.yaml
-          --values /workspace/source/config/overrides.yaml;
+          exec gdbserver :2345 /workspace/build/example_analytics_service --config /workspace/source/config/config.yaml --values /workspace/source/config/overrides.yaml;
         else
-          exec /workspace/build/example_analytics_service
-          --config /workspace/source/config/config.yaml
-          --values /workspace/source/config/overrides.yaml;
+          exec /workspace/build/example_analytics_service --config /workspace/source/config/config.yaml --values /workspace/source/config/overrides.yaml;
         fi
     volumes:
       - ./analyticsservice:/workspace/source:ro
@@ -37,12 +32,9 @@ services:
       - >-
         prepare-local-build /workspace/source /workspace/service
         && if [ "$${DEBUG:-0}" = "1" ]; then
-          exec dlv debug ./cmd/service/main.go
-          --headless --listen=:2345 --api-version=2 --accept-multiclient --continue --
-          -config ./config/config.yaml -values ./config/overrides.yaml;
+          exec dlv debug ./cmd/service/main.go --headless --listen=:2345 --api-version=2 --accept-multiclient --allow-non-terminal-interactive=true --continue -- -config ./config/config.yaml -values ./config/overrides.yaml;
         else
-          exec go run ./cmd/service/main.go
-          -config ./config/config.yaml -values ./config/overrides.yaml;
+          exec go run ./cmd/service/main.go -config ./config/config.yaml -values ./config/overrides.yaml;
         fi
     environment:
       GOPROXY: ${GOPROXY:-direct}
@@ -70,14 +62,9 @@ services:
       - -c
       - >-
         if [ "$${DEBUG:-0}" = "1" ]; then
-          exec gdbserver :2345
-          /workspace/build/example_inventory_service
-          --config /workspace/source/config/config.yaml
-          --values /workspace/source/config/overrides.yaml;
+          exec gdbserver :2345 /workspace/build/example_inventory_service --config /workspace/source/config/config.yaml --values /workspace/source/config/overrides.yaml;
         else
-          exec /workspace/build/example_inventory_service
-          --config /workspace/source/config/config.yaml
-          --values /workspace/source/config/overrides.yaml;
+          exec /workspace/build/example_inventory_service --config /workspace/source/config/config.yaml --values /workspace/source/config/overrides.yaml;
         fi
     volumes:
       - ./inventoryservice:/workspace/source:ro
@@ -95,14 +82,9 @@ services:
       - -c
       - >-
         if [ "$${DEBUG:-0}" = "1" ]; then
-          exec gdbserver :2345
-          /workspace/build/example_order_service
-          --config /workspace/source/config/config.yaml
-          --values /workspace/source/config/overrides.yaml;
+          exec gdbserver :2345 /workspace/build/example_order_service --config /workspace/source/config/config.yaml --values /workspace/source/config/overrides.yaml;
         else
-          exec /workspace/build/example_order_service
-          --config /workspace/source/config/config.yaml
-          --values /workspace/source/config/overrides.yaml;
+          exec /workspace/build/example_order_service --config /workspace/source/config/config.yaml --values /workspace/source/config/overrides.yaml;
         fi
     volumes:
       - ./orderservice:/workspace/source:ro

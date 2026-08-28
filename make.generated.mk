@@ -116,7 +116,8 @@ docker-up: docker-build grafana-dashboards ## Start all services through Docker 
 docker-up-dev: docker-build-dev grafana-dashboards ## Start source-mounted development services
 	@$(DOCKER_COMPOSE_DEV) up -d --no-build
 
-debug-analyticsservice: cpp-build ## Start only Analytics Service with its remote debugger on localhost:2345
+debug-analyticsservice: ## Start only Analytics Service with its remote debugger on localhost:2345
+	@$(MAKE) -C "analyticsservice" docker-build-dev USE_LOCAL_MODULES=1
 	@ANALYTICS_SERVICE_DEBUG=1 \
 		DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \
 		up -d --no-deps --build --force-recreate analyticsservice
@@ -126,12 +127,14 @@ debug-automationservice: ## Start only Automation Service with its remote debugg
 		DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \
 		up -d --no-deps --build --force-recreate automationservice
 
-debug-inventoryservice: cpp-build ## Start only Inventory Service with its remote debugger on localhost:2347
+debug-inventoryservice: ## Start only Inventory Service with its remote debugger on localhost:2347
+	@$(MAKE) -C "inventoryservice" docker-build-dev USE_LOCAL_MODULES=1
 	@INVENTORY_SERVICE_DEBUG=1 \
 		DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \
 		up -d --no-deps --build --force-recreate inventoryservice
 
-debug-orderservice: cpp-build ## Start only Order Service with its remote debugger on localhost:2348
+debug-orderservice: ## Start only Order Service with its remote debugger on localhost:2348
+	@$(MAKE) -C "orderservice" docker-build-dev USE_LOCAL_MODULES=1
 	@ORDER_SERVICE_DEBUG=1 \
 		DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \
 		up -d --no-deps --build --force-recreate orderservice
