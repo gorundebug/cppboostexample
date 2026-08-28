@@ -47,9 +47,9 @@ RUN --mount=type=cache,id=servicegen-go-tool-apt-lists-${TARGETARCH},target=/var
     && unzip -q /tmp/protoc.zip bin/protoc -d /usr/local \
     && rm -f /tmp/protoc.zip
 RUN --mount=type=cache,id=servicegen-go-mod-v1-${TARGETARCH},target=/go/pkg/mod,sharing=locked \
-    GOBIN=/usr/local/bin go install google.golang.org/protobuf/cmd/protoc-gen-go@${PROTOC_GEN_GO_VERSION} \
-    && GOBIN=/usr/local/bin go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@${PROTOC_GEN_GO_GRPC_VERSION} \
-    && GOBIN=/usr/local/bin go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@${OAPI_CODEGEN_VERSION}
+    servicegen-download-env --retry env GOBIN=/usr/local/bin go install google.golang.org/protobuf/cmd/protoc-gen-go@${PROTOC_GEN_GO_VERSION} \
+    && servicegen-download-env --retry env GOBIN=/usr/local/bin go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@${PROTOC_GEN_GO_GRPC_VERSION} \
+    && servicegen-download-env --retry env GOBIN=/usr/local/bin go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@${OAPI_CODEGEN_VERSION}
 COPY --from=servicelib-source / /tmp/servicelib-source
 RUN set -eu; \
     source_dir=/tmp/servicelib-source; \
@@ -85,7 +85,7 @@ RUN --mount=type=cache,id=servicegen-go-mod-v1-${TARGETARCH},target=/go/pkg/mod,
 # docker-build path continues in compiler and copies only the resulting binary
 # into the runtime image.
 FROM builder AS development
-RUN go install github.com/go-delve/delve/cmd/dlv@v1.25.2
+RUN servicegen-download-env --retry go install github.com/go-delve/delve/cmd/dlv@v1.25.2
 
 FROM builder AS compiler
 RUN --mount=type=cache,id=servicegen-go-mod-v1-${TARGETARCH},target=/go/pkg/mod,sharing=locked \
