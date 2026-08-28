@@ -10,7 +10,7 @@ services:
       - |
         prepare-local-build /workspace/source /workspace/service
         if [ "$${DEBUG:-0}" = "1" ]; then
-          exec dlv debug ./cmd/service/main.go --headless --listen=:2345 --api-version=2 --accept-multiclient -- -config ./config/config.yaml -values ./config/overrides.yaml
+          exec dlv debug ./cmd/service/main.go --headless --listen=:2345 --api-version=2 --accept-multiclient --allow-non-terminal-interactive=true -- -config ./config/config.yaml -values ./config/overrides.yaml
         fi
         exec go run ./cmd/service/main.go -config ./config/config.yaml -values ./config/overrides.yaml
     volumes:

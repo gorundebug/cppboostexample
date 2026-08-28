@@ -26,7 +26,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
          "Fetch pinned cppboostservicelib and missing contract modules" ON)
   set(CPPBOOSTSERVICELIB_REPOSITORY "https://github.com/gorundebug/cppboostservicelib.git" CACHE STRING
       "Standalone cppboostservicelib repository")
-  set(CPPBOOSTSERVICELIB_REVISION "v0.2.24" CACHE STRING
+  set(CPPBOOSTSERVICELIB_REVISION "v0.2.25" CACHE STRING
       "Pinned cppboostservicelib revision")
   set(CPPBOOSTSERVICELIB_ENABLE_GRPC ON
       CACHE BOOL "Build asio-grpc support" FORCE)
@@ -90,7 +90,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     elseif(FETCH_CPP_DEPENDENCIES)
       include(FetchContent)
       FetchContent_Declare(servicegen_module_inventory_service_api
-          GIT_REPOSITORY "https://github.com/gorundebug/cppboostexample-inventory-service-api.git"
+          GIT_REPOSITORY "https://github.com/gorundebug/cppboostexample.git"
           GIT_TAG "v0.2.14"
           GIT_SHALLOW FALSE
           GIT_PROGRESS TRUE)
@@ -107,7 +107,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     elseif(FETCH_CPP_DEPENDENCIES)
       include(FetchContent)
       FetchContent_Declare(servicegen_module_model
-          GIT_REPOSITORY "https://github.com/gorundebug/cppboostexample-model.git"
+          GIT_REPOSITORY "https://github.com/gorundebug/cppboostexample.git"
           GIT_TAG "v0.2.14"
           GIT_SHALLOW FALSE
           GIT_PROGRESS TRUE)
@@ -124,7 +124,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     elseif(FETCH_CPP_DEPENDENCIES)
       include(FetchContent)
       FetchContent_Declare(servicegen_module_order_service_api
-          GIT_REPOSITORY "https://github.com/gorundebug/cppboostexample-order-service-api.git"
+          GIT_REPOSITORY "https://github.com/gorundebug/cppboostexample.git"
           GIT_TAG "v0.2.14"
           GIT_SHALLOW FALSE
           GIT_PROGRESS TRUE)
