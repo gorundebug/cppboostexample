@@ -51,7 +51,7 @@ endif
 endif
 
 .PHONY: all build clean run test lint lint-fix act gen-proto service_build service_build_linux fmt-proto \
-	docker-build docker-build-dev docker-up docker-up-dev debug docker-down docker-down-dev hooks
+	docker-build docker-build-dev docker-up docker-up-dev debug docker-down docker-down-dev hooks help
 
 all: build
 
@@ -138,3 +138,7 @@ hooks: ## Install git hooks (pre-commit: lint, pre-push: test)
 	@cp scripts/pre-push.generated.sh .git/hooks/pre-push
 	@chmod +x .git/hooks/pre-push
 	@echo "Git hooks installed."
+
+help: ## Show this help
+	@grep -hE '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-24s %s\n", $$1, $$2}'
