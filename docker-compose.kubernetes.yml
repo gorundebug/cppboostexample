@@ -1,7 +1,7 @@
 # Local Kubernetes control plane for development and conformance.
 services:
   registry:
-    image: registry:2.8.3
+    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/registry:2.8.3
     restart: unless-stopped
     ports:
       - "${KUBERNETES_REGISTRY_PORT:-5001}:5000"
@@ -9,7 +9,7 @@ services:
       - kubernetes-registry:/var/lib/registry
 
   kubernetes:
-    image: rancher/k3s:v1.36.1-k3s1
+    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/rancher/k3s:v1.36.1-k3s1
     privileged: true
     restart: unless-stopped
     depends_on:
@@ -43,7 +43,7 @@ services:
       retries: 60
 
   helm:
-    image: alpine/helm:4.2.3
+    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/alpine/helm:4.2.3
     profiles: ["tools"]
     network_mode: service:kubernetes
     depends_on:

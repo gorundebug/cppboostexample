@@ -83,7 +83,7 @@ services:
 
 
   redpanda:
-    image: redpandadata/redpanda:v24.2.5
+    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/redpandadata/redpanda:v24.2.5
     restart: unless-stopped
     command:
       - redpanda
@@ -103,7 +103,7 @@ services:
 
 
   temporal-postgresql:
-    image: postgres:16.4-bookworm
+    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/postgres:16.4-bookworm
     restart: unless-stopped
     environment:
       POSTGRES_USER: temporal
@@ -120,7 +120,7 @@ services:
       - app_net
 
   temporal-schema:
-    image: temporalio/admin-tools:1.31.2
+    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/temporalio/admin-tools:1.31.2
     restart: "no"
     depends_on:
       temporal-postgresql:
@@ -138,7 +138,7 @@ services:
       - app_net
 
   temporal:
-    image: temporalio/server:1.31.2
+    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/temporalio/server:1.31.2
     restart: unless-stopped
     depends_on:
       temporal-schema:
@@ -166,7 +166,7 @@ services:
       - app_net
 
   temporal-create-namespace:
-    image: temporalio/admin-tools:1.31.2
+    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/temporalio/admin-tools:1.31.2
     restart: "no"
     depends_on:
       temporal:
@@ -182,7 +182,7 @@ services:
       - app_net
 
   temporal-ui:
-    image: temporalio/ui:2.53.2
+    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/temporalio/ui:2.53.2
     restart: unless-stopped
     depends_on:
       temporal:
@@ -196,7 +196,7 @@ services:
       - app_net
 
   prometheus:
-    image: prom/prometheus:latest
+    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/prom/prometheus:latest
     restart: unless-stopped
     ports:
       - "${PROMETHEUS_PORT:-9090}:9090"
@@ -206,7 +206,7 @@ services:
       - app_net
 
   grafana:
-    image: grafana/grafana:latest
+    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/grafana/grafana:latest
     restart: unless-stopped
     ports:
       - "${GRAFANA_PORT:-3000}:3000"

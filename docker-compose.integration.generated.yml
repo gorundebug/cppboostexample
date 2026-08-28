@@ -52,7 +52,7 @@ services:
     stop_grace_period: 30000ms
 
   redpanda:
-    image: redpandadata/redpanda:v24.2.5
+    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/redpandadata/redpanda:v24.2.5
     command: ["redpanda", "start", "--overprovisioned", "--smp=1", "--memory=512M", "--reserve-memory=0M", "--node-id=0", "--check=false", "--kafka-addr=internal://0.0.0.0:9092", "--advertise-kafka-addr=internal://redpanda:9092"]
     healthcheck:
       test: ["CMD", "rpk", "cluster", "health", "--exit-when-healthy"]

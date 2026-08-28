@@ -3,7 +3,7 @@
 # Proxy routing is a command-execution concern. It never changes generated
 # sources and is independent of USE_LOCAL_MODULES.
 
-DEPENDENCY_PROXY_DOCKER_ARGS :=
+export DEPENDENCY_PROXY_DOCKER_ARGS :=
 DEPENDENCY_GITHUB_RAW_URL ?= https://github.com
 DEPENDENCY_GITLAB_RAW_URL ?= https://gitlab.com
 
@@ -19,7 +19,7 @@ DEPENDENCY_PROXY_DOCKER_BASE := http://$(DEPENDENCY_PROXY_DOCKER_HOST):$(DEPENDE
 DEPENDENCY_GIT_MIRROR_BASE := http://$(DEPENDENCY_PROXY_HOST):$(DEPENDENCY_GIT_MIRROR_PORT)/cgi-bin/git
 DEPENDENCY_GIT_MIRROR_DOCKER_BASE := http://$(DEPENDENCY_PROXY_DOCKER_HOST):$(DEPENDENCY_GIT_MIRROR_PORT)/cgi-bin/git
 export DEPENDENCY_DOCKER_REGISTRY := $(DEPENDENCY_PROXY_HOST):$(DEPENDENCY_PROXY_DOCKER_PORT)
-DEPENDENCY_PROXY_DOCKER_ARGS := --add-host host.docker.internal:host-gateway
+export DEPENDENCY_PROXY_DOCKER_ARGS := --add-host host.docker.internal:host-gateway
 
 export DEPENDENCY_CONAN_HOME := $(DEPENDENCY_PROXY_DIR)/conan2
 export GOPROXY := $(DEPENDENCY_PROXY_BASE)/go-proxy/
