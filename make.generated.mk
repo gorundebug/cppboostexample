@@ -7,6 +7,7 @@ BIN_DIR := $(PROJECT_DIR)/bin
 TOOLS_DIR := $(PROJECT_DIR)/tools
 GOPRIVATE := github.com
 MODULE_VERSION := v0.2.14
+USE_LOCAL_MODULES ?= 1
 OS := $(shell uname -s)
 ARCH := $(shell uname -m)
 DOCKER_COMPOSE_RUNTIME_FILES :=
@@ -117,7 +118,7 @@ docker-up-dev: docker-build-dev grafana-dashboards ## Start source-mounted devel
 	@$(DOCKER_COMPOSE_DEV) up -d --no-build
 
 debug-analyticsservice: ## Start only Analytics Service with its remote debugger on localhost:2345
-	@$(MAKE) -C "analyticsservice" docker-build-dev USE_LOCAL_MODULES=1
+	@$(MAKE) -C "analyticsservice" docker-build-dev USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)"
 	@ANALYTICS_SERVICE_DEBUG=1 \
 		DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \
 		up -d --no-deps --build --force-recreate analyticsservice
@@ -128,13 +129,13 @@ debug-automationservice: ## Start only Automation Service with its remote debugg
 		up -d --no-deps --build --force-recreate automationservice
 
 debug-inventoryservice: ## Start only Inventory Service with its remote debugger on localhost:2347
-	@$(MAKE) -C "inventoryservice" docker-build-dev USE_LOCAL_MODULES=1
+	@$(MAKE) -C "inventoryservice" docker-build-dev USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)"
 	@INVENTORY_SERVICE_DEBUG=1 \
 		DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \
 		up -d --no-deps --build --force-recreate inventoryservice
 
 debug-orderservice: ## Start only Order Service with its remote debugger on localhost:2348
-	@$(MAKE) -C "orderservice" docker-build-dev USE_LOCAL_MODULES=1
+	@$(MAKE) -C "orderservice" docker-build-dev USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)"
 	@ORDER_SERVICE_DEBUG=1 \
 		DOCKER_TARGET=development $(DOCKER_COMPOSE_DEV) \
 		up -d --no-deps --build --force-recreate orderservice
@@ -227,7 +228,7 @@ merge-validate: ## Re-run generated/business interface checks
 $(ACT):
 	@mkdir -p "$(TOOLS_DIR)"
 	@echo "Downloading act $(ACT_VERSION)..."
-	@curl -sSL "$(DEPENDENCY_GITHUB_RAW_URL)/nektos/act/releases/download/$(ACT_VERSION)/act_$(OS)_$(ARCH).tar.gz" | tar -xz -C "$(TOOLS_DIR)" act
+	@curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors "$(DEPENDENCY_GITHUB_RAW_URL)/nektos/act/releases/download/$(ACT_VERSION)/act_$(OS)_$(ARCH).tar.gz" | tar -xz -C "$(TOOLS_DIR)" act
 
 $(GH):
 	@mkdir -p "$(TOOLS_DIR)"
@@ -236,13 +237,13 @@ $(GH):
 	_arch=$$(uname -m | sed 's/x86_64/amd64/'); \
 	_ver=$$(echo "$(GH_VERSION)" | sed 's/v//'); \
 	if [ "$$(uname -s)" = "Darwin" ]; then \
-	  curl -sSL "$(DEPENDENCY_GITHUB_RAW_URL)/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.zip" -o /tmp/gh.zip; \
+	  curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors "$(DEPENDENCY_GITHUB_RAW_URL)/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.zip" -o /tmp/gh.zip; \
 	  rm -rf /tmp/gh_extract; \
 	  unzip -q /tmp/gh.zip "gh_$${_ver}_$${_os}_$${_arch}/bin/gh" -d /tmp/gh_extract; \
 	  mv /tmp/gh_extract/gh_$${_ver}_$${_os}_$${_arch}/bin/gh "$(GH)"; \
 	  rm -rf /tmp/gh.zip /tmp/gh_extract; \
 	else \
-	  curl -sSL "$(DEPENDENCY_GITHUB_RAW_URL)/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.tar.gz" | tar -xz -C /tmp; \
+	  curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors "$(DEPENDENCY_GITHUB_RAW_URL)/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.tar.gz" | tar -xz -C /tmp; \
 	  mv /tmp/gh_$${_ver}_$${_os}_$${_arch}/bin/gh "$(GH)"; \
 	  rm -rf /tmp/gh_$${_ver}_$${_os}_$${_arch}; \
 	fi
@@ -254,7 +255,7 @@ $(GLAB):
 	@_os=$$(uname -s | tr '[:upper:]' '[:lower:]'); \
 	_arch=$$(uname -m | sed 's/amd64/x86_64/'); \
 	_ver=$$(echo "$(GLAB_VERSION)" | sed 's/v//'); \
-	curl -sSL "$(DEPENDENCY_GITLAB_RAW_URL)/gitlab-org/cli/-/releases/$(GLAB_VERSION)/downloads/glab_$${_ver}_$${_os}_$${_arch}.tar.gz" | \
+	curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors "$(DEPENDENCY_GITLAB_RAW_URL)/gitlab-org/cli/-/releases/$(GLAB_VERSION)/downloads/glab_$${_ver}_$${_os}_$${_arch}.tar.gz" | \
 	  tar -xz -C "$(TOOLS_DIR)" --strip-components=1 bin/glab
 	@chmod +x "$(GLAB)"
 

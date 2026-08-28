@@ -31,4 +31,5 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
      -DCPPBOOSTSERVICELIB_PROFILING="$CPPBOOSTSERVICELIB_PROFILING" \
      -DCPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS="$CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS" &&
    ./scripts/run_with_progress.generated.sh "Build $CPP_CMAKE_PRESET" cmake --build --preset "$CPP_CMAKE_PRESET" --parallel &&
-   ./scripts/run_with_progress.generated.sh "Test $CPP_CMAKE_PRESET" ctest --preset "$CPP_CMAKE_PRESET"'
+   ./scripts/run_with_progress.generated.sh "Test $CPP_CMAKE_PRESET" \
+     ctest --test-dir /workspace/build --output-on-failure --no-tests=error'

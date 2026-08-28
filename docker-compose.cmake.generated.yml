@@ -11,6 +11,8 @@ services:
         DEPENDENCY_DOCKER_REGISTRY: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}
         DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-}
         DEPENDENCY_CONAN_REMOTE_URL: ${DEPENDENCY_CONAN_REMOTE_URL:-}
+        DEPENDENCY_CONAN_UPLOAD_URL: ${DEPENDENCY_CONAN_UPLOAD_URL:-}
+        DEPENDENCY_CONAN_PUBLISH: ${DEPENDENCY_CONAN_PUBLISH:-0}
         PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
         PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:-}
         DEPENDENCY_APT_UBUNTU_ARCHIVE_URL: ${DEPENDENCY_APT_UBUNTU_ARCHIVE_URL:-}
@@ -18,6 +20,8 @@ services:
         DEPENDENCY_APT_UBUNTU_PORTS_URL: ${DEPENDENCY_APT_UBUNTU_PORTS_URL:-}
       additional_contexts:
         servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.27}}
+      secrets:
+        - dependency_conan_credential
     extra_hosts:
       - "host.docker.internal:host-gateway"
     working_dir: /workspace/source
@@ -38,16 +42,21 @@ services:
       FETCH_CPP_DEPENDENCIES: ${FETCH_CPP_DEPENDENCIES:-OFF}
       DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-}
       DEPENDENCY_CONAN_REMOTE_URL: ${DEPENDENCY_CONAN_REMOTE_URL:-}
+      DEPENDENCY_CONAN_UPLOAD_URL: ${DEPENDENCY_CONAN_UPLOAD_URL:-}
+      DEPENDENCY_CONAN_PUBLISH: ${DEPENDENCY_CONAN_PUBLISH:-0}
+      DEPENDENCY_CONAN_CREDENTIAL_FILE: /run/secrets/dependency_conan_credential
       CONAN_HOME: /conan
     volumes:
       - .:/workspace/source:ro
       - cpp-cmake-build:/workspace/build
       - cpp-ccache:/ccache
       - ${DEPENDENCY_CONAN_HOME:-cpp-conan2}:/conan
+    secrets:
+      - dependency_conan_credential
     command:
       - /bin/bash
       - -c
-      - source scripts/configure-git-auth.generated.sh && ./scripts/conan-install.generated.sh Debug /workspace/build/conan-debug && conan_toolchain="$$(cat /workspace/build/conan-debug/toolchain.path)" && cmake --fresh --preset docker-debug -DCMAKE_TOOLCHAIN_FILE="$$conan_toolchain" -DFETCH_CPP_DEPENDENCIES=OFF && cmake --build --preset docker-debug --parallel && ctest --preset docker-debug
+      - source scripts/configure-git-auth.generated.sh && ./scripts/conan-install.generated.sh Debug /workspace/build/conan-debug && conan_toolchain="$$(cat /workspace/build/conan-debug/toolchain.path)" && cmake --fresh --preset docker-debug -DCMAKE_TOOLCHAIN_FILE="$$conan_toolchain" -DFETCH_CPP_DEPENDENCIES=OFF && cmake --build --preset docker-debug --parallel && ctest --test-dir /workspace/build --output-on-failure --no-tests=error
   analyticsservice-runtime:
     image: cppboostexample-analyticsservice
     build:
@@ -60,6 +69,8 @@ services:
         DEPENDENCY_DOCKER_REGISTRY: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}
         DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-}
         DEPENDENCY_CONAN_REMOTE_URL: ${DEPENDENCY_CONAN_REMOTE_URL:-}
+        DEPENDENCY_CONAN_UPLOAD_URL: ${DEPENDENCY_CONAN_UPLOAD_URL:-}
+        DEPENDENCY_CONAN_PUBLISH: ${DEPENDENCY_CONAN_PUBLISH:-0}
         PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
         PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:-}
         DEPENDENCY_APT_UBUNTU_ARCHIVE_URL: ${DEPENDENCY_APT_UBUNTU_ARCHIVE_URL:-}
@@ -71,6 +82,8 @@ services:
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
         servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.27}}
+      secrets:
+        - dependency_conan_credential
   inventoryservice-runtime:
     image: cppboostexample-inventoryservice
     build:
@@ -83,6 +96,8 @@ services:
         DEPENDENCY_DOCKER_REGISTRY: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}
         DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-}
         DEPENDENCY_CONAN_REMOTE_URL: ${DEPENDENCY_CONAN_REMOTE_URL:-}
+        DEPENDENCY_CONAN_UPLOAD_URL: ${DEPENDENCY_CONAN_UPLOAD_URL:-}
+        DEPENDENCY_CONAN_PUBLISH: ${DEPENDENCY_CONAN_PUBLISH:-0}
         PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
         PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:-}
         DEPENDENCY_APT_UBUNTU_ARCHIVE_URL: ${DEPENDENCY_APT_UBUNTU_ARCHIVE_URL:-}
@@ -94,6 +109,8 @@ services:
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
         servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.27}}
+      secrets:
+        - dependency_conan_credential
   orderservice-runtime:
     image: cppboostexample-orderservice
     build:
@@ -106,6 +123,8 @@ services:
         DEPENDENCY_DOCKER_REGISTRY: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}
         DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-}
         DEPENDENCY_CONAN_REMOTE_URL: ${DEPENDENCY_CONAN_REMOTE_URL:-}
+        DEPENDENCY_CONAN_UPLOAD_URL: ${DEPENDENCY_CONAN_UPLOAD_URL:-}
+        DEPENDENCY_CONAN_PUBLISH: ${DEPENDENCY_CONAN_PUBLISH:-0}
         PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
         PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:-}
         DEPENDENCY_APT_UBUNTU_ARCHIVE_URL: ${DEPENDENCY_APT_UBUNTU_ARCHIVE_URL:-}
@@ -117,6 +136,8 @@ services:
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
         servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.27}}
+      secrets:
+        - dependency_conan_credential
 
 volumes:
   cpp-cmake-build:
@@ -125,3 +146,7 @@ volumes:
     name: cppboostexample_cpp-ccache
   cpp-conan2:
     name: dependency-conan2
+
+secrets:
+  dependency_conan_credential:
+    file: ${DEPENDENCY_CONAN_CREDENTIAL_FILE:-/dev/null}

@@ -17,6 +17,7 @@ fi
 cache_dir="${proxy_dir%/}/nexus"
 git_mirror_dir="${proxy_dir%/}/git-mirror"
 github_credential_file="$git_mirror_dir/github.credential"
+conan_credential_file="${proxy_dir%/}/conan.publisher.credential"
 export DEPENDENCY_GITHUB_CREDENTIAL_FILE="$github_credential_file"
 
 prepare_git_credentials() {
@@ -145,12 +146,15 @@ refresh_nexus_proxy_caches() {
 
 bootstrap() {
   password=$(nexus_password)
-  accept_eula_arg=
-  if [ "${DEPENDENCY_PROXY_ACCEPT_EULA:-false}" = "true" ]; then
-    accept_eula_arg=--accept-eula
+  compose run --rm --no-deps \
+    --user "$(id -u):$(id -g)" \
+    -e DEPENDENCY_PROXY_ADMIN_PASSWORD="$password" \
+    -e DEPENDENCY_PROXY_ACCEPT_EULA="${DEPENDENCY_PROXY_ACCEPT_EULA:-false}" \
+    bootstrap
+  if [ ! -s "$conan_credential_file" ]; then
+    echo "[dependency-cache] bootstrap did not create $conan_credential_file" >&2
+    exit 1
   fi
-  python3 "$project_dir/scripts/dependency_cache_bootstrap.generated.py" \
-    --url "$nexus_url" --password "$password" $accept_eula_arg
 }
 
 print_env() {
@@ -165,7 +169,10 @@ export PIP_INDEX_URL=$base/pypi-proxy/simple
 export PIP_TRUSTED_HOST=$host
 export UV_INDEX_URL=$base/pypi-proxy/simple
 export CARGO_REGISTRIES_CRATES_IO_INDEX=sparse+$base/cargo-proxy/
-export DEPENDENCY_CONAN_REMOTE_URL=$base/conan-proxy
+export DEPENDENCY_CONAN_REMOTE_URL=$base/conan-group
+export DEPENDENCY_CONAN_UPLOAD_URL=$base/conan-hosted
+export DEPENDENCY_CONAN_PUBLISH=1
+export DEPENDENCY_CONAN_CREDENTIAL_FILE=$conan_credential_file
 export DEPENDENCY_MAVEN_CENTRAL_URL=$base/maven-central
 export DEPENDENCY_GITHUB_RAW_URL=$base/github-raw
 export DEPENDENCY_GITLAB_RAW_URL=$base/gitlab-raw

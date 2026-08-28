@@ -9,6 +9,8 @@ ARG DEPENDENCY_APT_UBUNTU_SECURITY_URL=
 ARG DEPENDENCY_APT_UBUNTU_PORTS_URL=
 ARG DEPENDENCY_GITHUB_RAW_URL=
 ARG DEPENDENCY_CONAN_REMOTE_URL=
+ARG DEPENDENCY_CONAN_UPLOAD_URL=
+ARG DEPENDENCY_CONAN_PUBLISH=0
 ARG PIP_INDEX_URL=https://pypi.org/simple
 ARG PIP_TRUSTED_HOST=
 ENV DEBIAN_FRONTEND=noninteractive
@@ -22,6 +24,8 @@ RUN if [ -n "$DEPENDENCY_APT_UBUNTU_ARCHIVE_URL$DEPENDENCY_APT_UBUNTU_SECURITY_U
     fi
 ENV DEPENDENCY_GITHUB_RAW_URL=${DEPENDENCY_GITHUB_RAW_URL}
 ENV DEPENDENCY_CONAN_REMOTE_URL=${DEPENDENCY_CONAN_REMOTE_URL}
+ENV DEPENDENCY_CONAN_UPLOAD_URL=${DEPENDENCY_CONAN_UPLOAD_URL}
+ENV DEPENDENCY_CONAN_PUBLISH=${DEPENDENCY_CONAN_PUBLISH}
 COPY dependency-download-mirrors.generated.env /etc/servicegen/dependency-download-mirrors.generated.env
 COPY dependency-download-mirrors.env /etc/servicegen/dependency-download-mirrors.env
 COPY dependency-download-env.generated.sh /usr/local/bin/servicegen-download-env
@@ -69,6 +73,28 @@ ENV LC_ALL=en_US.UTF-8
 ENV CPPBOOSTSERVICELIB_SOURCE_DIR=/opt/servicelib
 ENV SERVICELIB_SOURCE_DIR=/opt/servicelib
 
+FROM development AS debug-builder
+
+COPY . /workspace
+RUN --mount=type=cache,id=cppboostexample-debug-build-${TARGETARCH},target=/workspace/build,sharing=locked \
+    --mount=type=cache,id=cppboostexample-debug-ccache-${TARGETARCH},target=/ccache \
+    --mount=type=cache,id=servicegen-conan2-${TARGETARCH},target=/conan,sharing=locked \
+    --mount=type=secret,id=dependency_conan_credential \
+    ./scripts/run_with_progress.generated.sh "Conan Debug install" \
+      ./scripts/conan-install.generated.sh Debug /workspace/build/conan-debug \
+    && conan_toolchain="$(cat /workspace/build/conan-debug/toolchain.path)" \
+    && CCACHE_DIR=/ccache ./scripts/run_with_progress.generated.sh "Debug configure" cmake --preset docker-debug \
+      --fresh \
+      -DCMAKE_TOOLCHAIN_FILE="${conan_toolchain}" \
+      -DFETCH_CPP_DEPENDENCIES=OFF \
+    && ./scripts/run_with_progress.generated.sh "Debug build" cmake --build --preset docker-debug --parallel
+
+FROM debug-builder AS test-builder
+RUN --mount=type=cache,id=cppboostexample-debug-build-${TARGETARCH},target=/workspace/build,sharing=locked \
+    --mount=type=cache,id=servicegen-conan2-${TARGETARCH},target=/conan,sharing=locked \
+    ./scripts/run_with_progress.generated.sh "Debug test" \
+      ctest --test-dir /workspace/build --output-on-failure --no-tests=error
+
 FROM development AS runtime-builder
 
 ARG CPPBOOSTSERVICELIB_PROFILING=OFF
@@ -79,6 +105,7 @@ COPY . /workspace
 RUN --mount=type=cache,id=cppboostexample-runtime-build-${TARGETARCH}-${SERVICEGEN_EXAMPLE_PROFILE},target=/workspace/build,sharing=locked \
     --mount=type=cache,id=cppboostexample-runtime-ccache-${TARGETARCH},target=/ccache \
     --mount=type=cache,id=servicegen-conan2-${TARGETARCH},target=/conan,sharing=locked \
+    --mount=type=secret,id=dependency_conan_credential \
     CPPBOOSTSERVICELIB_BUILD_TESTS=False \
       ./scripts/run_with_progress.generated.sh "Conan Release install" \
       ./scripts/conan-install.generated.sh Release /workspace/build/conan-release \
@@ -127,6 +154,10 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG DEPENDENCY_APT_UBUNTU_ARCHIVE_URL=
 ARG DEPENDENCY_APT_UBUNTU_SECURITY_URL=
 ARG DEPENDENCY_APT_UBUNTU_PORTS_URL=
+COPY dependency-download-mirrors.generated.env /etc/servicegen/dependency-download-mirrors.generated.env
+COPY dependency-download-mirrors.env /etc/servicegen/dependency-download-mirrors.env
+COPY dependency-download-env.generated.sh /usr/local/bin/servicegen-download-env
+SHELL ["/usr/local/bin/servicegen-download-env", "/bin/sh", "-c"]
 RUN if [ -n "$DEPENDENCY_APT_UBUNTU_ARCHIVE_URL$DEPENDENCY_APT_UBUNTU_SECURITY_URL$DEPENDENCY_APT_UBUNTU_PORTS_URL" ]; then \
       find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) -exec sed -i \
         -e "s|http://archive.ubuntu.com/ubuntu|$DEPENDENCY_APT_UBUNTU_ARCHIVE_URL|g" \

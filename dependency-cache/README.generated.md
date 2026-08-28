@@ -5,8 +5,9 @@ from public Go, npm, PyPI, Cargo, Helm, Maven Central, APT and Docker Hub regist
 plus immutable GitHub/GitLab archives and release assets used by generated
 builds.
 The companion persistent Git mirror caches smart-HTTP clones used by CPM and
-other Git-based fetchers, which a package proxy cannot cache. Neither service
-is a compiler or BuildKit cache.
+other Git-based fetchers, which a package proxy cannot cache. Nexus also keeps
+Conan binary packages built locally for package IDs absent from ConanCenter;
+ordinary application compilation remains in BuildKit/CMake/ccache.
 
 ```bash
 # Configure one global data directory in your shell:
@@ -77,6 +78,29 @@ user-owned `dependency-download-mirrors.env` file. Use
 entry is expanded to the host or Docker-reachable Nexus address automatically.
 Framework-owned defaults are generated from the single `downloadMirrors`
 catalog in `servicegen/internal/codegenerator/dependencies.yaml`.
+
+## Conan binary packages
+
+The generated Nexus bootstrap creates three Conan repositories:
+
+- `conan-proxy` caches ConanCenter;
+- `conan-hosted` stores binary packages built locally;
+- `conan-group` is the single read endpoint, with hosted packages taking
+  precedence over the public proxy.
+
+Proxy mode enables publication through a dedicated local account that can
+write only to `conan-hosted`. Credentials are kept in
+`$DEPENDENCY_PROXY_DIR/conan.publisher.credential` and are passed to Docker
+builds as a BuildKit secret; they are not embedded in an image or build
+argument. Conan's graph package list ensures that only packages built from
+source by the current install are uploaded, not packages downloaded from
+ConanCenter.
+
+For a trusted CI pipeline, leave developer builds read-only and configure the
+same contract only in CI: set `DEPENDENCY_CONAN_PUBLISH=1`, provide
+`DEPENDENCY_CONAN_UPLOAD_URL`, and expose a two-line username/password file as
+`DEPENDENCY_CONAN_CREDENTIAL_FILE`. Without the publish flag, the upload remote
+and secret are unused.
 
 ## Changing C++ dependency versions
 

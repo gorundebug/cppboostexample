@@ -120,7 +120,7 @@ $(GOLANGCI_LINT):
 $(ACT):
 	@mkdir -p $(TOOLS_DIR)
 	@echo "Downloading act $(ACT_VERSION)..."
-	@curl -sSL "$(DEPENDENCY_GITHUB_RAW_URL)/nektos/act/releases/download/$(ACT_VERSION)/act_$(OS)_$(ARCH).tar.gz" | tar -xz -C $(TOOLS_DIR) act
+	@curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors "$(DEPENDENCY_GITHUB_RAW_URL)/nektos/act/releases/download/$(ACT_VERSION)/act_$(OS)_$(ARCH).tar.gz" | tar -xz -C $(TOOLS_DIR) act
 
 act: $(ACT) ## Run GitHub Actions locally via act (requires Docker)
 	$(ACT) push

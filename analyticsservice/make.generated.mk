@@ -23,16 +23,14 @@ endif
 	docker-build docker-build-dev docker-up docker-up-dev debug docker-down docker-down-dev docker-clean help
 
 build: ## Build the standalone service in the canonical Docker toolchain
-	@./scripts/build.generated.sh docker-debug
+	@docker compose -f docker-compose.cmake.generated.yml build cpp-check
 
 test: ## Build and run all service tests
-	@./scripts/test.generated.sh docker-debug
+	@docker compose -f docker-compose.cmake.generated.yml build cpp-test
 
-release-build: ## Build the optimized standalone service in Docker
-	@./scripts/build.generated.sh docker-release
+release-build: docker-build ## Build the optimized standalone service in Docker
 
-release-test: ## Build and test the optimized standalone service
-	@./scripts/test.generated.sh docker-release
+release-test: test ## Build and test the standalone service in Docker
 
 asan-test: ## Run standalone service tests with ASan and UBSan
 	@SANITIZER_INTEGRATION=0 ./scripts/sanitizer-test.generated.sh asan

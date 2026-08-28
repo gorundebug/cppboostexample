@@ -42,7 +42,7 @@ RUN --mount=type=cache,id=servicegen-go-tool-apt-lists-${TARGETARCH},target=/var
          arm64) protoc_arch=aarch_64 ;; \
          *) echo "Unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
        esac \
-    && curl --fail --location --silent --show-error \
+    && curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors \
        "${DEPENDENCY_GITHUB_RAW_URL}/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-${protoc_arch}.zip" \
        --output /tmp/protoc.zip \
     && unzip -q /tmp/protoc.zip bin/protoc -d /usr/local \
@@ -88,7 +88,7 @@ RUN go mod edit -replace github.com/gorundebug/servicelib=/servicelib \
     && true
 RUN make -f make.generated.mk gen-proto TOOLS_DIR=/usr/local/bin PROTOC=/usr/local/bin/protoc
 RUN --mount=type=cache,id=servicegen-go-mod-v1-${TARGETARCH},target=/go/pkg/mod,sharing=locked \
-    go mod download
+    go mod download all
 
 # Source-mounted local development stops at this stage. The ordinary
 # docker-build path continues in compiler and copies only the resulting binary
@@ -97,6 +97,9 @@ FROM builder AS development
 RUN servicegen-download-env --retry go install github.com/go-delve/delve/cmd/dlv@v1.25.2
 
 FROM builder AS compiler
+# The generated source tree intentionally contains no environment-specific
+# go.sum. Resolve the local source-context graph only inside this disposable
+# builder layer; the user's checked-out go.mod is never mutated.
 RUN --mount=type=cache,id=servicegen-go-mod-v1-${TARGETARCH},target=/go/pkg/mod,sharing=locked \
     --mount=type=cache,id=servicegen-go-build-v1-${TARGETARCH},target=/root/.cache/go-build,sharing=locked \
     if [ "${RUNTIME_STRIP}" = "ON" ]; then \
@@ -104,7 +107,7 @@ RUN --mount=type=cache,id=servicegen-go-mod-v1-${TARGETARCH},target=/go/pkg/mod,
     else \
       GO_LINKER_FLAGS=""; \
     fi \
-    && CGO_ENABLED=0 GOOS=linux go build -ldflags="${GO_LINKER_FLAGS}" -o /app/service ./cmd/service/main.go
+    && CGO_ENABLED=0 GOOS=linux go build -mod=mod -ldflags="${GO_LINKER_FLAGS}" -o /app/service ./cmd/service/main.go
 
 # Replay target: compile the generated history checker with the same sources
 # and dependency cache as the service, without adding it to the runtime image.

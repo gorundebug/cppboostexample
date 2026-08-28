@@ -27,7 +27,10 @@ export PIP_TRUSTED_HOST="$docker_host"
 export UV_INDEX_URL="${repository_base}/pypi-proxy/simple"
 export CARGO_REGISTRIES_CRATES_IO_INDEX="sparse+${repository_base}/cargo-proxy/"
 export DEPENDENCY_MAVEN_CENTRAL_URL="${repository_base}/maven-central"
-export DEPENDENCY_CONAN_REMOTE_URL="${repository_base}/conan-proxy"
+export DEPENDENCY_CONAN_REMOTE_URL="${repository_base}/conan-group"
+export DEPENDENCY_CONAN_UPLOAD_URL="${repository_base}/conan-hosted"
+export DEPENDENCY_CONAN_PUBLISH=1
+export DEPENDENCY_CONAN_CREDENTIAL_FILE="${DEPENDENCY_PROXY_DIR%/}/conan.publisher.credential"
 export DEPENDENCY_GITHUB_RAW_URL="${repository_base}/github-raw"
 export DEPENDENCY_GITLAB_RAW_URL="${repository_base}/gitlab-raw"
 export DEPENDENCY_APT_UBUNTU_ARCHIVE_URL="${repository_base}/apt-ubuntu-archive"
@@ -46,6 +49,7 @@ proxy_build_variables=(
   GOPROXY GOSUMDB NPM_CONFIG_REGISTRY PIP_INDEX_URL PIP_TRUSTED_HOST
   UV_INDEX_URL CARGO_REGISTRIES_CRATES_IO_INDEX
   DEPENDENCY_MAVEN_CENTRAL_URL DEPENDENCY_CONAN_REMOTE_URL
+  DEPENDENCY_CONAN_UPLOAD_URL DEPENDENCY_CONAN_PUBLISH
   DEPENDENCY_GITHUB_RAW_URL DEPENDENCY_GITLAB_RAW_URL
   DEPENDENCY_APT_UBUNTU_ARCHIVE_URL DEPENDENCY_APT_UBUNTU_SECURITY_URL
   DEPENDENCY_APT_UBUNTU_PORTS_URL DEPENDENCY_APT_DEBIAN_URL
@@ -70,6 +74,9 @@ proxy_build() {
   done
 
   injected+=(--add-host "host.docker.internal:host-gateway")
+  if [[ -s "$DEPENDENCY_CONAN_CREDENTIAL_FILE" ]]; then
+    injected+=(--secret "id=dependency_conan_credential,src=$DEPENDENCY_CONAN_CREDENTIAL_FILE")
+  fi
   local name
   for name in "${proxy_build_variables[@]}"; do
     if [[ ! -f "$dockerfile" ]] || grep -Eq "^[[:space:]]*ARG[[:space:]]+${name}([[:space:]=]|$)" "$dockerfile"; then

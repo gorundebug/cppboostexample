@@ -33,10 +33,10 @@ LANG_DOCKER_DEV_BUILD_TARGETS += golang-docker-dev-build
 	golang-docker-build golang-docker-dev-build go-mod-tidy go-mod-sync fmt-go fmt-proto gen-proto golang-workflowcheck
 
 golang-build: golang-gen ## Generate transport code and build all Go services
-	@$(MAKE) -C ./automationservice -f Makefile service_build USE_LOCAL_MODULES=1 PROJECT_DIR="$(PROJECT_DIR)" BIN_DIR="$(BIN_DIR)"
+	@$(MAKE) -C ./automationservice -f Makefile service_build USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)" PROJECT_DIR="$(PROJECT_DIR)" BIN_DIR="$(BIN_DIR)"
 
 golang-test: golang-codegen ## Generate transport code and run tests for all Go services
-	@$(MAKE) -C ./automationservice -f Makefile test USE_LOCAL_MODULES=1
+	@$(MAKE) -C ./automationservice -f Makefile test USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)"
 
 golang-lint: $(GOLANGCI_LINT) ## Run Go linters
 	@$(MAKE) -C ./automationservice -f Makefile lint GOLANGCI_LINT="$(GOLANGCI_LINT)"
@@ -67,17 +67,17 @@ golang-gen-proto: $(PROTOC) $(PROTOC_GEN_GO) $(PROTOC_GEN_GO_GRPC) ## Generate G
 	@$(MAKE) -C ./order_service_api -f make.generated.mk gen-proto PROTOC="$(PROTOC)"
 golang-codegen: golang-gen-proto golang-fmt ## Generate all Go transport code without changing module manifests
 
-golang-gen: golang-codegen go-mod-tidy ## Generate transport code and synchronize module manifests
+golang-gen: golang-codegen ## Generate transport code without changing module manifests
 
 golang-clean: ## Remove Go build artifacts
 	@$(MAKE) -C ./automationservice -f Makefile clean PROJECT_DIR="$(PROJECT_DIR)" BIN_DIR="$(BIN_DIR)"
 	@rm -rf "$(BIN_DIR)"
 
 golang-docker-build: golang-codegen ## Build Go service Docker images entirely in Docker
-	@$(MAKE) -C ./automationservice -f Makefile docker-build USE_LOCAL_MODULES=1
+	@$(MAKE) -C ./automationservice -f Makefile docker-build USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)"
 
 golang-docker-dev-build: golang-codegen ## Build source-mounted Go development images
-	@$(MAKE) -C ./automationservice -f Makefile docker-build-dev USE_LOCAL_MODULES=1
+	@$(MAKE) -C ./automationservice -f Makefile docker-build-dev USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)"
 
 fmt-go: golang-fmt-go ## Format Go code
 
@@ -103,7 +103,7 @@ $(BUF):
 	@set -eu; \
 	tmp=$$(mktemp "$(TOOLS_DIR)/.buf.XXXXXX"); \
 	trap 'rm -f "$$tmp"' EXIT INT TERM; \
-	curl --fail --location --silent --show-error \
+	curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors \
 	  "$(DEPENDENCY_GITHUB_RAW_URL)/bufbuild/buf/releases/download/$(BUF_VERSION)/buf-$(OS)-$(ARCH)" \
 	  --output "$$tmp"; \
 	chmod +x "$$tmp"; \
@@ -119,7 +119,7 @@ $(PROTOC):
 	_os=$$(uname -s | sed 's/Darwin/osx/;s/Linux/linux/'); \
 	_arch=$$(uname -m | sed 's/arm64/aarch_64/;s/aarch64/aarch_64/'); \
 	_ver=$$(echo "$(PROTOC_VERSION)" | sed 's/v//'); \
-	curl --fail --location --silent --show-error \
+	curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors \
 	  "$(DEPENDENCY_GITHUB_RAW_URL)/protocolbuffers/protobuf/releases/download/$(PROTOC_VERSION)/protoc-$${_ver}-$${_os}-$${_arch}.zip" \
 	  --output "$$tmp/protoc.zip"; \
 	unzip -q "$$tmp/protoc.zip" bin/protoc -d "$$tmp/extract"; \

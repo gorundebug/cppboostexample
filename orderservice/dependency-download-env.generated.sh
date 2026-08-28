@@ -14,6 +14,18 @@ if [ "${1:-}" = "-c" ]; then
   set -- /bin/sh "$@"
 fi
 
+# APT metadata and package files may change between `apt-get update` and
+# `apt-get install` on an upstream mirror. Retry the complete transaction so a
+# failed install refreshes the index from the same configured source. Keep this
+# policy here so every generated language and Docker stage behaves alike.
+if [ "$retry_command" -eq 0 ] \
+    && [ "${1:-}" = "/bin/sh" ] \
+    && [ "${2:-}" = "-c" ]; then
+  case "${3:-}" in
+    *"apt-get update"*) retry_command=1 ;;
+  esac
+fi
+
 # Values from the user-owned override file take precedence over the generated
 # catalog. `env` accepts downloader variable names that are not shell identifiers.
 default_overrides=/etc/servicegen/dependency-download-mirrors.env

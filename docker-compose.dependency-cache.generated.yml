@@ -2,6 +2,22 @@
 name: servicegen-dependency-cache
 
 services:
+  bootstrap:
+    image: python:3.12.11-alpine3.22
+    profiles:
+      - tools
+    entrypoint:
+      - python3
+      - /bootstrap/dependency_cache_bootstrap.generated.py
+    command:
+      - --url
+      - http://nexus:8081
+      - --conan-credential-file
+      - /dependency-cache/conan.publisher.credential
+    volumes:
+      - ./scripts/dependency_cache_bootstrap.generated.py:/bootstrap/dependency_cache_bootstrap.generated.py:ro
+      - ${DEPENDENCY_PROXY_DIR:?set DEPENDENCY_PROXY_DIR}:/dependency-cache
+
   git-mirror:
     image: servicegen-git-mirror:2.49.1
     build:
