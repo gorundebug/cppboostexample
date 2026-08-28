@@ -14,7 +14,7 @@ fi
 # The generated project owns its tests, while the framework source remains
 # configured with CPPBOOSTSERVICELIB_BUILD_TESTS=OFF by CMake. Requesting the
 # Conan test dependency here makes GTest available without FetchContent.
-export CPPBOOSTSERVICELIB_BUILD_TESTS=True
+export CPPBOOSTSERVICELIB_BUILD_TESTS="${CPPBOOSTSERVICELIB_BUILD_TESTS:-True}"
 export CPPBOOSTSERVICELIB_ENABLE_CRON=True
 export CPPBOOSTSERVICELIB_ENABLE_GRPC=True
 export CPPBOOSTSERVICELIB_ENABLE_KAFKA=True
