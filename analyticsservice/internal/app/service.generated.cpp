@@ -62,6 +62,12 @@ void ServiceGenerated::start() {
 }
 
 void ServiceGenerated::initMakers() {
+  makers_.analytics_schedule_source = [](
+      servicelib::Context context, servicelib::IServiceEnvironment& environment,
+      const servicelib::config::CronEndpointConfig& config) {
+    return functions::MakeAnalyticsScheduleSource(
+        std::move(context), environment, config);
+  };
   makers_.count_order_processed = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
       const servicelib::config::ProcessStreamConfig& config) {
@@ -77,6 +83,14 @@ void ServiceGenerated::initMakers() {
 }
 
 void ServiceGenerated::initFunctions(const config::Config& cfg) {
+  if (!makers_.analytics_schedule_source) {
+    throw std::logic_error("function maker AnalyticsScheduleSource is not configured");
+  }
+  functions_.analytics_schedule_source = makers_.analytics_schedule_source(
+      servicelib::Context{}, *this, cfg.endpoints.analyticsSchedule);
+  if (!functions_.analytics_schedule_source) {
+    throw std::logic_error("function maker AnalyticsScheduleSource returned null");
+  }
   if (!makers_.count_order_processed) {
     throw std::logic_error("function maker CountOrderProcessed is not configured");
   }
@@ -142,6 +156,7 @@ void ServiceGenerated::initRuntime() {
 }
 
 void ServiceGenerated::initStreams(const config::Config& cfg) {
+  streams_.analytics_schedule = &servicelib::makeInputStreamRef<std::string, std::monostate, std::exception_ptr, ServiceGenerated>(cfg.streams.analyticsSchedule, nullptr, *this);
   streams_.consume_order_processed = &servicelib::makeInputStreamRef<example::model::types::OrderProcessed, example::model::types::OrderProcessed, std::exception_ptr, ServiceGenerated>(cfg.streams.consumeOrderProcessed, nullptr, *this);
   auto& count_order_processed = (*streams_.consume_order_processed).process(cfg.streams.countOrderProcessed, servicelib::StreamType<example::model::types::OrderProcessed>{}, servicelib::StreamType<std::exception_ptr>{}, servicelib::StreamFunction(std::ref(*functions_.count_order_processed)));
   streams_.count_order_processed = std::addressof(count_order_processed);
@@ -161,6 +176,14 @@ void ServiceGenerated::initDataSources(
       *functions_.order_processed_endpoint_source);
   registerDataSource(endpoints_.consume_order_processed);
 
+  connectors_.local_cron_cron_source =
+      servicelib::datasource::cron::LibcronDataSource::make(
+          *this, cfg.dataConnectors.localCron.id);
+  endpoints_.analytics_schedule =
+      servicelib::datasource::cron::Endpoint::make(
+          *this, *streams_.analytics_schedule, *functions_.analytics_schedule_source);
+  connectors_.local_cron_cron_source->addEndpoint(endpoints_.analytics_schedule);
+  registerDataSource(connectors_.local_cron_cron_source);
 
 }
 

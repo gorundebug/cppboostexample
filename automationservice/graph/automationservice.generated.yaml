@@ -750,7 +750,8 @@ settings:
 types:
     automationJob:
         description: Automation job payload and result.
+        module: model
         name: AutomationJob
-        publicType: false
+        publicType: true
         type: string
         useAlias: false

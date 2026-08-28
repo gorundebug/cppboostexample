@@ -22,14 +22,14 @@ Record the time when this result is produced.
 
 
 ## Stream types
-- Input: `OrderItemResult` — `model/include/example/model/types/order_item_result.hpp`
+- Input: `OrderItemResult` — `model_cpp/include/example/model/types/order_item_result.hpp`
 - Output: `OrderState` — `orderservice/internal/types/order_state.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
 - [ ] Open `orderservice/internal/functions/order/map_order_item_result_to_order_state.hpp` and preserve its generated contract
-- [ ] Inspect input type `OrderItemResult` in `model/include/example/model/types/order_item_result.hpp`
+- [ ] Inspect input type `OrderItemResult` in `model_cpp/include/example/model/types/order_item_result.hpp`
 - [ ] Inspect output type `OrderState` in `orderservice/internal/types/order_state.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`

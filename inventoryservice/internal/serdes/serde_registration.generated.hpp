@@ -5,8 +5,8 @@
 
 #include <servicelib/runtime/serde/serde.hpp>
 #include <servicelib/runtime/serde/serdeimpl.hpp>
-#include <model/include/example/model/serdes/order_item_serde.hpp>
-#include <model/include/example/model/serdes/order_item_result_serde.hpp>
+#include <model_cpp/include/example/model/serdes/order_item_serde.hpp>
+#include <model_cpp/include/example/model/serdes/order_item_result_serde.hpp>
 
 
 template <>

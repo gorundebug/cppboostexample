@@ -6,6 +6,9 @@ dataConnectors:
     securityProtocol: $orderEventsSecurityProtocol
     username: $orderEventsUsername
 endpoints:
+  analyticsSchedule:
+    enabled: $analyticsScheduleEnabled
+    tracingEnabled: $analyticsScheduleTracingEnabled
   orderProcessed:
     enabled: $orderProcessedEnabled
 services:

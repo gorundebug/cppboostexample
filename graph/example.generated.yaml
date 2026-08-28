@@ -24,6 +24,20 @@ dataConnectors:
         typeScriptImplementation: grpc/grpc-js
     localCron:
         endpoints:
+            analyticsSchedule:
+                enabled: true
+                functionDescription: |
+                    Create an analytics job message identifying the local scheduled firing.
+                functionInitializerGroup: ""
+                functionName: AnalyticsSchedule
+                functionPackage: cron
+                missedRunPolicy: FireOnce
+                name: Analytics Schedule
+                overlapPolicy: Skip
+                publicFunction: false
+                schedule: '*/5 * * * *'
+                timezone: UTC
+                tracingEnabled: false
             localSchedule:
                 enabled: true
                 functionDescription: |
@@ -334,6 +348,9 @@ services:
             color: '#05ABF7'
             pipelines:
                 analytics:
+                    analyticsSchedule:
+                        x: -1600
+                        "y": -205
                     consumeOrderProcessed:
                         x: -1190
                         "y": -205
@@ -354,6 +371,11 @@ services:
         name: Analytics Service
         pipelines:
             analytics:
+                analyticsSchedule:
+                    endpoint: analyticsSchedule
+                    name: Analytics Schedule
+                    type: Input
+                    valueType: automationJob
                 consumeOrderProcessed:
                     endpoint: orderProcessed
                     name: Consume Order Processed
@@ -1157,8 +1179,9 @@ settings:
 types:
     automationJob:
         description: Automation job payload and result.
+        module: model
         name: AutomationJob
-        publicType: false
+        publicType: true
         type: string
         useAlias: false
     order:

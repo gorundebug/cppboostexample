@@ -10,12 +10,12 @@ DEPENDENCY_DOCKER_TARGETS := build test release-build release-test asan-test tsa
 include dependency-proxy.generated.mk
 
 ifeq ($(strip $(USE_LOCAL_MODULES)),1)
-export MODULE_MODEL_SOURCE_CONTEXT := ../model
+export MODULE_MODEL_CPP_SOURCE_CONTEXT := ../model_cpp
 endif
 
 ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
 export DEPENDENCY_CONAN_HOME := $(DEPENDENCY_PROXY_DIR)/conan2
-export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.25.tar.gz
+export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.27.tar.gz
 export SERVICELIB_SOURCE_CONTEXT ?= $(CPPBOOSTSERVICELIB_SOURCE_CONTEXT)
 endif
 

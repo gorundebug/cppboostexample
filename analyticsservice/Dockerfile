@@ -1,6 +1,6 @@
 ARG DEPENDENCY_DOCKER_REGISTRY=docker.io
 FROM servicelib-source AS servicelib-source
-FROM module-model AS module-model
+FROM module-model_cpp AS module-model_cpp
 
 FROM ${DEPENDENCY_DOCKER_REGISTRY}/library/ubuntu:24.04 AS development
 
@@ -64,7 +64,7 @@ RUN set -eu; \
     cp -a "$source_dir/." /opt/servicelib/; \
     rm -rf /tmp/servicelib-source
 WORKDIR /workspace
-COPY --from=module-model / /workspace/modules/model
+COPY --from=module-model_cpp / /workspace/modules/model_cpp
 
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8

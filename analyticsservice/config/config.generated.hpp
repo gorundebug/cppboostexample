@@ -18,9 +18,12 @@
 namespace example::analytics_service::config {
 
 inline constexpr int kAnalyticsServiceServiceId = 1;
-inline constexpr int kConsumeOrderProcessedStreamId = 1;
-inline constexpr int kCountOrderProcessedStreamId = 2;
-inline constexpr int kOrderProcessedEndpointId = 3;
+inline constexpr int kAnalyticsScheduleStreamId = 1;
+inline constexpr int kConsumeOrderProcessedStreamId = 2;
+inline constexpr int kCountOrderProcessedStreamId = 3;
+inline constexpr int kAnalyticsScheduleEndpointId = 2;
+inline constexpr int kOrderProcessedEndpointId = 4;
+inline constexpr int kLocalCronConnectorId = 2;
 inline constexpr int kOrderEventsConnectorId = 3;
 
 class Config final : public servicelib::config::IConfig {
@@ -30,15 +33,18 @@ class Config final : public servicelib::config::IConfig {
   } services;
 
   struct Streams final {
+    servicelib::config::InputStreamConfig analyticsSchedule;
     servicelib::config::InputStreamConfig consumeOrderProcessed;
     servicelib::config::ProcessStreamConfig countOrderProcessed;
   } streams;
 
   struct DataConnectors final {
+    servicelib::config::CronDataConnectorConfig localCron;
     servicelib::config::KafkaDataConnectorConfig orderEvents;
   } dataConnectors;
 
   struct Endpoints final {
+    servicelib::config::CronEndpointConfig analyticsSchedule;
     servicelib::config::KafkaEndpointConfig orderProcessed;
   } endpoints;
 
@@ -55,6 +61,7 @@ class Config final : public servicelib::config::IConfig {
   } modules;
 
   struct Types final {
+    servicelib::config::TypeConfig automationJob;
     servicelib::config::TypeConfig orderProcessed;
   } types;
 
@@ -67,17 +74,17 @@ class Config final : public servicelib::config::IConfig {
 
   std::vector<servicelib::config::StreamConfigRef> GetStreams()
       const override {
-    return { streams.consumeOrderProcessed, streams.countOrderProcessed,  };
+    return { streams.analyticsSchedule, streams.consumeOrderProcessed, streams.countOrderProcessed,  };
   }
 
   std::vector<servicelib::config::DataConnectorConfigRef> GetDataConnectors()
       const override {
-    return { dataConnectors.orderEvents,  };
+    return { dataConnectors.localCron, dataConnectors.orderEvents,  };
   }
 
   std::vector<servicelib::config::EndpointConfigRef> GetEndpoints()
       const override {
-    return { endpoints.orderProcessed,  };
+    return { endpoints.analyticsSchedule, endpoints.orderProcessed,  };
   }
 
   std::vector<const servicelib::config::PoolConfig*> GetPools()
@@ -97,7 +104,7 @@ class Config final : public servicelib::config::IConfig {
 
   std::vector<const servicelib::config::TypeConfig*> GetTypes()
       const override {
-    return { &types.orderProcessed,  };
+    return { &types.automationJob, &types.orderProcessed,  };
   }
 };
 
@@ -129,6 +136,19 @@ inline Config MakeConfig() {
     value.statusHandler = "status";
     return value;
   }();
+  cfg.streams.analyticsSchedule = [] {
+    InputStreamConfig value{};
+    value.id = kAnalyticsScheduleStreamId;
+    value.name = "Analytics Schedule";
+    value.pipeline = "analytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = 0;
+    value.xPos = -1600;
+    value.yPos = -205;
+    value.valueType = "AutomationJob";
+    value.idEndpoint = kAnalyticsScheduleEndpointId;
+    return value;
+  }();
   cfg.streams.consumeOrderProcessed = [] {
     InputStreamConfig value{};
     value.id = kConsumeOrderProcessedStreamId;
@@ -158,6 +178,13 @@ inline Config MakeConfig() {
     value.functionModule = "";
     return value;
   }();
+  cfg.dataConnectors.localCron = [] {
+    CronDataConnectorConfig value{};
+    value.id = kLocalCronConnectorId;
+    value.name = "Local Cron";
+    value.implementation = DataConnectorImplementation::kCppLibcron;
+    return value;
+  }();
   cfg.dataConnectors.orderEvents = [] {
     KafkaDataConnectorConfig value{};
     value.id = kOrderEventsConnectorId;
@@ -170,6 +197,24 @@ inline Config MakeConfig() {
     value.saslMechanism = KafkaSaslMechanism::kSCRAMSHA512;
     value.username = "";
     value.password = "";
+    return value;
+  }();
+  cfg.endpoints.analyticsSchedule = [] {
+    CronEndpointConfig value{};
+    value.id = kAnalyticsScheduleEndpointId;
+    value.name = "Analytics Schedule";
+    value.idDataConnector = kLocalCronConnectorId;
+    value.tracingEnabled = false;
+    value.enabled = true;
+    value.schedule = "*/5 * * * *";
+    value.timezone = "UTC";
+    value.overlapPolicy = ScheduleOverlapPolicy::kSkip;
+    value.missedRunPolicy = ScheduleMissedRunPolicy::kFireOnce;
+    value.functionName = "AnalyticsSchedule";
+    value.functionPackage = "cron";
+    value.publicFunction = false;
+    value.functionDescription = "Create an analytics job message identifying the local scheduled firing.\n";
+    value.functionInitializerGroup = "";
     return value;
   }();
   cfg.endpoints.orderProcessed = [] {
@@ -206,6 +251,15 @@ inline Config MakeConfig() {
     ModuleConfig value{};
     value.name = "order_service_api";
     value.path = "github.com/gorundebug/cppboostexample-order-service-api";
+    return value;
+  }();
+  cfg.types.automationJob = [] {
+    TypeConfig value{};
+    value.name = "AutomationJob";
+    value.type = DataType::kString;
+    value.module = "model";
+    value.publicType = true;
+    value.useAlias = false;
     return value;
   }();
   cfg.types.orderProcessed = [] {
@@ -255,6 +309,20 @@ inline YAML::Node FindConfigObject(const YAML::Node& root,
 }
 
 inline void ApplyConfig(const YAML::Node& value, Config& config) {
+  {
+    const auto object = FindConfigObject(value, "endpoints", "analyticsSchedule");
+    if (const auto field = object["enabled"]; field.IsDefined() && !field.IsNull()) {
+      config.endpoints.analyticsSchedule.enabled =
+          servicelib::config::YamlValue(field).As<bool>();
+    }
+  }
+  {
+    const auto object = FindConfigObject(value, "endpoints", "analyticsSchedule");
+    if (const auto field = object["tracingEnabled"]; field.IsDefined() && !field.IsNull()) {
+      config.endpoints.analyticsSchedule.tracingEnabled =
+          servicelib::config::YamlValue(field).As<bool>();
+    }
+  }
   {
     const auto object = FindConfigObject(value, "services", "analyticsService");
     if (const auto field = object["defaultGrpcTimeout"]; field.IsDefined() && !field.IsNull()) {
@@ -340,13 +408,17 @@ inline void ApplyConfig(const YAML::Node& value, Config& config) {
     }
   }
   ApplyCustomProperties(FindConfigObject(value, "services", "analyticsService"), config.services.analyticsService);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "analyticsSchedule"), config.streams.analyticsSchedule);
   ApplyCustomProperties(FindConfigObject(value, "streams", "consumeOrderProcessed"), config.streams.consumeOrderProcessed);
   ApplyCustomProperties(FindConfigObject(value, "streams", "countOrderProcessed"), config.streams.countOrderProcessed);
+  ApplyCustomProperties(FindConfigObject(value, "dataConnectors", "localCron"), config.dataConnectors.localCron);
   ApplyCustomProperties(FindConfigObject(value, "dataConnectors", "orderEvents"), config.dataConnectors.orderEvents);
+  ApplyCustomProperties(FindConfigObject(value, "endpoints", "analyticsSchedule"), config.endpoints.analyticsSchedule);
   ApplyCustomProperties(FindConfigObject(value, "endpoints", "orderProcessed"), config.endpoints.orderProcessed);
   ApplyCustomProperties(FindConfigObject(value, "modules", "inventoryServiceApi"), config.modules.inventoryServiceApi);
   ApplyCustomProperties(FindConfigObject(value, "modules", "model"), config.modules.model);
   ApplyCustomProperties(FindConfigObject(value, "modules", "orderServiceApi"), config.modules.orderServiceApi);
+  ApplyCustomProperties(FindConfigObject(value, "types", "automationJob"), config.types.automationJob);
   ApplyCustomProperties(FindConfigObject(value, "types", "orderProcessed"), config.types.orderProcessed);
   ApplyConfig(value, config.custom);
 }
@@ -374,6 +446,20 @@ inline int ParseEnvironmentInt(const char* name, const char* value) {
 }
 
 inline void ApplyEnvironment(Config& config) {
+  if (const auto* value = std::getenv("ANALYTICS_SCHEDULE_ENABLED")) {
+    const std::string_view parsed{value};
+    if (parsed != "true" && parsed != "false") {
+      throw std::invalid_argument("invalid boolean in ANALYTICS_SCHEDULE_ENABLED");
+    }
+    config.endpoints.analyticsSchedule.enabled = parsed == "true";
+  }
+  if (const auto* value = std::getenv("ANALYTICS_SCHEDULE_TRACING_ENABLED")) {
+    const std::string_view parsed{value};
+    if (parsed != "true" && parsed != "false") {
+      throw std::invalid_argument("invalid boolean in ANALYTICS_SCHEDULE_TRACING_ENABLED");
+    }
+    config.endpoints.analyticsSchedule.tracingEnabled = parsed == "true";
+  }
   if (const auto* value = std::getenv("ANALYTICS_SERVICE_DEFAULT_GRPC_TIMEOUT")) {
     config.services.analyticsService.defaultGrpcTimeout =
         ParseEnvironmentInt("ANALYTICS_SERVICE_DEFAULT_GRPC_TIMEOUT", value);

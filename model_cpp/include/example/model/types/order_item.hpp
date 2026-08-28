@@ -17,10 +17,8 @@ struct OrderItem final {
 
 inline void tag_invoke(boost::json::value_from_tag, boost::json::value& json,
                        const OrderItem& value) {
-  json = {{"order_id", value.order_id},
-          {"item_id", value.item_id},
-          {"sku", value.sku},
-          {"quantity", value.quantity},
+  json = {{"order_id", value.order_id}, {"item_id", value.item_id},
+          {"sku", value.sku}, {"quantity", value.quantity},
           {"unit_price", value.unit_price}};
 }
 

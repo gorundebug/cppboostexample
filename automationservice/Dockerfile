@@ -2,6 +2,7 @@ ARG DEPENDENCY_DOCKER_REGISTRY=docker.io
 
 # Stage 1: Build
 FROM servicelib-source AS servicelib-source
+FROM module-model_go-source AS module-model_go-source
 
 FROM ${DEPENDENCY_DOCKER_REGISTRY}/library/golang:1.25-bookworm AS builder
 
@@ -66,6 +67,13 @@ RUN set -eu; \
     if [ -z "$source_dir" ] || [ "$source_dir" = "/" ]; then echo "unsafe servicelib source directory" >&2; exit 1; fi; \
     mkdir -p /servicelib; \
     cp -a "$source_dir/." /servicelib/
+COPY --from=module-model_go-source / /tmp/module-model_go-source
+RUN set -eu; source_dir=/tmp/module-model_go-source; \
+	source_dir="$source_dir/model_go"; \
+    manifest="$source_dir/go.mod"; \
+    if [ ! -f "$manifest" ]; then manifest=$(find "$source_dir" -mindepth 2 -maxdepth 2 -type f -name go.mod -print -quit); fi; \
+    if [ -z "$manifest" ]; then echo "module context github.com/gorundebug/cppboostexample/model_go has no go.mod" >&2; exit 1; fi; \
+    source_dir=${manifest%/go.mod}; mkdir -p /modules/model_go; cp -a "$source_dir/." /modules/model_go/
 RUN set -eu; \
     for module in /modules/*; do \
       if [ -f "$module/Makefile" ]; then \
@@ -76,6 +84,7 @@ RUN set -eu; \
 COPY . /workspace
 WORKDIR /workspace
 RUN go mod edit -replace github.com/gorundebug/servicelib=/servicelib \
+    && go mod edit -replace github.com/gorundebug/cppboostexample/model_go=/modules/model_go \
     && true
 RUN make -f make.generated.mk gen-proto TOOLS_DIR=/usr/local/bin PROTOC=/usr/local/bin/protoc
 RUN --mount=type=cache,id=servicegen-go-mod-v1-${TARGETARCH},target=/go/pkg/mod,sharing=locked \
@@ -127,10 +136,7 @@ WORKDIR /app
 COPY --from=compiler /app/service .
 COPY ${SERVICE_DIR}/config/ ./config/
 
-EXPOSE 9094
-EXPOSE 9204
-
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget -qO/dev/null http://localhost:9094/status || exit 1
+  CMD wget -qO/dev/null http://localhost:${AUTOMATION_SERVICE_HTTP_PORT:-9094}/status || exit 1
 
 ENTRYPOINT ["./service", "-config", "./config/config.yaml", "-values", "./config/overrides.yaml"]

@@ -17,7 +17,7 @@ services:
         DEPENDENCY_APT_UBUNTU_SECURITY_URL: ${DEPENDENCY_APT_UBUNTU_SECURITY_URL:-}
         DEPENDENCY_APT_UBUNTU_PORTS_URL: ${DEPENDENCY_APT_UBUNTU_PORTS_URL:-}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.25}}
+        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.27}}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     working_dir: /workspace/source
@@ -70,7 +70,7 @@ services:
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.25}}
+        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.27}}
   inventoryservice-runtime:
     image: cppboostexample-inventoryservice
     build:
@@ -93,7 +93,7 @@ services:
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.25}}
+        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.27}}
   orderservice-runtime:
     image: cppboostexample-orderservice
     build:
@@ -116,12 +116,12 @@ services:
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.25}}
+        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.27}}
 
 volumes:
   cpp-cmake-build:
-    name: ${CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.25}
+    name: ${CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.27}
   cpp-ccache:
     name: cppboostexample_cpp-ccache
   cpp-conan2:
-    name: cppboostexample_cpp-conan2
+    name: dependency-conan2

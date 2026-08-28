@@ -24,10 +24,9 @@ export CPPBOOSTSERVICELIB_ENABLE_OTEL=True
   --output-folder="$output_dir" \
   "${@:3}"
 
-mapfile -t toolchains < <(find "$output_dir" -type f -name conan_toolchain.cmake -print)
-if [[ "${#toolchains[@]}" -ne 1 ]]; then
-  echo "expected exactly one Conan toolchain below $output_dir, found ${#toolchains[@]}" >&2
-  printf '  %s\n' "${toolchains[@]}" >&2
+toolchain="$output_dir/build/$build_type/generators/conan_toolchain.cmake"
+if [[ ! -f "$toolchain" ]]; then
+  echo "Conan toolchain is missing: $toolchain" >&2
   exit 2
 fi
-printf '%s\n' "${toolchains[0]}" > "$output_dir/toolchain.path"
+printf '%s\n' "$toolchain" > "$output_dir/toolchain.path"

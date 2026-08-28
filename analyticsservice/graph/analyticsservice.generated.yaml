@@ -1,4 +1,26 @@
 dataConnectors:
+    localCron:
+        endpoints:
+            analyticsSchedule:
+                enabled: true
+                functionDescription: |
+                    Create an analytics job message identifying the local scheduled firing.
+                functionInitializerGroup: ""
+                functionName: AnalyticsSchedule
+                functionPackage: cron
+                missedRunPolicy: FireOnce
+                name: Analytics Schedule
+                overlapPolicy: Skip
+                publicFunction: false
+                schedule: '*/5 * * * *'
+                timezone: UTC
+                tracingEnabled: false
+        goImplementation: go/gocron
+        name: Local Cron
+        pythonImplementation: python/apscheduler
+        rustImplementation: rust/croner
+        type: Cron
+        typeScriptImplementation: node/croner
     orderEvents:
         brokers: redpanda:9092
         dialTimeout: 5000
@@ -36,6 +58,9 @@ services:
             color: '#05ABF7'
             pipelines:
                 analytics:
+                    analyticsSchedule:
+                        x: -1600
+                        "y": -205
                     consumeOrderProcessed:
                         x: -1190
                         "y": -205
@@ -56,6 +81,11 @@ services:
         name: Analytics Service
         pipelines:
             analytics:
+                analyticsSchedule:
+                    endpoint: analyticsSchedule
+                    name: Analytics Schedule
+                    type: Input
+                    valueType: automationJob
                 consumeOrderProcessed:
                     endpoint: orderProcessed
                     name: Consume Order Processed
@@ -83,6 +113,13 @@ settings:
     name: Example
     repoPath: github.com/gorundebug/cppboostexample
 types:
+    automationJob:
+        description: Automation job payload and result.
+        module: model
+        name: AutomationJob
+        publicType: true
+        type: string
+        useAlias: false
     orderProcessed:
         definitionFormat: Native
         description: 'Final order-processing event. Fields: OrderID string, Status string, ProcessedAt time.Time, TotalItems int, ConfirmedItems int, FailureReason string.'

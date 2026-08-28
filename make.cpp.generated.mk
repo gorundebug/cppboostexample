@@ -38,9 +38,11 @@ cpp-release-test: cpp-tools ## Build and test optimized C++ services in Docker
 
 cpp-asan-test: cpp-tools ## Run C++ tests with ASan and UBSan
 	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" asan-test USE_LOCAL_MODULES=1 || exit $$?; done
+	@SANITIZER_INTEGRATION=1 ./scripts/sanitizer-test.generated.sh asan
 
 cpp-tsan-test: cpp-tools ## Run C++ tests with TSan
 	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" tsan-test USE_LOCAL_MODULES=1 || exit $$?; done
+	@SANITIZER_INTEGRATION=1 ./scripts/sanitizer-test.generated.sh tsan
 
 cpp-release-up: cpp-release-build ## Start services built with CMake Release
 	@docker compose up -d

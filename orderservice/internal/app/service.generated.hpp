@@ -25,9 +25,9 @@
 
 #include <handlers/order_service_api/processorder/requests.hpp>
 #include <handlers/order_service_api/processorder/responses.hpp>
-#include <model/include/example/model/types/order_item.hpp>
-#include <model/include/example/model/types/order_item_result.hpp>
-#include <model/include/example/model/types/order_processed.hpp>
+#include <model_cpp/include/example/model/types/order_item.hpp>
+#include <model_cpp/include/example/model/types/order_item_result.hpp>
+#include <model_cpp/include/example/model/types/order_processed.hpp>
 #include <orderservice/internal/functions/endpoint/order_processed_endpoint_sink.hpp>
 #include <orderservice/internal/functions/endpoint/process_order_item_sink.hpp>
 #include <orderservice/internal/functions/endpoint/process_order_source.hpp>

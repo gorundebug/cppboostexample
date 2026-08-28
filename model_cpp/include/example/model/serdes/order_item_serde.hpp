@@ -1,36 +1,36 @@
 #pragma once
 
-#include <stdexcept>
-#include <string>
-
 #include <boost/json.hpp>
 
+#include <cstddef>
+#include <string>
+
 #include <servicelib/runtime/serde/serde.hpp>
-#include <model/include/example/model/types/order_processed.hpp>
+#include <model_cpp/include/example/model/types/order_item.hpp>
 
 namespace example::model::types::serde {
 
-class OrderProcessedSerde final
-    : public servicelib::serde::Serde<example::model::types::OrderProcessed> {
+class OrderItemSerde final
+    : public servicelib::serde::Serde<example::model::types::OrderItem> {
  public:
   bool IsStub() const noexcept override { return false; }
 
   servicelib::serde::SerdeData Serialize(
-      const example::model::types::OrderProcessed& value) const override {
+      const example::model::types::OrderItem& value) const override {
     servicelib::serde::SerdeData result;
     SerializeTo(result, value);
     return result;
   }
   void SerializeTo(servicelib::serde::SerdeData& output,
-                   const example::model::types::OrderProcessed& value) const override {
+                   const example::model::types::OrderItem& value) const override {
     const auto text = boost::json::serialize(boost::json::value_from(value));
     const auto* bytes = reinterpret_cast<const std::byte*>(text.data());
     output.insert(output.end(), bytes, bytes + text.size());
   }
-  example::model::types::OrderProcessed Deserialize(
+  example::model::types::OrderItem Deserialize(
       servicelib::serde::SerdeView data) const override {
     const auto* chars = reinterpret_cast<const char*>(data.data());
-    return boost::json::value_to<example::model::types::OrderProcessed>(
+    return boost::json::value_to<example::model::types::OrderItem>(
         boost::json::parse(std::string{chars, data.size()}));
   }
 };

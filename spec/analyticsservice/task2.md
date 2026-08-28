@@ -1,38 +1,34 @@
-# Task 2/2: `OrderProcessedEndpointSource`
+# Task 2/3: `AnalyticsScheduleSource`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `C++/Boost` |
-| Kind | `kafka-source` |
-| File | `analyticsservice/internal/functions/endpoint/order_processed_endpoint_source.hpp` |
-| Test | `analyticsservice/internal/functions/endpoint/order_processed_endpoint_source_test.cpp` |
+| Kind | `schedule-source` |
+| File | `analyticsservice/internal/functions/cron/analytics_schedule_source.hpp` |
+| Test | `analyticsservice/internal/functions/cron/analytics_schedule_source_test.cpp` |
 | Service | `Analytics Service` |
 
 
 ## Behaviour
 
-Exchange OrderProcessed events keyed by order ID.
-Producers include the final status, processing time, total and confirmed item counts, and a failure reason for unsuccessful orders.
-Consumers decode the event and mark its Kafka message processed only after the pipeline handles it successfully.
+Create an analytics job message identifying the local scheduled firing.
 
 
 
 
 
 ## Stream types
-- Input: `OrderProcessed` — `model/include/example/model/types/order_processed.hpp`
-- Output: `OrderProcessed` — `model/include/example/model/types/order_processed.hpp`
+- Input: `AutomationJob` — `model_cpp/include/example/model/types/automation_job.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `analyticsservice/internal/functions/endpoint/order_processed_endpoint_source.hpp` and preserve its generated contract
-- [ ] Inspect input type `OrderProcessed` in `model/include/example/model/types/order_processed.hpp`
-- [ ] Inspect output type `OrderProcessed` in `model/include/example/model/types/order_processed.hpp`
+- [ ] Open `analyticsservice/internal/functions/cron/analytics_schedule_source.hpp` and preserve its generated contract
+- [ ] Inspect input type `AutomationJob` in `model_cpp/include/example/model/types/automation_job.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/order_processed_endpoint_source_test.cpp`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/cron/analytics_schedule_source_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task2.md — OrderProcessedEndpointSource — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task2.md — AnalyticsScheduleSource — C++/Boost — done`

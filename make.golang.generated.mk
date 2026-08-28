@@ -35,7 +35,7 @@ LANG_DOCKER_DEV_BUILD_TARGETS += golang-docker-dev-build
 golang-build: golang-gen ## Generate transport code and build all Go services
 	@$(MAKE) -C ./automationservice -f Makefile service_build USE_LOCAL_MODULES=1 PROJECT_DIR="$(PROJECT_DIR)" BIN_DIR="$(BIN_DIR)"
 
-golang-test: ## Run tests for all Go services
+golang-test: golang-codegen ## Generate transport code and run tests for all Go services
 	@$(MAKE) -C ./automationservice -f Makefile test USE_LOCAL_MODULES=1
 
 golang-lint: $(GOLANGCI_LINT) ## Run Go linters
@@ -49,13 +49,13 @@ golang-workflowcheck: $(WORKFLOWCHECK) ## Check Go Temporal Workflow determinism
 golang-fmt-go: ## Format Go code
 	@gofmt -w ./automationservice
 	@gofmt -w ./inventory_service_api
-	@gofmt -w ./model
+	@gofmt -w ./model_go
 	@gofmt -w ./order_service_api
 
 golang-fmt-proto: $(BUF) ## Format protobuf files used by Go
 	@$(MAKE) -C ./automationservice -f Makefile fmt-proto TOOLS_DIR="$(TOOLS_DIR)"
 	@$(MAKE) -C ./inventory_service_api -f make.generated.mk fmt-proto TOOLS_DIR="$(TOOLS_DIR)"
-	@$(MAKE) -C ./model -f make.generated.mk fmt-proto TOOLS_DIR="$(TOOLS_DIR)"
+	@$(MAKE) -C ./model_go -f make.generated.mk fmt-proto TOOLS_DIR="$(TOOLS_DIR)"
 	@$(MAKE) -C ./order_service_api -f make.generated.mk fmt-proto TOOLS_DIR="$(TOOLS_DIR)"
 
 golang-fmt: golang-fmt-go golang-fmt-proto ## Format all Go-owned sources
@@ -63,7 +63,7 @@ golang-fmt: golang-fmt-go golang-fmt-proto ## Format all Go-owned sources
 golang-gen-proto: $(PROTOC) $(PROTOC_GEN_GO) $(PROTOC_GEN_GO_GRPC) ## Generate Go protobuf code
 	@$(MAKE) -C ./automationservice -f Makefile gen-proto PROTOC="$(PROTOC)"
 	@$(MAKE) -C ./inventory_service_api -f make.generated.mk gen-proto PROTOC="$(PROTOC)"
-	@$(MAKE) -C ./model -f make.generated.mk gen-proto PROTOC="$(PROTOC)"
+	@$(MAKE) -C ./model_go -f make.generated.mk gen-proto PROTOC="$(PROTOC)"
 	@$(MAKE) -C ./order_service_api -f make.generated.mk gen-proto PROTOC="$(PROTOC)"
 golang-codegen: golang-gen-proto golang-fmt ## Generate all Go transport code without changing module manifests
 
@@ -87,13 +87,13 @@ gen-proto: golang-gen-proto ## Generate Go protobuf code
 go-mod-tidy: ## Run go mod tidy for all Go modules
 	@cd ./automationservice && GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
 	@cd ./inventory_service_api && GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
-	@cd ./model && GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
+	@cd ./model_go && GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
 	@cd ./order_service_api && GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
 	@go work use
 
 go-mod-sync: ## Sync Go modules with published versions after git-push
 	@cd ./inventory_service_api && GOWORK=off GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
-	@cd ./model && GOWORK=off GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
+	@cd ./model_go && GOWORK=off GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
 	@cd ./order_service_api && GOWORK=off GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
 	@cd ./automationservice && GOWORK=off GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
 

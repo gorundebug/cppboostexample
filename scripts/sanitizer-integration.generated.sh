@@ -32,7 +32,7 @@ cleanup() {
 trap cleanup EXIT
 
 SERVICELIB_NOOP_METRICS=1 \
-  "./${build_dir}/inventoryservice/example_inventory_service" \
+  "${build_dir%/}/inventoryservice/example_inventory_service" \
     --config inventoryservice/config/config.yaml \
     --values inventoryservice/config/overrides.yaml \
     --workers 2 &
@@ -41,7 +41,7 @@ inventory_pid="$!"
 ORDER_PROCESSED_ENABLED=false \
 INVENTORY_SERVICE_API_ADDRESS=dns:///127.0.0.1:9202 \
 SERVICELIB_NOOP_METRICS=1 \
-  "./${build_dir}/orderservice/example_order_service" \
+  "${build_dir%/}/orderservice/example_order_service" \
     --config orderservice/config/config.yaml \
     --values orderservice/config/overrides.yaml \
     --workers 2 &

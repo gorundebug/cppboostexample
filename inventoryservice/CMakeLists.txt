@@ -26,12 +26,14 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
          "Fetch pinned cppboostservicelib and missing contract modules" ON)
   set(CPPBOOSTSERVICELIB_REPOSITORY "https://github.com/gorundebug/cppboostservicelib.git" CACHE STRING
       "Standalone cppboostservicelib repository")
-  set(CPPBOOSTSERVICELIB_REVISION "v0.2.25" CACHE STRING
+  set(CPPBOOSTSERVICELIB_REVISION "v0.2.27" CACHE STRING
       "Pinned cppboostservicelib revision")
   set(CPPBOOSTSERVICELIB_ENABLE_GRPC ON
       CACHE BOOL "Build asio-grpc support" FORCE)
   set(CPPBOOSTSERVICELIB_ENABLE_KAFKA OFF
       CACHE BOOL "Build librdkafka support" FORCE)
+  set(CPPBOOSTSERVICELIB_ENABLE_CRON OFF
+      CACHE BOOL "Build the libcron data source" FORCE)
   set(CPPBOOSTSERVICELIB_ENABLE_OTEL ON
       CACHE BOOL "Build OpenTelemetry tracing and logging support" FORCE)
   set(CPPBOOSTSERVICELIB_BUILD_TESTS OFF CACHE BOOL
@@ -100,10 +102,10 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     endif()
   endif()
   if(NOT TARGET example_model)
-    set(_servicegen_module_source "${MODULES_ROOT}/model")
+    set(_servicegen_module_source "${MODULES_ROOT}/model_cpp")
     if(EXISTS "${_servicegen_module_source}/CMakeLists.txt")
       add_subdirectory("${_servicegen_module_source}"
-          "${CMAKE_BINARY_DIR}/_modules/model")
+          "${CMAKE_BINARY_DIR}/_modules/model_cpp")
     elseif(FETCH_CPP_DEPENDENCIES)
       include(FetchContent)
       FetchContent_Declare(servicegen_module_model
@@ -113,7 +115,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
           GIT_PROGRESS TRUE)
       FetchContent_MakeAvailable(servicegen_module_model)
     else()
-      message(FATAL_ERROR "Contract module model was not found")
+      message(FATAL_ERROR "Contract module model_cpp was not found")
     endif()
   endif()
 endif()

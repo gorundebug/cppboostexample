@@ -6,9 +6,9 @@
 #include <servicelib/runtime/serde/serde.hpp>
 #include <servicelib/runtime/serde/serdeimpl.hpp>
 #include <orderservice/internal/serdes/order_serde.hpp>
-#include <model/include/example/model/serdes/order_item_serde.hpp>
-#include <model/include/example/model/serdes/order_item_result_serde.hpp>
-#include <model/include/example/model/serdes/order_processed_serde.hpp>
+#include <model_cpp/include/example/model/serdes/order_item_serde.hpp>
+#include <model_cpp/include/example/model/serdes/order_item_result_serde.hpp>
+#include <model_cpp/include/example/model/serdes/order_processed_serde.hpp>
 #include <orderservice/internal/serdes/order_state_serde.hpp>
 
 

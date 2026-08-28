@@ -1,7 +1,7 @@
 ARG DEPENDENCY_DOCKER_REGISTRY=docker.io
 FROM servicelib-source AS servicelib-source
 FROM module-inventory_service_api AS module-inventory_service_api
-FROM module-model AS module-model
+FROM module-model_cpp AS module-model_cpp
 FROM module-order_service_api AS module-order_service_api
 
 FROM ${DEPENDENCY_DOCKER_REGISTRY}/library/ubuntu:24.04 AS development
@@ -67,7 +67,7 @@ RUN set -eu; \
     rm -rf /tmp/servicelib-source
 WORKDIR /workspace
 COPY --from=module-inventory_service_api / /workspace/modules/inventory_service_api
-COPY --from=module-model / /workspace/modules/model
+COPY --from=module-model_cpp / /workspace/modules/model_cpp
 COPY --from=module-order_service_api / /workspace/modules/order_service_api
 
 ENV LANG=en_US.UTF-8

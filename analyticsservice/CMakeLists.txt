@@ -26,12 +26,14 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
          "Fetch pinned cppboostservicelib and missing contract modules" ON)
   set(CPPBOOSTSERVICELIB_REPOSITORY "https://github.com/gorundebug/cppboostservicelib.git" CACHE STRING
       "Standalone cppboostservicelib repository")
-  set(CPPBOOSTSERVICELIB_REVISION "v0.2.25" CACHE STRING
+  set(CPPBOOSTSERVICELIB_REVISION "v0.2.27" CACHE STRING
       "Pinned cppboostservicelib revision")
   set(CPPBOOSTSERVICELIB_ENABLE_GRPC ON
       CACHE BOOL "Build asio-grpc support" FORCE)
   set(CPPBOOSTSERVICELIB_ENABLE_KAFKA ON
       CACHE BOOL "Build librdkafka support" FORCE)
+  set(CPPBOOSTSERVICELIB_ENABLE_CRON ON
+      CACHE BOOL "Build the libcron data source" FORCE)
   set(CPPBOOSTSERVICELIB_ENABLE_OTEL ON
       CACHE BOOL "Build OpenTelemetry tracing and logging support" FORCE)
   set(CPPBOOSTSERVICELIB_BUILD_TESTS OFF CACHE BOOL
@@ -83,10 +85,10 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   endif()
 
   if(NOT TARGET example_model)
-    set(_servicegen_module_source "${MODULES_ROOT}/model")
+    set(_servicegen_module_source "${MODULES_ROOT}/model_cpp")
     if(EXISTS "${_servicegen_module_source}/CMakeLists.txt")
       add_subdirectory("${_servicegen_module_source}"
-          "${CMAKE_BINARY_DIR}/_modules/model")
+          "${CMAKE_BINARY_DIR}/_modules/model_cpp")
     elseif(FETCH_CPP_DEPENDENCIES)
       include(FetchContent)
       FetchContent_Declare(servicegen_module_model
@@ -96,7 +98,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
           GIT_PROGRESS TRUE)
       FetchContent_MakeAvailable(servicegen_module_model)
     else()
-      message(FATAL_ERROR "Contract module model was not found")
+      message(FATAL_ERROR "Contract module model_cpp was not found")
     endif()
   endif()
 endif()
@@ -125,7 +127,7 @@ target_compile_features(example_analytics_service PRIVATE cxx_std_20)
 target_include_directories(example_analytics_service PRIVATE "${_servicegen_include_root}")
 target_link_libraries(example_analytics_service PRIVATE
     PkgConfig::JEMALLOC
-    servicelib::servicelib servicelib::otel servicelib::kafka
+    servicelib::servicelib servicelib::otel servicelib::cron servicelib::kafka
     example_model
 )
 
@@ -154,13 +156,14 @@ include(GoogleTest)
 
 add_executable(example_analytics_service_unit_tests
     internal/functions/analytics/count_order_processed_test.cpp
+    internal/functions/cron/analytics_schedule_source_test.cpp
     internal/functions/endpoint/order_processed_endpoint_source_test.cpp
 )
 target_compile_features(example_analytics_service_unit_tests PRIVATE cxx_std_20)
 target_include_directories(example_analytics_service_unit_tests PRIVATE
     "${_servicegen_include_root}")
 target_link_libraries(example_analytics_service_unit_tests PRIVATE
-    servicelib::servicelib GTest::gtest_main servicelib::kafka
+    servicelib::servicelib servicelib::cron GTest::gtest_main servicelib::kafka
     example_model
 )
 gtest_discover_tests(example_analytics_service_unit_tests)

@@ -18,4 +18,5 @@ done
 
 cd "$work_dir"
 go mod edit -replace github.com/gorundebug/servicelib=/servicelib
+go mod edit -replace github.com/gorundebug/cppboostexample/model_go=/modules/model_go
 make -f make.generated.mk gen-proto TOOLS_DIR=/usr/local/bin PROTOC=/usr/local/bin/protoc

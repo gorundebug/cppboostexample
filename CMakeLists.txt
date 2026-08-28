@@ -24,7 +24,7 @@ set(CPPBOOSTSERVICELIB_REPOSITORY
     "https://github.com/gorundebug/cppboostservicelib.git" CACHE STRING
     "Standalone cppboostservicelib repository")
 set(CPPBOOSTSERVICELIB_REVISION
-    "v0.2.25" CACHE STRING
+    "v0.2.27" CACHE STRING
     "Pinned cppboostservicelib revision")
 set(CPPBOOSTSERVICELIB_DEPENDENCY_MODE "CONAN" CACHE STRING
     "Dependency provider used for a source-tree cppboostservicelib build")
@@ -74,7 +74,7 @@ if(NOT TARGET servicelib::kafka)
 endif()
 
 add_subdirectory(inventory_service_api)
-add_subdirectory(model)
+add_subdirectory(model_cpp)
 add_subdirectory(order_service_api)
 add_subdirectory(analyticsservice)
 add_subdirectory(inventoryservice)

@@ -22,14 +22,14 @@ Preserve each item's data and assign the parent order ID.
 
 ## Stream types
 - Input: `Order` — `orderservice/internal/types/order.hpp`
-- Output: `OrderItem` — `model/include/example/model/types/order_item.hpp`
+- Output: `OrderItem` — `model_cpp/include/example/model/types/order_item.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
 - [ ] Open `orderservice/internal/functions/order/process_order_items.hpp` and preserve its generated contract
 - [ ] Inspect input type `Order` in `orderservice/internal/types/order.hpp`
-- [ ] Inspect output type `OrderItem` in `model/include/example/model/types/order_item.hpp`
+- [ ] Inspect output type `OrderItem` in `model_cpp/include/example/model/types/order_item.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
 - [ ] Implement meaningful assertions in `orderservice/internal/functions/order/process_order_items_test.cpp`

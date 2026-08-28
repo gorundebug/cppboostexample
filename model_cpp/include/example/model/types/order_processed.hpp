@@ -3,10 +3,7 @@
 #include <boost/json.hpp>
 
 #include <cstddef>
-#include <cstdint>
 #include <string>
-#include <unordered_map>
-#include <vector>
 
 namespace example::model::types {
 
@@ -21,16 +18,14 @@ struct OrderProcessed final {
 
 inline void tag_invoke(boost::json::value_from_tag, boost::json::value& json,
                        const OrderProcessed& value) {
-  json = {{"order_id", value.order_id},
-          {"status", value.status},
-          {"processed_at", value.processed_at},
-          {"total_items", value.total_items},
+  json = {{"order_id", value.order_id}, {"status", value.status},
+          {"processed_at", value.processed_at}, {"total_items", value.total_items},
           {"confirmed_items", value.confirmed_items},
           {"failure_reason", value.failure_reason}};
 }
 
-inline OrderProcessed tag_invoke(
-    boost::json::value_to_tag<OrderProcessed>, const boost::json::value& json) {
+inline OrderProcessed tag_invoke(boost::json::value_to_tag<OrderProcessed>,
+                                 const boost::json::value& json) {
   const auto& object = json.as_object();
   return {boost::json::value_to<std::string>(object.at("order_id")),
           boost::json::value_to<std::string>(object.at("status")),

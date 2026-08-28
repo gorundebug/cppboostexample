@@ -38,15 +38,15 @@ target_name=""
 case "${service_name}" in
   analyticsservice)
     target_name="example_analytics_service"
-    module_dirs=("model" )
+    module_dirs=("model_cpp" )
     ;;
   inventoryservice)
     target_name="example_inventory_service"
-    module_dirs=("inventory_service_api" "model" )
+    module_dirs=("inventory_service_api" "model_cpp" )
     ;;
   orderservice)
     target_name="example_order_service"
-    module_dirs=("inventory_service_api" "model" "order_service_api" )
+    module_dirs=("inventory_service_api" "model_cpp" "order_service_api" )
     ;;
   *) echo "unknown generated Boost C++ service: ${service_name}" >&2; exit 1 ;;
 esac

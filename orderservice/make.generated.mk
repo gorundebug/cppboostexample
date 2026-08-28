@@ -11,13 +11,13 @@ include dependency-proxy.generated.mk
 
 ifeq ($(strip $(USE_LOCAL_MODULES)),1)
 export MODULE_INVENTORY_SERVICE_API_SOURCE_CONTEXT := ../inventory_service_api
-export MODULE_MODEL_SOURCE_CONTEXT := ../model
+export MODULE_MODEL_CPP_SOURCE_CONTEXT := ../model_cpp
 export MODULE_ORDER_SERVICE_API_SOURCE_CONTEXT := ../order_service_api
 endif
 
 ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
 export DEPENDENCY_CONAN_HOME := $(DEPENDENCY_PROXY_DIR)/conan2
-export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.25.tar.gz
+export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.27.tar.gz
 export SERVICELIB_SOURCE_CONTEXT ?= $(CPPBOOSTSERVICELIB_SOURCE_CONTEXT)
 endif
 

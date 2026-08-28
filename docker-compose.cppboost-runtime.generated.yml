@@ -11,8 +11,8 @@ services:
     security_opt: !reset []
     cap_add: !reset []
     ports: !override
-      - "9093:9093"
-      - "9203:9203"
+      - "${ANALYTICS_SERVICE_HTTP_PORT:-9093}:${ANALYTICS_SERVICE_HTTP_PORT:-9093}"
+      - "${ANALYTICS_SERVICE_GRPC_PORT:-9203}:${ANALYTICS_SERVICE_GRPC_PORT:-9203}"
   inventoryservice:
     image: cppboostexample-inventoryservice
     working_dir: /app
@@ -25,8 +25,8 @@ services:
     security_opt: !reset []
     cap_add: !reset []
     ports: !override
-      - "9092:9092"
-      - "9202:9202"
+      - "${INVENTORY_SERVICE_HTTP_PORT:-9092}:${INVENTORY_SERVICE_HTTP_PORT:-9092}"
+      - "${INVENTORY_SERVICE_GRPC_PORT:-9202}:${INVENTORY_SERVICE_GRPC_PORT:-9202}"
   orderservice:
     image: cppboostexample-orderservice
     working_dir: /app
@@ -39,5 +39,5 @@ services:
     security_opt: !reset []
     cap_add: !reset []
     ports: !override
-      - "9091:9091"
-      - "9201:9201"
+      - "${ORDER_SERVICE_HTTP_PORT:-9091}:${ORDER_SERVICE_HTTP_PORT:-9091}"
+      - "${ORDER_SERVICE_GRPC_PORT:-9201}:${ORDER_SERVICE_GRPC_PORT:-9201}"

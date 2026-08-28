@@ -1,4 +1,4 @@
-# Task 1/2: `CountOrderProcessed`
+# Task 1/3: `CountOrderProcessed`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
@@ -20,15 +20,15 @@ Count successful and unsuccessful orders independently, then return the event un
 
 
 ## Stream types
-- Input: `OrderProcessed` — `model/include/example/model/types/order_processed.hpp`
-- Output: `OrderProcessed` — `model/include/example/model/types/order_processed.hpp`
+- Input: `OrderProcessed` — `model_cpp/include/example/model/types/order_processed.hpp`
+- Output: `OrderProcessed` — `model_cpp/include/example/model/types/order_processed.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
 - [ ] Open `analyticsservice/internal/functions/analytics/count_order_processed.hpp` and preserve its generated contract
-- [ ] Inspect input type `OrderProcessed` in `model/include/example/model/types/order_processed.hpp`
-- [ ] Inspect output type `OrderProcessed` in `model/include/example/model/types/order_processed.hpp`
+- [ ] Inspect input type `OrderProcessed` in `model_cpp/include/example/model/types/order_processed.hpp`
+- [ ] Inspect output type `OrderProcessed` in `model_cpp/include/example/model/types/order_processed.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
 - [ ] Implement meaningful assertions in `analyticsservice/internal/functions/analytics/count_order_processed_test.cpp`

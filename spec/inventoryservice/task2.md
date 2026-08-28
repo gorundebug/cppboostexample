@@ -30,15 +30,15 @@ If the inventory call fails, the caller returns a non-reserved PROCESSING_ERROR 
 
 
 ## Stream types
-- Input: `OrderItem` — `model/include/example/model/types/order_item.hpp`
-- Output: `OrderItemResult` — `model/include/example/model/types/order_item_result.hpp`
+- Input: `OrderItem` — `model_cpp/include/example/model/types/order_item.hpp`
+- Output: `OrderItemResult` — `model_cpp/include/example/model/types/order_item_result.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
 - [ ] Open `inventoryservice/internal/functions/endpoint/process_order_item_source.hpp` and preserve its generated contract
-- [ ] Inspect input type `OrderItem` in `model/include/example/model/types/order_item.hpp`
-- [ ] Inspect output type `OrderItemResult` in `model/include/example/model/types/order_item_result.hpp`
+- [ ] Inspect input type `OrderItem` in `model_cpp/include/example/model/types/order_item.hpp`
+- [ ] Inspect output type `OrderItemResult` in `model_cpp/include/example/model/types/order_item_result.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
 - [ ] Implement meaningful assertions in `inventoryservice/internal/functions/endpoint/process_order_item_source_test.cpp`

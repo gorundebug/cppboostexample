@@ -1783,7 +1783,7 @@ func MakeConfig() *Config {
 			},
 			Model: cfg.ModuleConfig{
 				Name: "model",
-				Path: "github.com/gorundebug/cppboostexample-model",
+				Path: "github.com/gorundebug/cppboostexample/model_go",
 			},
 			OrderServiceApi: cfg.ModuleConfig{
 				Name: "order_service_api",
@@ -1794,8 +1794,10 @@ func MakeConfig() *Config {
 			AutomationJob cfg.TypeConfig `yaml:"automationJob" mapstructure:"automationJob"`
 		}{
 			AutomationJob: cfg.TypeConfig{
-				Name: "AutomationJob",
-				Type: api.DataTypeString,
+				Name:       "AutomationJob",
+				Type:       api.DataTypeString,
+				Module:     "model",
+				PublicType: true,
 			},
 		},
 	}
