@@ -38,8 +38,6 @@ prepare_git_credentials() {
   chmod 0600 "$github_credential_file"
 }
 
-prepare_git_credentials
-
 # Docker Desktop forwards host.docker.internal to host loopback. Native Linux
 # Docker resolves the same stable name through host-gateway, so Nexus must also
 # listen on the host bridge rather than loopback only.
@@ -200,6 +198,7 @@ case "${1:-up}" in
   up)
     mkdir -p "$cache_dir" "$git_mirror_dir"
     chmod 0777 "$cache_dir" "$git_mirror_dir"
+    prepare_git_credentials
     compose up -d --build nexus git-mirror
     wait_ready
     bootstrap
@@ -213,10 +212,12 @@ case "${1:-up}" in
     compose ps
     ;;
   refresh)
+    prepare_git_credentials
     refresh_nexus_proxy_caches
     refresh_git_mirrors "$@"
     ;;
   refresh-git)
+    prepare_git_credentials
     refresh_git_mirrors "$@"
     ;;
   env)
