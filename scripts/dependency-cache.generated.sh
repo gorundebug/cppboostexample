@@ -209,6 +209,9 @@ case "${1:-up}" in
     refresh_nexus_proxy_caches
     refresh_git_mirrors "$@"
     ;;
+  refresh-git)
+    refresh_git_mirrors "$@"
+    ;;
   env)
     print_env
     ;;
