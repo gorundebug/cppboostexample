@@ -24,8 +24,8 @@
 #include <servicelib/runtime/environment/environment.hpp>
 #include <handlers/order_service_api/processorder/requests.hpp>
 #include <handlers/order_service_api/processorder/responses.hpp>
-#include <model/include/example/model/types/order_item.hpp>
-#include <model/include/example/model/types/order_item_result.hpp>
+#include <model_cpp/include/example/model/types/order_item.hpp>
+#include <model_cpp/include/example/model/types/order_item_result.hpp>
 #include <orderservice/internal/types/order.hpp>
 #include <orderservice/internal/types/order_state.hpp>
 

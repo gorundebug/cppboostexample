@@ -11,8 +11,8 @@
 #include <servicelib/runtime/common.hpp>
 #include <servicelib/runtime/config/endpoint_types.hpp>
 #include <servicelib/runtime/environment/environment.hpp>
-#include <model/include/example/model/types/order_item.hpp>
-#include <model/include/example/model/types/order_item_result.hpp>
+#include <model_cpp/include/example/model/types/order_item.hpp>
+#include <model_cpp/include/example/model/types/order_item_result.hpp>
 #include <proto/inventoryserviceapi/processorderitem/processorderitem.pb.h>
 
 

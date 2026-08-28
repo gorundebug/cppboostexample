@@ -14,7 +14,7 @@
 #include <servicelib/runtime/base.hpp>
 #include <servicelib/runtime/config/stream_types.hpp>
 #include <servicelib/runtime/environment/environment.hpp>
-#include <model/include/example/model/types/order_processed.hpp>
+#include <model_cpp/include/example/model/types/order_processed.hpp>
 #include <orderservice/internal/types/order_state.hpp>
 
 

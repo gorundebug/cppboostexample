@@ -69,7 +69,9 @@ RUN set -eu; \
     cp -a "$source_dir/." /servicelib/
 COPY --from=module-model_go-source / /tmp/module-model_go-source
 RUN set -eu; source_dir=/tmp/module-model_go-source; \
-	source_dir="$source_dir/model_go"; \
+	if [ ! -f "$source_dir/go.mod" ] && [ -f "$source_dir/model_go/go.mod" ]; then \
+	  source_dir="$source_dir/model_go"; \
+	fi; \
     manifest="$source_dir/go.mod"; \
     if [ ! -f "$manifest" ]; then manifest=$(find "$source_dir" -mindepth 2 -maxdepth 2 -type f -name go.mod -print -quit); fi; \
     if [ -z "$manifest" ]; then echo "module context github.com/gorundebug/cppboostexample/model_go has no go.mod" >&2; exit 1; fi; \

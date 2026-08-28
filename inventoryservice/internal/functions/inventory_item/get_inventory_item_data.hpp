@@ -13,8 +13,8 @@
 #include <servicelib/runtime/context.hpp>
 #include <servicelib/runtime/config/stream_types.hpp>
 #include <servicelib/runtime/environment/environment.hpp>
-#include <model/include/example/model/types/order_item.hpp>
-#include <model/include/example/model/types/order_item_result.hpp>
+#include <model_cpp/include/example/model/types/order_item.hpp>
+#include <model_cpp/include/example/model/types/order_item_result.hpp>
 
 
 namespace example::inventory_service::functions {
