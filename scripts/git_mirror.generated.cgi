@@ -8,6 +8,10 @@ if [ "$request_path" = "/__servicegen_health" ]; then
   exit 0
 fi
 if [ "$request_path" = "/__servicegen_refresh" ]; then
+  if [ "${DEPENDENCY_GIT_MIRROR_OFFLINE:-0}" = "1" ]; then
+    printf 'Status: 503 Service Unavailable\r\nContent-Type: text/plain\r\n\r\nGit mirror is offline; refresh is disabled\n'
+    exit 0
+  fi
   if [ "${REQUEST_METHOD:-GET}" != "POST" ]; then
     printf 'Status: 405 Method Not Allowed\r\nContent-Type: text/plain\r\n\r\nPOST required\n'
     exit 0
@@ -121,6 +125,10 @@ done
 trap 'rmdir "$lock" 2>/dev/null || true' EXIT HUP INT TERM
 
 if [ ! -d "$mirror" ]; then
+  if [ "${DEPENDENCY_GIT_MIRROR_OFFLINE:-0}" = "1" ]; then
+    printf 'Status: 404 Not Found\r\nContent-Type: text/plain\r\n\r\nrepository is not present in the offline Git mirror\n'
+    exit 0
+  fi
   temporary="${mirror}.tmp.$$"
   rm -rf "$temporary"
   if ! git clone --mirror "$upstream" "$temporary" >&2; then
