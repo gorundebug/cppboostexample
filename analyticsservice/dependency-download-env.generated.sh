@@ -3,6 +3,7 @@
 set -eu
 
 retry_command=0
+retry_default_attempts=8
 if [ "${1:-}" = "--retry" ]; then
   retry_command=1
   shift
@@ -24,6 +25,9 @@ if [ "$retry_command" -eq 0 ] \
   case "${3:-}" in
     *"apt-get update"*) retry_command=1 ;;
     *"pnpm install"*) retry_command=1 ;;
+    *"docker build "*) retry_command=1; retry_default_attempts=3 ;;
+    *"docker buildx build "*) retry_command=1; retry_default_attempts=3 ;;
+    *"docker compose "*" build"*) retry_command=1; retry_default_attempts=3 ;;
   esac
 fi
 
@@ -64,7 +68,7 @@ if [ "$retry_command" -eq 0 ]; then
 fi
 
 attempt=1
-max_attempts=${DEPENDENCY_COMMAND_RETRY_ATTEMPTS:-8}
+max_attempts=${DEPENDENCY_COMMAND_RETRY_ATTEMPTS:-$retry_default_attempts}
 retry_delay=${DEPENDENCY_COMMAND_RETRY_DELAY_SECONDS:-5}
 while :; do
   if env "$@"; then

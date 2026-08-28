@@ -5,6 +5,9 @@
 export FETCH_CPP_DEPENDENCIES := OFF
 STANDALONE_COMPOSE := $(if $(wildcard docker-compose.yml),docker-compose.yml,docker-compose.generated.yml)
 STANDALONE_DEV_COMPOSE := $(if $(wildcard docker-compose.dev.yml),docker-compose.dev.yml,docker-compose.dev.generated.yml)
+DEPENDENCY_DOWNLOAD_ENV := $(or $(wildcard $(abspath ./dependency-download-env.generated.sh)),$(wildcard $(abspath ../dependency-download-env.generated.sh)),/bin/sh)
+SHELL := $(DEPENDENCY_DOWNLOAD_ENV)
+.SHELLFLAGS := -c
 DEPENDENCY_DOCKER_TARGETS := build test release-build release-test asan-test tsan-test lint \
 	docker-build docker-up docker-build-dev docker-up-dev debug
 include dependency-proxy.generated.mk
