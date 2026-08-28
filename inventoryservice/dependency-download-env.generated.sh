@@ -23,6 +23,7 @@ if [ "$retry_command" -eq 0 ] \
     && [ "${2:-}" = "-c" ]; then
   case "${3:-}" in
     *"apt-get update"*) retry_command=1 ;;
+    *"pnpm install"*) retry_command=1 ;;
   esac
 fi
 
