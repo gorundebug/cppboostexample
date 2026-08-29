@@ -18,6 +18,8 @@ services:
     volumes:
       - ./analyticsservice:/workspace/source:ro
       - cpp-dev-cmake-build-analyticsservice:/workspace/build
+    ports:
+      - "${ANALYTICS_SERVICE_DEBUG_PORT:-2345}:2345"
     security_opt:
       - seccomp:unconfined
     cap_add:
@@ -49,6 +51,8 @@ services:
       - go-dev-worktree-automationservice:/workspace/service
       - go-dev-mod-cache:/go/pkg/mod
       - go-dev-build-cache:/root/.cache/go-build
+    ports:
+      - "${AUTOMATION_SERVICE_DEBUG_PORT:-2346}:2345"
     security_opt:
       - seccomp:unconfined
     cap_add:
@@ -69,6 +73,8 @@ services:
     volumes:
       - ./inventoryservice:/workspace/source:ro
       - cpp-dev-cmake-build-inventoryservice:/workspace/build
+    ports:
+      - "${INVENTORY_SERVICE_DEBUG_PORT:-2347}:2345"
     security_opt:
       - seccomp:unconfined
     cap_add:
@@ -89,6 +95,8 @@ services:
     volumes:
       - ./orderservice:/workspace/source:ro
       - cpp-dev-cmake-build-orderservice:/workspace/build
+    ports:
+      - "${ORDER_SERVICE_DEBUG_PORT:-2348}:2345"
     security_opt:
       - seccomp:unconfined
     cap_add:
