@@ -34,9 +34,7 @@ and `[mixed]` orchestrates both according to the languages in this project.
 ## First local run
 
 ```sh
-make tools       # [host] install/check project tooling
-make build       # [mixed] build every language with its documented backend
-make test        # [mixed] run every language test suite with its documented backend
+make init        # [mixed] install tooling, generate sources, and format them
 make docker-up   # [Docker] build copied-source runtime images and start the stack
 ```
 
@@ -47,10 +45,16 @@ from copied sources, generates Grafana dashboards and starts the complete
 project infrastructure and all services.
 
 ```sh
+make build             # [mixed] build every service without starting it
+make test              # [mixed] run every language test suite
 make docker-down       # [Docker] stop the runtime stack, preserve volumes
 make docker-restart    # [Docker] rebuild and restart the runtime stack
 make docker-clean      # [Docker] stop the stack and remove project volumes
 ```
+
+Generated `scripts/*.generated.sh` files are implementation details behind
+these Make targets. Use `make help` as the public command index and invoke a
+generated script directly only while diagnosing that script itself.
 
 ## Build modes
 
@@ -152,6 +156,38 @@ make integration-test # [Docker] run the integration stack and assertions
 make clean           # [host] remove language build artifacts
 ```
 
+## Regeneration and merge
+
+The generator can update an existing project without overwriting business
+code. Run merge commands from the project root:
+
+```sh
+make merge-check ARCHIVE=/absolute/path/project.zip # preview; do not change files
+make merge ARCHIVE=/absolute/path/project.zip       # apply the generated archive
+make merge-validate                                 # validate generated/business boundaries
+```
+
+`merge-check` is the safe command to use in CI or before accepting a generator
+upgrade. Project-specific merge hooks and exclusions are documented next to
+the generated merge scripts; do not edit generated files merely to preserve a
+custom change.
+
+## Publishing independent repositories
+
+Each service and module is independently publishable; the project repository
+is only their workspace and orchestration layer.
+
+```sh
+make git-push       # generate and push configured modules, services, and project
+make git-init       # git-push, then synchronize language dependency manifests
+make go-mod-sync    # Go only: synchronize manifests after publishing tags
+```
+
+Individual `git-push-<component>` targets are listed by `make help`. Destructive
+`git-delete*` targets delete configured remote repositories and are never part
+of build or regeneration. Review the resolved repository names before invoking
+them.
+
 
 ### Go
 
@@ -199,9 +235,17 @@ export DEPENDENCY_PROXY_DIR=/absolute/path/to/dependency-proxy-data
 make DEPENDENCY_PROXY_ACCEPT_EULA=true dependency-cache-up # [Docker] first start only
 make dependency-cache-status       # [Docker]
 make dependency-cache-refresh      # [Docker] refresh every mirrored Git repository
+eval "$(make -s dependency-cache-env)" # [host] print/apply package-manager routing
 make dependency-cache-docker-build # [Docker] prefetch/cache base images
 make dependency-cache-down         # [Docker] preserve cached data
+make dependency-cache-clean        # [Docker] delete all proxy and mirror data
 ```
+
+Set `DEPENDENCY_PROXY_DIR` before every command that must use the proxy. Unset
+it to use upstream registries directly. After publishing a new internal tag,
+run `make dependency-cache-refresh` before a build that consumes that tag; a
+failed refresh stops instead of silently serving an older revision. In either
+mode download failures are retried but never routed through a hidden fallback.
 
 See [`dependency-cache/README.generated.md`](./dependency-cache/README.generated.md)
 for setup, routing, retry, Linux/macOS Docker-host details and cache

@@ -67,11 +67,11 @@ service_build_linux:
 	mkdir -p $(BIN_DIR)
 	CGO_ENABLED=0 GOOS=linux go build -ldflags="$(LDFLAGS)" -o "$(BIN_DIR)/$(SERVICE_NAME)" "./cmd/service/main.go"
 
-clean:
+clean: ## [host] Remove Go build artifacts
 	@echo "Cleaning $(SERVICE_NAME)..."
 	rm -rf "$(BIN_DIR)"
 
-gen-proto:
+gen-proto: ## [host] Regenerate service-owned protobuf code
 	@if [ -d internal/proto ]; then \
 		echo "Generate proto code..."; \
 		find . -type f -name 'go.generated.proto.mk' | while read mkfile; do \
@@ -81,7 +81,7 @@ gen-proto:
 		done; \
 	fi
 
-fmt-proto:
+fmt-proto: ## [host] Format service-owned protobuf files
 	@find . -type f -name '*.proto' | while read protofile; do \
 		$(BUF) format -w $$protofile; \
 	done
@@ -89,31 +89,31 @@ fmt-proto:
 docker-build: ## [Docker] Build the autonomous copied-source runtime image
 	@$(COMPOSE) build $(SERVICE_NAME)
 
-docker-build-dev:
+docker-build-dev: ## [Docker] Build the source-mounted development image
 	@$(COMPOSE_DEV) build $(SERVICE_NAME)
 
-docker-up: docker-build
+docker-up: docker-build ## [Docker] Start only this service
 	@$(COMPOSE) up -d --no-build $(SERVICE_NAME)
 
-docker-up-dev: docker-build-dev
+docker-up-dev: docker-build-dev ## [Docker] Start with sources mounted read-only
 	@DEBUG=0 $(COMPOSE_DEV) up -d --no-build --force-recreate $(SERVICE_NAME)
 
 debug: docker-build-dev ## Start Delve on host port $(DEBUG_PORT), container port 2345
 	@DEBUG=1 $(COMPOSE_DEV) up -d --no-build --force-recreate $(SERVICE_NAME)
 
-docker-down:
+docker-down: ## [Docker] Stop the standalone runtime stack
 	@$(COMPOSE) down
 
-docker-down-dev:
+docker-down-dev: ## [Docker] Stop the standalone development stack
 	@$(COMPOSE_DEV) down
 
-test:
+test: ## [host] Run Go tests
 	go test ./...
 
-lint: $(GOLANGCI_LINT)
+lint: $(GOLANGCI_LINT) ## [host] Run golangci-lint
 	$(GOLANGCI_LINT) run ./...
 
-lint-fix: $(GOLANGCI_LINT)
+lint-fix: $(GOLANGCI_LINT) ## [host] Apply supported golangci-lint fixes
 	$(GOLANGCI_LINT) run --fix ./...
 
 $(GOLANGCI_LINT):
@@ -129,7 +129,7 @@ $(ACT):
 act: $(ACT) ## Run GitHub Actions locally via act (requires Docker)
 	$(ACT) push
 
-run:
+run: ## [host] Run with generated configuration files
 	go run "./cmd/service/main.go" -config "./config/config.yaml" -values "./config/overrides.yaml"
 
 hooks: ## Install git hooks (pre-commit: lint, pre-push: test)
