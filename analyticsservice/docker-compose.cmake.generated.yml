@@ -33,7 +33,7 @@ services:
         DEPENDENCY_APT_UBUNTU_SECURITY_URL: ${DEPENDENCY_APT_UBUNTU_SECURITY_URL:-}
         DEPENDENCY_APT_UBUNTU_PORTS_URL: ${DEPENDENCY_APT_UBUNTU_PORTS_URL:-}
       additional_contexts:
-        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.27}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.28}
         module-model_cpp: ${MODULE_MODEL_CPP_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.14}
       secrets:
         - dependency_conan_credential
@@ -95,7 +95,7 @@ services:
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.27}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.28}
         module-model_cpp: ${MODULE_MODEL_CPP_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.14}
       secrets:
         - dependency_conan_credential

@@ -16,7 +16,7 @@ services:
         DEPENDENCY_APT_DEBIAN_URL: ${DEPENDENCY_APT_DEBIAN_URL:-}
         DEPENDENCY_APT_DEBIAN_SECURITY_URL: ${DEPENDENCY_APT_DEBIAN_SECURITY_URL:-}
       additional_contexts:
-        servicelib-source: "${GOSERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/servicelib.git#v0.2.27}"
+        servicelib-source: "${GOSERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/servicelib.git#v0.2.28}"
         module-model_go-source: "${MODEL_GO_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.14}"
     environment:
       - DEBUG=${DEBUG:-0}
