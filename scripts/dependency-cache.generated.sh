@@ -96,6 +96,13 @@ refresh_git_mirrors() {
   compose up -d git-mirror
   wait_git_mirror
   if [ "$#" -gt 0 ]; then
+    for repository in "$@"; do
+      # An explicit refresh may name a repository that was published only
+      # moments ago.  Prime it through the mirror itself before asking the
+      # refresh endpoint to update the now-existing cached repository.
+      git ls-remote "$git_mirror_url/cgi-bin/git/${repository%.git}.git" \
+        >/dev/null
+    done
     payload=$(printf '%s\n' "$@")
     curl --fail --show-error --silent \
       --retry 8 --retry-delay 2 --retry-max-time 180 --retry-all-errors \
