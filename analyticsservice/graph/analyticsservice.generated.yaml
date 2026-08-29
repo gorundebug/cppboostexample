@@ -109,7 +109,7 @@ services:
         startupHandler: health/startup
         statusHandler: status
 settings:
-    moduleVersion: v0.2.30
+    moduleVersion: v0.2.31
     name: Example
     repoPath: github.com/gorundebug/cppboostexample
 types:

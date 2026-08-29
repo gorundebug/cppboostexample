@@ -33,10 +33,10 @@ services:
         DEPENDENCY_APT_UBUNTU_SECURITY_URL: ${DEPENDENCY_APT_UBUNTU_SECURITY_URL:-}
         DEPENDENCY_APT_UBUNTU_PORTS_URL: ${DEPENDENCY_APT_UBUNTU_PORTS_URL:-}
       additional_contexts:
-        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.30}
-        module-inventory_service_api: ${MODULE_INVENTORY_SERVICE_API_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.30}
-        module-model_cpp: ${MODULE_MODEL_CPP_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.30}
-        module-order_service_api: ${MODULE_ORDER_SERVICE_API_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.30}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.31}
+        module-inventory_service_api: ${MODULE_INVENTORY_SERVICE_API_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.31}
+        module-model_cpp: ${MODULE_MODEL_CPP_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.31}
+        module-order_service_api: ${MODULE_ORDER_SERVICE_API_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.31}
       secrets:
         - dependency_conan_credential
     extra_hosts:
@@ -97,10 +97,10 @@ services:
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
         SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.30}
-        module-inventory_service_api: ${MODULE_INVENTORY_SERVICE_API_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.30}
-        module-model_cpp: ${MODULE_MODEL_CPP_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.30}
-        module-order_service_api: ${MODULE_ORDER_SERVICE_API_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.30}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.31}
+        module-inventory_service_api: ${MODULE_INVENTORY_SERVICE_API_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.31}
+        module-model_cpp: ${MODULE_MODEL_CPP_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.31}
+        module-order_service_api: ${MODULE_ORDER_SERVICE_API_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.31}
       secrets:
         - dependency_conan_credential
 
