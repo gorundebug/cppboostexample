@@ -2,7 +2,7 @@
 set -euo pipefail
 
 project_dir="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
-framework_dir="${CPPBOOSTSERVICELIB_SOURCE_DIR:-/opt/servicelib}"
+framework_dir="${SERVICELIB_SOURCE_DIR:-/opt/servicelib}"
 build_type="${1:-Release}"
 output_dir="${2:-$project_dir/build/conan-${build_type,,}}"
 

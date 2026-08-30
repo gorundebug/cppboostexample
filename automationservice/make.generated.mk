@@ -9,11 +9,12 @@ LDFLAGS := -X main.build_version=$(BUILD_VERSION) -X main.build_commit=$(GIT_COM
 BIN_DIR := $(PROJECT_DIR)/bin
 COMPOSE := docker compose -f $(if $(wildcard docker-compose.yml),docker-compose.yml,docker-compose.generated.yml)
 COMPOSE_DEV := $(COMPOSE) -f docker-compose.dev.generated.yml
+COMPOSE_RACE := $(COMPOSE) -f docker-compose.race.generated.yml
 TOOLS_DIR ?= $(abspath ./tools)
 BUF := $(TOOLS_DIR)/buf
 PROTOC ?= $(TOOLS_DIR)/protoc
 GOLANGCI_LINT ?= $(TOOLS_DIR)/golangci-lint
-GOLANGCI_LINT_VERSION := v1.64.8
+GOLANGCI_LINT_VERSION := v2.12.2
 ACT_VERSION := v0.2.144
 ACT := $(TOOLS_DIR)/act
 OS := $(shell uname -s)
@@ -25,7 +26,8 @@ SHELL := $(DEPENDENCY_DOWNLOAD_ENV)
 .SHELLFLAGS := -c
 export
 
-DEPENDENCY_DOCKER_TARGETS := docker-build docker-up docker-build-dev docker-up-dev debug
+DEPENDENCY_DOCKER_TARGETS := docker-build docker-up docker-build-dev docker-up-dev debug \
+	race-build race-up race-start
 include dependency-proxy.generated.mk
 
 USE_LOCAL_MODULES ?= 0
@@ -42,7 +44,7 @@ ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
 # Keep an explicit environment/command-line source context for local framework
 # development. Only replace the generated release default with the proxy URL.
 ifeq ($(origin GOSERVICELIB_SOURCE_CONTEXT),file)
-GOSERVICELIB_SOURCE_CONTEXT := $(DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/servicelib/archive/refs/tags/v0.2.31.tar.gz
+GOSERVICELIB_SOURCE_CONTEXT := $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/servicelib.git\#v0.2.31
 endif
 export GOSERVICELIB_SOURCE_CONTEXT
 ifneq ($(strip $(USE_LOCAL_MODULES)),1)
@@ -51,7 +53,8 @@ endif
 endif
 
 .PHONY: all build clean run test lint lint-fix act gen-proto service_build service_build_linux fmt-proto \
-	docker-build docker-build-dev docker-up docker-up-dev debug docker-down docker-down-dev hooks help
+	docker-build docker-build-dev docker-up docker-up-dev debug docker-down docker-down-dev hooks help \
+	race-build race-up race-start race-down
 
 all: build
 
@@ -106,6 +109,25 @@ docker-down: ## [Docker] Stop the standalone runtime stack
 
 docker-down-dev: ## [Docker] Stop the standalone development stack
 	@$(COMPOSE_DEV) down
+
+race-build: ## [Docker] Build this service as a real Go race runtime image
+	@$(COMPOSE_RACE) build $(SERVICE_NAME)
+
+race-up: race-build ## [Docker] Start this service with Go's race detector
+	@$(COMPOSE_RACE) up -d --no-build $(SERVICE_NAME)
+
+race-start: ## [Docker] Start the already-built Go race image
+	@$(COMPOSE_RACE) up -d --no-build $(SERVICE_NAME)
+
+race-down: ## [Docker] Stop the standalone Go race service within 7 seconds
+	@status=0; \
+	$(COMPOSE_RACE) stop --timeout "$${RACE_STOP_TIMEOUT:-7}" $(SERVICE_NAME) || status=1; \
+	logs=$$(mktemp); \
+	$(COMPOSE_RACE) logs --no-color $(SERVICE_NAME) >"$$logs" 2>&1 || true; \
+	if grep -Eq 'WARNING: DATA RACE|Found [0-9]+ data race' "$$logs"; then cat "$$logs" >&2; status=1; fi; \
+	rm -f "$$logs"; \
+	$(COMPOSE_RACE) down --timeout "$${RACE_STOP_TIMEOUT:-7}" --remove-orphans || status=1; \
+	exit $$status
 
 test: ## [host] Run Go tests
 	go test ./...

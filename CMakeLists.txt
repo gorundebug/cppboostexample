@@ -16,7 +16,7 @@ if(USE_CCACHE AND NOT CMAKE_CXX_COMPILER_LAUNCHER)
   endif()
 endif()
 
-set(CPPBOOSTSERVICELIB_SOURCE_DIR "" CACHE PATH
+set(SERVICELIB_SOURCE_DIR "" CACHE PATH
     "Path to a cppboostservicelib source checkout")
 option(FETCH_CPP_DEPENDENCIES
        "Fetch the pinned cppboostservicelib source tree when absent" OFF)
@@ -38,9 +38,9 @@ set(CPPBOOSTSERVICELIB_ENABLE_KAFKA ON
 set(CPPBOOSTSERVICELIB_ENABLE_OTEL ON
     CACHE BOOL "Build OpenTelemetry tracing and logging support" FORCE)
 
-if(CPPBOOSTSERVICELIB_SOURCE_DIR)
+if(SERVICELIB_SOURCE_DIR)
   add_subdirectory(
-      "${CPPBOOSTSERVICELIB_SOURCE_DIR}"
+      "${SERVICELIB_SOURCE_DIR}"
       "${CMAKE_BINARY_DIR}/_deps/cppboostservicelib-build"
       EXCLUDE_FROM_ALL)
 elseif(FETCH_CPP_DEPENDENCIES)

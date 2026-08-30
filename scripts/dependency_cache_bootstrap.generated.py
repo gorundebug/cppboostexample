@@ -112,6 +112,7 @@ def repositories() -> list[tuple[str, str, str, dict]]:
         ("conan-source-ariadne", "https://distfiles.ariadne.space"),
         ("conan-source-gnu-ftp", "https://ftp.gnu.org"),
         ("conan-source-gnu-mirror", "https://ftpmirror.gnu.org"),
+        ("github-raw", "https://github.com"),
         ("conan-source-savannah-git", "https://https.git.savannah.gnu.org"),
         ("conan-source-kernel", "https://mirrors.kernel.org"),
         ("conan-source-sourceforge", "https://sourceforge.net"),
@@ -119,6 +120,8 @@ def repositories() -> list[tuple[str, str, str, dict]]:
         ("conan-source-mirrorservice", "https://www.mirrorservice.org"),
         ("conan-source-zlib", "https://zlib.net"),
     ):
+        if name in {"github-raw"}:
+            continue
         raw_source = common(name, remote_url)
         raw_source["proxy"]["contentMaxAge"] = -1
         raw_source["proxy"]["metadataMaxAge"] = -1

@@ -4,9 +4,9 @@ variables:
   DOCKER_TLS_CERTDIR: ""
 
 .cpp-dependencies:
-  image: docker:latest
+  image: docker:29.7.2-cli
   services:
-    - docker:dind
+    - docker:29.7.2-dind
   before_script:
     - apk add --no-cache bash git
     - git clone "https://github.com/gorundebug/cppboostservicelib.git" .servicelib

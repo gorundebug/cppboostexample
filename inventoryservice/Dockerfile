@@ -33,7 +33,7 @@ COPY dependency-download-mirrors.env /etc/servicegen/dependency-download-mirrors
 COPY dependency-download-env.generated.sh /usr/local/bin/servicegen-download-env
 SHELL ["/usr/local/bin/servicegen-download-env", "/bin/sh", "-c"]
 
-COPY docker/cppboost-packages-ubuntu-24.04.txt /tmp/cppboost-packages.txt
+COPY docker/cppboost-packages.txt /tmp/cppboost-packages.txt
 RUN rm -f /etc/apt/apt.conf.d/docker-clean
 RUN --mount=type=cache,id=servicegen-apt-lists-${TARGETARCH},target=/var/lib/apt/lists,sharing=locked \
     --mount=type=cache,id=servicegen-apt-cache-${TARGETARCH},target=/var/cache/apt,sharing=locked \
@@ -74,8 +74,14 @@ COPY --from=module-model_cpp / /workspace/modules/model_cpp
 
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
-ENV CPPBOOSTSERVICELIB_SOURCE_DIR=/opt/servicelib
 ENV SERVICELIB_SOURCE_DIR=/opt/servicelib
+
+# The ordinary build/test/sanitizer image owns an immutable copy of the
+# service sources.  Development and debugger commands may overlay this path
+# with the explicitly read-only source mount from the dev compose file.
+FROM development AS source-builder
+COPY . /workspace/source
+WORKDIR /workspace/source
 
 FROM development AS debug-builder
 
@@ -104,9 +110,9 @@ FROM development AS runtime-builder
 ARG CPPBOOSTSERVICELIB_PROFILING=OFF
 ARG CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS=OFF
 ARG RUNTIME_STRIP=ON
-ARG SERVICEGEN_EXAMPLE_PROFILE=function-call
+ARG EXAMPLE_PROFILE=function-call
 COPY . /workspace
-RUN --mount=type=cache,id=cppboostexample-runtime-build-${TARGETARCH}-${SERVICEGEN_EXAMPLE_PROFILE},target=/workspace/build,sharing=locked \
+RUN --mount=type=cache,id=cppboostexample-runtime-build-${TARGETARCH}-${EXAMPLE_PROFILE},target=/workspace/build,sharing=locked \
     --mount=type=cache,id=cppboostexample-runtime-ccache-${TARGETARCH},target=/ccache \
     --mount=type=cache,id=servicegen-conan2-${TARGETARCH},target=/conan,sharing=locked \
     --mount=type=secret,id=dependency_conan_credential \

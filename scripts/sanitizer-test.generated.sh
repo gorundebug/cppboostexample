@@ -3,17 +3,28 @@ set -euo pipefail
 source "$(dirname "$0")/dependency-proxy-env.generated.sh"
 
 sanitizer="${1:?expected asan or tsan}"
+action="${2:-test}"
 case "$sanitizer" in
   asan)
-    conan_sanitizer=Address
     cmake_options=(
       -DCPPBOOSTSERVICELIB_ASAN=ON
       -DCPPBOOSTSERVICELIB_UBSAN=ON
     )
+    conan_sanitizer=AddressUndefined
+    conan_compile_flags="['-fsanitize=address,undefined','-fno-omit-frame-pointer','-g']"
+    conan_link_flags="['-fsanitize=address,undefined','--rtlib=compiler-rt']"
+    conan_asan_only_compile_flags="['-fsanitize=address','-fno-omit-frame-pointer','-g']"
+    conan_asan_only_link_flags="['-fsanitize=address','--rtlib=compiler-rt']"
     ;;
   tsan)
-    conan_sanitizer=Thread
     cmake_options=(-DCPPBOOSTSERVICELIB_TSAN=ON)
+    conan_sanitizer=Thread
+    # gRPC's supported TSan configuration defines GRPC_TSAN in addition to
+    # instrumenting the complete host dependency graph.
+    conan_compile_flags="['-fsanitize=thread','-fno-omit-frame-pointer','-g','-DGRPC_TSAN']"
+    conan_link_flags="['-fsanitize=thread','--rtlib=compiler-rt']"
+    conan_asan_only_compile_flags='[]'
+    conan_asan_only_link_flags='[]'
     ;;
   *)
     echo "unsupported sanitizer: $sanitizer" >&2
@@ -22,44 +33,63 @@ case "$sanitizer" in
 esac
 
 options="${cmake_options[*]}"
-exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
+run_build() {
+docker compose -f docker-compose.cmake.generated.yml run --build --rm \
   -e CPP_SANITIZER="$sanitizer" \
-  -e CPP_CONAN_SANITIZER="$conan_sanitizer" \
   -e SANITIZER_INTEGRATION="${SANITIZER_INTEGRATION:-1}" \
+  -e SANITIZER_RUN_TESTS="${SANITIZER_RUN_TESTS:-1}" \
+  -e CONAN_SANITIZER="$conan_sanitizer" \
+  -e CONAN_SANITIZER_COMPILE_FLAGS="$conan_compile_flags" \
+  -e CONAN_SANITIZER_LINK_FLAGS="$conan_link_flags" \
+  -e CONAN_ASAN_ONLY_COMPILE_FLAGS="$conan_asan_only_compile_flags" \
+  -e CONAN_ASAN_ONLY_LINK_FLAGS="$conan_asan_only_link_flags" \
   -e CPP_SANITIZER_OPTIONS="$options" cpp-build \
   /bin/bash -lc \
   'set -euo pipefail
    source scripts/configure-git-auth.generated.sh
    build_dir="/workspace/build/sanitizers/$CPP_SANITIZER"
-   conan_dir="/workspace/build/conan-debug-$CPP_SANITIZER"
-   case "$CPP_SANITIZER" in
-     asan)
-       sanitizer_flags='"'"'["-fsanitize=address","-fno-omit-frame-pointer"]'"'"'
-       ;;
-     tsan)
-       sanitizer_flags='"'"'["-fsanitize=thread","-fno-omit-frame-pointer"]'"'"'
-       ;;
-   esac
-   conan_sanitizer_args=(
-     -s:h "compiler.sanitizer=$CPP_CONAN_SANITIZER"
-     -c:h "tools.build:cflags=$sanitizer_flags"
-     -c:h "tools.build:cxxflags=$sanitizer_flags"
-     -c:h "tools.build:sharedlinkflags=$sanitizer_flags"
-     -c:h "tools.build:exelinkflags=$sanitizer_flags"
-   )
-   ./scripts/conan-install.generated.sh Debug "$conan_dir" \
-     "${conan_sanitizer_args[@]}"
+   conan_dir="/workspace/build/conan-sanitizer-$CPP_SANITIZER-clang"
+   conan_extra_args=()
+   if [[ "$CPP_SANITIZER" == "asan" ]]; then
+     # These C libraries do not provide a clean UBSan contract: Cyrus erases
+     # plugin callback types, librdkafka performs zero-offset arithmetic on a
+     # null list cursor, and OpenSSL typed stack cleanup uses callback casts.
+     # Keep them fully ASan-instrumented while the compatible static graph
+     # retains UBSan too.
+     for package in cyrus-sasl librdkafka openssl; do
+       conan_extra_args+=(
+         -s:h "$package/*:compiler.sanitizer=AddressOnly"
+         -c:h "$package/*:tools.build:cflags=$CONAN_ASAN_ONLY_COMPILE_FLAGS"
+         -c:h "$package/*:tools.build:cxxflags=$CONAN_ASAN_ONLY_COMPILE_FLAGS"
+         -c:h "$package/*:tools.build:exelinkflags=$CONAN_ASAN_ONLY_LINK_FLAGS"
+         -c:h "$package/*:tools.build:sharedlinkflags=$CONAN_ASAN_ONLY_LINK_FLAGS"
+       )
+     done
+   fi
+   ./scripts/conan-install.generated.sh Release "$conan_dir" \
+     -s:b build_type=Release \
+     -s:h compiler=clang \
+     -s:h compiler.version=18 \
+     -s:h compiler.cppstd=20 \
+     -s:h compiler.libcxx=libstdc++11 \
+     -s:h "compiler.sanitizer=$CONAN_SANITIZER" \
+     -c:h "tools.build:compiler_executables={\"c\":\"clang\",\"cpp\":\"clang++\"}" \
+     -c:h "tools.build:cflags=$CONAN_SANITIZER_COMPILE_FLAGS" \
+     -c:h "tools.build:cxxflags=$CONAN_SANITIZER_COMPILE_FLAGS" \
+     -c:h "tools.build:exelinkflags=$CONAN_SANITIZER_LINK_FLAGS" \
+     -c:h "tools.build:sharedlinkflags=$CONAN_SANITIZER_LINK_FLAGS" \
+     "${conan_extra_args[@]}"
    conan_toolchain="$(cat "$conan_dir/toolchain.path")"
    cmake -S . -B "$build_dir" -G Ninja \
      --fresh \
-     -DCMAKE_BUILD_TYPE=Debug \
+     -DCMAKE_BUILD_TYPE=Release \
      -DCMAKE_TOOLCHAIN_FILE="$conan_toolchain" \
      -DMODULES_ROOT=/workspace/source \
-     -DCPPBOOSTSERVICELIB_SOURCE_DIR="$CPPBOOSTSERVICELIB_SOURCE_DIR" \
+     -DSERVICELIB_SOURCE_DIR="$SERVICELIB_SOURCE_DIR" \
      -DFETCH_CPP_DEPENDENCIES=OFF \
      $CPP_SANITIZER_OPTIONS
    cmake --build "$build_dir" --parallel
-   case "$CPP_SANITIZER" in
+   if [[ "$SANITIZER_RUN_TESTS" == "1" ]]; then case "$CPP_SANITIZER" in
      asan)
        ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 \
        UBSAN_OPTIONS=halt_on_error=1 \
@@ -69,8 +99,21 @@ exec docker compose -f docker-compose.cmake.generated.yml run --build --rm \
        TSAN_OPTIONS=halt_on_error=1 \
          ctest --test-dir "$build_dir" --output-on-failure
        ;;
-   esac
+   esac; fi
    if [[ "$SANITIZER_INTEGRATION" == "1" ]]; then
      scripts/sanitizer-integration.generated.sh \
        "$build_dir" "$CPP_SANITIZER"
    fi'
+}
+
+
+
+case "$action" in
+  build)
+    SANITIZER_RUN_TESTS=0 SANITIZER_INTEGRATION=0 run_build
+    ;;
+  test)
+    run_build
+    ;;
+  *) echo "unsupported sanitizer action: $action" >&2; exit 2 ;;
+esac

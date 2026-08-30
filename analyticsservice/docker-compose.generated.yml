@@ -1,6 +1,6 @@
 services:
   analyticsservice:
-    image: cppboostexample-analyticsservice
+    image: cppboostexample-analyticsservice:local
     working_dir: /app
     command:
       - --config

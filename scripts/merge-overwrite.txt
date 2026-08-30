@@ -7,7 +7,7 @@
 #
 # Example:
 # Dockerfile
-# orderservice/config/config.yaml
+# service-name/config/config.yaml
 scripts/merge-overwrite.txt
 scripts/dependency-source-cache.generated.sh
 Makefile
@@ -20,7 +20,10 @@ go.work
 CMakeLists.txt
 CMakePresets.json
 Dockerfile.cmake
-docker/cppboost-packages-ubuntu-24.04.txt
+docker/cppboost-packages.txt
+analyticsservice/docker/cppboost-packages.txt
+inventoryservice/docker/cppboost-packages.txt
+orderservice/docker/cppboost-packages.txt
 inventory_service_api/CMakeLists.txt
 model/CMakeLists.txt
 order_service_api/CMakeLists.txt

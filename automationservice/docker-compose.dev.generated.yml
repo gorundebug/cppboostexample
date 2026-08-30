@@ -1,6 +1,6 @@
 services:
   automationservice:
-    image: automationservice-development:latest
+    image: automationservice-development:local
     build:
       target: development
     working_dir: /workspace/service

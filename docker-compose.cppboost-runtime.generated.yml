@@ -1,6 +1,6 @@
 services:
   analyticsservice:
-    image: cppboostexample-analyticsservice
+    image: cppboostexample-analyticsservice:local
     working_dir: /app
     command:
       - --config
@@ -14,7 +14,7 @@ services:
       - "${ANALYTICS_SERVICE_HOST_HTTP_PORT:-9093}:${ANALYTICS_SERVICE_HTTP_PORT:-9093}"
       - "${ANALYTICS_SERVICE_HOST_GRPC_PORT:-9203}:${ANALYTICS_SERVICE_GRPC_PORT:-9203}"
   inventoryservice:
-    image: cppboostexample-inventoryservice
+    image: cppboostexample-inventoryservice:local
     working_dir: /app
     command:
       - --config
@@ -28,7 +28,7 @@ services:
       - "${INVENTORY_SERVICE_HOST_HTTP_PORT:-9092}:${INVENTORY_SERVICE_HTTP_PORT:-9092}"
       - "${INVENTORY_SERVICE_HOST_GRPC_PORT:-9202}:${INVENTORY_SERVICE_GRPC_PORT:-9202}"
   orderservice:
-    image: cppboostexample-orderservice
+    image: cppboostexample-orderservice:local
     working_dir: /app
     command:
       - --config

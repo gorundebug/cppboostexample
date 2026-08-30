@@ -160,22 +160,22 @@ build_images() {
   progress "building existing minimal runtime images"
   make docker-build
   progress "publishing analyticsservice image"
-  docker tag "cppboostexample-analyticsservice:latest" \
+  docker tag "cppboostexample-analyticsservice:local" \
     "${HOST_REGISTRY}/cppboostexample/analyticsservice:${IMAGE_TAG}"
   docker push \
     "${HOST_REGISTRY}/cppboostexample/analyticsservice:${IMAGE_TAG}"
   progress "publishing automationservice image"
-  docker tag "automationservice:latest" \
+  docker tag "automationservice:local" \
     "${HOST_REGISTRY}/cppboostexample/automationservice:${IMAGE_TAG}"
   docker push \
     "${HOST_REGISTRY}/cppboostexample/automationservice:${IMAGE_TAG}"
   progress "publishing inventoryservice image"
-  docker tag "cppboostexample-inventoryservice:latest" \
+  docker tag "cppboostexample-inventoryservice:local" \
     "${HOST_REGISTRY}/cppboostexample/inventoryservice:${IMAGE_TAG}"
   docker push \
     "${HOST_REGISTRY}/cppboostexample/inventoryservice:${IMAGE_TAG}"
   progress "publishing orderservice image"
-  docker tag "cppboostexample-orderservice:latest" \
+  docker tag "cppboostexample-orderservice:local" \
     "${HOST_REGISTRY}/cppboostexample/orderservice:${IMAGE_TAG}"
   docker push \
     "${HOST_REGISTRY}/cppboostexample/orderservice:${IMAGE_TAG}"

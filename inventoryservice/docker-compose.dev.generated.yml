@@ -1,6 +1,6 @@
 services:
   inventoryservice:
-    image: inventoryservice-cpp-build
+    image: inventoryservice-cpp-build:local
     working_dir: /workspace/source
     command:
       - /bin/sh

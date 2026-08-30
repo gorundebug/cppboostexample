@@ -1,6 +1,6 @@
 services:
   orderservice:
-    image: cppboostexample-orderservice
+    image: cppboostexample-orderservice:local
     working_dir: /app
     command:
       - --config

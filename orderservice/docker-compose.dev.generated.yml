@@ -1,6 +1,6 @@
 services:
   orderservice:
-    image: orderservice-cpp-build
+    image: orderservice-cpp-build:local
     working_dir: /workspace/source
     command:
       - /bin/sh

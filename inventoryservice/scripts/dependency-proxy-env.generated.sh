@@ -8,6 +8,8 @@ if [[ -n "${DEPENDENCY_PROXY_DIR:-}" ]]; then
   dependency_proxy_docker_host="${DEPENDENCY_PROXY_DOCKER_HOST:-host.docker.internal}"
   dependency_proxy_port="${DEPENDENCY_PROXY_PORT:-18081}"
   dependency_proxy_base="http://${dependency_proxy_docker_host}:${dependency_proxy_port}/repository"
+  dependency_git_mirror_port="${DEPENDENCY_GIT_MIRROR_PORT:-18084}"
+  dependency_git_mirror_base="http://${dependency_proxy_docker_host}:${dependency_git_mirror_port}/cgi-bin/git"
 
   export DEPENDENCY_CONAN_HOME="${DEPENDENCY_PROXY_DIR}/conan2"
   export DEPENDENCY_DOCKER_REGISTRY="${dependency_proxy_host}:${DEPENDENCY_PROXY_DOCKER_PORT:-18083}"
@@ -21,5 +23,5 @@ if [[ -n "${DEPENDENCY_PROXY_DIR:-}" ]]; then
   export DEPENDENCY_APT_UBUNTU_ARCHIVE_URL="${dependency_proxy_base}/apt-ubuntu-archive"
   export DEPENDENCY_APT_UBUNTU_SECURITY_URL="${dependency_proxy_base}/apt-ubuntu-security"
   export DEPENDENCY_APT_UBUNTU_PORTS_URL="${dependency_proxy_base}/apt-ubuntu-ports"
-  export CPPBOOSTSERVICELIB_SOURCE_CONTEXT="${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${dependency_proxy_base}/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.31.tar.gz}"
+  export SERVICELIB_SOURCE_CONTEXT="${SERVICELIB_SOURCE_CONTEXT:-${dependency_git_mirror_base}/github.com/gorundebug/cppboostservicelib.git#v0.2.31}"
 fi

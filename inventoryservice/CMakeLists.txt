@@ -17,7 +17,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     endif()
   endif()
 
-  set(CPPBOOSTSERVICELIB_SOURCE_DIR "" CACHE PATH
+  set(SERVICELIB_SOURCE_DIR "" CACHE PATH
       "Path to a cppboostservicelib source checkout")
   set(_servicegen_modules_root_default "${CMAKE_CURRENT_SOURCE_DIR}/modules")
   set(MODULES_ROOT "${_servicegen_modules_root_default}" CACHE PATH
@@ -45,9 +45,9 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   set(CPPBOOSTSERVICELIB_DEPENDENCY_MODE "CONAN" CACHE STRING
       "Dependency provider for standalone cppboostservicelib")
 
-  if(CPPBOOSTSERVICELIB_SOURCE_DIR)
+  if(SERVICELIB_SOURCE_DIR)
     add_subdirectory(
-        "${CPPBOOSTSERVICELIB_SOURCE_DIR}"
+        "${SERVICELIB_SOURCE_DIR}"
         "${CMAKE_BINARY_DIR}/_deps/cppboostservicelib-build"
         EXCLUDE_FROM_ALL)
   elseif(FETCH_CPP_DEPENDENCIES)
@@ -72,16 +72,6 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     FetchContent_MakeAvailable(servicegen_cppboostservicelib)
   else()
     find_package(cppboostservicelib CONFIG REQUIRED)
-  endif()
-
-  # Conan imported targets are directory-scoped. In a standalone service the
-  # framework and contract modules are sibling subdirectories, so establish
-  # the code-generation packages in the service root as well. This makes the
-  # protoc and grpc_cpp_plugin targets visible to every packaged local module.
-  if(CPPBOOSTSERVICELIB_DEPENDENCY_MODE STREQUAL "CONAN")
-    find_package(Protobuf CONFIG REQUIRED)
-    find_package(gRPC CONFIG REQUIRED)
-    find_package(asio-grpc CONFIG REQUIRED)
   endif()
 
   if(NOT TARGET example_inventory_service_api)

@@ -1,6 +1,6 @@
 services:
   analyticsservice:
-    image: analyticsservice-cpp-build
+    image: analyticsservice-cpp-build:local
     working_dir: /workspace/source
     command:
       - /bin/sh

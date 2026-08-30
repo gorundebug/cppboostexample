@@ -1,6 +1,6 @@
 services:
   analyticsservice:
-    image: cppboostexample-analyticsservice
+    image: cppboostexample-analyticsservice:local
     working_dir: /app
     command:
       - --config
@@ -22,7 +22,7 @@ services:
       - app_net
 
   automationservice:
-    image: automationservice:latest
+    image: automationservice:local
     restart: unless-stopped
     environment:
       - DEBUG=${AUTOMATION_SERVICE_DEBUG:-0}
@@ -41,7 +41,7 @@ services:
       - app_net
 
   inventoryservice:
-    image: cppboostexample-inventoryservice
+    image: cppboostexample-inventoryservice:local
     working_dir: /app
     command:
       - --config
@@ -63,7 +63,7 @@ services:
       - app_net
 
   orderservice:
-    image: cppboostexample-orderservice
+    image: cppboostexample-orderservice:local
     working_dir: /app
     command:
       - --config
@@ -200,7 +200,7 @@ services:
       - app_net
 
   prometheus:
-    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/prom/prometheus:latest
+    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/prom/prometheus:v3.14.0
     restart: unless-stopped
     ports:
       - "${PROMETHEUS_PORT:-9090}:9090"
@@ -210,7 +210,7 @@ services:
       - app_net
 
   grafana:
-    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/grafana/grafana:latest
+    image: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}/grafana/grafana:13.2.0
     restart: unless-stopped
     ports:
       - "${GRAFANA_PORT:-3000}:3000"

@@ -22,26 +22,15 @@ case "$sanitizer" in
 esac
 
 service_dirs=(
-
-  "analyticsservice"
-
-  "inventoryservice"
-
-  "orderservice"
+  "."
 )
 service_names=(
-  "analyticsservice"
-  "inventoryservice"
   "orderservice"
 )
 service_targets=(
-  "example_analytics_service"
-  "example_inventory_service"
   "example_order_service"
 )
 http_ports=(
-  "9093"
-  "9092"
   "9091"
 )
 
@@ -63,7 +52,7 @@ for index in "${!service_dirs[@]}"; do
   (
     cd "$service_dir"
     exec env SERVICELIB_NOOP_METRICS=1 \
-      "${build_dir%/}/$service_name/$target" \
+      "${build_dir%/}/$target" \
       --config config/config.yaml \
       --values config/overrides.integration.generated.yaml \
       --workers 2

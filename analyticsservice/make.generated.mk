@@ -8,7 +8,8 @@ STANDALONE_DEV_COMPOSE := $(if $(wildcard docker-compose.dev.yml),docker-compose
 DEPENDENCY_DOWNLOAD_ENV := $(or $(wildcard $(abspath ./dependency-download-env.generated.sh)),$(wildcard $(abspath ../dependency-download-env.generated.sh)),/bin/sh)
 SHELL := $(DEPENDENCY_DOWNLOAD_ENV)
 .SHELLFLAGS := -c
-DEPENDENCY_DOCKER_TARGETS := build test release-build release-test asan-test tsan-test lint \
+DEPENDENCY_DOCKER_TARGETS := build test release-build release-test asan-build asan-start asan-up asan-down asan-test \
+	tsan-build tsan-start tsan-up tsan-down tsan-test lint \
 	docker-build docker-up docker-build-dev docker-up-dev debug
 include dependency-proxy.generated.mk
 
@@ -22,11 +23,11 @@ endif
 
 ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
 export DEPENDENCY_CONAN_HOME := $(DEPENDENCY_PROXY_DIR)/conan2
-export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.31.tar.gz
-export SERVICELIB_SOURCE_CONTEXT ?= $(CPPBOOSTSERVICELIB_SOURCE_CONTEXT)
+export SERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostservicelib.git\#v0.2.31
 endif
 
-.PHONY: build test release-build release-test asan-test tsan-test release-up lint fmt clean \
+.PHONY: build test release-build release-test asan-build asan-start asan-up asan-down asan-test \
+	tsan-build tsan-start tsan-up tsan-down tsan-test release-up lint fmt clean \
 	docker-build docker-build-dev docker-up docker-up-dev debug docker-down docker-down-dev docker-clean help
 
 build: ## [Docker] Debug compile check from copied sources; does not start the service
@@ -39,11 +40,35 @@ release-build: docker-build ## [Docker] Alias of docker-build
 
 release-test: test ## [Docker] Alias of test
 
+asan-build: ## [Docker] Build this service with ASan and UBSan
+	@./scripts/sanitizer-test.generated.sh asan build
+
+asan-start: ## [Docker] Start the already-built ASan/UBSan service
+	@./scripts/sanitizer-test.generated.sh asan start
+
+asan-up: ## [Docker] Start this service with ASan and UBSan
+	@./scripts/sanitizer-test.generated.sh asan up
+
+asan-down: ## [Docker] Stop this service's ASan runtime
+	@./scripts/sanitizer-test.generated.sh asan down
+
 asan-test: ## Run standalone service tests with ASan and UBSan
-	@SANITIZER_INTEGRATION=0 ./scripts/sanitizer-test.generated.sh asan
+	@SANITIZER_INTEGRATION=0 ./scripts/sanitizer-test.generated.sh asan test
+
+tsan-build: ## [Docker] Build this service with TSan
+	@./scripts/sanitizer-test.generated.sh tsan build
+
+tsan-start: ## [Docker] Start the already-built TSan service
+	@./scripts/sanitizer-test.generated.sh tsan start
+
+tsan-up: ## [Docker] Start this service with TSan
+	@./scripts/sanitizer-test.generated.sh tsan up
+
+tsan-down: ## [Docker] Stop this service's TSan runtime
+	@./scripts/sanitizer-test.generated.sh tsan down
 
 tsan-test: ## Run standalone service tests with TSan
-	@SANITIZER_INTEGRATION=0 ./scripts/sanitizer-test.generated.sh tsan
+	@SANITIZER_INTEGRATION=0 ./scripts/sanitizer-test.generated.sh tsan test
 
 release-up: release-build ## Build the optimized service
 
@@ -63,7 +88,8 @@ docker-build: ## [Docker] Build the optimized autonomous runtime image from copi
 
 docker-build-dev: ## Build this service in the source-mounted Boost C++ development image
 	@docker compose -f docker-compose.cmake.generated.yml build cpp-build
-	@docker compose -f docker-compose.cmake.generated.yml run --rm cpp-build
+	@docker compose -f docker-compose.cmake.generated.yml run --rm \
+		-v "$(CURDIR):/workspace/source:ro" cpp-build
 
 docker-up: docker-build ## Start this service through Docker Compose
 	@docker compose -f "$(STANDALONE_COMPOSE)" up -d --no-build

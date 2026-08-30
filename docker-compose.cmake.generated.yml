@@ -1,6 +1,6 @@
 services:
   cpp-build:
-    image: cppboostexample-cpp-build
+    image: cppboostexample-cpp-build:local
     build:
       context: .
       dockerfile: Dockerfile.cmake
@@ -19,14 +19,13 @@ services:
         DEPENDENCY_APT_UBUNTU_SECURITY_URL: ${DEPENDENCY_APT_UBUNTU_SECURITY_URL:-}
         DEPENDENCY_APT_UBUNTU_PORTS_URL: ${DEPENDENCY_APT_UBUNTU_PORTS_URL:-}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.31}}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.31}
       secrets:
         - dependency_conan_credential
     extra_hosts:
       - "host.docker.internal:host-gateway"
     working_dir: /workspace/source
     environment:
-      CPPBOOSTSERVICELIB_SOURCE_DIR: ${SERVICELIB_CONTAINER_SOURCE_DIR:-/opt/servicelib}
       SERVICELIB_SOURCE_DIR: ${SERVICELIB_CONTAINER_SOURCE_DIR:-/opt/servicelib}
       CCACHE_DIR: /ccache
       CCACHE_BASEDIR: /workspace/source
@@ -44,6 +43,7 @@ services:
       DEPENDENCY_CONAN_REMOTE_URL: ${DEPENDENCY_CONAN_REMOTE_URL:-}
       DEPENDENCY_CONAN_UPLOAD_URL: ${DEPENDENCY_CONAN_UPLOAD_URL:-}
       DEPENDENCY_CONAN_PUBLISH: ${DEPENDENCY_CONAN_PUBLISH:-0}
+      CPPBOOSTSERVICELIB_CONAN_LOCKFILE: ${CPPBOOSTSERVICELIB_CONAN_LOCKFILE:-}
       DEPENDENCY_CONAN_CREDENTIAL_FILE: /run/secrets/dependency_conan_credential
       CONAN_HOME: /conan
     volumes:
@@ -58,7 +58,7 @@ services:
       - -c
       - source scripts/configure-git-auth.generated.sh && ./scripts/conan-install.generated.sh Debug /workspace/build/conan-debug && conan_toolchain="$$(cat /workspace/build/conan-debug/toolchain.path)" && cmake --fresh --preset docker-debug -DCMAKE_TOOLCHAIN_FILE="$$conan_toolchain" -DFETCH_CPP_DEPENDENCIES=OFF && cmake --build --preset docker-debug --parallel && ctest --test-dir /workspace/build --output-on-failure --no-tests=error
   analyticsservice-runtime:
-    image: cppboostexample-analyticsservice
+    image: cppboostexample-analyticsservice:local
     build:
       context: .
       dockerfile: Dockerfile.cmake
@@ -79,13 +79,13 @@ services:
         CPPBOOSTSERVICELIB_PROFILING: ${CPPBOOSTSERVICELIB_PROFILING:-OFF}
         CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS: ${CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS:-OFF}
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
-        SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
+        EXAMPLE_PROFILE: ${EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.31}}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.31}
       secrets:
         - dependency_conan_credential
   inventoryservice-runtime:
-    image: cppboostexample-inventoryservice
+    image: cppboostexample-inventoryservice:local
     build:
       context: .
       dockerfile: Dockerfile.cmake
@@ -106,13 +106,13 @@ services:
         CPPBOOSTSERVICELIB_PROFILING: ${CPPBOOSTSERVICELIB_PROFILING:-OFF}
         CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS: ${CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS:-OFF}
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
-        SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
+        EXAMPLE_PROFILE: ${EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.31}}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.31}
       secrets:
         - dependency_conan_credential
   orderservice-runtime:
-    image: cppboostexample-orderservice
+    image: cppboostexample-orderservice:local
     build:
       context: .
       dockerfile: Dockerfile.cmake
@@ -133,9 +133,9 @@ services:
         CPPBOOSTSERVICELIB_PROFILING: ${CPPBOOSTSERVICELIB_PROFILING:-OFF}
         CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS: ${CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS:-OFF}
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
-        SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
+        EXAMPLE_PROFILE: ${EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${CPPBOOSTSERVICELIB_SOURCE_CONTEXT:-${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.31}}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.31}
       secrets:
         - dependency_conan_credential
 

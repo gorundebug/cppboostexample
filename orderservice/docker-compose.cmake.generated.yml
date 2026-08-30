@@ -2,23 +2,23 @@ services:
   cpp-check:
     extends:
       service: orderservice-runtime
-    image: cppboostexample-orderservice-check
+    image: cppboostexample-orderservice-check:local
     build:
       target: debug-builder
 
   cpp-test:
     extends:
       service: orderservice-runtime
-    image: cppboostexample-orderservice-test
+    image: cppboostexample-orderservice-test:local
     build:
       target: test-builder
 
   cpp-build:
-    image: orderservice-cpp-build
+    image: orderservice-cpp-build:local
     build:
       context: .
       dockerfile: Dockerfile
-      target: development
+      target: source-builder
       extra_hosts:
         - "host.docker.internal:host-gateway"
       args:
@@ -43,7 +43,6 @@ services:
       - "host.docker.internal:host-gateway"
     working_dir: /workspace/source
     environment:
-      CPPBOOSTSERVICELIB_SOURCE_DIR: ${SERVICELIB_CONTAINER_SOURCE_DIR:-/opt/servicelib}
       SERVICELIB_SOURCE_DIR: ${SERVICELIB_CONTAINER_SOURCE_DIR:-/opt/servicelib}
       CCACHE_DIR: /ccache
       CCACHE_BASEDIR: /workspace/source
@@ -60,11 +59,11 @@ services:
       DEPENDENCY_CONAN_REMOTE_URL: ${DEPENDENCY_CONAN_REMOTE_URL:-}
       DEPENDENCY_CONAN_UPLOAD_URL: ${DEPENDENCY_CONAN_UPLOAD_URL:-}
       DEPENDENCY_CONAN_PUBLISH: ${DEPENDENCY_CONAN_PUBLISH:-0}
+      CPPBOOSTSERVICELIB_CONAN_LOCKFILE: ${CPPBOOSTSERVICELIB_CONAN_LOCKFILE:-}
       DEPENDENCY_CONAN_CREDENTIAL_FILE: /run/secrets/dependency_conan_credential
       DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-}
       CONAN_HOME: /conan
     volumes:
-      - .:/workspace/source:ro
       - cpp-cmake-build:/workspace/build
       - cpp-ccache:/ccache
       - ${DEPENDENCY_CONAN_HOME:-cpp-conan2}:/conan
@@ -76,7 +75,7 @@ services:
       - source scripts/configure-git-auth.generated.sh && ./scripts/conan-install.generated.sh Debug /workspace/build/conan-debug && conan_toolchain="$$(cat /workspace/build/conan-debug/toolchain.path)" && cmake --fresh --preset docker-debug -DCMAKE_TOOLCHAIN_FILE="$$conan_toolchain" -DMODULES_ROOT=/workspace/modules -DFETCH_CPP_DEPENDENCIES=OFF && cmake --build --preset docker-debug --parallel && ctest --test-dir /workspace/build --output-on-failure --no-tests=error
 
   orderservice-runtime:
-    image: cppboostexample-orderservice
+    image: cppboostexample-orderservice:local
     build:
       context: .
       dockerfile: Dockerfile
@@ -95,7 +94,7 @@ services:
         PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
         PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:-}
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
-        SERVICEGEN_EXAMPLE_PROFILE: ${SERVICEGEN_EXAMPLE_PROFILE:-function-call}
+        EXAMPLE_PROFILE: ${EXAMPLE_PROFILE:-function-call}
       additional_contexts:
         servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.31}
         module-inventory_service_api: ${MODULE_INVENTORY_SERVICE_API_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.31}

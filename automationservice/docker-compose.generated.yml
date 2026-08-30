@@ -1,6 +1,6 @@
 services:
   automationservice:
-    image: automationservice:latest
+    image: automationservice:local
     build:
       context: .
       dockerfile: Dockerfile

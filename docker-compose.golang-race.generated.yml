@@ -1,0 +1,4 @@
+services:
+  automationservice:
+    image: automationservice:race
+    restart: "no"

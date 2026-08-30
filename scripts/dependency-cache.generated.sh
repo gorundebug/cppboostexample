@@ -93,7 +93,10 @@ wait_git_mirror() {
 
 refresh_git_mirrors() {
   shift
-  compose up -d git-mirror
+  # Generated bind-mounted helpers may be atomically replaced by a project
+  # refresh. Recreate this lightweight stateless frontend so Docker mounts the
+  # current inode; the bare repositories themselves remain in /mirrors.
+  compose up -d --force-recreate git-mirror
   wait_git_mirror
   if [ "$#" -gt 0 ]; then
     for repository in "$@"; do
@@ -206,7 +209,8 @@ case "${1:-up}" in
     mkdir -p "$cache_dir" "$git_mirror_dir"
     chmod 0777 "$cache_dir" "$git_mirror_dir"
     prepare_git_credentials
-    compose up -d --build nexus git-mirror
+    compose up -d nexus
+    compose up -d --build --force-recreate git-mirror
     wait_ready
     bootstrap
     echo "[dependency-cache] ready: $nexus_url"
@@ -220,8 +224,8 @@ case "${1:-up}" in
     ;;
   refresh)
     prepare_git_credentials
-    refresh_nexus_proxy_caches
     refresh_git_mirrors "$@"
+    refresh_nexus_proxy_caches
     ;;
   refresh-git)
     prepare_git_credentials

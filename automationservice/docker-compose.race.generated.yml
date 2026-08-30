@@ -1,0 +1,6 @@
+services:
+  automationservice:
+    image: automationservice:race
+    restart: "no"
+    build:
+      target: race

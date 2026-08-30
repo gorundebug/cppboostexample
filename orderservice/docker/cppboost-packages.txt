@@ -3,6 +3,8 @@ ccache
 clang
 clang-format
 clang-tidy
+libclang-rt-18-dev
+llvm-18
 cmake
 gdb
 gdbserver

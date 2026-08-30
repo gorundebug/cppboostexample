@@ -1,6 +1,6 @@
 services:
   analyticsservice:
-    image: cppboostexample-cpp-build
+    image: cppboostexample-cpp-build:local
     working_dir: /workspace/source/analyticsservice
     command:
       - /workspace/build/analyticsservice/example_analytics_service
@@ -17,7 +17,7 @@ services:
 
     stop_grace_period: 30000ms
   inventoryservice:
-    image: cppboostexample-cpp-build
+    image: cppboostexample-cpp-build:local
     working_dir: /workspace/source/inventoryservice
     command:
       - /workspace/build/inventoryservice/example_inventory_service
@@ -34,7 +34,7 @@ services:
 
     stop_grace_period: 30000ms
   orderservice:
-    image: cppboostexample-cpp-build
+    image: cppboostexample-cpp-build:local
     working_dir: /workspace/source/orderservice
     command:
       - /workspace/build/orderservice/example_order_service

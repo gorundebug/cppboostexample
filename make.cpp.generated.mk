@@ -13,7 +13,10 @@ LANG_DOCKER_DEV_BUILD_TARGETS += cpp-docker-dev-build
 LANG_INTEGRATION_TARGETS += cpp-integration-test
 DOCKER_COMPOSE_RUNTIME_FILES += docker-compose.cppboost-runtime.generated.yml
 
-.PHONY: cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test \
+.PHONY: cpp-build cpp-test cpp-release-build cpp-release-test \
+	cpp-asan-build cpp-asan-start cpp-asan-up cpp-asan-stop cpp-asan-down cpp-asan-test \
+	cpp-asan-clean cpp-tsan-build cpp-tsan-start cpp-tsan-up cpp-tsan-stop cpp-tsan-down \
+	cpp-tsan-clean cpp-tsan-test \
 	cpp-release-up cpp-lint cpp-format cpp-gen cpp-clean cpp-tools \
 	cpp-docker-build cpp-docker-dev-build cpp-integration-test cpp-package \
 	cpp-workspace-build cpp-workspace-test
@@ -36,13 +39,97 @@ cpp-release-build: cpp-tools ## [Docker] Build optimized C++ services
 cpp-release-test: cpp-tools ## Build and test optimized C++ services in Docker
 	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" release-test USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)" || exit $$?; done
 
-cpp-asan-test: cpp-tools ## Run C++ tests with ASan and UBSan
-	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" asan-test USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)" || exit $$?; done
-	@SANITIZER_INTEGRATION=1 ./scripts/sanitizer-test.generated.sh asan
+cpp-asan-build: cpp-tools ## Build every Boost C++ service with ASan and UBSan
+	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" asan-build USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)" || exit $$?; done
 
-cpp-tsan-test: cpp-tools ## Run C++ tests with TSan
+cpp-asan-up: cpp-tools ## Start every Boost C++ service with ASan and UBSan
+	@$(MAKE) cpp-asan-build USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)"
+	@$(MAKE) cpp-asan-start USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)"
+
+cpp-asan-start: cpp-tools ## Start every already-built Boost C++ ASan/UBSan service
+	@docker compose --project-name cppboostexample-sanitizer-asan up -d --wait redpanda
+	@for service in $(CPP_SERVICE_DIRS); do \
+		SANITIZER_NETWORK=cppboostexample-sanitizer-asan_app_net \
+		SANITIZER_CONTAINER_NAME=cppboostexample-sanitizer-asan-$$service \
+		$(MAKE) -C "$$service" asan-start USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)" || exit $$?; \
+	done
+
+cpp-asan-stop: cpp-tools ## Send one SIGTERM to every ASan Boost C++ service and verify shutdown
+	@status=0; containers=""; for service in $(CPP_SERVICE_DIRS); do \
+		container=cppboostexample-sanitizer-asan-$$service; \
+		docker container inspect "$$container" >/dev/null 2>&1 && containers="$$containers $$container" || true; \
+	done; \
+	if [ -n "$$containers" ]; then docker kill --signal SIGTERM $$containers >/dev/null || status=1; fi; \
+	deadline=$$((SECONDS + $${SANITIZER_STOP_TIMEOUT:-7})); running="$$containers"; \
+	while [ -n "$$running" ] && [ $$SECONDS -lt $$deadline ]; do \
+		next=""; for container in $$running; do \
+			[ "$$(docker inspect --format '{{.State.Running}}' "$$container" 2>/dev/null)" = true ] && next="$$next $$container" || true; \
+		done; running="$$next"; [ -z "$$running" ] || sleep 0.1; \
+	done; \
+	if [ -n "$$running" ]; then echo "sanitized services exceeded shared stop deadline:$$running" >&2; docker kill --signal SIGKILL $$running >/dev/null 2>&1 || true; status=1; fi; \
+	for service in $(CPP_SERVICE_DIRS); do \
+		SANITIZER_PRINT_LOGS=0 SANITIZER_CONTAINER_NAME=cppboostexample-sanitizer-asan-$$service \
+		"$$service/scripts/sanitizer-test.generated.sh" asan verify || status=1; \
+	done; \
+	exit $$status
+
+cpp-asan-clean: cpp-tools ## Remove shared ASan test infrastructure after services stopped
+	@docker compose --project-name cppboostexample-sanitizer-asan down --timeout "$${SANITIZER_STOP_TIMEOUT:-7}" --volumes --remove-orphans
+
+cpp-asan-down: cpp-tools ## Stop every ASan Boost C++ service and remove shared infrastructure
+	@$(MAKE) cpp-asan-stop
+	@$(MAKE) cpp-asan-clean
+
+cpp-asan-test: cpp-tools ## Run every Boost C++ service test with ASan and UBSan
+	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" asan-test USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)" || exit $$?; done
+	@$(MAKE) cpp-asan-up
+	@$(MAKE) cpp-asan-down
+
+cpp-tsan-build: cpp-tools ## Build every Boost C++ service with TSan
+	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" tsan-build USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)" || exit $$?; done
+
+cpp-tsan-up: cpp-tools ## Start every Boost C++ service with TSan
+	@$(MAKE) cpp-tsan-build USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)"
+	@$(MAKE) cpp-tsan-start USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)"
+
+cpp-tsan-start: cpp-tools ## Start every already-built Boost C++ TSan service
+	@docker compose --project-name cppboostexample-sanitizer-tsan up -d --wait redpanda
+	@for service in $(CPP_SERVICE_DIRS); do \
+		SANITIZER_NETWORK=cppboostexample-sanitizer-tsan_app_net \
+		SANITIZER_CONTAINER_NAME=cppboostexample-sanitizer-tsan-$$service \
+		$(MAKE) -C "$$service" tsan-start USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)" || exit $$?; \
+	done
+
+cpp-tsan-stop: cpp-tools ## Send one SIGTERM to every TSan Boost C++ service and verify shutdown
+	@status=0; containers=""; for service in $(CPP_SERVICE_DIRS); do \
+		container=cppboostexample-sanitizer-tsan-$$service; \
+		docker container inspect "$$container" >/dev/null 2>&1 && containers="$$containers $$container" || true; \
+	done; \
+	if [ -n "$$containers" ]; then docker kill --signal SIGTERM $$containers >/dev/null || status=1; fi; \
+	deadline=$$((SECONDS + $${SANITIZER_STOP_TIMEOUT:-7})); running="$$containers"; \
+	while [ -n "$$running" ] && [ $$SECONDS -lt $$deadline ]; do \
+		next=""; for container in $$running; do \
+			[ "$$(docker inspect --format '{{.State.Running}}' "$$container" 2>/dev/null)" = true ] && next="$$next $$container" || true; \
+		done; running="$$next"; [ -z "$$running" ] || sleep 0.1; \
+	done; \
+	if [ -n "$$running" ]; then echo "sanitized services exceeded shared stop deadline:$$running" >&2; docker kill --signal SIGKILL $$running >/dev/null 2>&1 || true; status=1; fi; \
+	for service in $(CPP_SERVICE_DIRS); do \
+		SANITIZER_PRINT_LOGS=0 SANITIZER_CONTAINER_NAME=cppboostexample-sanitizer-tsan-$$service \
+		"$$service/scripts/sanitizer-test.generated.sh" tsan verify || status=1; \
+	done; \
+	exit $$status
+
+cpp-tsan-clean: cpp-tools ## Remove shared TSan test infrastructure after services stopped
+	@docker compose --project-name cppboostexample-sanitizer-tsan down --timeout "$${SANITIZER_STOP_TIMEOUT:-7}" --volumes --remove-orphans
+
+cpp-tsan-down: cpp-tools ## Stop every TSan Boost C++ service and remove shared infrastructure
+	@$(MAKE) cpp-tsan-stop
+	@$(MAKE) cpp-tsan-clean
+
+cpp-tsan-test: cpp-tools ## Run every Boost C++ service test with TSan
 	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" tsan-test USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)" || exit $$?; done
-	@SANITIZER_INTEGRATION=1 ./scripts/sanitizer-test.generated.sh tsan
+	@$(MAKE) cpp-tsan-up
+	@$(MAKE) cpp-tsan-down
 
 cpp-release-up: cpp-release-build ## Start services built with CMake Release
 	@docker compose up -d
@@ -76,7 +163,7 @@ cpp-package: ## Package all C++ services as standalone repositories
 	  ./scripts/package-cpp-service.generated.sh "$$service" "dist/$$service"; \
 	done
 
-cpp-package-%: ## Package one C++ service (for example: make cpp-package-orderservice)
+cpp-package-%: ## Package one C++ service (for example: make cpp-package-myservice)
 	@case " $(CPP_SERVICE_DIRS) " in \
 	  *" $* "*) ;; \
 	  *) echo "unknown C++ service: $*" >&2; exit 2 ;; \

@@ -1238,46 +1238,63 @@ func (s *Service) StopService(ctx context.Context) {
 	svcCfg := s.ServiceConfig()
 	timeoutCtx, cancel := context.WithTimeout(ctx, time.Duration(svcCfg.ShutdownTimeout)*time.Millisecond)
 	defer cancel()
-	wg := sync.WaitGroup{}
-	done := make(chan struct{})
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		s.ServiceApp.Stop(timeoutCtx)
-	}()
 
-	var httpStopDone chan struct{}
+	// First stop transport admission and let requests already accepted by the
+	// HTTP/gRPC servers finish while the graph runtime and outbound clients
+	// are still available to their handlers.
+	wg := sync.WaitGroup{}
+	admissionDone := make(chan struct{})
 	if s.httpServer != nil {
-		httpStopDone = make(chan struct{})
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			defer close(httpStopDone)
 			if err := s.httpServer.Shutdown(timeoutCtx); err != nil {
 				s.Log().Warn(timeoutCtx, "HTTP server shutdown", log.Err(err))
 			}
 			<-s.httpServerDone
 		}()
 	}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		s.stop(timeoutCtx)
-	}()
 	go func() {
 		wg.Wait()
-		close(done)
+		close(admissionDone)
 	}()
 	select {
-	case <-done:
+	case <-admissionDone:
 	case <-timeoutCtx.Done():
-		if httpStopDone != nil {
-			select {
-			case <-httpStopDone:
-			default:
-				s.Log().Warn(timeoutCtx, "HTTP server stop timed out", log.Err(timeoutCtx.Err()))
-			}
-		}
+		s.Log().Warn(timeoutCtx, "transport drain timed out", log.Err(timeoutCtx.Err()))
+	}
+
+	// Only after inbound handlers have drained may graph resources, pools and
+	// sinks stop. All phases share the same absolute shutdown deadline.
+	runtimeDone := make(chan struct{})
+	go func() {
+		defer close(runtimeDone)
+		s.ServiceApp.Stop(timeoutCtx)
+	}()
+	select {
+	case <-runtimeDone:
+	case <-timeoutCtx.Done():
+		s.Log().Warn(timeoutCtx, "graph runtime stop timed out", log.Err(timeoutCtx.Err()))
+	}
+
+	// Outbound clients and user-owned resources are last: accepted handlers
+	// and graph shutdown callbacks may still need them in earlier phases.
+	cleanupWg := sync.WaitGroup{}
+
+	cleanupWg.Add(1)
+	go func() {
+		defer cleanupWg.Done()
+		s.stop(timeoutCtx)
+	}()
+	cleanupDone := make(chan struct{})
+	go func() {
+		cleanupWg.Wait()
+		close(cleanupDone)
+	}()
+	select {
+	case <-cleanupDone:
+	case <-timeoutCtx.Done():
+		s.Log().Warn(timeoutCtx, "service cleanup timed out", log.Err(timeoutCtx.Err()))
 	}
 }
 

@@ -1,6 +1,6 @@
 services:
   inventoryservice:
-    image: cppboostexample-inventoryservice
+    image: cppboostexample-inventoryservice:local
     working_dir: /app
     command:
       - --config

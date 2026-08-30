@@ -3,7 +3,7 @@
 # service source code. Use it through `make docker-up-dev`.
 services:
   analyticsservice:
-    image: analyticsservice-cpp-build
+    image: analyticsservice-cpp-build:local
     build: !reset null
     working_dir: /workspace/source
     command:
@@ -25,7 +25,7 @@ services:
     cap_add:
       - SYS_PTRACE
   automationservice:
-    image: automationservice-development:latest
+    image: automationservice-development:local
     build: !reset null
     working_dir: /workspace/service
     command:
@@ -58,7 +58,7 @@ services:
     cap_add:
       - SYS_PTRACE
   inventoryservice:
-    image: inventoryservice-cpp-build
+    image: inventoryservice-cpp-build:local
     build: !reset null
     working_dir: /workspace/source
     command:
@@ -80,7 +80,7 @@ services:
     cap_add:
       - SYS_PTRACE
   orderservice:
-    image: orderservice-cpp-build
+    image: orderservice-cpp-build:local
     build: !reset null
     working_dir: /workspace/source
     command:

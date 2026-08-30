@@ -43,16 +43,17 @@ ORDER_SERVICE_DEBUG_PORT ?= 2348
 export ORDER_SERVICE_DEBUG_PORT
 
 DEPENDENCY_DOCKER_TARGETS := $(LANG_DOCKER_BUILD_TARGETS) $(LANG_DOCKER_DEV_BUILD_TARGETS) \
-	$(LANG_DOCKER_VERIFY_TARGETS) $(DEBUG_TARGETS) docker-build docker-build-local docker-build-dev docker-up docker-up-dev \
+	$(LANG_DOCKER_VERIFY_TARGETS) $(DEBUG_TARGETS) docker-build docker-build-local docker-build-dev docker-up docker-start docker-up-dev \
 	grafana-dashboards kubernetes-up kubernetes-build kubernetes-deploy \
 	cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test \
-	cpp-lint cpp-integration-test
+	cpp-lint cpp-integration-test \
+	golang-race-build golang-race-up golang-race-start
 DEPENDENCY_HOST_TARGETS := $(LANG_HOST_PREP_TARGETS)
 include dependency-proxy.generated.mk
 
 ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
-export GOSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/servicelib/archive/refs/tags/v0.2.31.tar.gz
-export CPPBOOSTSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_PROXY_DOCKER_BASE)/github-raw/gorundebug/cppboostservicelib/archive/refs/tags/v0.2.31.tar.gz
+export GOSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/servicelib.git\#v0.2.31
+export SERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostservicelib.git\#v0.2.31
 endif
 
 export DOCKER_TARGET := runtime
@@ -69,7 +70,7 @@ GLAB := $(TOOLS_DIR)/glab
 .DEFAULT_GOAL := all
 
 .PHONY: all init git-init build test lint lint-fix fmt gen clean ci tools \
-	run integration-test act docker-build docker-build-local docker-build-dev docker-up docker-up-dev \
+	run integration-test act docker-build docker-build-local docker-build-dev docker-up docker-start docker-up-dev \
 	docker-down docker-down-dev docker-restart docker-clean grafana-dashboards merge help \
 	kubernetes-up kubernetes-build kubernetes-deploy kubernetes-test \
 	kubernetes-status kubernetes-down kubernetes-clean \
@@ -122,6 +123,9 @@ grafana-dashboards: ## Generate Grafana dashboards for all services
 
 docker-up: docker-build grafana-dashboards ## Start all services through Docker Compose
 	@$(DOCKER_COMPOSE) up -d
+
+docker-start: ## Start already-built runtime images without rebuilding
+	@$(DOCKER_COMPOSE) up -d --no-build
 
 docker-up-dev: docker-build-dev grafana-dashboards ## Start source-mounted development services
 	@$(DOCKER_COMPOSE_DEV) up -d --no-build

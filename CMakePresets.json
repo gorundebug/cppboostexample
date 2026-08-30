@@ -14,7 +14,7 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "FETCH_CPP_DEPENDENCIES": "ON",
-        "CPPBOOSTSERVICELIB_SOURCE_DIR": "$env{CPPBOOSTSERVICELIB_SOURCE_DIR}"
+        "SERVICELIB_SOURCE_DIR": "$env{SERVICELIB_SOURCE_DIR}"
       }
     },
     {
@@ -25,7 +25,7 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "FETCH_CPP_DEPENDENCIES": "ON",
-        "CPPBOOSTSERVICELIB_SOURCE_DIR": "$env{CPPBOOSTSERVICELIB_SOURCE_DIR}"
+        "SERVICELIB_SOURCE_DIR": "$env{SERVICELIB_SOURCE_DIR}"
       }
     },
     {
@@ -36,7 +36,7 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "FETCH_CPP_DEPENDENCIES": "OFF",
-        "CPPBOOSTSERVICELIB_SOURCE_DIR": "$env{CPPBOOSTSERVICELIB_SOURCE_DIR}"
+        "SERVICELIB_SOURCE_DIR": "$env{SERVICELIB_SOURCE_DIR}"
       }
     },
     {
@@ -47,7 +47,7 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "FETCH_CPP_DEPENDENCIES": "OFF",
-        "CPPBOOSTSERVICELIB_SOURCE_DIR": "$env{CPPBOOSTSERVICELIB_SOURCE_DIR}"
+        "SERVICELIB_SOURCE_DIR": "$env{SERVICELIB_SOURCE_DIR}"
       }
     }
   ],
