@@ -6,7 +6,7 @@ PROJECT_DIR := $(abspath .)
 BIN_DIR := $(PROJECT_DIR)/bin
 TOOLS_DIR := $(PROJECT_DIR)/tools
 GOPRIVATE := github.com
-MODULE_VERSION := v0.2.38
+MODULE_VERSION := v0.2.39
 USE_LOCAL_MODULES ?= 1
 OS := $(shell uname -s)
 ARCH := $(shell uname -m)
@@ -52,8 +52,8 @@ DEPENDENCY_HOST_TARGETS := $(LANG_HOST_PREP_TARGETS)
 include dependency-proxy.generated.mk
 
 ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
-export GOSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/servicelib.git\#v0.2.38
-export SERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostservicelib.git\#v0.2.38
+export GOSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/servicelib.git\#v0.2.39
+export SERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostservicelib.git\#v0.2.39
 endif
 
 export DOCKER_TARGET := runtime
