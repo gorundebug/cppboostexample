@@ -58,7 +58,20 @@ if [ "$request_path" = "/__servicegen_refresh" ]; then
     done
     [ "$status" -eq 0 ] || break
     echo "[dependency-cache] refreshing ${cached_mirror#/mirrors/}" >>"$output"
-    if git -C "$cached_mirror" remote update --prune >>"$output" 2>&1; then
+    refresh_attempt=1
+    refresh_succeeded=0
+    while [ "$refresh_attempt" -le 3 ]; do
+      if git -C "$cached_mirror" remote update --prune >>"$output" 2>&1; then
+        refresh_succeeded=1
+        break
+      fi
+      if [ "$refresh_attempt" -lt 3 ]; then
+        echo "[dependency-cache] refresh failed; retry $((refresh_attempt + 1))/3: ${cached_mirror#/mirrors/}" >>"$output"
+        sleep 2
+      fi
+      refresh_attempt=$((refresh_attempt + 1))
+    done
+    if [ "$refresh_succeeded" -eq 1 ]; then
       touch "$cached_mirror/servicegen-last-refresh"
       rmdir "$cached_lock"
       active_lock=
