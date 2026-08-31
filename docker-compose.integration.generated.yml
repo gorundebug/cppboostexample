@@ -62,4 +62,4 @@ services:
 
 volumes:
   cpp-cmake-build:
-    name: ${CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.37}
+    name: ${CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.38}
