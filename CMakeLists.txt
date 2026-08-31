@@ -29,7 +29,7 @@ set(CPPBOOSTSERVICELIB_REPOSITORY
     "https://github.com/gorundebug/cppboostservicelib.git" CACHE STRING
     "Standalone cppboostservicelib repository")
 set(CPPBOOSTSERVICELIB_REVISION
-    "v0.2.43" CACHE STRING
+    "v0.2.44" CACHE STRING
     "Pinned cppboostservicelib revision")
 set(CPPBOOSTSERVICELIB_DEPENDENCY_MODE "CONAN" CACHE STRING
     "Dependency provider used for a source-tree cppboostservicelib build")
@@ -38,8 +38,6 @@ set(CPPBOOSTSERVICELIB_BUILD_TESTS OFF CACHE BOOL
 
 set(CPPBOOSTSERVICELIB_ENABLE_GRPC ON
     CACHE BOOL "Build asio-grpc support" FORCE)
-set(CPPBOOSTSERVICELIB_ENABLE_CRON ON
-    CACHE BOOL "Build the libcron data source" FORCE)
 set(CPPBOOSTSERVICELIB_ENABLE_KAFKA ON
     CACHE BOOL "Build librdkafka support" FORCE)
 set(CPPBOOSTSERVICELIB_ENABLE_OTEL ON

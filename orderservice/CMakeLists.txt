@@ -31,14 +31,12 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
          "Fetch pinned cppboostservicelib and missing contract modules" ON)
   set(CPPBOOSTSERVICELIB_REPOSITORY "https://github.com/gorundebug/cppboostservicelib.git" CACHE STRING
       "Standalone cppboostservicelib repository")
-  set(CPPBOOSTSERVICELIB_REVISION "v0.2.43" CACHE STRING
+  set(CPPBOOSTSERVICELIB_REVISION "v0.2.44" CACHE STRING
       "Pinned cppboostservicelib revision")
   set(CPPBOOSTSERVICELIB_ENABLE_GRPC ON
       CACHE BOOL "Build asio-grpc support" FORCE)
   set(CPPBOOSTSERVICELIB_ENABLE_KAFKA ON
       CACHE BOOL "Build librdkafka support" FORCE)
-  set(CPPBOOSTSERVICELIB_ENABLE_CRON OFF
-      CACHE BOOL "Build the libcron data source" FORCE)
   set(CPPBOOSTSERVICELIB_ENABLE_OTEL ON
       CACHE BOOL "Build OpenTelemetry tracing and logging support" FORCE)
   set(CPPBOOSTSERVICELIB_BUILD_TESTS OFF CACHE BOOL
@@ -88,7 +86,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
       include(FetchContent)
       FetchContent_Declare(servicegen_module_inventory_service_api
           GIT_REPOSITORY "https://github.com/gorundebug/cppboostexample.git"
-          GIT_TAG "v0.2.43"
+          GIT_TAG "v0.2.44"
           GIT_SHALLOW FALSE
           GIT_PROGRESS TRUE)
       FetchContent_MakeAvailable(servicegen_module_inventory_service_api)
@@ -105,7 +103,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
       include(FetchContent)
       FetchContent_Declare(servicegen_module_model
           GIT_REPOSITORY "https://github.com/gorundebug/cppboostexample.git"
-          GIT_TAG "v0.2.43"
+          GIT_TAG "v0.2.44"
           GIT_SHALLOW FALSE
           GIT_PROGRESS TRUE)
       FetchContent_MakeAvailable(servicegen_module_model)
@@ -122,7 +120,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
       include(FetchContent)
       FetchContent_Declare(servicegen_module_order_service_api
           GIT_REPOSITORY "https://github.com/gorundebug/cppboostexample.git"
-          GIT_TAG "v0.2.43"
+          GIT_TAG "v0.2.44"
           GIT_SHALLOW FALSE
           GIT_PROGRESS TRUE)
       FetchContent_MakeAvailable(servicegen_module_order_service_api)
