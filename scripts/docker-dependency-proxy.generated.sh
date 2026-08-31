@@ -12,6 +12,7 @@ fi
 
 docker_host="${DEPENDENCY_PROXY_DOCKER_HOST:-host.docker.internal}"
 nexus_port="${DEPENDENCY_PROXY_PORT:-18081}"
+registry_port="${DEPENDENCY_PROXY_DOCKER_PORT:-18083}"
 git_mirror_port="${DEPENDENCY_GIT_MIRROR_PORT:-18084}"
 repository_base="http://${docker_host}:${nexus_port}/repository"
 git_mirror_base="http://${docker_host}:${git_mirror_port}/cgi-bin/git"
@@ -25,6 +26,7 @@ export NPM_CONFIG_REGISTRY="${repository_base}/npm-proxy/"
 export PIP_INDEX_URL="${repository_base}/pypi-proxy/simple"
 export PIP_TRUSTED_HOST="$docker_host"
 export UV_INDEX_URL="${repository_base}/pypi-proxy/simple"
+export DEPENDENCY_DOCKER_REGISTRY="${docker_host}:${registry_port}"
 export CARGO_REGISTRIES_CRATES_IO_INDEX="sparse+${repository_base}/cargo-proxy/"
 export DEPENDENCY_MAVEN_CENTRAL_URL="${repository_base}/maven-central"
 export DEPENDENCY_CONAN_REMOTE_URL="${repository_base}/conan-group"
@@ -46,6 +48,7 @@ export GIT_CONFIG_KEY_1="url.${git_mirror_base}/gitlab.com/.insteadOf"
 export GIT_CONFIG_VALUE_1=https://gitlab.com/
 
 proxy_build_variables=(
+  DEPENDENCY_DOCKER_REGISTRY
   GOPROXY GOSUMDB NPM_CONFIG_REGISTRY PIP_INDEX_URL PIP_TRUSTED_HOST
   UV_INDEX_URL CARGO_REGISTRIES_CRATES_IO_INDEX
   DEPENDENCY_MAVEN_CENTRAL_URL DEPENDENCY_CONAN_REMOTE_URL
