@@ -17,8 +17,13 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     endif()
   endif()
 
-  set(SERVICELIB_SOURCE_DIR "" CACHE PATH
+  set(_servicelib_source_dir_default "")
+  if(DEFINED ENV{SERVICELIB_SOURCE_DIR})
+    set(_servicelib_source_dir_default "$ENV{SERVICELIB_SOURCE_DIR}")
+  endif()
+  set(SERVICELIB_SOURCE_DIR "${_servicelib_source_dir_default}" CACHE PATH
       "Path to a cppboostservicelib source checkout")
+  unset(_servicelib_source_dir_default)
   set(_servicegen_modules_root_default "${CMAKE_CURRENT_SOURCE_DIR}/modules")
   set(MODULES_ROOT "${_servicegen_modules_root_default}" CACHE PATH
       "Path containing local generated contract modules")

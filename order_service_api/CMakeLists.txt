@@ -6,8 +6,13 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   set(CMAKE_CXX_EXTENSIONS OFF)
 
-  set(SERVICELIB_SOURCE_DIR "" CACHE PATH
+  set(_servicelib_source_dir_default "")
+  if(DEFINED ENV{SERVICELIB_SOURCE_DIR})
+    set(_servicelib_source_dir_default "$ENV{SERVICELIB_SOURCE_DIR}")
+  endif()
+  set(SERVICELIB_SOURCE_DIR "${_servicelib_source_dir_default}" CACHE PATH
       "Path to a cppboostservicelib source checkout")
+  unset(_servicelib_source_dir_default)
   set(CPPBOOSTSERVICELIB_DEPENDENCY_MODE "CONAN" CACHE STRING "" FORCE)
   set(CPPBOOSTSERVICELIB_BUILD_TESTS OFF CACHE BOOL "" FORCE)
   if(SERVICELIB_SOURCE_DIR)
