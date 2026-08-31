@@ -23,7 +23,7 @@ endif
 
 ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
 export DEPENDENCY_CONAN_HOME := $(DEPENDENCY_PROXY_DIR)/conan2
-export SERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostservicelib.git\#v0.2.42
+export SERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostservicelib.git\#v0.2.43
 endif
 
 .PHONY: build test release-build release-test asan-build asan-start asan-up asan-down asan-test \
