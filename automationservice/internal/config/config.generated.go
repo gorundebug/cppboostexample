@@ -1502,6 +1502,8 @@ func MakeConfig() *Config {
 				ActivityStartToCloseTimeout: 30000,
 				ActivityHeartbeatTimeout:    5000,
 				MaximumAttempts:             3,
+				FunctionName:                "ActivityJobEndpoint",
+				FunctionPackage:             "activity",
 			},
 
 			FanOutActivityA: cfg.TemporalEndpointConfig{
@@ -1518,6 +1520,8 @@ func MakeConfig() *Config {
 				ActivityStartToCloseTimeout: 30000,
 				ActivityHeartbeatTimeout:    5000,
 				MaximumAttempts:             3,
+				FunctionName:                "FanoutActivityAEndpoint",
+				FunctionPackage:             "activity",
 			},
 
 			FanOutActivityB: cfg.TemporalEndpointConfig{
@@ -1534,6 +1538,8 @@ func MakeConfig() *Config {
 				ActivityStartToCloseTimeout: 30000,
 				ActivityHeartbeatTimeout:    5000,
 				MaximumAttempts:             3,
+				FunctionName:                "FanoutActivityBEndpoint",
+				FunctionPackage:             "activity",
 			},
 
 			FanOutActivityC: cfg.TemporalEndpointConfig{
@@ -1550,6 +1556,8 @@ func MakeConfig() *Config {
 				ActivityStartToCloseTimeout: 30000,
 				ActivityHeartbeatTimeout:    5000,
 				MaximumAttempts:             3,
+				FunctionName:                "FanoutActivityCEndpoint",
+				FunctionPackage:             "activity",
 			},
 
 			FanOutWorkflowJob: cfg.TemporalEndpointConfig{
@@ -1564,17 +1572,22 @@ func MakeConfig() *Config {
 				MissedRunPolicy:          api.ScheduleMissedRunPolicyFireOnce,
 				WorkflowExecutionTimeout: 60000,
 				MaximumAttempts:          3,
+				FunctionName:             "FanoutWorkflowJobEndpoint",
+				FunctionPackage:          "workflow",
 			},
 
 			LocalSchedule: cfg.CronEndpointConfig{
-				ID:              localScheduleEndpointID,
-				Name:            "Local Schedule",
-				IdDataConnector: localCronConnectorID,
-				Enabled:         true,
-				Schedule:        "*/5 * * * *",
-				Timezone:        "UTC",
-				OverlapPolicy:   api.ScheduleOverlapPolicySkip,
-				MissedRunPolicy: api.ScheduleMissedRunPolicyFireOnce,
+				ID:                  localScheduleEndpointID,
+				Name:                "Local Schedule",
+				IdDataConnector:     localCronConnectorID,
+				Enabled:             true,
+				Schedule:            "*/5 * * * *",
+				Timezone:            "UTC",
+				OverlapPolicy:       api.ScheduleOverlapPolicySkip,
+				MissedRunPolicy:     api.ScheduleMissedRunPolicyFireOnce,
+				FunctionName:        "LocalSchedule",
+				FunctionPackage:     "cron",
+				FunctionDescription: "Create a job message identifying the local scheduled firing.\n",
 			},
 
 			SequentialActivityA: cfg.TemporalEndpointConfig{
@@ -1591,6 +1604,8 @@ func MakeConfig() *Config {
 				ActivityStartToCloseTimeout: 30000,
 				ActivityHeartbeatTimeout:    5000,
 				MaximumAttempts:             3,
+				FunctionName:                "SequentialActivityAEndpoint",
+				FunctionPackage:             "activity",
 			},
 
 			SequentialActivityB: cfg.TemporalEndpointConfig{
@@ -1607,6 +1622,8 @@ func MakeConfig() *Config {
 				ActivityStartToCloseTimeout: 30000,
 				ActivityHeartbeatTimeout:    5000,
 				MaximumAttempts:             3,
+				FunctionName:                "SequentialActivityBEndpoint",
+				FunctionPackage:             "activity",
 			},
 
 			TemporalActivitySchedule: cfg.TemporalEndpointConfig{
@@ -1625,6 +1642,9 @@ func MakeConfig() *Config {
 				ActivityStartToCloseTimeout: 30000,
 				ActivityHeartbeatTimeout:    5000,
 				MaximumAttempts:             3,
+				FunctionName:                "TemporalActivitySchedule",
+				FunctionPackage:             "activity",
+				FunctionDescription:         "Create an Activity job message identifying the durable scheduled firing.\n",
 			},
 
 			TemporalWorkflowSchedule: cfg.TemporalEndpointConfig{
@@ -1641,6 +1661,9 @@ func MakeConfig() *Config {
 				MissedRunPolicy:          api.ScheduleMissedRunPolicyFireOnce,
 				WorkflowExecutionTimeout: 60000,
 				MaximumAttempts:          3,
+				FunctionName:             "TemporalWorkflowSchedule",
+				FunctionPackage:          "workflow",
+				FunctionDescription:      "Create a Workflow job message identifying the durable scheduled firing.\n",
 			},
 
 			WorkflowJob: cfg.TemporalEndpointConfig{
@@ -1655,6 +1678,8 @@ func MakeConfig() *Config {
 				MissedRunPolicy:          api.ScheduleMissedRunPolicyFireOnce,
 				WorkflowExecutionTimeout: 60000,
 				MaximumAttempts:          3,
+				FunctionName:             "WorkflowJobEndpoint",
+				FunctionPackage:          "workflow",
 			},
 		},
 		Pools: struct {
