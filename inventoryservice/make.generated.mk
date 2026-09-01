@@ -16,6 +16,7 @@ include dependency-proxy.generated.mk
 USE_LOCAL_MODULES ?= 0
 DEBUG_PORT ?= 2345
 export DEBUG_PORT
+DEPENDENCY_CONAN_VOLUME ?= dependency-conan2
 
 ifeq ($(strip $(USE_LOCAL_MODULES)),1)
 export MODULE_INVENTORY_SERVICE_API_SOURCE_CONTEXT := ../inventory_service_api
@@ -27,21 +28,29 @@ export DEPENDENCY_CONAN_HOME := $(DEPENDENCY_PROXY_DIR)/conan2
 export SERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostservicelib.git\#v0.2.57
 endif
 
-.PHONY: build test release-build release-test asan-build asan-start asan-up asan-down asan-test \
+.PHONY: cpp-tools build test release-build release-test asan-build asan-start asan-up asan-down asan-test \
 	tsan-build tsan-start tsan-up tsan-down tsan-test release-up lint fmt clean \
 	docker-build docker-build-dev docker-up docker-up-dev debug docker-down docker-down-dev docker-clean help
 
-build: ## [Docker] Debug compile check from copied sources; does not start the service
+cpp-tools: ## Verify Docker and prepare the shared fallback Conan cache
+	@docker version >/dev/null
+	@docker compose version >/dev/null
+	@if [ -z "$(strip $(DEPENDENCY_CONAN_HOME))" ]; then \
+		docker volume inspect "$(DEPENDENCY_CONAN_VOLUME)" >/dev/null 2>&1 || \
+			docker volume create "$(DEPENDENCY_CONAN_VOLUME)" >/dev/null; \
+	fi
+
+build: cpp-tools ## [Docker] Debug compile check from copied sources; does not start the service
 	@docker compose -f docker-compose.cmake.generated.yml build cpp-check
 
-test: ## [Docker] Build and run all service tests from copied sources
+test: cpp-tools ## [Docker] Build and run all service tests from copied sources
 	@docker compose -f docker-compose.cmake.generated.yml build cpp-test
 
 release-build: docker-build ## [Docker] Alias of docker-build
 
 release-test: test ## [Docker] Alias of test
 
-asan-build: ## [Docker] Build this service with ASan and UBSan
+asan-build: cpp-tools ## [Docker] Build this service with ASan and UBSan
 	@./scripts/sanitizer-test.generated.sh asan build
 
 asan-start: ## [Docker] Start the already-built ASan/UBSan service
@@ -56,7 +65,7 @@ asan-down: ## [Docker] Stop this service's ASan runtime
 asan-test: ## Run standalone service tests with ASan and UBSan
 	@SANITIZER_INTEGRATION=0 ./scripts/sanitizer-test.generated.sh asan test
 
-tsan-build: ## [Docker] Build this service with TSan
+tsan-build: cpp-tools ## [Docker] Build this service with TSan
 	@./scripts/sanitizer-test.generated.sh tsan build
 
 tsan-start: ## [Docker] Start the already-built TSan service
@@ -84,10 +93,10 @@ clean: ## Remove CMake build artifacts
 	@docker compose -f docker-compose.cmake.generated.yml down --volumes --remove-orphans
 	@rm -rf build
 
-docker-build: ## [Docker] Build the optimized autonomous runtime image from copied sources
+docker-build: cpp-tools ## [Docker] Build the optimized autonomous runtime image from copied sources
 	@docker compose -f docker-compose.cmake.generated.yml build inventoryservice-runtime
 
-docker-build-dev: ## Build this service in the source-mounted Boost C++ development image
+docker-build-dev: cpp-tools ## Build this service in the source-mounted Boost C++ development image
 	@docker compose -f docker-compose.cmake.generated.yml build cpp-build
 	@docker compose -f docker-compose.cmake.generated.yml run --rm \
 		-v "$(CURDIR):/workspace/source:ro" cpp-build

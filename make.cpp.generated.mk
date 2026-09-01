@@ -22,10 +22,15 @@ DOCKER_COMPOSE_RUNTIME_FILES += docker-compose.cppboost-runtime.generated.yml
 	cpp-workspace-build cpp-workspace-test
 
 CPP_SERVICE_DIRS := analyticsservice inventoryservice orderservice
+DEPENDENCY_CONAN_VOLUME ?= dependency-conan2
 
 cpp-tools: ## Verify Docker is available for the canonical C++ toolchain
 	@docker version >/dev/null
 	@docker compose version >/dev/null
+	@if [ -z "$(strip $(DEPENDENCY_CONAN_HOME))" ]; then \
+		docker volume inspect "$(DEPENDENCY_CONAN_VOLUME)" >/dev/null 2>&1 || \
+			docker volume create "$(DEPENDENCY_CONAN_VOLUME)" >/dev/null; \
+	fi
 
 cpp-build: cpp-tools ## [Docker] Build all C++ services
 	@for service in $(CPP_SERVICE_DIRS); do $(MAKE) -C "$$service" build USE_LOCAL_MODULES="$(USE_LOCAL_MODULES)" || exit $$?; done

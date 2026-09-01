@@ -177,6 +177,7 @@ export PIP_INDEX_URL=$base/pypi-proxy/simple
 export PIP_TRUSTED_HOST=$host
 export UV_INDEX_URL=$base/pypi-proxy/simple
 export CARGO_REGISTRIES_CRATES_IO_INDEX=sparse+$base/cargo-proxy/
+export DEPENDENCY_CONAN_HOME=${proxy_dir%/}/conan2
 export DEPENDENCY_CONAN_REMOTE_URL=$base/conan-group
 export DEPENDENCY_CONAN_UPLOAD_URL=$base/conan-hosted
 export DEPENDENCY_CONAN_PUBLISH=1

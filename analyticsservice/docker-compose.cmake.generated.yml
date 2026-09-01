@@ -104,7 +104,8 @@ volumes:
     name: cppboostexample_analyticsservice_cpp-cmake-build
   cpp-ccache:
   cpp-conan2:
-    name: dependency-conan2
+    external: true
+    name: ${DEPENDENCY_CONAN_VOLUME:-dependency-conan2}
 
 secrets:
   dependency_conan_credential:
