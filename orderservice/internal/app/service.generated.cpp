@@ -5,9 +5,11 @@
 #include <chrono>
 #include <cstdint>
 #include <exception>
+#include <future>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include <servicelib/runtime/environment/metrics/prometheus.hpp>
 #include <servicelib/runtime/status/http.hpp>
@@ -118,67 +120,94 @@ void ServiceGenerated::initFunctions(const config::Config& cfg) {
   if (!makers_.map_order_item_result_to_order_state) {
     throw std::logic_error("function maker MapOrderItemResultToOrderState is not configured");
   }
-  functions_.map_order_item_result_to_order_state = makers_.map_order_item_result_to_order_state(
-      servicelib::Context{}, *this, cfg.streams.mapOrderItemResultToOrderState);
-  if (!functions_.map_order_item_result_to_order_state) {
-    throw std::logic_error("function maker MapOrderItemResultToOrderState returned null");
-  }
   if (!makers_.map_to_order_processed) {
     throw std::logic_error("function maker MapToOrderProcessed is not configured");
-  }
-  functions_.map_to_order_processed = makers_.map_to_order_processed(
-      servicelib::Context{}, *this, cfg.streams.mapToOrderProcessed);
-  if (!functions_.map_to_order_processed) {
-    throw std::logic_error("function maker MapToOrderProcessed returned null");
   }
   if (!makers_.map_to_order_state) {
     throw std::logic_error("function maker MapToOrderState is not configured");
   }
-  functions_.map_to_order_state = makers_.map_to_order_state(
-      servicelib::Context{}, *this, cfg.streams.mapToOrderState);
-  if (!functions_.map_to_order_state) {
-    throw std::logic_error("function maker MapToOrderState returned null");
-  }
   if (!makers_.order_processed_endpoint_sink) {
     throw std::logic_error("function maker OrderProcessedEndpointSink is not configured");
-  }
-  functions_.order_processed_endpoint_sink = makers_.order_processed_endpoint_sink(
-      servicelib::Context{}, *this, cfg.endpoints.orderProcessed);
-  if (!functions_.order_processed_endpoint_sink) {
-    throw std::logic_error("function maker OrderProcessedEndpointSink returned null");
   }
   if (!makers_.process_order_item_sink) {
     throw std::logic_error("function maker ProcessOrderItemSink is not configured");
   }
-  functions_.process_order_item_sink = makers_.process_order_item_sink(
-      servicelib::Context{}, *this, cfg.endpoints.processOrderItem);
-  if (!functions_.process_order_item_sink) {
-    throw std::logic_error("function maker ProcessOrderItemSink returned null");
-  }
   if (!makers_.process_order_items) {
     throw std::logic_error("function maker ProcessOrderItems is not configured");
-  }
-  functions_.process_order_items = makers_.process_order_items(
-      servicelib::Context{}, *this, cfg.streams.processOrderItems);
-  if (!functions_.process_order_items) {
-    throw std::logic_error("function maker ProcessOrderItems returned null");
   }
   if (!makers_.process_order_source) {
     throw std::logic_error("function maker ProcessOrderSource is not configured");
   }
-  functions_.process_order_source = makers_.process_order_source(
-      servicelib::Context{}, *this, cfg.endpoints.processOrder);
-  if (!functions_.process_order_source) {
-    throw std::logic_error("function maker ProcessOrderSource returned null");
-  }
   if (!makers_.soft_deadline) {
     throw std::logic_error("function maker SoftDeadline is not configured");
   }
-  functions_.soft_deadline = makers_.soft_deadline(
-      servicelib::Context{}, *this, cfg.streams.softDeadline);
-  if (!functions_.soft_deadline) {
-    throw std::logic_error("function maker SoftDeadline returned null");
+  std::vector<std::future<void>> maker_tasks;
+  maker_tasks.reserve(8);
+  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
+    functions_.map_order_item_result_to_order_state = makers_.map_order_item_result_to_order_state(
+        servicelib::Context{}, *this, cfg.streams.mapOrderItemResultToOrderState);
+    if (!functions_.map_order_item_result_to_order_state) {
+      throw std::logic_error("function maker MapOrderItemResultToOrderState returned null");
+    }
+  }));
+  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
+    functions_.map_to_order_processed = makers_.map_to_order_processed(
+        servicelib::Context{}, *this, cfg.streams.mapToOrderProcessed);
+    if (!functions_.map_to_order_processed) {
+      throw std::logic_error("function maker MapToOrderProcessed returned null");
+    }
+  }));
+  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
+    functions_.map_to_order_state = makers_.map_to_order_state(
+        servicelib::Context{}, *this, cfg.streams.mapToOrderState);
+    if (!functions_.map_to_order_state) {
+      throw std::logic_error("function maker MapToOrderState returned null");
+    }
+  }));
+  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
+    functions_.order_processed_endpoint_sink = makers_.order_processed_endpoint_sink(
+        servicelib::Context{}, *this, cfg.endpoints.orderProcessed);
+    if (!functions_.order_processed_endpoint_sink) {
+      throw std::logic_error("function maker OrderProcessedEndpointSink returned null");
+    }
+  }));
+  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
+    functions_.process_order_item_sink = makers_.process_order_item_sink(
+        servicelib::Context{}, *this, cfg.endpoints.processOrderItem);
+    if (!functions_.process_order_item_sink) {
+      throw std::logic_error("function maker ProcessOrderItemSink returned null");
+    }
+  }));
+  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
+    functions_.process_order_items = makers_.process_order_items(
+        servicelib::Context{}, *this, cfg.streams.processOrderItems);
+    if (!functions_.process_order_items) {
+      throw std::logic_error("function maker ProcessOrderItems returned null");
+    }
+  }));
+  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
+    functions_.process_order_source = makers_.process_order_source(
+        servicelib::Context{}, *this, cfg.endpoints.processOrder);
+    if (!functions_.process_order_source) {
+      throw std::logic_error("function maker ProcessOrderSource returned null");
+    }
+  }));
+  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
+    functions_.soft_deadline = makers_.soft_deadline(
+        servicelib::Context{}, *this, cfg.streams.softDeadline);
+    if (!functions_.soft_deadline) {
+      throw std::logic_error("function maker SoftDeadline returned null");
+    }
+  }));
+  std::exception_ptr maker_error;
+  for (auto& task : maker_tasks) {
+    try {
+      task.get();
+    } catch (...) {
+      if (!maker_error) maker_error = std::current_exception();
+    }
   }
+  if (maker_error) std::rethrow_exception(maker_error);
 }
 
 void ServiceGenerated::initRuntime() {

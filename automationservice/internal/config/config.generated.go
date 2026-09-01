@@ -391,6 +391,9 @@ func (c *Config) ApplyEnvironment() error {
 	if err := c.applyTemporalAddress(); err != nil {
 		return err
 	}
+	if err := c.applyTemporalWorkerStopTimeout(); err != nil {
+		return err
+	}
 	if err := c.applyTemporalWorkflowScheduleEnabled(); err != nil {
 		return err
 	}
@@ -824,6 +827,21 @@ func (c *Config) applyTemporalAddress() error {
 	}
 
 	c.DataConnectors.Temporal.Address = value
+
+	return nil
+}
+
+func (c *Config) applyTemporalWorkerStopTimeout() error {
+	value, exists := os.LookupEnv("TEMPORAL_WORKER_STOP_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert TEMPORAL_WORKER_STOP_TIMEOUT to int: %w", err)
+	}
+	c.DataConnectors.Temporal.WorkerStopTimeout = intVal
 
 	return nil
 }
@@ -1473,6 +1491,7 @@ func MakeConfig() *Config {
 				Identity:                "example-automation",
 				MaxConcurrentActivities: 2,
 				MaxConcurrentWorkflows:  4,
+				WorkerStopTimeout:       5000,
 			},
 		},
 		Endpoints: struct {

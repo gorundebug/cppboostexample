@@ -322,6 +322,7 @@ dataConnectors:
         tlsEnabled: false
         type: Temporal
         typeScriptImplementation: temporal/typescript
+        workerStopTimeout: 5000
 modules:
     inventoryServiceApi:
         golangVersion: 1.25.4

@@ -1,6 +1,7 @@
 dataConnectors:
   temporal:
     address: temporal:7233
+    workerStopTimeout: 5000
 endpoints:
   activityJob:
     enabled: true

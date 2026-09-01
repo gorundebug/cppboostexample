@@ -1,6 +1,7 @@
 dataConnectors:
   temporal:
     address: $temporalAddress
+    workerStopTimeout: $temporalWorkerStopTimeout
 endpoints:
   activityJob:
     enabled: $activityJobEnabled

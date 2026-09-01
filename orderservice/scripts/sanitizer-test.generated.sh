@@ -122,7 +122,7 @@ start_service() {
       -v "cppboostexample_orderservice_cpp-cmake-build:/workspace/build" \
       -w /workspace/source \
       -e SANITIZER_HOLD=1 \
-      "orderservice-cpp-build" \
+      "orderservice-cpp-build:local" \
       /bin/bash -lc \
       "exec scripts/sanitizer-integration.generated.sh /workspace/build/sanitizers/$sanitizer $sanitizer"
 }
