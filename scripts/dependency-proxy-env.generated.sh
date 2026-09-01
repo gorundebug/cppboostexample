@@ -23,5 +23,5 @@ if [[ -n "${DEPENDENCY_PROXY_DIR:-}" ]]; then
   export DEPENDENCY_APT_UBUNTU_ARCHIVE_URL="${dependency_proxy_base}/apt-ubuntu-archive"
   export DEPENDENCY_APT_UBUNTU_SECURITY_URL="${dependency_proxy_base}/apt-ubuntu-security"
   export DEPENDENCY_APT_UBUNTU_PORTS_URL="${dependency_proxy_base}/apt-ubuntu-ports"
-  export SERVICELIB_SOURCE_CONTEXT="${SERVICELIB_SOURCE_CONTEXT:-${dependency_git_mirror_base}/github.com/gorundebug/cppboostservicelib.git#v0.2.57}"
+  export SERVICELIB_SOURCE_CONTEXT="${SERVICELIB_SOURCE_CONTEXT:-${dependency_git_mirror_base}/github.com/gorundebug/cppboostservicelib.git#v0.2.58}"
 fi
