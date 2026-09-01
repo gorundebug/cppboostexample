@@ -96,6 +96,111 @@ proxy_build() {
   exec "$DEPENDENCY_REAL_DOCKER" build "${injected[@]}" "${original[@]}"
 }
 
+proxy_image_reference() {
+  local image="$1" registry path first
+  case "$image" in
+    docker.io/*)
+      registry="$DEPENDENCY_DOCKER_REGISTRY"
+      path="${image#docker.io/}"
+      ;;
+    ghcr.io/*)
+      registry="${registry_host}:${DEPENDENCY_PROXY_GHCR_PORT:-18085}"
+      path="${image#ghcr.io/}"
+      ;;
+    quay.io/*)
+      registry="${registry_host}:${DEPENDENCY_PROXY_QUAY_PORT:-18086}"
+      path="${image#quay.io/}"
+      ;;
+    docker.redpanda.com/*)
+      registry="${registry_host}:${DEPENDENCY_PROXY_REDPANDA_PORT:-18087}"
+      path="${image#docker.redpanda.com/}"
+      ;;
+    registry.k8s.io/*)
+      registry="${registry_host}:${DEPENDENCY_PROXY_KUBERNETES_PORT:-18088}"
+      path="${image#registry.k8s.io/}"
+      ;;
+    localhost/*|localhost:*/*|127.0.0.1/*|127.0.0.1:*/*|host.docker.internal/*|host.docker.internal:*/*)
+      printf '%s\n' "$image"
+      return
+      ;;
+    */*)
+      first="${image%%/*}"
+      if [[ "$first" == *.* || "$first" == *:* ]]; then
+        echo "No dependency proxy registry is configured for image '$image'" >&2
+        return 1
+      fi
+      registry="$DEPENDENCY_DOCKER_REGISTRY"
+      path="$image"
+      ;;
+    *)
+      registry="$DEPENDENCY_DOCKER_REGISTRY"
+      path="library/$image"
+      ;;
+  esac
+  printf '%s/%s\n' "$registry" "$path"
+}
+
+proxy_run() {
+  local -a original=("$@") arguments=()
+  local index=0 argument
+  # Proxy mode owns pull policy. Remove a caller-provided policy so Docker can
+  # never contact the original registry before the wrapper has routed it.
+  while (( index < ${#original[@]} )); do
+    argument="${original[$index]}"
+    case "$argument" in
+      --pull)
+        ((index += 2))
+        continue
+        ;;
+      --pull=*)
+        ((index += 1))
+        continue
+        ;;
+    esac
+    arguments+=("$argument")
+    ((index += 1))
+  done
+
+  local capture_dir error_output error_pipe tee_pid tee_status
+  local status missing_image proxy_image
+  capture_dir="$(mktemp -d "${TMPDIR:-/tmp}/dependency-docker-run.XXXXXX")"
+  error_output="$capture_dir/stderr"
+  error_pipe="$capture_dir/stderr.pipe"
+  mkfifo "$error_pipe"
+  tee "$error_output" < "$error_pipe" >&2 &
+  tee_pid=$!
+  set +e
+  "$DEPENDENCY_REAL_DOCKER" run --pull=never \
+    --add-host "host.docker.internal:host-gateway" "${arguments[@]}" \
+    2> "$error_pipe"
+  status=$?
+  wait "$tee_pid"
+  tee_status=$?
+  set -e
+  rm -f "$error_pipe"
+  if [[ "$tee_status" -ne 0 ]]; then
+    rm -rf "$capture_dir"
+    return "$tee_status"
+  fi
+  if [[ "$status" -eq 125 ]]; then
+    missing_image="$(sed -n 's/^docker: Error response from daemon: No such image: //p' "$error_output" | head -n 1)"
+    if [[ -n "$missing_image" ]]; then
+      if ! proxy_image="$(proxy_image_reference "$missing_image")"; then
+        rm -rf "$capture_dir"
+        return "$status"
+      fi
+      echo "[dependency-proxy] pulling $missing_image through $proxy_image" >&2
+      "$DEPENDENCY_REAL_DOCKER" pull "$proxy_image"
+      "$DEPENDENCY_REAL_DOCKER" tag "$proxy_image" "$missing_image"
+      rm -rf "$capture_dir"
+      exec "$DEPENDENCY_REAL_DOCKER" run --pull=never \
+        --add-host "host.docker.internal:host-gateway" "${arguments[@]}"
+    fi
+  fi
+  rm -rf "$capture_dir"
+  return "$status"
+}
+
 if [[ "${1:-}" == build ]]; then
   shift
   proxy_build build "$@"
@@ -108,8 +213,8 @@ fi
 
 if [[ "${1:-}" == run ]]; then
   shift
-  exec "$DEPENDENCY_REAL_DOCKER" run \
-    --add-host "host.docker.internal:host-gateway" "$@"
+  proxy_run "$@"
+  exit $?
 fi
 
 exec "$DEPENDENCY_REAL_DOCKER" "$@"

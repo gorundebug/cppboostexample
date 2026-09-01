@@ -58,7 +58,11 @@ and `docker.redpanda.com` (18087), plus `registry.k8s.io` (18088). Separate repo
 between identical image paths owned by different registries. When proxy mode is enabled,
 generated service builds pass `DEPENDENCY_DOCKER_REGISTRY` to every language's
 Dockerfile, so base images are resolved through Nexus without changing Docker
-Desktop/Engine daemon settings. The generated local k3s configuration mirrors
+Desktop/Engine daemon settings. The generated Docker command wrapper applies
+the same catalog to plain `docker run`: it forbids Docker's direct pull, pulls
+a missing image through the matching Nexus registry, tags it locally and then
+starts the requested container. An unknown external registry fails explicitly
+in proxy mode instead of falling back to the Internet. The generated local k3s configuration mirrors
 every registry in this catalog and disables containerd's direct default-registry
 fallback, so a proxy error is retried instead of silently using the Internet.
 Without proxy mode normal registry endpoints are used directly. Pinned C++ sources use immutable archives through host-specific raw
