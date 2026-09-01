@@ -22,6 +22,7 @@ services:
       - --write-kubeconfig-mode=0644
     environment:
       K3S_TOKEN: ${KUBERNETES_TOKEN:-servicegen-local}
+      K3S_DISABLE_DEFAULT_REGISTRY_ENDPOINT: ${KUBERNETES_DISABLE_DEFAULT_REGISTRY_ENDPOINT:-false}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
@@ -35,7 +36,7 @@ services:
       # Cluster state remains disposable in the separate kubernetes-data volume.
       - kubernetes-image-cache:/var/lib/rancher/k3s/agent/containerd
       - kubernetes-kubeconfig:/output
-      - ./kubernetes/registries.generated.yaml:/etc/rancher/k3s/registries.yaml:ro
+      - ${KUBERNETES_REGISTRIES_FILE:-./kubernetes/registries.generated.yaml}:/etc/rancher/k3s/registries.yaml:ro
     healthcheck:
       test: ["CMD", "kubectl", "get", "--raw=/readyz"]
       interval: 5s

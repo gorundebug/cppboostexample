@@ -100,6 +100,7 @@ def repositories() -> list[tuple[str, str, str, dict]]:
         ("helm", "proxy", "helm-opentelemetry", common("helm-opentelemetry", "https://open-telemetry.github.io/opentelemetry-helm-charts")),
         ("helm", "proxy", "helm-jaeger", common("helm-jaeger", "https://jaegertracing.github.io/helm-charts")),
         ("helm", "proxy", "helm-redpanda", common("helm-redpanda", "https://charts.redpanda.com")),
+        ("helm", "proxy", "helm-temporal", common("helm-temporal", "https://go.temporal.io/helm-charts")),
         ("raw", "proxy", "maven-central", maven),
         ("raw", "proxy", "github-raw", github),
         ("raw", "proxy", "gitlab-raw", gitlab),
@@ -164,19 +165,26 @@ def repositories() -> list[tuple[str, str, str, dict]]:
     ))
     definitions[2][3]["pypi"] = {"indexPath": "/simple"}
     definitions[3][3]["cargo"] = {"requireAuthentication": False}
-    docker = common("docker-hub", "https://registry-1.docker.io")
-    docker["docker"] = {
-        "v1Enabled": False,
-        "forceBasicAuth": False,
-        "httpPort": 8082,
-        "pathEnabled": False,
-    }
-    docker["dockerProxy"] = {
-        "indexType": "HUB",
-        "cacheForeignLayers": True,
-        "foreignLayerUrlWhitelist": [],
-    }
-    definitions.append(("docker", "proxy", "docker-hub", docker))
+    for name, remote_url, connector_port, index_type in (
+        ("docker-hub", "https://registry-1.docker.io", 8082, "HUB"),
+        ("docker-redpanda", "https://docker.redpanda.com", 8085, "REGISTRY"),
+        ("docker-ghcr", "https://ghcr.io", 8083, "REGISTRY"),
+        ("docker-quay", "https://quay.io", 8084, "REGISTRY"),
+        ("docker-kubernetes", "https://registry.k8s.io", 8086, "REGISTRY"),
+    ):
+        docker = common(name, remote_url)
+        docker["docker"] = {
+            "v1Enabled": False,
+            "forceBasicAuth": False,
+            "httpPort": connector_port,
+            "pathEnabled": False,
+        }
+        docker["dockerProxy"] = {
+            "indexType": index_type,
+            "cacheForeignLayers": True,
+            "foreignLayerUrlWhitelist": [],
+        }
+        definitions.append(("docker", "proxy", name, docker))
     for name, remote_url in (
         ("apt-ubuntu-archive", "http://archive.ubuntu.com/ubuntu/"),
         ("apt-ubuntu-security", "http://security.ubuntu.com/ubuntu/"),

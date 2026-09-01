@@ -34,7 +34,7 @@ spec:
       securityContext:
         {{ toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: "analyticsservice"
+        - name: {{ include "analyticsservice.name" . }}
           image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:

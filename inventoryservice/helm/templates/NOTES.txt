@@ -1,4 +1,4 @@
-Inventory Service is installed in namespace {{ .Release.Namespace }}.
+{{ .Chart.Name }} is installed in namespace {{ .Release.Namespace }}.
 
 Inspect metrics through the API proxy:
-  kubectl get --raw "/api/v1/namespaces/{{ .Release.Namespace }}/services/http:inventoryservice:9092/proxy/metrics"
+  kubectl get --raw "/api/v1/namespaces/{{ .Release.Namespace }}/services/http:{{ include "inventoryservice.fullname" . }}:{{ .Values.service.httpPort }}/proxy/metrics"

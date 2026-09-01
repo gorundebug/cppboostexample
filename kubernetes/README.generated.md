@@ -8,11 +8,23 @@ be verified together.
 
 ```bash
 make kubernetes-up       # build runtime images, start k3s, deploy and verify
+make kubernetes-services-up # rebuild and replace only services in the running cluster
 make kubernetes-status   # show nodes, pods, services and Helm releases
 make kubernetes-test     # verify probes, metrics and the order -> Kafka -> analytics flow
 make kubernetes-down     # stop the local cluster and preserve its volumes
 make kubernetes-clean    # remove the cluster, registry and all local volumes
 ```
+
+When `DEPENDENCY_PROXY_DIR` is set, Helm repositories and all external OCI
+registries used by the generated infrastructure are routed through the shared
+Nexus instance. k3s disables direct registry fallback in this mode: a missing
+or unavailable proxy is an explicit deployment failure, not an unnoticed
+Internet download. Without the variable, Kubernetes uses the normal public
+registries. The persistent k3s containerd volume reuses pulled image layers
+between ordinary `kubernetes-down` / `kubernetes-up` cycles.
+`kubernetes-services-up` keeps the installed infrastructure intact and is the
+fast path for testing another service implementation against the same local
+Redpanda, Temporal and observability stack.
 
 Use `<service>/helm/values.yaml` for project-specific overrides. Generated
 defaults stay in `values.generated.yaml` and are replaced on regeneration.

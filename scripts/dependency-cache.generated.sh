@@ -194,6 +194,7 @@ export DEPENDENCY_HELM_GRAFANA_URL=$base/helm-grafana
 export DEPENDENCY_HELM_OPENTELEMETRY_URL=$base/helm-opentelemetry
 export DEPENDENCY_HELM_JAEGER_URL=$base/helm-jaeger
 export DEPENDENCY_HELM_REDPANDA_URL=$base/helm-redpanda
+export DEPENDENCY_HELM_TEMPORAL_URL=$base/helm-temporal
 export DEPENDENCY_DOCKER_REGISTRY=$host:${DEPENDENCY_PROXY_DOCKER_PORT:-18083}
 export DEPENDENCY_GIT_MIRROR_URL=$git_mirror
 export GIT_CONFIG_COUNT=2

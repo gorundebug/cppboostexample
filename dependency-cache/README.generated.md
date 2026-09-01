@@ -1,7 +1,7 @@
 # Local dependency proxy
 
 The optional shared Nexus instance caches artifacts downloaded
-from public Go, npm, PyPI, Cargo, Helm, Maven Central, APT and Docker Hub registries,
+from public Go, npm, PyPI, Cargo, Helm, Maven Central, APT and OCI registries,
 plus immutable GitHub/GitLab archives and release assets used by generated
 builds.
 The companion persistent Git mirror caches smart-HTTP clones used by CPM and
@@ -52,11 +52,16 @@ Engine on Linux. On Linux the proxy launcher therefore binds the published
 ports to the host bridge (`0.0.0.0` by default); use the host firewall or set
 `DEPENDENCY_PROXY_BIND_HOST` explicitly when tighter exposure is required.
 
-Docker image proxying is exposed on port 18083. When proxy mode is enabled,
+Docker Hub image proxying is exposed on port 18083. The same generated catalog
+also exposes separate Nexus proxies for `ghcr.io` (18085), `quay.io` (18086)
+and `docker.redpanda.com` (18087), plus `registry.k8s.io` (18088). Separate repositories avoid collisions
+between identical image paths owned by different registries. When proxy mode is enabled,
 generated service builds pass `DEPENDENCY_DOCKER_REGISTRY` to every language's
 Dockerfile, so base images are resolved through Nexus without changing Docker
-Desktop/Engine daemon settings. Without proxy mode the value remains
-`docker.io`. Pinned C++ sources use immutable archives through host-specific raw
+Desktop/Engine daemon settings. The generated local k3s configuration mirrors
+every registry in this catalog and disables containerd's direct default-registry
+fallback, so a proxy error is retried instead of silently using the Internet.
+Without proxy mode normal registry endpoints are used directly. Pinned C++ sources use immutable archives through host-specific raw
 proxies to populate their separate versioned source cache. A Conan hook rejects
 a previously unknown source host in proxy mode, so a dependency update cannot
 silently bypass Nexus. Generated Debian/Ubuntu build stages rewrite their APT sources to Nexus
@@ -77,7 +82,10 @@ user-owned `dependency-download-mirrors.env` file. Use
 `${DEPENDENCY_GITHUB_RAW_URL}/owner/repository/...` as the URL prefix; the same
 entry is expanded to the host or Docker-reachable Nexus address automatically.
 Framework-owned defaults are generated from the single `downloadMirrors`
-catalog in `servicegen/internal/codegenerator/dependencies.yaml`.
+catalog in `servicegen/internal/codegenerator/dependencies.yaml`. New OCI
+registries used by generated Kubernetes infrastructure belong in that file's
+`containerRegistryProxies` catalog; Nexus provisioning, published ports and
+k3s mirrors are then generated together.
 
 ## Conan binary packages
 

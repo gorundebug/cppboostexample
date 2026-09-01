@@ -27,6 +27,6 @@ spec:
         - targetLabel: telemetry_source
           replacement: temporal-sdk
         - targetLabel: service
-          replacement: "automationservice"
+          replacement: {{ .Chart.Name | quote }}
     {{- end }}
 {{- end }}

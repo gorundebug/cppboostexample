@@ -25,6 +25,54 @@ TEMPORAL_POSTGRES_PASSWORD="${KUBERNETES_TEMPORAL_POSTGRES_PASSWORD:-temporal}"
 
 progress() { printf '==> [kubernetes] %s\n' "$*"; }
 
+prepare_registry_config() {
+  if [[ -z "${DEPENDENCY_PROXY_DIR:-}" ]]; then
+    export KUBERNETES_REGISTRIES_FILE="${ROOT}/kubernetes/registries.generated.yaml"
+    export KUBERNETES_DISABLE_DEFAULT_REGISTRY_ENDPOINT=false
+    return
+  fi
+
+  local proxy_host="${DEPENDENCY_PROXY_DOCKER_HOST:-host.docker.internal}"
+  local runtime_dir="${ROOT}/.artifacts/kubernetes"
+  local runtime_file="${runtime_dir}/registries.runtime.yaml"
+  mkdir -p "${runtime_dir}"
+  cat >"${runtime_file}" <<EOF
+mirrors:
+  "registry:5000":
+    endpoint:
+      - "http://registry:5000"
+EOF
+  cat >>"${runtime_file}" <<EOF
+  "docker.io":
+    endpoint:
+      - "http://${proxy_host}:${DEPENDENCY_PROXY_DOCKER_PORT:-18083}"
+EOF
+  cat >>"${runtime_file}" <<EOF
+  "docker.redpanda.com":
+    endpoint:
+      - "http://${proxy_host}:${DEPENDENCY_PROXY_REDPANDA_PORT:-18087}"
+EOF
+  cat >>"${runtime_file}" <<EOF
+  "ghcr.io":
+    endpoint:
+      - "http://${proxy_host}:${DEPENDENCY_PROXY_GHCR_PORT:-18085}"
+EOF
+  cat >>"${runtime_file}" <<EOF
+  "quay.io":
+    endpoint:
+      - "http://${proxy_host}:${DEPENDENCY_PROXY_QUAY_PORT:-18086}"
+EOF
+  cat >>"${runtime_file}" <<EOF
+  "registry.k8s.io":
+    endpoint:
+      - "http://${proxy_host}:${DEPENDENCY_PROXY_KUBERNETES_PORT:-18088}"
+EOF
+  export KUBERNETES_REGISTRIES_FILE="${runtime_file}"
+  # With proxy mode enabled, a failed mirror must never fall back directly to
+  # the public registry. containerd retries the configured Nexus endpoint.
+  export KUBERNETES_DISABLE_DEFAULT_REGISTRY_ENDPOINT=true
+}
+
 container_proxy_url() {
   local value="$1"
   local host="${DEPENDENCY_PROXY_HOST:-localhost}"
@@ -112,6 +160,13 @@ kubectl() {
   "${COMPOSE[@]}" exec -T kubernetes kubectl "$@"
 }
 
+local_runtime_image() {
+  local service="$1"
+  docker compose -f docker-compose.yml config --format json "${service}" |
+    python3 -c 'import json, sys; service = sys.argv[1]; print(json.load(sys.stdin)["services"][service]["image"])' \
+      "${service}"
+}
+
 ensure_namespace() {
   kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml |
     kubectl apply -f - >/dev/null
@@ -150,6 +205,7 @@ configure_kafka_secrets() {
 }
 
 infra_up() {
+  prepare_registry_config
   ensure_tool_caches
   progress "starting project registry and k3s"
   "${COMPOSE[@]}" up -d registry kubernetes
@@ -160,22 +216,26 @@ build_images() {
   progress "building existing minimal runtime images"
   make docker-build
   progress "publishing analyticsservice image"
-  docker tag "cppboostexample-analyticsservice:local" \
+  runtime_image="$(local_runtime_image "analyticsservice")"
+  docker tag "${runtime_image}" \
     "${HOST_REGISTRY}/cppboostexample/analyticsservice:${IMAGE_TAG}"
   docker push \
     "${HOST_REGISTRY}/cppboostexample/analyticsservice:${IMAGE_TAG}"
   progress "publishing automationservice image"
-  docker tag "automationservice:local" \
+  runtime_image="$(local_runtime_image "automationservice")"
+  docker tag "${runtime_image}" \
     "${HOST_REGISTRY}/cppboostexample/automationservice:${IMAGE_TAG}"
   docker push \
     "${HOST_REGISTRY}/cppboostexample/automationservice:${IMAGE_TAG}"
   progress "publishing inventoryservice image"
-  docker tag "cppboostexample-inventoryservice:local" \
+  runtime_image="$(local_runtime_image "inventoryservice")"
+  docker tag "${runtime_image}" \
     "${HOST_REGISTRY}/cppboostexample/inventoryservice:${IMAGE_TAG}"
   docker push \
     "${HOST_REGISTRY}/cppboostexample/inventoryservice:${IMAGE_TAG}"
   progress "publishing orderservice image"
-  docker tag "cppboostexample-orderservice:local" \
+  runtime_image="$(local_runtime_image "orderservice")"
+  docker tag "${runtime_image}" \
     "${HOST_REGISTRY}/cppboostexample/orderservice:${IMAGE_TAG}"
   docker push \
     "${HOST_REGISTRY}/cppboostexample/orderservice:${IMAGE_TAG}"
@@ -400,7 +460,7 @@ deploy_services() {
   fi
 }
 
-verify() {
+verify_services() {
   progress "waiting for service rollouts"
   kubectl --namespace "${NAMESPACE}" rollout status \
     deployment/analyticsservice --timeout="${TIMEOUT}"
@@ -427,6 +487,10 @@ verify() {
     "/api/v1/namespaces/${NAMESPACE}/services/http:orderservice:9091/proxy/health/ready" \
     >/dev/null
   printf '  PASS  orderservice /health/ready\n'
+}
+
+verify() {
+  verify_services
   progress "checking Prometheus, Grafana, Jaeger, Loki and OTel Collector"
   kubectl get --raw \
     "/api/v1/namespaces/${NAMESPACE}/services/http:monitoring-kube-prometheus-prometheus:9090/proxy/-/ready" \
@@ -495,6 +559,14 @@ case "${1:-up}" in
     infra_up
     build_images
     ;;
+  services-up)
+    wait_for_cluster
+    ensure_namespace
+    configure_kafka_secrets
+    build_images
+    deploy_services
+    verify_services
+    ;;
   deploy)
     infra_up
     deploy_infrastructure
@@ -526,7 +598,7 @@ case "${1:-up}" in
     "${COMPOSE[@]}" down --volumes --remove-orphans
     ;;
   *)
-    echo "usage: $0 {up|infra-up|build|deploy|test|status|down|clean}" >&2
+    echo "usage: $0 {up|infra-up|build|services-up|deploy|test|status|down|clean}" >&2
     exit 2
     ;;
 esac

@@ -44,7 +44,7 @@ export ORDER_SERVICE_DEBUG_PORT
 
 DEPENDENCY_DOCKER_TARGETS := $(LANG_DOCKER_BUILD_TARGETS) $(LANG_DOCKER_DEV_BUILD_TARGETS) \
 	$(LANG_DOCKER_VERIFY_TARGETS) $(DEBUG_TARGETS) docker-build docker-build-local docker-build-dev docker-up docker-start docker-up-dev \
-	grafana-dashboards kubernetes-up kubernetes-build kubernetes-deploy \
+	grafana-dashboards kubernetes-up kubernetes-build kubernetes-services-up kubernetes-deploy \
 	cpp-build cpp-test cpp-release-build cpp-release-test cpp-asan-test cpp-tsan-test \
 	cpp-lint cpp-integration-test \
 	golang-race-build golang-race-up golang-race-start
@@ -72,9 +72,9 @@ GLAB := $(TOOLS_DIR)/glab
 .PHONY: all init git-init build test lint lint-fix fmt gen clean ci tools \
 	run integration-test act docker-build docker-build-local docker-build-dev docker-up docker-start docker-up-dev \
 	docker-down docker-down-dev docker-restart docker-clean grafana-dashboards merge help \
-	kubernetes-up kubernetes-build kubernetes-deploy kubernetes-test \
+	kubernetes-up kubernetes-build kubernetes-services-up kubernetes-deploy kubernetes-test \
 	kubernetes-status kubernetes-down kubernetes-clean \
-	k8s-up k8s-build k8s-deploy k8s-test k8s-status k8s-down k8s-clean \
+	k8s-up k8s-build k8s-services-up k8s-deploy k8s-test k8s-status k8s-down k8s-clean \
 	dependency-cache-up dependency-cache-status dependency-cache-refresh dependency-cache-env \
 	dependency-cache-docker-env dependency-cache-docker-build \
 	dependency-cache-down dependency-cache-clean \
@@ -203,6 +203,9 @@ kubernetes-up: ## Build, deploy and verify all services in local Kubernetes
 kubernetes-build: ## Build and publish runtime images to the local registry
 	@bash scripts/kubernetes.generated.sh build
 
+kubernetes-services-up: ## Build, deploy and verify services in an existing local cluster
+	@bash scripts/kubernetes.generated.sh services-up
+
 kubernetes-deploy: ## Install project infrastructure and service Helm releases
 	@bash scripts/kubernetes.generated.sh deploy
 
@@ -220,6 +223,7 @@ kubernetes-clean: ## Remove local Kubernetes and all project cluster volumes
 
 k8s-up: kubernetes-up
 k8s-build: kubernetes-build
+k8s-services-up: kubernetes-services-up
 k8s-deploy: kubernetes-deploy
 k8s-test: kubernetes-test
 k8s-status: kubernetes-status
