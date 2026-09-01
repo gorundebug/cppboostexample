@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <exception>
 #include <future>
+#include <mutex>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -50,11 +51,12 @@ ServiceGenerated::~ServiceGenerated() {
 
 void ServiceGenerated::start() {
   try {
+    const servicelib::Context context;
     servicelib::config::RuntimeConfigRegistry::Publish(runtime_config_);
     serviceInit();
     initMakers();
-    customMakersInit();
-    initRuntime();
+    customMakersInit(context);
+    initRuntime(context);
     servicelib::ServiceApp<ServiceGenerated, DataTypes>::start();
     lifecycle_started_ = true;
     http_server_->Start();
@@ -116,7 +118,8 @@ void ServiceGenerated::initMakers() {
   };
 }
 
-void ServiceGenerated::initFunctions(const config::Config& cfg) {
+void ServiceGenerated::initFunctions(
+    servicelib::Context context, const config::Config& cfg) {
   if (!makers_.map_order_item_result_to_order_state) {
     throw std::logic_error("function maker MapOrderItemResultToOrderState is not configured");
   }
@@ -141,76 +144,177 @@ void ServiceGenerated::initFunctions(const config::Config& cfg) {
   if (!makers_.soft_deadline) {
     throw std::logic_error("function maker SoftDeadline is not configured");
   }
+  std::stop_source maker_cancellation;
+  std::mutex maker_error_mutex;
+  std::exception_ptr first_maker_error;
+  const auto maker_context = context.withExternalCancellation(
+      maker_cancellation.get_token());
   std::vector<std::future<void>> maker_tasks;
   maker_tasks.reserve(8);
-  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
-    functions_.map_order_item_result_to_order_state = makers_.map_order_item_result_to_order_state(
-        servicelib::Context{}, *this, cfg.streams.mapOrderItemResultToOrderState);
-    if (!functions_.map_order_item_result_to_order_state) {
-      throw std::logic_error("function maker MapOrderItemResultToOrderState returned null");
+  maker_tasks.push_back(std::async(
+      std::launch::async,
+      [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
+       &first_maker_error] {
+    try {
+      functions_.map_order_item_result_to_order_state = makers_.map_order_item_result_to_order_state(
+          maker_context, *this, cfg.streams.mapOrderItemResultToOrderState);
+      if (!functions_.map_order_item_result_to_order_state) {
+        throw std::logic_error("function maker MapOrderItemResultToOrderState returned null");
+      }
+    } catch (...) {
+      maker_cancellation.request_stop();
+      const std::lock_guard lock(maker_error_mutex);
+      if (!first_maker_error) {
+        first_maker_error = std::current_exception();
+      }
+      throw;
     }
   }));
-  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
-    functions_.map_to_order_processed = makers_.map_to_order_processed(
-        servicelib::Context{}, *this, cfg.streams.mapToOrderProcessed);
-    if (!functions_.map_to_order_processed) {
-      throw std::logic_error("function maker MapToOrderProcessed returned null");
+  maker_tasks.push_back(std::async(
+      std::launch::async,
+      [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
+       &first_maker_error] {
+    try {
+      functions_.map_to_order_processed = makers_.map_to_order_processed(
+          maker_context, *this, cfg.streams.mapToOrderProcessed);
+      if (!functions_.map_to_order_processed) {
+        throw std::logic_error("function maker MapToOrderProcessed returned null");
+      }
+    } catch (...) {
+      maker_cancellation.request_stop();
+      const std::lock_guard lock(maker_error_mutex);
+      if (!first_maker_error) {
+        first_maker_error = std::current_exception();
+      }
+      throw;
     }
   }));
-  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
-    functions_.map_to_order_state = makers_.map_to_order_state(
-        servicelib::Context{}, *this, cfg.streams.mapToOrderState);
-    if (!functions_.map_to_order_state) {
-      throw std::logic_error("function maker MapToOrderState returned null");
+  maker_tasks.push_back(std::async(
+      std::launch::async,
+      [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
+       &first_maker_error] {
+    try {
+      functions_.map_to_order_state = makers_.map_to_order_state(
+          maker_context, *this, cfg.streams.mapToOrderState);
+      if (!functions_.map_to_order_state) {
+        throw std::logic_error("function maker MapToOrderState returned null");
+      }
+    } catch (...) {
+      maker_cancellation.request_stop();
+      const std::lock_guard lock(maker_error_mutex);
+      if (!first_maker_error) {
+        first_maker_error = std::current_exception();
+      }
+      throw;
     }
   }));
-  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
-    functions_.order_processed_endpoint_sink = makers_.order_processed_endpoint_sink(
-        servicelib::Context{}, *this, cfg.endpoints.orderProcessed);
-    if (!functions_.order_processed_endpoint_sink) {
-      throw std::logic_error("function maker OrderProcessedEndpointSink returned null");
+  maker_tasks.push_back(std::async(
+      std::launch::async,
+      [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
+       &first_maker_error] {
+    try {
+      functions_.order_processed_endpoint_sink = makers_.order_processed_endpoint_sink(
+          maker_context, *this, cfg.endpoints.orderProcessed);
+      if (!functions_.order_processed_endpoint_sink) {
+        throw std::logic_error("function maker OrderProcessedEndpointSink returned null");
+      }
+    } catch (...) {
+      maker_cancellation.request_stop();
+      const std::lock_guard lock(maker_error_mutex);
+      if (!first_maker_error) {
+        first_maker_error = std::current_exception();
+      }
+      throw;
     }
   }));
-  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
-    functions_.process_order_item_sink = makers_.process_order_item_sink(
-        servicelib::Context{}, *this, cfg.endpoints.processOrderItem);
-    if (!functions_.process_order_item_sink) {
-      throw std::logic_error("function maker ProcessOrderItemSink returned null");
+  maker_tasks.push_back(std::async(
+      std::launch::async,
+      [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
+       &first_maker_error] {
+    try {
+      functions_.process_order_item_sink = makers_.process_order_item_sink(
+          maker_context, *this, cfg.endpoints.processOrderItem);
+      if (!functions_.process_order_item_sink) {
+        throw std::logic_error("function maker ProcessOrderItemSink returned null");
+      }
+    } catch (...) {
+      maker_cancellation.request_stop();
+      const std::lock_guard lock(maker_error_mutex);
+      if (!first_maker_error) {
+        first_maker_error = std::current_exception();
+      }
+      throw;
     }
   }));
-  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
-    functions_.process_order_items = makers_.process_order_items(
-        servicelib::Context{}, *this, cfg.streams.processOrderItems);
-    if (!functions_.process_order_items) {
-      throw std::logic_error("function maker ProcessOrderItems returned null");
+  maker_tasks.push_back(std::async(
+      std::launch::async,
+      [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
+       &first_maker_error] {
+    try {
+      functions_.process_order_items = makers_.process_order_items(
+          maker_context, *this, cfg.streams.processOrderItems);
+      if (!functions_.process_order_items) {
+        throw std::logic_error("function maker ProcessOrderItems returned null");
+      }
+    } catch (...) {
+      maker_cancellation.request_stop();
+      const std::lock_guard lock(maker_error_mutex);
+      if (!first_maker_error) {
+        first_maker_error = std::current_exception();
+      }
+      throw;
     }
   }));
-  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
-    functions_.process_order_source = makers_.process_order_source(
-        servicelib::Context{}, *this, cfg.endpoints.processOrder);
-    if (!functions_.process_order_source) {
-      throw std::logic_error("function maker ProcessOrderSource returned null");
+  maker_tasks.push_back(std::async(
+      std::launch::async,
+      [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
+       &first_maker_error] {
+    try {
+      functions_.process_order_source = makers_.process_order_source(
+          maker_context, *this, cfg.endpoints.processOrder);
+      if (!functions_.process_order_source) {
+        throw std::logic_error("function maker ProcessOrderSource returned null");
+      }
+    } catch (...) {
+      maker_cancellation.request_stop();
+      const std::lock_guard lock(maker_error_mutex);
+      if (!first_maker_error) {
+        first_maker_error = std::current_exception();
+      }
+      throw;
     }
   }));
-  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
-    functions_.soft_deadline = makers_.soft_deadline(
-        servicelib::Context{}, *this, cfg.streams.softDeadline);
-    if (!functions_.soft_deadline) {
-      throw std::logic_error("function maker SoftDeadline returned null");
+  maker_tasks.push_back(std::async(
+      std::launch::async,
+      [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
+       &first_maker_error] {
+    try {
+      functions_.soft_deadline = makers_.soft_deadline(
+          maker_context, *this, cfg.streams.softDeadline);
+      if (!functions_.soft_deadline) {
+        throw std::logic_error("function maker SoftDeadline returned null");
+      }
+    } catch (...) {
+      maker_cancellation.request_stop();
+      const std::lock_guard lock(maker_error_mutex);
+      if (!first_maker_error) {
+        first_maker_error = std::current_exception();
+      }
+      throw;
     }
   }));
-  std::exception_ptr maker_error;
+
   for (auto& task : maker_tasks) {
     try {
       task.get();
     } catch (...) {
-      if (!maker_error) maker_error = std::current_exception();
+      // The task recorded the first failure before requesting cancellation.
     }
   }
-  if (maker_error) std::rethrow_exception(maker_error);
+  if (first_maker_error) std::rethrow_exception(first_maker_error);
 }
 
-void ServiceGenerated::initRuntime() {
+void ServiceGenerated::initRuntime(servicelib::Context context) {
   const auto runtime_config = getRuntimeConfigSnapshot();
   if (!runtime_config) {
     throw std::runtime_error("servicelib runtime config is not published");
@@ -222,8 +326,8 @@ void ServiceGenerated::initRuntime() {
     throw std::runtime_error("servicelib runtime config has unexpected type");
   }
   this->ensureConfiguredPools();
-  initFunctions(*config_snapshot);
-  customFunctionsInit();
+  initFunctions(context, *config_snapshot);
+  customFunctionsInit(context);
   initStreams(*config_snapshot);
   initDataSinks(*config_snapshot);
   http_router_ = std::make_shared<servicelib::http::Router>();

@@ -109,16 +109,16 @@ class ServiceGenerated
   ServiceMakers makers_;
   ServiceFunctions functions_;
 
-  virtual void customMakersInit() {}
-  virtual void customFunctionsInit() {}
+  virtual void customMakersInit(servicelib::Context) {}
+  virtual void customFunctionsInit(servicelib::Context) {}
   virtual void serviceInit() {}
   virtual void serviceStarted() {}
   virtual void serviceStopping() noexcept {}
 
  private:
   void initMakers();
-  void initFunctions(const config::Config& config);
-  void initRuntime();
+  void initFunctions(servicelib::Context context, const config::Config& config);
+  void initRuntime(servicelib::Context context);
   void initStreams(const config::Config& config);
   void initDataSinks(const config::Config& config);
   void initDataSources(const config::Config& config);

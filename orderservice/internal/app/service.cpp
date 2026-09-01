@@ -2,10 +2,12 @@
 
 namespace example::order_service::app {
 
-void Service::customMakersInit() {
+void Service::customMakersInit(servicelib::Context context) {
+  (void)context;
   // Replace generated makers here. This file is never overwritten.
 }
-void Service::customFunctionsInit() {
+void Service::customFunctionsInit(servicelib::Context context) {
+  (void)context;
   // Configure constructed functions here before the graph is wired.
 }
 void Service::serviceInit() {}

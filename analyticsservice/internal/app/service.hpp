@@ -11,8 +11,8 @@ class Service final : public ServiceGenerated {
   ~Service() override = default;
 
  protected:
-  void customMakersInit() override;
-  void customFunctionsInit() override;
+  void customMakersInit(servicelib::Context context) override;
+  void customFunctionsInit(servicelib::Context context) override;
   void serviceInit() override;
   void serviceStarted() override;
   void serviceStopping() noexcept override;

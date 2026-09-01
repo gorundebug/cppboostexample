@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <exception>
 #include <future>
+#include <mutex>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -50,11 +51,12 @@ ServiceGenerated::~ServiceGenerated() {
 
 void ServiceGenerated::start() {
   try {
+    const servicelib::Context context;
     servicelib::config::RuntimeConfigRegistry::Publish(runtime_config_);
     serviceInit();
     initMakers();
-    customMakersInit();
-    initRuntime();
+    customMakersInit(context);
+    initRuntime(context);
     servicelib::ServiceApp<ServiceGenerated, DataTypes>::start();
     lifecycle_started_ = true;
     http_server_->Start();
@@ -80,41 +82,71 @@ void ServiceGenerated::initMakers() {
   };
 }
 
-void ServiceGenerated::initFunctions(const config::Config& cfg) {
+void ServiceGenerated::initFunctions(
+    servicelib::Context context, const config::Config& cfg) {
   if (!makers_.get_inventory_item_data) {
     throw std::logic_error("function maker GetInventoryItemData is not configured");
   }
   if (!makers_.process_order_item_source) {
     throw std::logic_error("function maker ProcessOrderItemSource is not configured");
   }
+  std::stop_source maker_cancellation;
+  std::mutex maker_error_mutex;
+  std::exception_ptr first_maker_error;
+  const auto maker_context = context.withExternalCancellation(
+      maker_cancellation.get_token());
   std::vector<std::future<void>> maker_tasks;
   maker_tasks.reserve(2);
-  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
-    functions_.get_inventory_item_data = makers_.get_inventory_item_data(
-        servicelib::Context{}, *this, cfg.streams.getInventoryItemData);
-    if (!functions_.get_inventory_item_data) {
-      throw std::logic_error("function maker GetInventoryItemData returned null");
+  maker_tasks.push_back(std::async(
+      std::launch::async,
+      [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
+       &first_maker_error] {
+    try {
+      functions_.get_inventory_item_data = makers_.get_inventory_item_data(
+          maker_context, *this, cfg.streams.getInventoryItemData);
+      if (!functions_.get_inventory_item_data) {
+        throw std::logic_error("function maker GetInventoryItemData returned null");
+      }
+    } catch (...) {
+      maker_cancellation.request_stop();
+      const std::lock_guard lock(maker_error_mutex);
+      if (!first_maker_error) {
+        first_maker_error = std::current_exception();
+      }
+      throw;
     }
   }));
-  maker_tasks.push_back(std::async(std::launch::async, [this, &cfg] {
-    functions_.process_order_item_source = makers_.process_order_item_source(
-        servicelib::Context{}, *this, cfg.endpoints.processOrderItem);
-    if (!functions_.process_order_item_source) {
-      throw std::logic_error("function maker ProcessOrderItemSource returned null");
+  maker_tasks.push_back(std::async(
+      std::launch::async,
+      [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
+       &first_maker_error] {
+    try {
+      functions_.process_order_item_source = makers_.process_order_item_source(
+          maker_context, *this, cfg.endpoints.processOrderItem);
+      if (!functions_.process_order_item_source) {
+        throw std::logic_error("function maker ProcessOrderItemSource returned null");
+      }
+    } catch (...) {
+      maker_cancellation.request_stop();
+      const std::lock_guard lock(maker_error_mutex);
+      if (!first_maker_error) {
+        first_maker_error = std::current_exception();
+      }
+      throw;
     }
   }));
-  std::exception_ptr maker_error;
+
   for (auto& task : maker_tasks) {
     try {
       task.get();
     } catch (...) {
-      if (!maker_error) maker_error = std::current_exception();
+      // The task recorded the first failure before requesting cancellation.
     }
   }
-  if (maker_error) std::rethrow_exception(maker_error);
+  if (first_maker_error) std::rethrow_exception(first_maker_error);
 }
 
-void ServiceGenerated::initRuntime() {
+void ServiceGenerated::initRuntime(servicelib::Context context) {
   const auto runtime_config = getRuntimeConfigSnapshot();
   if (!runtime_config) {
     throw std::runtime_error("servicelib runtime config is not published");
@@ -126,8 +158,8 @@ void ServiceGenerated::initRuntime() {
     throw std::runtime_error("servicelib runtime config has unexpected type");
   }
   this->ensureConfiguredPools();
-  initFunctions(*config_snapshot);
-  customFunctionsInit();
+  initFunctions(context, *config_snapshot);
+  customFunctionsInit(context);
   initStreams(*config_snapshot);
   http_router_ = std::make_shared<servicelib::http::Router>();
   const auto service_config = getServiceConfigSnapshot();

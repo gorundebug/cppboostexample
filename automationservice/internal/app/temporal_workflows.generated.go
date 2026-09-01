@@ -53,7 +53,7 @@ func buildTemporalWorkflowGraph(
 	); err != nil {
 		return nil, nil, err
 	}
-	if err := graph.buildWorkflowGraph(context.Background(), &cfg, env); err != nil {
+	if err := graph.buildWorkflowGraph(workflowCtx, context.Background(), &cfg, env); err != nil {
 		return nil, nil, err
 	}
 	if err := env.Start(context.Background()); err != nil {

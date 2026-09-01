@@ -20,6 +20,7 @@ import (
 	log "github.com/gorundebug/servicelib/runtime/environment/log"
 	runtimeserde "github.com/gorundebug/servicelib/runtime/serde"
 	"github.com/gorundebug/servicelib/transformation"
+	temporalworkflow "go.temporal.io/sdk/workflow"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/gorundebug/cppboostexample-automationservice/internal/config"
@@ -912,14 +913,14 @@ func (s *Service) initFunctions(ctx context.Context, cfg *config.Config, env run
 
 // buildWorkflowGraph constructs a fresh graph without creating process-owned
 // servers, clients, exporters, watchers or OS-backed executors.
-func (s *Service) buildWorkflowGraph(ctx context.Context, cfg *config.Config, env runtime.RuntimeEnvironment) error {
+func (s *Service) buildWorkflowGraph(workflowCtx temporalworkflow.Context, ctx context.Context, cfg *config.Config, env runtime.RuntimeEnvironment) error {
 	if err := s.initMakers(ctx); err != nil {
 		return fmt.Errorf("init Workflow makers failed: %w", err)
 	}
 	if err := s.customMakersInit(ctx); err != nil {
 		return fmt.Errorf("custom Workflow makers failed: %w", err)
 	}
-	if err := s.initWorkflowFunctions(ctx, cfg, env); err != nil {
+	if err := s.initWorkflowFunctions(workflowCtx, ctx, cfg, env); err != nil {
 		return fmt.Errorf("init Workflow functions failed: %w", err)
 	}
 	if err := s.customFunctionsInit(ctx); err != nil {
@@ -931,263 +932,316 @@ func (s *Service) buildWorkflowGraph(ctx context.Context, cfg *config.Config, en
 	return nil
 }
 
-// Workflow function makers run in a stable generated order. The ordinary
-// service keeps initializer-group goroutines; a Temporal Workflow must not use
-// process goroutines during replayable graph construction.
-func (s *Service) initWorkflowFunctions(ctx context.Context, cfg *config.Config, env runtime.RuntimeEnvironment) error {
+// Workflow makers preserve ordinary initializer-group semantics while using
+// Temporal's deterministic coroutine scheduler instead of process goroutines.
+func (s *Service) initWorkflowFunctions(workflowCtx temporalworkflow.Context, ctx context.Context, cfg *config.Config, env runtime.RuntimeEnvironment) error {
+	eg, egCtx := newWorkflowMakerGroup(workflowCtx, ctx)
 	if s.makers.automationActivityPauseMaker != nil {
-		value, err := s.makers.automationActivityPauseMaker(ctx, &cfg.Streams.ActivityPause, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationActivityPause, err = s.makers.automationActivityPauseMaker(egCtx, &cfg.Streams.ActivityPause, env)
 			return err
-		}
-		s.functions.automationActivityPause = value
+		})
 	}
 	if s.makers.automationProcessActivityJobMaker != nil {
-		value, err := s.makers.automationProcessActivityJobMaker(ctx, &cfg.Streams.ProcessActivityJob, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationProcessActivityJob, err = s.makers.automationProcessActivityJobMaker(egCtx, &cfg.Streams.ProcessActivityJob, env)
 			return err
-		}
-		s.functions.automationProcessActivityJob = value
+		})
 	}
 	if s.makers.automationProcessFanoutActivityAMaker != nil {
-		value, err := s.makers.automationProcessFanoutActivityAMaker(ctx, &cfg.Streams.ProcessFanOutActivityA, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationProcessFanoutActivityA, err = s.makers.automationProcessFanoutActivityAMaker(egCtx, &cfg.Streams.ProcessFanOutActivityA, env)
 			return err
-		}
-		s.functions.automationProcessFanoutActivityA = value
+		})
 	}
 	if s.makers.automationProcessFanoutActivityBMaker != nil {
-		value, err := s.makers.automationProcessFanoutActivityBMaker(ctx, &cfg.Streams.ProcessFanOutActivityB, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationProcessFanoutActivityB, err = s.makers.automationProcessFanoutActivityBMaker(egCtx, &cfg.Streams.ProcessFanOutActivityB, env)
 			return err
-		}
-		s.functions.automationProcessFanoutActivityB = value
+		})
 	}
 	if s.makers.automationProcessFanoutActivityCMaker != nil {
-		value, err := s.makers.automationProcessFanoutActivityCMaker(ctx, &cfg.Streams.ProcessFanOutActivityC, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationProcessFanoutActivityC, err = s.makers.automationProcessFanoutActivityCMaker(egCtx, &cfg.Streams.ProcessFanOutActivityC, env)
 			return err
-		}
-		s.functions.automationProcessFanoutActivityC = value
+		})
 	}
 	if s.makers.automationObserveFanoutActivityBMaker != nil {
-		value, err := s.makers.automationObserveFanoutActivityBMaker(ctx, &cfg.Streams.ObserveFanOutActivityB, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationObserveFanoutActivityB, err = s.makers.automationObserveFanoutActivityBMaker(egCtx, &cfg.Streams.ObserveFanOutActivityB, env)
 			return err
-		}
-		s.functions.automationObserveFanoutActivityB = value
+		})
 	}
 	if s.makers.automationObserveFanoutActivityCMaker != nil {
-		value, err := s.makers.automationObserveFanoutActivityCMaker(ctx, &cfg.Streams.ObserveFanOutActivityC, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationObserveFanoutActivityC, err = s.makers.automationObserveFanoutActivityCMaker(egCtx, &cfg.Streams.ObserveFanOutActivityC, env)
 			return err
-		}
-		s.functions.automationObserveFanoutActivityC = value
+		})
 	}
 	if s.makers.automationProcessSequentialActivityAMaker != nil {
-		value, err := s.makers.automationProcessSequentialActivityAMaker(ctx, &cfg.Streams.ProcessSequentialActivityA, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationProcessSequentialActivityA, err = s.makers.automationProcessSequentialActivityAMaker(egCtx, &cfg.Streams.ProcessSequentialActivityA, env)
 			return err
-		}
-		s.functions.automationProcessSequentialActivityA = value
+		})
 	}
 	if s.makers.automationProcessSequentialActivityBMaker != nil {
-		value, err := s.makers.automationProcessSequentialActivityBMaker(ctx, &cfg.Streams.ProcessSequentialActivityB, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationProcessSequentialActivityB, err = s.makers.automationProcessSequentialActivityBMaker(egCtx, &cfg.Streams.ProcessSequentialActivityB, env)
 			return err
-		}
-		s.functions.automationProcessSequentialActivityB = value
+		})
 	}
 	if s.makers.automationWorkflowPauseMaker != nil {
-		value, err := s.makers.automationWorkflowPauseMaker(ctx, &cfg.Streams.WorkflowPause, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationWorkflowPause, err = s.makers.automationWorkflowPauseMaker(egCtx, &cfg.Streams.WorkflowPause, env)
 			return err
-		}
-		s.functions.automationWorkflowPause = value
+		})
 	}
 	if s.makers.automationProcessWorkflowJobMaker != nil {
-		value, err := s.makers.automationProcessWorkflowJobMaker(ctx, &cfg.Streams.ProcessWorkflowJob, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationProcessWorkflowJob, err = s.makers.automationProcessWorkflowJobMaker(egCtx, &cfg.Streams.ProcessWorkflowJob, env)
 			return err
-		}
-		s.functions.automationProcessWorkflowJob = value
+		})
 	}
 	if s.makers.automationObserveActivityResultMaker != nil {
-		value, err := s.makers.automationObserveActivityResultMaker(ctx, &cfg.Streams.ObserveActivityResult, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationObserveActivityResult, err = s.makers.automationObserveActivityResultMaker(egCtx, &cfg.Streams.ObserveActivityResult, env)
 			return err
-		}
-		s.functions.automationObserveActivityResult = value
+		})
 	}
 	if s.makers.automationObserveWorkflowResultMaker != nil {
-		value, err := s.makers.automationObserveWorkflowResultMaker(ctx, &cfg.Streams.ObserveWorkflowResult, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationObserveWorkflowResult, err = s.makers.automationObserveWorkflowResultMaker(egCtx, &cfg.Streams.ObserveWorkflowResult, env)
 			return err
-		}
-		s.functions.automationObserveWorkflowResult = value
+		})
 	}
 	if s.makers.automationScheduledActivityPauseMaker != nil {
-		value, err := s.makers.automationScheduledActivityPauseMaker(ctx, &cfg.Streams.ScheduledActivityPause, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationScheduledActivityPause, err = s.makers.automationScheduledActivityPauseMaker(egCtx, &cfg.Streams.ScheduledActivityPause, env)
 			return err
-		}
-		s.functions.automationScheduledActivityPause = value
+		})
 	}
 	if s.makers.automationProcessScheduledActivityMaker != nil {
-		value, err := s.makers.automationProcessScheduledActivityMaker(ctx, &cfg.Streams.ProcessScheduledActivity, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationProcessScheduledActivity, err = s.makers.automationProcessScheduledActivityMaker(egCtx, &cfg.Streams.ProcessScheduledActivity, env)
 			return err
-		}
-		s.functions.automationProcessScheduledActivity = value
+		})
 	}
 	if s.makers.automationScheduledWorkflowPauseMaker != nil {
-		value, err := s.makers.automationScheduledWorkflowPauseMaker(ctx, &cfg.Streams.ScheduledWorkflowPause, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationScheduledWorkflowPause, err = s.makers.automationScheduledWorkflowPauseMaker(egCtx, &cfg.Streams.ScheduledWorkflowPause, env)
 			return err
-		}
-		s.functions.automationScheduledWorkflowPause = value
+		})
 	}
 	if s.makers.automationProcessScheduledWorkflowMaker != nil {
-		value, err := s.makers.automationProcessScheduledWorkflowMaker(ctx, &cfg.Streams.ProcessScheduledWorkflow, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.automationProcessScheduledWorkflow, err = s.makers.automationProcessScheduledWorkflowMaker(egCtx, &cfg.Streams.ProcessScheduledWorkflow, env)
 			return err
-		}
-		s.functions.automationProcessScheduledWorkflow = value
+		})
 	}
 	if s.makers.activityActivityJobEndpointSourceMaker != nil {
-		value, err := s.makers.activityActivityJobEndpointSourceMaker(ctx, &cfg.Endpoints.ActivityJob, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.activityActivityJobEndpointSource, err = s.makers.activityActivityJobEndpointSourceMaker(egCtx, &cfg.Endpoints.ActivityJob, env)
 			return err
-		}
-		s.functions.activityActivityJobEndpointSource = value
+		})
 	}
 	if s.makers.activityFanoutActivityAEndpointSourceMaker != nil {
-		value, err := s.makers.activityFanoutActivityAEndpointSourceMaker(ctx, &cfg.Endpoints.FanOutActivityA, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.activityFanoutActivityAEndpointSource, err = s.makers.activityFanoutActivityAEndpointSourceMaker(egCtx, &cfg.Endpoints.FanOutActivityA, env)
 			return err
-		}
-		s.functions.activityFanoutActivityAEndpointSource = value
+		})
 	}
 	if s.makers.activityFanoutActivityBEndpointSourceMaker != nil {
-		value, err := s.makers.activityFanoutActivityBEndpointSourceMaker(ctx, &cfg.Endpoints.FanOutActivityB, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.activityFanoutActivityBEndpointSource, err = s.makers.activityFanoutActivityBEndpointSourceMaker(egCtx, &cfg.Endpoints.FanOutActivityB, env)
 			return err
-		}
-		s.functions.activityFanoutActivityBEndpointSource = value
+		})
 	}
 	if s.makers.activityFanoutActivityCEndpointSourceMaker != nil {
-		value, err := s.makers.activityFanoutActivityCEndpointSourceMaker(ctx, &cfg.Endpoints.FanOutActivityC, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.activityFanoutActivityCEndpointSource, err = s.makers.activityFanoutActivityCEndpointSourceMaker(egCtx, &cfg.Endpoints.FanOutActivityC, env)
 			return err
-		}
-		s.functions.activityFanoutActivityCEndpointSource = value
+		})
 	}
 	if s.makers.workflowFanoutWorkflowJobEndpointSourceMaker != nil {
-		value, err := s.makers.workflowFanoutWorkflowJobEndpointSourceMaker(ctx, &cfg.Endpoints.FanOutWorkflowJob, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.workflowFanoutWorkflowJobEndpointSource, err = s.makers.workflowFanoutWorkflowJobEndpointSourceMaker(egCtx, &cfg.Endpoints.FanOutWorkflowJob, env)
 			return err
-		}
-		s.functions.workflowFanoutWorkflowJobEndpointSource = value
+		})
 	}
 	if s.makers.activitySequentialActivityAEndpointSourceMaker != nil {
-		value, err := s.makers.activitySequentialActivityAEndpointSourceMaker(ctx, &cfg.Endpoints.SequentialActivityA, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.activitySequentialActivityAEndpointSource, err = s.makers.activitySequentialActivityAEndpointSourceMaker(egCtx, &cfg.Endpoints.SequentialActivityA, env)
 			return err
-		}
-		s.functions.activitySequentialActivityAEndpointSource = value
+		})
 	}
 	if s.makers.activitySequentialActivityBEndpointSourceMaker != nil {
-		value, err := s.makers.activitySequentialActivityBEndpointSourceMaker(ctx, &cfg.Endpoints.SequentialActivityB, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.activitySequentialActivityBEndpointSource, err = s.makers.activitySequentialActivityBEndpointSourceMaker(egCtx, &cfg.Endpoints.SequentialActivityB, env)
 			return err
-		}
-		s.functions.activitySequentialActivityBEndpointSource = value
+		})
 	}
 	if s.makers.workflowWorkflowJobEndpointSourceMaker != nil {
-		value, err := s.makers.workflowWorkflowJobEndpointSourceMaker(ctx, &cfg.Endpoints.WorkflowJob, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.workflowWorkflowJobEndpointSource, err = s.makers.workflowWorkflowJobEndpointSourceMaker(egCtx, &cfg.Endpoints.WorkflowJob, env)
 			return err
-		}
-		s.functions.workflowWorkflowJobEndpointSource = value
+		})
 	}
 	if s.makers.cronLocalScheduleSourceMaker != nil {
-		value, err := s.makers.cronLocalScheduleSourceMaker(ctx, &cfg.Endpoints.LocalSchedule, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.cronLocalScheduleSource, err = s.makers.cronLocalScheduleSourceMaker(egCtx, &cfg.Endpoints.LocalSchedule, env)
 			return err
-		}
-		s.functions.cronLocalScheduleSource = value
+		})
 	}
 	if s.makers.activityTemporalActivityScheduleSourceMaker != nil {
-		value, err := s.makers.activityTemporalActivityScheduleSourceMaker(ctx, &cfg.Endpoints.TemporalActivitySchedule, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.activityTemporalActivityScheduleSource, err = s.makers.activityTemporalActivityScheduleSourceMaker(egCtx, &cfg.Endpoints.TemporalActivitySchedule, env)
 			return err
-		}
-		s.functions.activityTemporalActivityScheduleSource = value
+		})
 	}
 	if s.makers.workflowTemporalWorkflowScheduleSourceMaker != nil {
-		value, err := s.makers.workflowTemporalWorkflowScheduleSourceMaker(ctx, &cfg.Endpoints.TemporalWorkflowSchedule, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.workflowTemporalWorkflowScheduleSource, err = s.makers.workflowTemporalWorkflowScheduleSourceMaker(egCtx, &cfg.Endpoints.TemporalWorkflowSchedule, env)
 			return err
-		}
-		s.functions.workflowTemporalWorkflowScheduleSource = value
+		})
 	}
 	if s.makers.activityFanoutActivityAEndpointSinkMaker != nil {
-		value, err := s.makers.activityFanoutActivityAEndpointSinkMaker(ctx, &cfg.Endpoints.FanOutActivityA, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.activityFanoutActivityAEndpointSink, err = s.makers.activityFanoutActivityAEndpointSinkMaker(egCtx, &cfg.Endpoints.FanOutActivityA, env)
 			return err
-		}
-		s.functions.activityFanoutActivityAEndpointSink = value
+		})
 	}
 	if s.makers.activityFanoutActivityBEndpointSinkMaker != nil {
-		value, err := s.makers.activityFanoutActivityBEndpointSinkMaker(ctx, &cfg.Endpoints.FanOutActivityB, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.activityFanoutActivityBEndpointSink, err = s.makers.activityFanoutActivityBEndpointSinkMaker(egCtx, &cfg.Endpoints.FanOutActivityB, env)
 			return err
-		}
-		s.functions.activityFanoutActivityBEndpointSink = value
+		})
 	}
 	if s.makers.activityFanoutActivityCEndpointSinkMaker != nil {
-		value, err := s.makers.activityFanoutActivityCEndpointSinkMaker(ctx, &cfg.Endpoints.FanOutActivityC, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.activityFanoutActivityCEndpointSink, err = s.makers.activityFanoutActivityCEndpointSinkMaker(egCtx, &cfg.Endpoints.FanOutActivityC, env)
 			return err
-		}
-		s.functions.activityFanoutActivityCEndpointSink = value
+		})
 	}
 	if s.makers.activitySequentialActivityAEndpointSinkMaker != nil {
-		value, err := s.makers.activitySequentialActivityAEndpointSinkMaker(ctx, &cfg.Endpoints.SequentialActivityA, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.activitySequentialActivityAEndpointSink, err = s.makers.activitySequentialActivityAEndpointSinkMaker(egCtx, &cfg.Endpoints.SequentialActivityA, env)
 			return err
-		}
-		s.functions.activitySequentialActivityAEndpointSink = value
+		})
 	}
 	if s.makers.activitySequentialActivityBEndpointSinkMaker != nil {
-		value, err := s.makers.activitySequentialActivityBEndpointSinkMaker(ctx, &cfg.Endpoints.SequentialActivityB, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.activitySequentialActivityBEndpointSink, err = s.makers.activitySequentialActivityBEndpointSinkMaker(egCtx, &cfg.Endpoints.SequentialActivityB, env)
 			return err
-		}
-		s.functions.activitySequentialActivityBEndpointSink = value
+		})
 	}
 	if s.makers.activityActivityJobEndpointSinkMaker != nil {
-		value, err := s.makers.activityActivityJobEndpointSinkMaker(ctx, &cfg.Endpoints.ActivityJob, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.activityActivityJobEndpointSink, err = s.makers.activityActivityJobEndpointSinkMaker(egCtx, &cfg.Endpoints.ActivityJob, env)
 			return err
-		}
-		s.functions.activityActivityJobEndpointSink = value
+		})
 	}
 	if s.makers.workflowFanoutWorkflowJobEndpointSinkMaker != nil {
-		value, err := s.makers.workflowFanoutWorkflowJobEndpointSinkMaker(ctx, &cfg.Endpoints.FanOutWorkflowJob, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.workflowFanoutWorkflowJobEndpointSink, err = s.makers.workflowFanoutWorkflowJobEndpointSinkMaker(egCtx, &cfg.Endpoints.FanOutWorkflowJob, env)
 			return err
-		}
-		s.functions.workflowFanoutWorkflowJobEndpointSink = value
+		})
 	}
 	if s.makers.workflowWorkflowJobEndpointSinkMaker != nil {
-		value, err := s.makers.workflowWorkflowJobEndpointSinkMaker(ctx, &cfg.Endpoints.WorkflowJob, env)
-		if err != nil {
+		eg.Go(func() error {
+			var err error
+			s.functions.workflowWorkflowJobEndpointSink, err = s.makers.workflowWorkflowJobEndpointSinkMaker(egCtx, &cfg.Endpoints.WorkflowJob, env)
 			return err
-		}
-		s.functions.workflowWorkflowJobEndpointSink = value
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return err
 	}
 	return nil
+}
+
+type workflowMakerGroup struct {
+	workflowCtx  temporalworkflow.Context
+	waitGroup    temporalworkflow.WaitGroup
+	makerContext *workflowMakerContext
+	firstError   error
+}
+
+// workflowMakerContext is the standard-context adapter used only while makers
+// construct a replay-safe Workflow graph. Native Go cancellation channels are
+// intentionally unavailable inside Workflow code; cooperative makers observe
+// cancellation through Err().
+type workflowMakerContext struct {
+	canceled bool
+}
+
+func (*workflowMakerContext) Deadline() (time.Time, bool) { return time.Time{}, false }
+func (*workflowMakerContext) Done() <-chan struct{}       { return nil }
+func (c *workflowMakerContext) Err() error {
+	if c.canceled {
+		return context.Canceled
+	}
+	return nil
+}
+func (*workflowMakerContext) Value(any) any { return nil }
+
+func newWorkflowMakerGroup(workflowCtx temporalworkflow.Context, parent context.Context) (*workflowMakerGroup, context.Context) {
+	_ = parent
+	makerCtx := &workflowMakerContext{}
+	return &workflowMakerGroup{
+		workflowCtx:  workflowCtx,
+		waitGroup:    temporalworkflow.NewWaitGroup(workflowCtx),
+		makerContext: makerCtx,
+	}, makerCtx
+}
+
+func (g *workflowMakerGroup) Go(run func() error) {
+	g.waitGroup.Go(g.workflowCtx, func(temporalworkflow.Context) {
+		if err := run(); err != nil && g.firstError == nil {
+			g.firstError = err
+			g.makerContext.canceled = true
+		}
+	})
+}
+
+func (g *workflowMakerGroup) Wait() error {
+	g.waitGroup.Wait(g.workflowCtx)
+	g.makerContext.canceled = true
+	return g.firstError
 }
 
 func (s *Service) ServiceInit() error {
