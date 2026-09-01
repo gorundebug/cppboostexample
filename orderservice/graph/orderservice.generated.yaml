@@ -238,7 +238,7 @@ services:
                     type: Sink
                     valueType: orderProcessed
                 softDeadline:
-                    duration: 0
+                    duration: 1000
                     functionDescription: |
                         Trigger the timeout branch shortly before the request deadline, leaving the configured duration to assemble a response.
                         When no request deadline exists, use the configured duration itself. Never wait past an existing deadline.

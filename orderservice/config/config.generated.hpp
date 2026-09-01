@@ -292,7 +292,7 @@ inline Config MakeConfig() {
     value.idSource = kSplitPipelineStreamId;
     value.xPos = -477;
     value.yPos = -444;
-    value.duration = 0;
+    value.duration = 1000;
     value.functionPackage = "order";
     value.functionName = "SoftDeadline";
     value.functionDescription = "Trigger the timeout branch shortly before the request deadline, leaving the configured duration to assemble a response.\nWhen no request deadline exists, use the configured duration itself. Never wait past an existing deadline.\n";
