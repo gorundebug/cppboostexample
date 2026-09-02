@@ -2,6 +2,7 @@ package activity
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gorundebug/servicelib/datasource"
 	"github.com/gorundebug/servicelib/runtime"
@@ -28,10 +29,8 @@ func (f *TemporalActivityScheduleSource) OnTrigger(
 	trigger runtime.ScheduleTrigger,
 	out runtime.Collect[string],
 ) {
-	// TODO: convert trigger to the input payload and emit it with out.Out.
-	_ = ctx
-	_ = trigger
-	_ = out
+	_ = runtime.DurableCallHeartbeat(ctx, "scheduled:"+trigger.TriggerID)
+	out.Out(ctx, fmt.Sprintf("scheduled-activity:%s:%s", trigger.ScheduleID, trigger.TriggerID))
 }
 
 // MakeTemporalActivityScheduleSource constructs the endpoint function once during service startup.
