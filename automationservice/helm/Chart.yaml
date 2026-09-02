@@ -2,5 +2,5 @@ apiVersion: v2
 name: automationservice
 description: Helm chart for Automation Service
 type: application
-version: 0.2.67
-appVersion: "0.2.67"
+version: 0.2.68
+appVersion: "0.2.68"
