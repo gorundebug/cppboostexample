@@ -305,10 +305,15 @@ while IFS= read -r src; do
     fi
 done < <(find "$SRC_ROOT" -type f -print | LC_ALL=C sort)
 
-log "Checking for stale generated or explicitly overwritten files:"
+if [[ -n "$EXPLICIT_OVERWRITE_LIST" ]]; then
+    log "Checking for stale generated or explicitly managed files:"
+else
+    log "Checking for stale generated files:"
+fi
 while IFS= read -r current; do
     rel="${current#"$PROJECT_DIR"/}"
-    if ! is_generated_path "$rel" && ! is_overwrite_path "$rel"; then
+    if ! is_generated_path "$rel" && \
+        { [[ -z "$EXPLICIT_OVERWRITE_LIST" ]] || ! is_overwrite_path "$rel"; }; then
         continue
     fi
     is_external_generated_output "$rel" && continue
