@@ -17,7 +17,7 @@ stages:
 
 build:
   extends: .go-defaults
-  image: golang:1.25-bookworm
+  image: golang:1.25.4-bookworm
   stage: build
   script:
     - go mod tidy
@@ -25,14 +25,14 @@ build:
 
 test:
   extends: .go-defaults
-  image: golang:1.25-bookworm
+  image: golang:1.25.4-bookworm
   stage: test
   script:
     - go test ./...
 
 lint:
   extends: .go-defaults
-  image: golang:1.25-bookworm
+  image: golang:1.25.4-bookworm
   stage: lint
   script:
     - go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2

@@ -104,7 +104,7 @@ services:
                     type: Merge
                 processInventoryItem:
                     endpoint: processOrderItem
-                    name: 'Process Inventory Item '
+                    name: Process Inventory Item
                     source: mergeInventoryResult
                     type: Input
                     valueType: orderItem

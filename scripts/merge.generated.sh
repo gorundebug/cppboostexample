@@ -2,7 +2,8 @@
 # Merge a newly generated archive into an existing project.
 #
 # A file is replaced only when its basename contains "generated" or its exact
-# project-relative path is listed in scripts/merge-overwrite.txt. The
+# project-relative path is listed in scripts/merge-overwrite.txt (or in an
+# explicit list passed with --overwrite-list). The
 # user-owned scripts/merge_file.sh and scripts/merge_post.sh hooks may customize
 # that policy without changing this generated merge engine.
 
@@ -31,12 +32,27 @@ log "Log: $MERGE_LOG"
 DRY_RUN=0
 REMOVE_STALE=0
 ARCHIVE=""
-for arg in "$@"; do
-    case "$arg" in
-        --dry-run) DRY_RUN=1 ;;
-        --remove-stale) REMOVE_STALE=1 ;;
+EXPLICIT_OVERWRITE_LIST=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --dry-run)
+            DRY_RUN=1
+            shift
+            ;;
+        --remove-stale)
+            REMOVE_STALE=1
+            shift
+            ;;
+        --overwrite-list)
+            if [[ $# -lt 2 || -z "$2" ]]; then
+                log_error "[SG_MERGE_INVALID_ARGUMENT] --overwrite-list requires a file"
+                exit 2
+            fi
+            EXPLICIT_OVERWRITE_LIST="$2"
+            shift 2
+            ;;
         -*)
-            log_error "[SG_MERGE_INVALID_ARGUMENT] unsupported option '$arg'"
+            log_error "[SG_MERGE_INVALID_ARGUMENT] unsupported option '$1'"
             exit 2
             ;;
         *)
@@ -44,17 +60,22 @@ for arg in "$@"; do
                 log_error "[SG_MERGE_INVALID_ARGUMENT] only one archive may be specified"
                 exit 2
             fi
-            ARCHIVE="$arg"
+            ARCHIVE="$1"
+            shift
             ;;
     esac
 done
 
 if [[ -z "$ARCHIVE" ]]; then
-    log_error "[SG_MERGE_INVALID_ARGUMENT] Usage: $0 [--dry-run] [--remove-stale] <archive.zip|archive.tar.gz>"
+    log_error "[SG_MERGE_INVALID_ARGUMENT] Usage: $0 [--dry-run] [--remove-stale] [--overwrite-list <file>] <archive.zip|archive.tar.gz>"
     exit 2
 fi
 if [[ ! -f "$ARCHIVE" ]]; then
     log_error "[SG_MERGE_INVALID_ARGUMENT] archive '$ARCHIVE' was not found"
+    exit 1
+fi
+if [[ -n "$EXPLICIT_OVERWRITE_LIST" && ! -f "$EXPLICIT_OVERWRITE_LIST" ]]; then
+    log_error "[SG_MERGE_INVALID_ARGUMENT] overwrite list '$EXPLICIT_OVERWRITE_LIST' was not found"
     exit 1
 fi
 
@@ -100,9 +121,12 @@ validate_relative_path() {
 INCOMING_OVERWRITE_LIST="$SRC_ROOT/scripts/merge-overwrite.txt"
 OVERWRITE_PATHS=()
 ACTIVE_OVERWRITE_LIST="$OVERWRITE_LIST"
-if [[ -f "$INCOMING_OVERWRITE_LIST" ]]; then
+if [[ -n "$EXPLICIT_OVERWRITE_LIST" ]]; then
+    ACTIVE_OVERWRITE_LIST="$EXPLICIT_OVERWRITE_LIST"
+elif [[ -f "$INCOMING_OVERWRITE_LIST" ]]; then
     ACTIVE_OVERWRITE_LIST="$INCOMING_OVERWRITE_LIST"
 fi
+log "Overwrite list: $ACTIVE_OVERWRITE_LIST"
 for active_list in "$ACTIVE_OVERWRITE_LIST"; do
     [[ -f "$active_list" ]] || continue
     while IFS= read -r path || [[ -n "$path" ]]; do
@@ -281,10 +305,12 @@ while IFS= read -r src; do
     fi
 done < <(find "$SRC_ROOT" -type f -print | LC_ALL=C sort)
 
-log "Checking for stale generated files:"
+log "Checking for stale generated or explicitly overwritten files:"
 while IFS= read -r current; do
     rel="${current#"$PROJECT_DIR"/}"
-    is_generated_path "$rel" || continue
+    if ! is_generated_path "$rel" && ! is_overwrite_path "$rel"; then
+        continue
+    fi
     is_external_generated_output "$rel" && continue
     if [[ ! -f "$SRC_ROOT/$rel" ]]; then
         log "  STALE $rel"
@@ -306,6 +332,7 @@ done < <(
            -name .artifacts -o \
            -name .cache -o \
            -name .venv -o \
+           -name .local-dependencies -o \
            -name __pycache__ -o \
            -name build -o \
            -name dist -o \
@@ -343,7 +370,11 @@ fi
 VALIDATOR="$SRC_ROOT/scripts/merge_validate.generated.py"
 VALIDATION_STATUS=0
 if [[ -f "$VALIDATOR" ]]; then
-    validator_args=(--project "$PROJECT_DIR" --incoming "$SRC_ROOT")
+    validator_args=(
+        --project "$PROJECT_DIR"
+        --incoming "$SRC_ROOT"
+        --overwrite-list "$ACTIVE_OVERWRITE_LIST"
+    )
     if [[ "$DRY_RUN" -eq 0 ]]; then
         validator_args+=(--write-task)
     fi
@@ -360,7 +391,7 @@ log "  added: $ADDED"
 log "  generated updated: $UPDATED"
 log "  exception-list overwritten: $OVERWRITTEN"
 log "  user files preserved: $PRESERVED"
-log "  stale generated files: $STALE"
+    log "  stale managed files: $STALE"
 log "  stale files removed: $REMOVED"
 log "  file hook overrides: $HOOK_OVERRIDES"
 log "  post hooks executed: $POST_HOOKS"

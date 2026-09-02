@@ -11,11 +11,17 @@ from datetime import datetime
 from pathlib import Path
 
 
-def overwrite_paths(project: Path, incoming: Path) -> set[str]:
+def overwrite_paths(
+    project: Path,
+    incoming: Path,
+    explicit_source: Path | None = None,
+) -> set[str]:
     result: set[str] = set()
     incoming_source = incoming / "scripts" / "merge-overwrite.txt"
     source = (
-        incoming_source
+        explicit_source
+        if explicit_source is not None
+        else incoming_source
         if incoming_source.is_file()
         else project / "scripts" / "merge-overwrite.txt"
     )
@@ -100,8 +106,12 @@ def definition_pattern(name: str) -> re.Pattern[str]:
                       rf"\bpub\s+fn\s+{re.escape(name)}\s*\(")
 
 
-def validate(project: Path, incoming: Path) -> list[dict[str, object]]:
-    overwritten = overwrite_paths(project, incoming)
+def validate(
+    project: Path,
+    incoming: Path,
+    overwrite_list: Path | None = None,
+) -> list[dict[str, object]]:
+    overwritten = overwrite_paths(project, incoming, overwrite_list)
     paths = virtual_files(project, incoming)
     contents = {
         relative: virtual_text(project, incoming, relative, overwritten)
@@ -155,12 +165,16 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--project", type=Path, required=True)
     parser.add_argument("--incoming", type=Path)
+    parser.add_argument("--overwrite-list", type=Path)
     parser.add_argument("--write-task", action="store_true")
     parser.add_argument("--format", choices=("human", "json"), default="human")
     args = parser.parse_args()
     project = args.project.resolve()
     incoming = args.incoming.resolve() if args.incoming else project
-    issues = validate(project, incoming)
+    overwrite_list = (
+        args.overwrite_list.resolve() if args.overwrite_list else None
+    )
+    issues = validate(project, incoming, overwrite_list)
     if not issues:
         if args.format == "json":
             print(json.dumps({

@@ -47,6 +47,7 @@ project infrastructure and all services.
 ```sh
 make build             # [mixed] build every service without starting it
 make test              # [mixed] run every language test suite
+make docker-start      # [Docker] start already-built runtime images
 make docker-down       # [Docker] stop the runtime stack, preserve volumes
 make docker-restart    # [Docker] rebuild and restart the runtime stack
 make docker-clean      # [Docker] stop the stack and remove project volumes
@@ -63,6 +64,7 @@ Runtime, development and debugger modes are intentionally separate:
 ```sh
 make docker-build      # [Docker] build autonomous runtime images from copied sources
 make docker-up         # [Docker] build and start the complete runtime stack
+make docker-start      # [Docker] start the complete stack without rebuilding images
 make docker-up-dev     # [Docker] build/start services with read-only source mounts
 make docker-down-dev   # [Docker] stop the development stack
 
@@ -129,17 +131,17 @@ place them under one parent directory using their generated directory names:
 
 ```text
 checkout/
-  orderservice/
-  inventory_service_api/
+  service-name/
+  api-module/
   model_<language>/
-  order_service_api/
+  another-api-module/
 ```
 
 Then run the service's Make command explicitly in local mode, for example:
 
 ```sh
-make -C orderservice build USE_LOCAL_MODULES=1
-make -C orderservice docker-build USE_LOCAL_MODULES=1
+make -C service-name build USE_LOCAL_MODULES=1
+make -C service-name docker-build USE_LOCAL_MODULES=1
 ```
 
 ## Quality and generated code
@@ -198,6 +200,10 @@ make golang-lint      # [host]
 make golang-lint-fix  # [host]
 make golang-codegen   # [host]
 make go-mod-sync      # [host]
+make golang-race-build # [Docker] build every Go service with the race detector
+make golang-race-up    # [Docker] build and start the complete race-enabled stack
+make golang-race-start # [Docker] start already-built race images
+make golang-race-down  # [Docker] validate race logs/exits and stop the stack
 ```
 
 
@@ -218,6 +224,9 @@ make cpp-workspace-build # [Docker]
 make cpp-workspace-test  # [Docker]
 make cpp-package         # [host] package standalone service directories
 ```
+
+Sanitizer builds use `RelWithDebInfo` (`-O2`, debug symbols, no stripping) for
+service/host libraries and the regular `Release` profile for Conan build tools.
 
 
 
@@ -256,6 +265,7 @@ maintenance.
 ```sh
 make kubernetes-up      # [Docker] build, deploy and verify the local cluster
 make kubernetes-build   # [Docker] build and publish images to its local registry
+make kubernetes-services-up # [Docker] replace services in the running cluster
 make kubernetes-deploy  # [Docker] install infrastructure and service Helm releases
 make kubernetes-test    # [Docker] verify rollouts and metrics
 make kubernetes-status  # [Docker]

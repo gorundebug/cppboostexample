@@ -8,20 +8,20 @@ dataConnectors:
     saslMechanism: SCRAM-SHA-512
     securityProtocol: PLAINTEXT
     username: ""
+endpoints:
+  orderProcessed:
+    enabled: true
 pools:
   defaultPool:
     executorsCount: 2
 services:
   orderService:
-    defaultGrpcTimeout: 5000
+    defaultGrpcTimeout: 0
     environment: ""
     grpcHost: 0.0.0.0
     grpcPort: 9201
     httpHost: 0.0.0.0
     httpPort: 9091
-endpoints:
-  orderProcessed:
-    enabled: true
 streams:
   softDeadline:
     duration: 1000

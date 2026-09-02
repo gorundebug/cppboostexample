@@ -3,11 +3,16 @@ bin/
 generated/
 build/
 dist/
+node_modules/
+*.tsbuildinfo
 compile_commands.json
 .ccache/
 .cppservicelib/
 .pyservicelib/
 .servicegen/
+.artifacts/
+report.*.json
+Heap.*.heapsnapshot
 
 # Go
 *.test
@@ -38,11 +43,6 @@ go.work.sum
 .DS_Store
 Thumbs.db
 
-# Services (cloned separately via clone.generated.sh)
-/inventoryservice/
-/orderservice/
+# Go services (cloned separately via clone.generated.sh in all-Go projects)
 
-# Modules (cloned separately via clone.generated.sh)
-/inventory_service_api/
-/model/
-/order_service_api/
+# Go modules (cloned separately via clone.generated.sh in all-Go projects)

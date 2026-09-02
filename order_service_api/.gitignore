@@ -1,9 +1,13 @@
-/build/
-/build-*/
-/.cache/
-/compile_commands.json
-.env
-.env.local
+# Go
+*.test
+*.out
+coverage.out
+# IDE
 .idea/
 .vscode/
+*.swp
+*.swo
+
+# OS
 .DS_Store
+Thumbs.db

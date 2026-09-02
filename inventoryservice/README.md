@@ -23,6 +23,11 @@ make docker-clean   # [Docker] stop and remove standalone volumes/build state
 make help           # [host] list generated targets
 ```
 
+Sanitizer targets compile the complete statically linked dependency graph as
+optimized `Release` code with explicit debug symbols and frame pointers and
+without stripping. ASan+UBSan and TSan use standard Conan/compiler settings
+and upstream-supported build options; third-party source code is never patched.
+
 The service defaults to repository modules (`USE_LOCAL_MODULES=0`). A generated
 project passes `USE_LOCAL_MODULES=1`. The same local mode works for a separately
 obtained service when all unpublished contract/model modules are placed next to

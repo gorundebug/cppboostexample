@@ -166,7 +166,7 @@ inline Config MakeConfig() {
   cfg.streams.processInventoryItem = [] {
     InputStreamConfig value{};
     value.id = kProcessInventoryItemStreamId;
-    value.name = "Process Inventory Item ";
+    value.name = "Process Inventory Item";
     value.pipeline = "inventoryItem";
     value.idService = kInventoryServiceServiceId;
     value.idSource = kMergeInventoryResultStreamId;

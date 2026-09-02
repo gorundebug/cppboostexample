@@ -2,10 +2,12 @@
 
 ```mermaid
 flowchart LR
-  s1(["Consume Order Processed
+  s1(["Analytics Schedule
+AutomationJob"])
+  s2(["Consume Order Processed
 OrderProcessed"])
-  s2[["Count Order Processed
+  s3[["Count Order Processed
 OrderProcessed"]]
-  s2 --> s1
-  s1 --> s2
+  s3 --> s2
+  s2 --> s3
 ```

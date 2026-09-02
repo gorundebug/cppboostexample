@@ -22,6 +22,10 @@ make fmt-proto        # [host] format service-owned .proto files
 make act              # [Docker] run repository CI locally through act
 make docker-build     # [Docker] build the autonomous runtime image from copied sources
 make docker-up        # [Docker] build and start only this service
+make race-build       # [Docker] build this service independently with -race
+make race-up          # [Docker] build and start this service with -race
+make race-start       # [Docker] start its already-built race image
+make race-down        # [Docker] validate race logs/exits and stop it
 make docker-up-dev    # [Docker] start with this directory mounted read-only
 make debug DEBUG_PORT=2345 # [Docker] start Delve; DEBUG_PORT is the host port
 make docker-down      # [Docker] stop the standalone runtime stack
