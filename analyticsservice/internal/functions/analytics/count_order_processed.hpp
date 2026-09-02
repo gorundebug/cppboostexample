@@ -3,6 +3,8 @@
 #include <chrono>
 #include <atomic>
 #include <memory>
+
+#include <boost/asio/awaitable.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
@@ -45,11 +47,11 @@ struct CountOrderProcessed final {
   std::shared_ptr<State> state_;
 };
 
-inline std::unique_ptr<CountOrderProcessed> MakeCountOrderProcessed(
+inline boost::asio::awaitable<std::unique_ptr<CountOrderProcessed>> MakeCountOrderProcessed(
     servicelib::Context context, servicelib::IServiceEnvironment& environment,
     const servicelib::config::ProcessStreamConfig& config) {
   (void)context; (void)environment; (void)config;
-  return std::make_unique<CountOrderProcessed>();
+  co_return std::make_unique<CountOrderProcessed>();
 }
 
 }  // namespace example::analytics_service::functions

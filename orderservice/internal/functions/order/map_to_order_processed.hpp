@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <memory>
 
+#include <boost/asio/awaitable.hpp>
+
 #include <algorithm>
 #include <string>
 #include <tuple>
@@ -45,13 +47,13 @@ struct MapToOrderProcessed final {
   }
 };
 
-inline std::unique_ptr<MapToOrderProcessed> MakeMapToOrderProcessed(
+inline boost::asio::awaitable<std::unique_ptr<MapToOrderProcessed>> MakeMapToOrderProcessed(
     servicelib::Context context, servicelib::IServiceEnvironment& environment,
     const servicelib::config::MapStreamConfig& config) {
   (void)context;
   (void)environment;
   (void)config;
-  return std::make_unique<MapToOrderProcessed>();
+  co_return std::make_unique<MapToOrderProcessed>();
 }
 
 }  // namespace example::order_service::functions

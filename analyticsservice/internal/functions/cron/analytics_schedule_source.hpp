@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+
+#include <boost/asio/awaitable.hpp>
 #include <utility>
 
 #include <servicelib/runtime/common.hpp>
@@ -23,13 +25,13 @@ struct AnalyticsScheduleSource final {
   }
 };
 
-inline std::unique_ptr<AnalyticsScheduleSource> MakeAnalyticsScheduleSource(
+inline boost::asio::awaitable<std::unique_ptr<AnalyticsScheduleSource>> MakeAnalyticsScheduleSource(
     servicelib::Context context, servicelib::IServiceEnvironment& environment,
     const servicelib::config::CronEndpointConfig& config) {
   (void)context;
   (void)config;
   (void)environment;
-  return std::make_unique<AnalyticsScheduleSource>();
+  co_return std::make_unique<AnalyticsScheduleSource>();
 }
 
 }  // namespace example::analytics_service::functions

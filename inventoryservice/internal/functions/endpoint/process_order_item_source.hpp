@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <boost/asio/awaitable.hpp>
+
 #include <exception>
 #include <stdexcept>
 #include <string>
@@ -75,11 +77,11 @@ struct ProcessOrderItemSource final {
                   State&) const noexcept {}
 };
 
-inline std::unique_ptr<ProcessOrderItemSource> MakeProcessOrderItemSource(
+inline boost::asio::awaitable<std::unique_ptr<ProcessOrderItemSource>> MakeProcessOrderItemSource(
     servicelib::Context context, servicelib::IServiceEnvironment& environment,
     const servicelib::config::GrpcEndpointConfig& config) {
   (void)context; (void)environment; (void)config;
-  return std::make_unique<ProcessOrderItemSource>();
+  co_return std::make_unique<ProcessOrderItemSource>();
 }
 
 }  // namespace example::inventory_service::functions

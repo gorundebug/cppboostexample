@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <boost/asio/awaitable.hpp>
+
 #include <chrono>
 #include <cstddef>
 #include <stdexcept>
@@ -39,11 +41,11 @@ struct MapToOrderState final {
   }
 };
 
-inline std::unique_ptr<MapToOrderState> MakeMapToOrderState(
+inline boost::asio::awaitable<std::unique_ptr<MapToOrderState>> MakeMapToOrderState(
     servicelib::Context context, servicelib::IServiceEnvironment& environment,
     const servicelib::config::MapStreamConfig& config) {
   (void)context; (void)environment; (void)config;
-  return std::make_unique<MapToOrderState>();
+  co_return std::make_unique<MapToOrderState>();
 }
 
 }  // namespace example::order_service::functions

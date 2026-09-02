@@ -10,6 +10,7 @@
 #include <variant>
 
 #include <boost/asio/any_io_executor.hpp>
+#include <boost/asio/awaitable.hpp>
 #include <agrpc/grpc_context.hpp>
 
 
@@ -57,12 +58,23 @@ class ServiceGenerated
 
  protected:
   struct ServiceMakers final {
-    std::function<std::unique_ptr<functions::GetInventoryItemData>(
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::GetInventoryItemData>>(
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::ProcessStreamConfig&)> get_inventory_item_data;
-    std::function<std::unique_ptr<functions::ProcessOrderItemSource>(
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::ProcessOrderItemSource>>(
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::GrpcEndpointConfig&)> process_order_item_source;
+    std::function<boost::asio::awaitable<
+        std::shared_ptr<servicelib::http::Router>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::ServiceConfig&)> http_router;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<servicelib::http::Server>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::ServiceConfig&,
+        std::shared_ptr<servicelib::http::Router>)> http_server;
   };
   struct ServiceFunctions final {
     std::unique_ptr<functions::GetInventoryItemData> get_inventory_item_data;
@@ -80,6 +92,9 @@ class ServiceGenerated
 
  private:
   void initMakers();
+  void initInfrastructure(servicelib::Context context,
+                          const config::Config& config,
+                          const servicelib::config::ServiceConfig& service_config);
   void initFunctions(servicelib::Context context, const config::Config& config);
   void initRuntime(servicelib::Context context);
   void initStreams(const config::Config& config);

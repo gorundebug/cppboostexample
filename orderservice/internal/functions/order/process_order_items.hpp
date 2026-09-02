@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <boost/asio/awaitable.hpp>
+
 #include <chrono>
 #include <cstddef>
 #include <stdexcept>
@@ -34,11 +36,11 @@ struct ProcessOrderItems final {
   }
 };
 
-inline std::unique_ptr<ProcessOrderItems> MakeProcessOrderItems(
+inline boost::asio::awaitable<std::unique_ptr<ProcessOrderItems>> MakeProcessOrderItems(
     servicelib::Context context, servicelib::IServiceEnvironment& environment,
     const servicelib::config::FlatMapStreamConfig& config) {
   (void)context; (void)environment; (void)config;
-  return std::make_unique<ProcessOrderItems>();
+  co_return std::make_unique<ProcessOrderItems>();
 }
 
 }  // namespace example::order_service::functions

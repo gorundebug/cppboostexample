@@ -67,7 +67,7 @@ RUN set -eu; \
     source_dir=${manifest%/CMakeLists.txt}; \
     if [ -z "$source_dir" ] || [ "$source_dir" = "/" ]; then echo "unsafe cppboostservicelib source directory" >&2; exit 1; fi; \
     mkdir -p /opt/servicelib; \
-    cp -a "$source_dir/." /opt/servicelib/; \
+    cp -R "$source_dir/." /opt/servicelib/; \
     rm -rf /tmp/servicelib-source
 WORKDIR /workspace
 COPY --from=module-inventory_service_api / /workspace/modules/inventory_service_api

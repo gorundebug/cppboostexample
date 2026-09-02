@@ -2,6 +2,8 @@
 #include "orderservice/internal/app/service.generated.hpp"
 
 #include <algorithm>
+#include <boost/asio/co_spawn.hpp>
+#include <boost/asio/use_future.hpp>
 #include <chrono>
 #include <cstdint>
 #include <exception>
@@ -70,52 +72,174 @@ void ServiceGenerated::start() {
 void ServiceGenerated::initMakers() {
   makers_.map_order_item_result_to_order_state = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
-      const servicelib::config::MapStreamConfig& config) {
+      const servicelib::config::MapStreamConfig& config) -> boost::asio::awaitable<
+          std::unique_ptr<functions::MapOrderItemResultToOrderState>> {
     return functions::MakeMapOrderItemResultToOrderState(
         std::move(context), environment, config);
   };
   makers_.map_to_order_processed = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
-      const servicelib::config::MapStreamConfig& config) {
+      const servicelib::config::MapStreamConfig& config) -> boost::asio::awaitable<
+          std::unique_ptr<functions::MapToOrderProcessed>> {
     return functions::MakeMapToOrderProcessed(
         std::move(context), environment, config);
   };
   makers_.map_to_order_state = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
-      const servicelib::config::MapStreamConfig& config) {
+      const servicelib::config::MapStreamConfig& config) -> boost::asio::awaitable<
+          std::unique_ptr<functions::MapToOrderState>> {
     return functions::MakeMapToOrderState(
         std::move(context), environment, config);
   };
   makers_.order_processed_endpoint_sink = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
-      const servicelib::config::KafkaEndpointConfig& config) {
+      const servicelib::config::KafkaEndpointConfig& config) -> boost::asio::awaitable<
+          std::unique_ptr<functions::OrderProcessedEndpointSink>> {
     return functions::MakeOrderProcessedEndpointSink(
         std::move(context), environment, config);
   };
   makers_.process_order_item_sink = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
-      const servicelib::config::GrpcEndpointConfig& config) {
+      const servicelib::config::GrpcEndpointConfig& config) -> boost::asio::awaitable<
+          std::unique_ptr<functions::ProcessOrderItemSink>> {
     return functions::MakeProcessOrderItemSink(
         std::move(context), environment, config);
   };
   makers_.process_order_items = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
-      const servicelib::config::FlatMapStreamConfig& config) {
+      const servicelib::config::FlatMapStreamConfig& config) -> boost::asio::awaitable<
+          std::unique_ptr<functions::ProcessOrderItems>> {
     return functions::MakeProcessOrderItems(
         std::move(context), environment, config);
   };
   makers_.process_order_source = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
-      const servicelib::config::HttpEndpointConfig& config) {
+      const servicelib::config::HttpEndpointConfig& config) -> boost::asio::awaitable<
+          std::unique_ptr<functions::ProcessOrderSource>> {
     return functions::MakeProcessOrderSource(
         std::move(context), environment, config);
   };
   makers_.soft_deadline = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
-      const servicelib::config::DelayStreamConfig& config) {
+      const servicelib::config::DelayStreamConfig& config) -> boost::asio::awaitable<
+          std::unique_ptr<functions::SoftDeadline>> {
     return functions::MakeSoftDeadline(
         std::move(context), environment, config);
   };
+  makers_.http_router = [](
+      servicelib::Context context, servicelib::IServiceEnvironment& environment,
+      const servicelib::config::ServiceConfig& config)
+      -> boost::asio::awaitable<std::shared_ptr<servicelib::http::Router>> {
+    (void)context;
+    (void)environment;
+    (void)config;
+    co_return std::make_shared<servicelib::http::Router>();
+  };
+  makers_.http_server = [this](
+      servicelib::Context context, servicelib::IServiceEnvironment& environment,
+      const servicelib::config::ServiceConfig& config,
+      std::shared_ptr<servicelib::http::Router> router)
+      -> boost::asio::awaitable<std::unique_ptr<servicelib::http::Server>> {
+    (void)context;
+    (void)environment;
+    if (config.httpPort < 0 || config.httpPort > 65535) {
+      throw std::invalid_argument("service HTTP port is out of range");
+    }
+    servicelib::http::Server::Options options;
+    options.address = config.httpHost.empty() ? std::string{"0.0.0.0"}
+                                               : config.httpHost;
+    options.port = static_cast<std::uint16_t>(config.httpPort);
+    options.shutdownTimeout =
+        std::chrono::milliseconds{std::max(config.shutdownTimeout, 0)};
+    co_return std::make_unique<servicelib::http::Server>(
+        executor_, std::move(router), std::move(options));
+  };
+  makers_.inventory_service_api_client = [this](
+      servicelib::Context context, servicelib::IServiceEnvironment& environment,
+      const servicelib::config::GrpcDataConnectorConfig& config)
+      -> boost::asio::awaitable<std::unique_ptr<
+          servicelib::grpc_transport::ClientPool<inventoryserviceapi::InventoryServiceApi::Stub>>> {
+    (void)context;
+    (void)environment;
+    if (config.connectionsCount < 1) {
+      throw std::invalid_argument(
+          "gRPC connector " + config.name +
+          " connectionsCount must be at least 1");
+    }
+    co_return std::make_unique<
+        servicelib::grpc_transport::ClientPool<inventoryserviceapi::InventoryServiceApi::Stub>>(
+        *grpc_context_, config.address,
+        static_cast<std::size_t>(config.connectionsCount),
+        [] (std::shared_ptr<::grpc::Channel> channel) {
+          return inventoryserviceapi::InventoryServiceApi::NewStub(std::move(channel));
+        });
+  };
+}
+
+void ServiceGenerated::initInfrastructure(
+    servicelib::Context context, const config::Config& cfg,
+    const servicelib::config::ServiceConfig& service_config) {
+  if (!makers_.http_router || !makers_.http_server) {
+    throw std::logic_error("HTTP infrastructure makers are not configured");
+  }
+  http_router_ = boost::asio::co_spawn(
+      executor_, makers_.http_router(context, *this, service_config),
+      boost::asio::use_future).get();
+  if (!http_router_) {
+    throw std::logic_error("HTTP router maker returned null");
+  }
+  std::stop_source maker_cancellation;
+  std::mutex maker_error_mutex;
+  std::exception_ptr first_maker_error;
+  const auto maker_context = context.withExternalCancellation(
+      maker_cancellation.get_token());
+  std::vector<std::future<void>> maker_tasks;
+  const auto launch = [&](auto task) {
+    maker_tasks.push_back(boost::asio::co_spawn(
+        executor_, std::move(task), boost::asio::use_future));
+  };
+  launch([this, service_config, maker_context, &maker_cancellation,
+          &maker_error_mutex, &first_maker_error]()
+             -> boost::asio::awaitable<void> {
+    try {
+      http_server_ = co_await makers_.http_server(
+          maker_context, *this, service_config, http_router_);
+      if (!http_server_) throw std::logic_error("HTTP server maker returned null");
+    } catch (...) {
+      maker_cancellation.request_stop();
+      const std::lock_guard lock(maker_error_mutex);
+      if (!first_maker_error) first_maker_error = std::current_exception();
+      throw;
+    }
+  }());
+  if (!makers_.inventory_service_api_client) {
+    throw std::logic_error("infrastructure maker inventory_service_api_client is not configured");
+  }
+  launch([this, &cfg, maker_context, &maker_cancellation,
+          &maker_error_mutex, &first_maker_error]()
+             -> boost::asio::awaitable<void> {
+    try {
+      connectors_.inventory_service_api_client = co_await makers_.inventory_service_api_client(
+          maker_context, *this, cfg.dataConnectors.inventoryServiceApi);
+      if (!connectors_.inventory_service_api_client) {
+        throw std::logic_error("infrastructure maker inventory_service_api_client returned null");
+      }
+    } catch (...) {
+      maker_cancellation.request_stop();
+      const std::lock_guard lock(maker_error_mutex);
+      if (!first_maker_error) first_maker_error = std::current_exception();
+      throw;
+    }
+  }());
+  for (auto& task : maker_tasks) {
+    try {
+      task.get();
+    } catch (...) {
+      // The task recorded the first failure before requesting cancellation.
+    }
+  }
+  maker_cancellation.request_stop();
+  if (first_maker_error) std::rethrow_exception(first_maker_error);
 }
 
 void ServiceGenerated::initFunctions(
@@ -151,12 +275,12 @@ void ServiceGenerated::initFunctions(
       maker_cancellation.get_token());
   std::vector<std::future<void>> maker_tasks;
   maker_tasks.reserve(8);
-  maker_tasks.push_back(std::async(
-      std::launch::async,
+  maker_tasks.push_back(boost::asio::co_spawn(
+      executor_,
       [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
-       &first_maker_error] {
+       &first_maker_error]() -> boost::asio::awaitable<void> {
     try {
-      functions_.map_order_item_result_to_order_state = makers_.map_order_item_result_to_order_state(
+      functions_.map_order_item_result_to_order_state = co_await makers_.map_order_item_result_to_order_state(
           maker_context, *this, cfg.streams.mapOrderItemResultToOrderState);
       if (!functions_.map_order_item_result_to_order_state) {
         throw std::logic_error("function maker MapOrderItemResultToOrderState returned null");
@@ -169,13 +293,14 @@ void ServiceGenerated::initFunctions(
       }
       throw;
     }
-  }));
-  maker_tasks.push_back(std::async(
-      std::launch::async,
+    co_return;
+  }(), boost::asio::use_future));
+  maker_tasks.push_back(boost::asio::co_spawn(
+      executor_,
       [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
-       &first_maker_error] {
+       &first_maker_error]() -> boost::asio::awaitable<void> {
     try {
-      functions_.map_to_order_processed = makers_.map_to_order_processed(
+      functions_.map_to_order_processed = co_await makers_.map_to_order_processed(
           maker_context, *this, cfg.streams.mapToOrderProcessed);
       if (!functions_.map_to_order_processed) {
         throw std::logic_error("function maker MapToOrderProcessed returned null");
@@ -188,13 +313,14 @@ void ServiceGenerated::initFunctions(
       }
       throw;
     }
-  }));
-  maker_tasks.push_back(std::async(
-      std::launch::async,
+    co_return;
+  }(), boost::asio::use_future));
+  maker_tasks.push_back(boost::asio::co_spawn(
+      executor_,
       [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
-       &first_maker_error] {
+       &first_maker_error]() -> boost::asio::awaitable<void> {
     try {
-      functions_.map_to_order_state = makers_.map_to_order_state(
+      functions_.map_to_order_state = co_await makers_.map_to_order_state(
           maker_context, *this, cfg.streams.mapToOrderState);
       if (!functions_.map_to_order_state) {
         throw std::logic_error("function maker MapToOrderState returned null");
@@ -207,13 +333,14 @@ void ServiceGenerated::initFunctions(
       }
       throw;
     }
-  }));
-  maker_tasks.push_back(std::async(
-      std::launch::async,
+    co_return;
+  }(), boost::asio::use_future));
+  maker_tasks.push_back(boost::asio::co_spawn(
+      executor_,
       [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
-       &first_maker_error] {
+       &first_maker_error]() -> boost::asio::awaitable<void> {
     try {
-      functions_.order_processed_endpoint_sink = makers_.order_processed_endpoint_sink(
+      functions_.order_processed_endpoint_sink = co_await makers_.order_processed_endpoint_sink(
           maker_context, *this, cfg.endpoints.orderProcessed);
       if (!functions_.order_processed_endpoint_sink) {
         throw std::logic_error("function maker OrderProcessedEndpointSink returned null");
@@ -226,13 +353,14 @@ void ServiceGenerated::initFunctions(
       }
       throw;
     }
-  }));
-  maker_tasks.push_back(std::async(
-      std::launch::async,
+    co_return;
+  }(), boost::asio::use_future));
+  maker_tasks.push_back(boost::asio::co_spawn(
+      executor_,
       [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
-       &first_maker_error] {
+       &first_maker_error]() -> boost::asio::awaitable<void> {
     try {
-      functions_.process_order_item_sink = makers_.process_order_item_sink(
+      functions_.process_order_item_sink = co_await makers_.process_order_item_sink(
           maker_context, *this, cfg.endpoints.processOrderItem);
       if (!functions_.process_order_item_sink) {
         throw std::logic_error("function maker ProcessOrderItemSink returned null");
@@ -245,13 +373,14 @@ void ServiceGenerated::initFunctions(
       }
       throw;
     }
-  }));
-  maker_tasks.push_back(std::async(
-      std::launch::async,
+    co_return;
+  }(), boost::asio::use_future));
+  maker_tasks.push_back(boost::asio::co_spawn(
+      executor_,
       [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
-       &first_maker_error] {
+       &first_maker_error]() -> boost::asio::awaitable<void> {
     try {
-      functions_.process_order_items = makers_.process_order_items(
+      functions_.process_order_items = co_await makers_.process_order_items(
           maker_context, *this, cfg.streams.processOrderItems);
       if (!functions_.process_order_items) {
         throw std::logic_error("function maker ProcessOrderItems returned null");
@@ -264,13 +393,14 @@ void ServiceGenerated::initFunctions(
       }
       throw;
     }
-  }));
-  maker_tasks.push_back(std::async(
-      std::launch::async,
+    co_return;
+  }(), boost::asio::use_future));
+  maker_tasks.push_back(boost::asio::co_spawn(
+      executor_,
       [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
-       &first_maker_error] {
+       &first_maker_error]() -> boost::asio::awaitable<void> {
     try {
-      functions_.process_order_source = makers_.process_order_source(
+      functions_.process_order_source = co_await makers_.process_order_source(
           maker_context, *this, cfg.endpoints.processOrder);
       if (!functions_.process_order_source) {
         throw std::logic_error("function maker ProcessOrderSource returned null");
@@ -283,13 +413,14 @@ void ServiceGenerated::initFunctions(
       }
       throw;
     }
-  }));
-  maker_tasks.push_back(std::async(
-      std::launch::async,
+    co_return;
+  }(), boost::asio::use_future));
+  maker_tasks.push_back(boost::asio::co_spawn(
+      executor_,
       [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
-       &first_maker_error] {
+       &first_maker_error]() -> boost::asio::awaitable<void> {
     try {
-      functions_.soft_deadline = makers_.soft_deadline(
+      functions_.soft_deadline = co_await makers_.soft_deadline(
           maker_context, *this, cfg.streams.softDeadline);
       if (!functions_.soft_deadline) {
         throw std::logic_error("function maker SoftDeadline returned null");
@@ -302,7 +433,8 @@ void ServiceGenerated::initFunctions(
       }
       throw;
     }
-  }));
+    co_return;
+  }(), boost::asio::use_future));
 
   for (auto& task : maker_tasks) {
     try {
@@ -311,6 +443,7 @@ void ServiceGenerated::initFunctions(
       // The task recorded the first failure before requesting cancellation.
     }
   }
+  maker_cancellation.request_stop();
   if (first_maker_error) std::rethrow_exception(first_maker_error);
 }
 
@@ -326,27 +459,16 @@ void ServiceGenerated::initRuntime(servicelib::Context context) {
     throw std::runtime_error("servicelib runtime config has unexpected type");
   }
   this->ensureConfiguredPools();
-  initFunctions(context, *config_snapshot);
-  customFunctionsInit(context);
-  initStreams(*config_snapshot);
-  initDataSinks(*config_snapshot);
-  http_router_ = std::make_shared<servicelib::http::Router>();
   const auto service_config = getServiceConfigSnapshot();
   if (!service_config) {
     throw std::runtime_error("service config is null");
   }
-  if (service_config->httpPort < 0 || service_config->httpPort > 65535) {
-    throw std::invalid_argument("service HTTP port is out of range");
-  }
-  servicelib::http::Server::Options http_options;
-  http_options.address = service_config->httpHost.empty()
-                             ? std::string{"0.0.0.0"}
-                             : service_config->httpHost;
-  http_options.port = static_cast<std::uint16_t>(service_config->httpPort);
-  http_options.shutdownTimeout = std::chrono::milliseconds{
-      std::max(service_config->shutdownTimeout, 0)};
-  http_server_ = std::make_unique<servicelib::http::Server>(
-      executor_, http_router_, std::move(http_options));
+  initInfrastructure(context, *config_snapshot, *service_config);
+  initFunctions(context, *config_snapshot);
+  customFunctionsInit(context);
+  initStreams(*config_snapshot);
+  initDataSinks(*config_snapshot);
+
   initDataSources(*config_snapshot);
   servicelib::http::RegisterStatusRoutes(
       *http_router_, *this, [this] {
@@ -388,21 +510,7 @@ void ServiceGenerated::initStreams(const config::Config& cfg) {
 
 void ServiceGenerated::initDataSinks(const config::Config& cfg) {
   (void)cfg;
-
   {
-    const auto& connector = cfg.dataConnectors.inventoryServiceApi;
-    if (connector.connectionsCount < 1) {
-      throw std::invalid_argument(
-          "gRPC connector " + connector.name +
-          " connectionsCount must be at least 1");
-    }
-    connectors_.inventory_service_api_client = std::make_unique<
-        servicelib::grpc_transport::ClientPool<inventoryserviceapi::InventoryServiceApi::Stub>>(
-        *grpc_context_, connector.address,
-        static_cast<std::size_t>(connector.connectionsCount),
-        [] (std::shared_ptr<::grpc::Channel> channel) {
-          return inventoryserviceapi::InventoryServiceApi::NewStub(std::move(channel));
-        });
   }
   connectors_.inventory_service_api_sink =
       servicelib::datasink::grpc::DataSink::make(

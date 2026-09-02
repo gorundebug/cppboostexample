@@ -9,6 +9,8 @@
 #include <exception>
 #include <iomanip>
 #include <memory>
+
+#include <boost/asio/awaitable.hpp>
 #include <mutex>
 #include <sstream>
 #include <stdexcept>
@@ -265,11 +267,11 @@ struct ProcessOrderSource final {
   std::chrono::steady_clock::duration timeout_;
 };
 
-inline std::unique_ptr<ProcessOrderSource> MakeProcessOrderSource(
+inline boost::asio::awaitable<std::unique_ptr<ProcessOrderSource>> MakeProcessOrderSource(
     servicelib::Context context, servicelib::IServiceEnvironment& environment,
     const servicelib::config::HttpEndpointConfig& config) {
   (void)context; (void)environment; (void)config;
-  return std::make_unique<ProcessOrderSource>();
+  co_return std::make_unique<ProcessOrderSource>();
 }
 
 }  // namespace example::order_service::functions

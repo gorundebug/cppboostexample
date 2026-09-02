@@ -4,6 +4,8 @@
 #include <chrono>
 #include <cstddef>
 #include <memory>
+
+#include <boost/asio/awaitable.hpp>
 #include <stdexcept>
 #include <tuple>
 #include <unordered_map>
@@ -79,11 +81,11 @@ struct GetInventoryItemData final {
   std::shared_ptr<State> state_;
 };
 
-inline std::unique_ptr<GetInventoryItemData> MakeGetInventoryItemData(
+inline boost::asio::awaitable<std::unique_ptr<GetInventoryItemData>> MakeGetInventoryItemData(
     servicelib::Context context, servicelib::IServiceEnvironment& environment,
     const servicelib::config::ProcessStreamConfig& config) {
   (void)context; (void)environment; (void)config;
-  return std::make_unique<GetInventoryItemData>();
+  co_return std::make_unique<GetInventoryItemData>();
 }
 
 }  // namespace example::inventory_service::functions

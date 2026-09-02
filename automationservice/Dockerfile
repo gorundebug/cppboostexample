@@ -66,7 +66,7 @@ RUN set -eu; \
     source_dir=${manifest%/go.mod}; \
     if [ -z "$source_dir" ] || [ "$source_dir" = "/" ]; then echo "unsafe servicelib source directory" >&2; exit 1; fi; \
     mkdir -p /servicelib; \
-    cp -a "$source_dir/." /servicelib/
+    cp -R "$source_dir/." /servicelib/
 COPY --from=module-model_go-source / /tmp/module-model_go-source
 RUN set -eu; source_dir=/tmp/module-model_go-source; \
 	if [ ! -f "$source_dir/go.mod" ] && [ -f "$source_dir/model_go/go.mod" ]; then \
@@ -75,7 +75,7 @@ RUN set -eu; source_dir=/tmp/module-model_go-source; \
     manifest="$source_dir/go.mod"; \
     if [ ! -f "$manifest" ]; then manifest=$(find "$source_dir" -mindepth 2 -maxdepth 2 -type f -name go.mod -print -quit); fi; \
     if [ -z "$manifest" ]; then echo "module context github.com/gorundebug/cppboostexample/model_go has no go.mod" >&2; exit 1; fi; \
-    source_dir=${manifest%/go.mod}; mkdir -p /modules/model_go; cp -a "$source_dir/." /modules/model_go/
+    source_dir=${manifest%/go.mod}; mkdir -p /modules/model_go; cp -R "$source_dir/." /modules/model_go/
 RUN set -eu; \
     for module in /modules/*; do \
       if [ -f "$module/Makefile" ]; then \

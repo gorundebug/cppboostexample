@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <boost/asio/awaitable.hpp>
+
 #include <chrono>
 #include <cstddef>
 #include <stdexcept>
@@ -43,11 +45,11 @@ struct SoftDeadline final {
   std::chrono::steady_clock::duration margin_;
 };
 
-inline std::unique_ptr<SoftDeadline> MakeSoftDeadline(
+inline boost::asio::awaitable<std::unique_ptr<SoftDeadline>> MakeSoftDeadline(
     servicelib::Context context, servicelib::IServiceEnvironment& environment,
     const servicelib::config::DelayStreamConfig& config) {
   (void)context; (void)environment;
-  return std::make_unique<SoftDeadline>(
+  co_return std::make_unique<SoftDeadline>(
       std::chrono::milliseconds{config.duration});
 }
 

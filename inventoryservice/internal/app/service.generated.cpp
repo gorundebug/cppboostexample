@@ -2,6 +2,8 @@
 #include "inventoryservice/internal/app/service.generated.hpp"
 
 #include <algorithm>
+#include <boost/asio/co_spawn.hpp>
+#include <boost/asio/use_future.hpp>
 #include <chrono>
 #include <cstdint>
 #include <exception>
@@ -70,16 +72,93 @@ void ServiceGenerated::start() {
 void ServiceGenerated::initMakers() {
   makers_.get_inventory_item_data = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
-      const servicelib::config::ProcessStreamConfig& config) {
+      const servicelib::config::ProcessStreamConfig& config) -> boost::asio::awaitable<
+          std::unique_ptr<functions::GetInventoryItemData>> {
     return functions::MakeGetInventoryItemData(
         std::move(context), environment, config);
   };
   makers_.process_order_item_source = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
-      const servicelib::config::GrpcEndpointConfig& config) {
+      const servicelib::config::GrpcEndpointConfig& config) -> boost::asio::awaitable<
+          std::unique_ptr<functions::ProcessOrderItemSource>> {
     return functions::MakeProcessOrderItemSource(
         std::move(context), environment, config);
   };
+  makers_.http_router = [](
+      servicelib::Context context, servicelib::IServiceEnvironment& environment,
+      const servicelib::config::ServiceConfig& config)
+      -> boost::asio::awaitable<std::shared_ptr<servicelib::http::Router>> {
+    (void)context;
+    (void)environment;
+    (void)config;
+    co_return std::make_shared<servicelib::http::Router>();
+  };
+  makers_.http_server = [this](
+      servicelib::Context context, servicelib::IServiceEnvironment& environment,
+      const servicelib::config::ServiceConfig& config,
+      std::shared_ptr<servicelib::http::Router> router)
+      -> boost::asio::awaitable<std::unique_ptr<servicelib::http::Server>> {
+    (void)context;
+    (void)environment;
+    if (config.httpPort < 0 || config.httpPort > 65535) {
+      throw std::invalid_argument("service HTTP port is out of range");
+    }
+    servicelib::http::Server::Options options;
+    options.address = config.httpHost.empty() ? std::string{"0.0.0.0"}
+                                               : config.httpHost;
+    options.port = static_cast<std::uint16_t>(config.httpPort);
+    options.shutdownTimeout =
+        std::chrono::milliseconds{std::max(config.shutdownTimeout, 0)};
+    co_return std::make_unique<servicelib::http::Server>(
+        executor_, std::move(router), std::move(options));
+  };
+}
+
+void ServiceGenerated::initInfrastructure(
+    servicelib::Context context, const config::Config& cfg,
+    const servicelib::config::ServiceConfig& service_config) {
+  if (!makers_.http_router || !makers_.http_server) {
+    throw std::logic_error("HTTP infrastructure makers are not configured");
+  }
+  http_router_ = boost::asio::co_spawn(
+      executor_, makers_.http_router(context, *this, service_config),
+      boost::asio::use_future).get();
+  if (!http_router_) {
+    throw std::logic_error("HTTP router maker returned null");
+  }
+  std::stop_source maker_cancellation;
+  std::mutex maker_error_mutex;
+  std::exception_ptr first_maker_error;
+  const auto maker_context = context.withExternalCancellation(
+      maker_cancellation.get_token());
+  std::vector<std::future<void>> maker_tasks;
+  const auto launch = [&](auto task) {
+    maker_tasks.push_back(boost::asio::co_spawn(
+        executor_, std::move(task), boost::asio::use_future));
+  };
+  launch([this, service_config, maker_context, &maker_cancellation,
+          &maker_error_mutex, &first_maker_error]()
+             -> boost::asio::awaitable<void> {
+    try {
+      http_server_ = co_await makers_.http_server(
+          maker_context, *this, service_config, http_router_);
+      if (!http_server_) throw std::logic_error("HTTP server maker returned null");
+    } catch (...) {
+      maker_cancellation.request_stop();
+      const std::lock_guard lock(maker_error_mutex);
+      if (!first_maker_error) first_maker_error = std::current_exception();
+      throw;
+    }
+  }());
+  for (auto& task : maker_tasks) {
+    try {
+      task.get();
+    } catch (...) {
+      // The task recorded the first failure before requesting cancellation.
+    }
+  }
+  maker_cancellation.request_stop();
+  if (first_maker_error) std::rethrow_exception(first_maker_error);
 }
 
 void ServiceGenerated::initFunctions(
@@ -97,12 +176,12 @@ void ServiceGenerated::initFunctions(
       maker_cancellation.get_token());
   std::vector<std::future<void>> maker_tasks;
   maker_tasks.reserve(2);
-  maker_tasks.push_back(std::async(
-      std::launch::async,
+  maker_tasks.push_back(boost::asio::co_spawn(
+      executor_,
       [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
-       &first_maker_error] {
+       &first_maker_error]() -> boost::asio::awaitable<void> {
     try {
-      functions_.get_inventory_item_data = makers_.get_inventory_item_data(
+      functions_.get_inventory_item_data = co_await makers_.get_inventory_item_data(
           maker_context, *this, cfg.streams.getInventoryItemData);
       if (!functions_.get_inventory_item_data) {
         throw std::logic_error("function maker GetInventoryItemData returned null");
@@ -115,13 +194,14 @@ void ServiceGenerated::initFunctions(
       }
       throw;
     }
-  }));
-  maker_tasks.push_back(std::async(
-      std::launch::async,
+    co_return;
+  }(), boost::asio::use_future));
+  maker_tasks.push_back(boost::asio::co_spawn(
+      executor_,
       [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
-       &first_maker_error] {
+       &first_maker_error]() -> boost::asio::awaitable<void> {
     try {
-      functions_.process_order_item_source = makers_.process_order_item_source(
+      functions_.process_order_item_source = co_await makers_.process_order_item_source(
           maker_context, *this, cfg.endpoints.processOrderItem);
       if (!functions_.process_order_item_source) {
         throw std::logic_error("function maker ProcessOrderItemSource returned null");
@@ -134,7 +214,8 @@ void ServiceGenerated::initFunctions(
       }
       throw;
     }
-  }));
+    co_return;
+  }(), boost::asio::use_future));
 
   for (auto& task : maker_tasks) {
     try {
@@ -143,6 +224,7 @@ void ServiceGenerated::initFunctions(
       // The task recorded the first failure before requesting cancellation.
     }
   }
+  maker_cancellation.request_stop();
   if (first_maker_error) std::rethrow_exception(first_maker_error);
 }
 
@@ -158,26 +240,15 @@ void ServiceGenerated::initRuntime(servicelib::Context context) {
     throw std::runtime_error("servicelib runtime config has unexpected type");
   }
   this->ensureConfiguredPools();
-  initFunctions(context, *config_snapshot);
-  customFunctionsInit(context);
-  initStreams(*config_snapshot);
-  http_router_ = std::make_shared<servicelib::http::Router>();
   const auto service_config = getServiceConfigSnapshot();
   if (!service_config) {
     throw std::runtime_error("service config is null");
   }
-  if (service_config->httpPort < 0 || service_config->httpPort > 65535) {
-    throw std::invalid_argument("service HTTP port is out of range");
-  }
-  servicelib::http::Server::Options http_options;
-  http_options.address = service_config->httpHost.empty()
-                             ? std::string{"0.0.0.0"}
-                             : service_config->httpHost;
-  http_options.port = static_cast<std::uint16_t>(service_config->httpPort);
-  http_options.shutdownTimeout = std::chrono::milliseconds{
-      std::max(service_config->shutdownTimeout, 0)};
-  http_server_ = std::make_unique<servicelib::http::Server>(
-      executor_, http_router_, std::move(http_options));
+  initInfrastructure(context, *config_snapshot, *service_config);
+  initFunctions(context, *config_snapshot);
+  customFunctionsInit(context);
+  initStreams(*config_snapshot);
+
   initDataSources(*config_snapshot);
   servicelib::http::RegisterStatusRoutes(
       *http_router_, *this, [this] {

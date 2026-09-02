@@ -35,6 +35,14 @@ user-owned extension points.
   interfaces. Keep their generated method signatures.
 - Pass the received `context.Context` to collectors, senders and callbacks.
   `context.Background()` and `context.TODO()` are forbidden in business paths.
+- Makers may perform asynchronous initialization. Generated initializer groups
+  run them through `errgroup`; they must honor cancellation and must not detach
+  initialization work from the group.
+- Preserve generated maker parameters and their order: cancellable group
+  context, runtime environment, then the exact typed function, stream,
+  endpoint, connector or service configuration. Runtime-owned router, handler
+  or owner values are additional explicit typed arguments where required;
+  makers must not recover these inputs from globals.
 - Use generated `Makefile` targets:
   - regenerate: `make gen`
   - build: `make build`
@@ -65,6 +73,8 @@ user-owned extension points.
 - Implement the adjacent `*_test.cpp` file with GoogleTest.
 - Keep the generated Boost.Asio/Beast/asio-grpc coroutine and executor
   boundaries; blocking work belongs on its configured non-I/O task pool.
+- Makers return `boost::asio::awaitable` and are scheduled concurrently on the
+  generated Asio executor. Do not use `std::async` or a private thread pool.
 - Do not modify `*_generated.hpp`, `*_generated.cpp`, generated protobuf, or
   generated OpenAPI sources.
 

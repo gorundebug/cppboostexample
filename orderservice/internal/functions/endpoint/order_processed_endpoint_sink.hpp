@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <boost/asio/awaitable.hpp>
+
 #include <exception>
 #include <stdexcept>
 #include <string>
@@ -47,11 +49,11 @@ struct OrderProcessedEndpointSink final {
       State&) const noexcept {}
 };
 
-inline std::unique_ptr<OrderProcessedEndpointSink> MakeOrderProcessedEndpointSink(
+inline boost::asio::awaitable<std::unique_ptr<OrderProcessedEndpointSink>> MakeOrderProcessedEndpointSink(
     servicelib::Context context, servicelib::IServiceEnvironment& environment,
     const servicelib::config::KafkaEndpointConfig& config) {
   (void)context; (void)environment; (void)config;
-  return std::make_unique<OrderProcessedEndpointSink>();
+  co_return std::make_unique<OrderProcessedEndpointSink>();
 }
 
 }  // namespace example::order_service::functions

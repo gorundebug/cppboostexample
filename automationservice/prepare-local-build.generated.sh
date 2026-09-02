@@ -7,7 +7,7 @@ work_dir="${2:?work directory is required}"
 test -f "$source_dir/go.mod"
 mkdir -p "$work_dir"
 find "$work_dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
-cp -a "$source_dir/." "$work_dir/"
+cp -R "$source_dir/." "$work_dir/"
 
 for module in /modules/*; do
   if [ -f "$module/Makefile" ]; then
