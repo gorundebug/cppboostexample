@@ -141,20 +141,29 @@ void ServiceGenerated::initInfrastructure(
     maker_tasks.push_back(boost::asio::co_spawn(
         executor_, std::move(task), boost::asio::use_future));
   };
-  launch([this, service_config, maker_context, &maker_cancellation,
-          &maker_error_mutex, &first_maker_error]()
+  launch([](ServiceGenerated* service,
+            servicelib::config::ServiceConfig service_config,
+            servicelib::Context maker_context,
+            std::stop_source* maker_cancellation,
+            std::mutex* maker_error_mutex,
+            std::exception_ptr* first_maker_error)
              -> boost::asio::awaitable<void> {
     try {
-      http_server_ = co_await makers_.http_server(
-          maker_context, *this, service_config, http_router_);
-      if (!http_server_) throw std::logic_error("HTTP server maker returned null");
+      service->http_server_ = co_await service->makers_.http_server(
+          maker_context, *service, service_config, service->http_router_);
+      if (!service->http_server_) {
+        throw std::logic_error("HTTP server maker returned null");
+      }
     } catch (...) {
-      maker_cancellation.request_stop();
-      const std::lock_guard lock(maker_error_mutex);
-      if (!first_maker_error) first_maker_error = std::current_exception();
+      maker_cancellation->request_stop();
+      const std::lock_guard lock(*maker_error_mutex);
+      if (!*first_maker_error) {
+        *first_maker_error = std::current_exception();
+      }
       throw;
     }
-  }());
+  }(this, service_config, maker_context, &maker_cancellation,
+    &maker_error_mutex, &first_maker_error));
   for (auto& task : maker_tasks) {
     try {
       task.get();
@@ -186,64 +195,79 @@ void ServiceGenerated::initFunctions(
   maker_tasks.reserve(3);
   maker_tasks.push_back(boost::asio::co_spawn(
       executor_,
-      [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
-       &first_maker_error]() -> boost::asio::awaitable<void> {
+      [](ServiceGenerated* service, servicelib::config::CronEndpointConfig function_config,
+         servicelib::Context maker_context,
+         std::stop_source* maker_cancellation,
+         std::mutex* maker_error_mutex,
+         std::exception_ptr* first_maker_error)
+          -> boost::asio::awaitable<void> {
     try {
-      functions_.analytics_schedule_source = co_await makers_.analytics_schedule_source(
-          maker_context, *this, cfg.endpoints.analyticsSchedule);
-      if (!functions_.analytics_schedule_source) {
+      service->functions_.analytics_schedule_source = co_await service->makers_.analytics_schedule_source(
+          maker_context, *service, function_config);
+      if (!service->functions_.analytics_schedule_source) {
         throw std::logic_error("function maker AnalyticsScheduleSource returned null");
       }
     } catch (...) {
-      maker_cancellation.request_stop();
-      const std::lock_guard lock(maker_error_mutex);
-      if (!first_maker_error) {
-        first_maker_error = std::current_exception();
+      maker_cancellation->request_stop();
+      const std::lock_guard lock(*maker_error_mutex);
+      if (!*first_maker_error) {
+        *first_maker_error = std::current_exception();
       }
       throw;
     }
     co_return;
-  }(), boost::asio::use_future));
+  }(this, cfg.endpoints.analyticsSchedule, maker_context, &maker_cancellation,
+    &maker_error_mutex, &first_maker_error), boost::asio::use_future));
   maker_tasks.push_back(boost::asio::co_spawn(
       executor_,
-      [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
-       &first_maker_error]() -> boost::asio::awaitable<void> {
+      [](ServiceGenerated* service, servicelib::config::ProcessStreamConfig function_config,
+         servicelib::Context maker_context,
+         std::stop_source* maker_cancellation,
+         std::mutex* maker_error_mutex,
+         std::exception_ptr* first_maker_error)
+          -> boost::asio::awaitable<void> {
     try {
-      functions_.count_order_processed = co_await makers_.count_order_processed(
-          maker_context, *this, cfg.streams.countOrderProcessed);
-      if (!functions_.count_order_processed) {
+      service->functions_.count_order_processed = co_await service->makers_.count_order_processed(
+          maker_context, *service, function_config);
+      if (!service->functions_.count_order_processed) {
         throw std::logic_error("function maker CountOrderProcessed returned null");
       }
     } catch (...) {
-      maker_cancellation.request_stop();
-      const std::lock_guard lock(maker_error_mutex);
-      if (!first_maker_error) {
-        first_maker_error = std::current_exception();
+      maker_cancellation->request_stop();
+      const std::lock_guard lock(*maker_error_mutex);
+      if (!*first_maker_error) {
+        *first_maker_error = std::current_exception();
       }
       throw;
     }
     co_return;
-  }(), boost::asio::use_future));
+  }(this, cfg.streams.countOrderProcessed, maker_context, &maker_cancellation,
+    &maker_error_mutex, &first_maker_error), boost::asio::use_future));
   maker_tasks.push_back(boost::asio::co_spawn(
       executor_,
-      [this, &cfg, maker_context, &maker_cancellation, &maker_error_mutex,
-       &first_maker_error]() -> boost::asio::awaitable<void> {
+      [](ServiceGenerated* service, servicelib::config::KafkaEndpointConfig function_config,
+         servicelib::Context maker_context,
+         std::stop_source* maker_cancellation,
+         std::mutex* maker_error_mutex,
+         std::exception_ptr* first_maker_error)
+          -> boost::asio::awaitable<void> {
     try {
-      functions_.order_processed_endpoint_source = co_await makers_.order_processed_endpoint_source(
-          maker_context, *this, cfg.endpoints.orderProcessed);
-      if (!functions_.order_processed_endpoint_source) {
+      service->functions_.order_processed_endpoint_source = co_await service->makers_.order_processed_endpoint_source(
+          maker_context, *service, function_config);
+      if (!service->functions_.order_processed_endpoint_source) {
         throw std::logic_error("function maker OrderProcessedEndpointSource returned null");
       }
     } catch (...) {
-      maker_cancellation.request_stop();
-      const std::lock_guard lock(maker_error_mutex);
-      if (!first_maker_error) {
-        first_maker_error = std::current_exception();
+      maker_cancellation->request_stop();
+      const std::lock_guard lock(*maker_error_mutex);
+      if (!*first_maker_error) {
+        *first_maker_error = std::current_exception();
       }
       throw;
     }
     co_return;
-  }(), boost::asio::use_future));
+  }(this, cfg.endpoints.orderProcessed, maker_context, &maker_cancellation,
+    &maker_error_mutex, &first_maker_error), boost::asio::use_future));
 
   for (auto& task : maker_tasks) {
     try {
