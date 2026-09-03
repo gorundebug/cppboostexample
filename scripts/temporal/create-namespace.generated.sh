@@ -24,4 +24,16 @@ fi
 
 temporal operator namespace create -n "${namespace}" \
   --address "${address}"
+
+attempt=1
+until temporal operator namespace describe -n "${namespace}" \
+  --address "${address}" >/dev/null 2>&1; do
+  if [ "${attempt}" -ge "${max_attempts}" ]; then
+    echo "Temporal namespace ${namespace} is not visible after ${max_attempts} attempts" >&2
+    exit 1
+  fi
+  attempt=$((attempt + 1))
+  sleep "${sleep_seconds}"
+done
+
 echo "Temporal namespace ${namespace} is ready"
