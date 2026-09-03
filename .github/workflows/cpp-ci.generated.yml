@@ -15,7 +15,7 @@ jobs:
         run: |
           . ./scripts/git-retry.generated.sh
           git_retry git clone "https://github.com/gorundebug/cppboostservicelib.git" .servicelib
-          git -C .servicelib checkout "v0.2.80"
+          git -C .servicelib checkout "v0.2.81"
 
       - name: Build and test
         env:
@@ -36,7 +36,7 @@ jobs:
         run: |
           . ./scripts/git-retry.generated.sh
           git_retry git clone "https://github.com/gorundebug/cppboostservicelib.git" .servicelib
-          git -C .servicelib checkout "v0.2.80"
+          git -C .servicelib checkout "v0.2.81"
 
       - name: Lint
         env:
