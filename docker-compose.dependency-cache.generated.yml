@@ -36,6 +36,7 @@ services:
     volumes:
       - ${DEPENDENCY_PROXY_DIR:?set DEPENDENCY_PROXY_DIR}/git-mirror:/mirrors
       - ./scripts/git_mirror.generated.cgi:/www/cgi-bin/git:ro
+      - ./scripts/git-retry.generated.sh:/www/git-retry.generated.sh:ro
       - ./scripts/git_mirror_askpass.generated.sh:/www/git-askpass.generated.sh:ro
 
   nexus:

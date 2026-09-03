@@ -482,10 +482,12 @@ inline void ApplyEnvironment(Config& config) {
     config.endpoints.analyticsSchedule.enabled = parsed == "true";
   }
   if (const auto* value = std::getenv("ANALYTICS_SCHEDULE_MISSED_RUN_POLICY")) {
-    config.endpoints.analyticsSchedule.missedRunPolicy = value;
+    config.endpoints.analyticsSchedule.missedRunPolicy =
+        servicelib::config::YamlValue(YAML::Load(value)).As<servicelib::api::ScheduleMissedRunPolicy>();
   }
   if (const auto* value = std::getenv("ANALYTICS_SCHEDULE_OVERLAP_POLICY")) {
-    config.endpoints.analyticsSchedule.overlapPolicy = value;
+    config.endpoints.analyticsSchedule.overlapPolicy =
+        servicelib::config::YamlValue(YAML::Load(value)).As<servicelib::api::ScheduleOverlapPolicy>();
   }
   if (const auto* value = std::getenv("ANALYTICS_SCHEDULE_SCHEDULE")) {
     config.endpoints.analyticsSchedule.schedule = value;

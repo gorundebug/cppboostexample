@@ -9,8 +9,9 @@ variables:
     - docker:29.7.2-dind
   before_script:
     - apk add --no-cache bash git
-    - git clone "https://github.com/gorundebug/cppboostservicelib.git" .servicelib
-    - git -C .servicelib checkout "v0.2.79"
+    - . ./scripts/git-retry.generated.sh
+    - git_retry git clone "https://github.com/gorundebug/cppboostservicelib.git" .servicelib
+    - git -C .servicelib checkout "v0.2.80"
 
 build-test:
   extends: .cpp-dependencies

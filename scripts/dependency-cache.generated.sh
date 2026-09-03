@@ -3,6 +3,8 @@
 set -eu
 
 project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+# shellcheck source=git-retry.generated.sh
+. "$project_dir/scripts/git-retry.generated.sh"
 compose_file="$project_dir/docker-compose.dependency-cache.generated.yml"
 nexus_port=${DEPENDENCY_PROXY_PORT:-18081}
 nexus_url="http://localhost:$nexus_port"
@@ -103,7 +105,7 @@ refresh_git_mirrors() {
       # An explicit refresh may name a repository that was published only
       # moments ago.  Prime it through the mirror itself before asking the
       # refresh endpoint to update the now-existing cached repository.
-      git ls-remote "$git_mirror_url/cgi-bin/git/${repository%.git}.git" \
+      git_retry git ls-remote "$git_mirror_url/cgi-bin/git/${repository%.git}.git" \
         >/dev/null
     done
     payload=$(printf '%s\n' "$@")

@@ -5,6 +5,9 @@
 # Usage: bash clone.generated.sh
 
 set -euo pipefail
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/git-retry.generated.sh
+. "${ROOT}/scripts/git-retry.generated.sh"
 
 clone_if_missing() {
     local dir="$1"
@@ -14,7 +17,7 @@ clone_if_missing() {
         echo "  skip  $dir (already present)"
     else
         echo "  clone $repo@$revision → $dir"
-        git clone --branch "$revision" --depth 1 "$repo" "$dir"
+        git_retry git clone --branch "$revision" --depth 1 "$repo" "$dir"
     fi
 }
 
