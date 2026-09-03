@@ -112,6 +112,7 @@ class ServiceGenerated
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::ServiceConfig&,
         std::shared_ptr<servicelib::http::Router>)> http_server;
+
     std::function<boost::asio::awaitable<std::unique_ptr<
         servicelib::grpc_transport::ClientPool<inventoryserviceapi::InventoryServiceApi::Stub>>>(
         servicelib::Context, servicelib::IServiceEnvironment&,
@@ -268,6 +269,7 @@ class ServiceGenerated
         servicelib::datasink::grpc::DataSink> inventory_service_api_sink;
     std::shared_ptr<
         servicelib::datasource::http::BeastDataSource> order_service_api_source;
+
     std::unique_ptr<
         servicelib::datasink::kafka::LibrdkafkaProducerClient> publish_order_processed_producer;
   };

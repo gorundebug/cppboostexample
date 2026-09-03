@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ -z "${DEPENDENCY_REAL_DOCKER:-}" ]]; then
-  echo "DEPENDENCY_REAL_DOCKER is not set" >&2
-  exit 2
+print_environment=0
+if [[ "${1:-}" == "--print-environment" ]]; then
+  print_environment=1
+  shift
 fi
 
 if [[ -z "${DEPENDENCY_PROXY_DIR:-}" ]]; then
+  if [[ "$print_environment" -eq 1 ]]; then
+    env -0
+    exit 0
+  fi
+  if [[ -z "${DEPENDENCY_REAL_DOCKER:-}" ]]; then
+    echo "DEPENDENCY_REAL_DOCKER is not set" >&2
+    exit 2
+  fi
   exec "$DEPENDENCY_REAL_DOCKER" "$@"
 fi
 
@@ -50,6 +59,16 @@ export GIT_CONFIG_KEY_0="url.${git_mirror_base}/github.com/.insteadOf"
 export GIT_CONFIG_VALUE_0=https://github.com/
 export GIT_CONFIG_KEY_1="url.${git_mirror_base}/gitlab.com/.insteadOf"
 export GIT_CONFIG_VALUE_1=https://gitlab.com/
+
+if [[ "$print_environment" -eq 1 ]]; then
+  env -0
+  exit 0
+fi
+
+if [[ -z "${DEPENDENCY_REAL_DOCKER:-}" ]]; then
+  echo "DEPENDENCY_REAL_DOCKER is not set" >&2
+  exit 2
+fi
 
 proxy_build_variables=(
   DEPENDENCY_DOCKER_REGISTRY

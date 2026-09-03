@@ -154,6 +154,7 @@ void ServiceGenerated::initMakers() {
     co_return std::make_unique<servicelib::http::Server>(
         executor_, std::move(router), std::move(options));
   };
+
   makers_.inventory_service_api_client = [this](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
       const servicelib::config::GrpcDataConnectorConfig& config)
@@ -182,6 +183,7 @@ void ServiceGenerated::initInfrastructure(
   if (!makers_.http_router || !makers_.http_server) {
     throw std::logic_error("HTTP infrastructure makers are not configured");
   }
+
   http_router_ = boost::asio::co_spawn(
       executor_, makers_.http_router(context, *this, service_config),
       boost::asio::use_future).get();
@@ -221,6 +223,7 @@ void ServiceGenerated::initInfrastructure(
     }
   }(this, service_config, maker_context, &maker_cancellation,
     &maker_error_mutex, &first_maker_error));
+
   if (!makers_.inventory_service_api_client) {
     throw std::logic_error("infrastructure maker inventory_service_api_client is not configured");
   }

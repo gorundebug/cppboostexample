@@ -75,6 +75,7 @@ class ServiceGenerated
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::ServiceConfig&,
         std::shared_ptr<servicelib::http::Router>)> http_server;
+
   };
   struct ServiceFunctions final {
     std::unique_ptr<functions::GetInventoryItemData> get_inventory_item_data;
