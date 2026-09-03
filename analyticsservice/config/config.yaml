@@ -8,6 +8,10 @@ dataConnectors:
 endpoints:
   analyticsSchedule:
     enabled: $analyticsScheduleEnabled
+    missedRunPolicy: $analyticsScheduleMissedRunPolicy
+    overlapPolicy: $analyticsScheduleOverlapPolicy
+    schedule: $analyticsScheduleSchedule
+    timezone: $analyticsScheduleTimezone
     tracingEnabled: $analyticsScheduleTracingEnabled
   orderProcessed:
     enabled: $orderProcessedEnabled

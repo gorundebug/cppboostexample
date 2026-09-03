@@ -1,41 +1,143 @@
 dataConnectors:
   temporal:
     address: $temporalAddress
+    apiKey: $temporalAPIKey
+    identity: $temporalIdentity
+    namespace: $temporalNamespace
+    tlsEnabled: $temporalTLSEnabled
     workerStopTimeout: $temporalWorkerStopTimeout
 endpoints:
   activityJob:
+    activityHeartbeatTimeout: $activityJobActivityHeartbeatTimeout
+    activityStartToCloseTimeout: $activityJobActivityStartToCloseTimeout
     enabled: $activityJobEnabled
+    maxConcurrentActivities: $activityJobMaxConcurrentActivities
+    maximumAttempts: $activityJobMaximumAttempts
+    missedRunPolicy: $activityJobMissedRunPolicy
+    overlapPolicy: $activityJobOverlapPolicy
+    schedule: $activityJobSchedule
+    taskQueue: $activityJobTaskQueue
+    timezone: $activityJobTimezone
     tracingEnabled: $activityJobTracingEnabled
+    workflowExecutionTimeout: $activityJobWorkflowExecutionTimeout
   fanOutActivityA:
+    activityHeartbeatTimeout: $fanOutActivityAActivityHeartbeatTimeout
+    activityStartToCloseTimeout: $fanOutActivityAActivityStartToCloseTimeout
     enabled: $fanOutActivityAEnabled
+    maxConcurrentActivities: $fanOutActivityAMaxConcurrentActivities
+    maximumAttempts: $fanOutActivityAMaximumAttempts
+    missedRunPolicy: $fanOutActivityAMissedRunPolicy
+    overlapPolicy: $fanOutActivityAOverlapPolicy
+    schedule: $fanOutActivityASchedule
+    taskQueue: $fanOutActivityATaskQueue
+    timezone: $fanOutActivityATimezone
     tracingEnabled: $fanOutActivityATracingEnabled
+    workflowExecutionTimeout: $fanOutActivityAWorkflowExecutionTimeout
   fanOutActivityB:
+    activityHeartbeatTimeout: $fanOutActivityBActivityHeartbeatTimeout
+    activityStartToCloseTimeout: $fanOutActivityBActivityStartToCloseTimeout
     enabled: $fanOutActivityBEnabled
+    maxConcurrentActivities: $fanOutActivityBMaxConcurrentActivities
+    maximumAttempts: $fanOutActivityBMaximumAttempts
+    missedRunPolicy: $fanOutActivityBMissedRunPolicy
+    overlapPolicy: $fanOutActivityBOverlapPolicy
+    schedule: $fanOutActivityBSchedule
+    taskQueue: $fanOutActivityBTaskQueue
+    timezone: $fanOutActivityBTimezone
     tracingEnabled: $fanOutActivityBTracingEnabled
+    workflowExecutionTimeout: $fanOutActivityBWorkflowExecutionTimeout
   fanOutActivityC:
+    activityHeartbeatTimeout: $fanOutActivityCActivityHeartbeatTimeout
+    activityStartToCloseTimeout: $fanOutActivityCActivityStartToCloseTimeout
     enabled: $fanOutActivityCEnabled
+    maxConcurrentActivities: $fanOutActivityCMaxConcurrentActivities
+    maximumAttempts: $fanOutActivityCMaximumAttempts
+    missedRunPolicy: $fanOutActivityCMissedRunPolicy
+    overlapPolicy: $fanOutActivityCOverlapPolicy
+    schedule: $fanOutActivityCSchedule
+    taskQueue: $fanOutActivityCTaskQueue
+    timezone: $fanOutActivityCTimezone
     tracingEnabled: $fanOutActivityCTracingEnabled
+    workflowExecutionTimeout: $fanOutActivityCWorkflowExecutionTimeout
   fanOutWorkflowJob:
     enabled: $fanOutWorkflowJobEnabled
+    maxConcurrentWorkflowTasks: $fanOutWorkflowJobMaxConcurrentWorkflowTasks
+    maximumAttempts: $fanOutWorkflowJobMaximumAttempts
+    missedRunPolicy: $fanOutWorkflowJobMissedRunPolicy
+    overlapPolicy: $fanOutWorkflowJobOverlapPolicy
+    schedule: $fanOutWorkflowJobSchedule
+    taskQueue: $fanOutWorkflowJobTaskQueue
+    timezone: $fanOutWorkflowJobTimezone
     tracingEnabled: $fanOutWorkflowJobTracingEnabled
+    workflowExecutionTimeout: $fanOutWorkflowJobWorkflowExecutionTimeout
   localSchedule:
     enabled: $localScheduleEnabled
+    missedRunPolicy: $localScheduleMissedRunPolicy
+    overlapPolicy: $localScheduleOverlapPolicy
+    schedule: $localScheduleSchedule
+    timezone: $localScheduleTimezone
     tracingEnabled: $localScheduleTracingEnabled
   sequentialActivityA:
+    activityHeartbeatTimeout: $sequentialActivityAActivityHeartbeatTimeout
+    activityStartToCloseTimeout: $sequentialActivityAActivityStartToCloseTimeout
     enabled: $sequentialActivityAEnabled
+    maxConcurrentActivities: $sequentialActivityAMaxConcurrentActivities
+    maximumAttempts: $sequentialActivityAMaximumAttempts
+    missedRunPolicy: $sequentialActivityAMissedRunPolicy
+    overlapPolicy: $sequentialActivityAOverlapPolicy
+    schedule: $sequentialActivityASchedule
+    taskQueue: $sequentialActivityATaskQueue
+    timezone: $sequentialActivityATimezone
     tracingEnabled: $sequentialActivityATracingEnabled
+    workflowExecutionTimeout: $sequentialActivityAWorkflowExecutionTimeout
   sequentialActivityB:
+    activityHeartbeatTimeout: $sequentialActivityBActivityHeartbeatTimeout
+    activityStartToCloseTimeout: $sequentialActivityBActivityStartToCloseTimeout
     enabled: $sequentialActivityBEnabled
+    maxConcurrentActivities: $sequentialActivityBMaxConcurrentActivities
+    maximumAttempts: $sequentialActivityBMaximumAttempts
+    missedRunPolicy: $sequentialActivityBMissedRunPolicy
+    overlapPolicy: $sequentialActivityBOverlapPolicy
+    schedule: $sequentialActivityBSchedule
+    taskQueue: $sequentialActivityBTaskQueue
+    timezone: $sequentialActivityBTimezone
     tracingEnabled: $sequentialActivityBTracingEnabled
+    workflowExecutionTimeout: $sequentialActivityBWorkflowExecutionTimeout
   temporalActivitySchedule:
+    activityHeartbeatTimeout: $temporalActivityScheduleActivityHeartbeatTimeout
+    activityStartToCloseTimeout: $temporalActivityScheduleActivityStartToCloseTimeout
     enabled: $temporalActivityScheduleEnabled
+    maxConcurrentActivities: $temporalActivityScheduleMaxConcurrentActivities
+    maximumAttempts: $temporalActivityScheduleMaximumAttempts
+    missedRunPolicy: $temporalActivityScheduleMissedRunPolicy
+    overlapPolicy: $temporalActivityScheduleOverlapPolicy
+    schedule: $temporalActivityScheduleSchedule
+    taskQueue: $temporalActivityScheduleTaskQueue
+    timezone: $temporalActivityScheduleTimezone
     tracingEnabled: $temporalActivityScheduleTracingEnabled
+    workflowExecutionTimeout: $temporalActivityScheduleWorkflowExecutionTimeout
   temporalWorkflowSchedule:
     enabled: $temporalWorkflowScheduleEnabled
+    maxConcurrentWorkflowTasks: $temporalWorkflowScheduleMaxConcurrentWorkflowTasks
+    maximumAttempts: $temporalWorkflowScheduleMaximumAttempts
+    missedRunPolicy: $temporalWorkflowScheduleMissedRunPolicy
+    overlapPolicy: $temporalWorkflowScheduleOverlapPolicy
+    schedule: $temporalWorkflowScheduleSchedule
+    taskQueue: $temporalWorkflowScheduleTaskQueue
+    timezone: $temporalWorkflowScheduleTimezone
     tracingEnabled: $temporalWorkflowScheduleTracingEnabled
+    workflowExecutionTimeout: $temporalWorkflowScheduleWorkflowExecutionTimeout
   workflowJob:
     enabled: $workflowJobEnabled
+    maxConcurrentWorkflowTasks: $workflowJobMaxConcurrentWorkflowTasks
+    maximumAttempts: $workflowJobMaximumAttempts
+    missedRunPolicy: $workflowJobMissedRunPolicy
+    overlapPolicy: $workflowJobOverlapPolicy
+    schedule: $workflowJobSchedule
+    taskQueue: $workflowJobTaskQueue
+    timezone: $workflowJobTimezone
     tracingEnabled: $workflowJobTracingEnabled
+    workflowExecutionTimeout: $workflowJobWorkflowExecutionTimeout
 pools:
   defaultPool:
     executorsCount: $defaultPoolExecutorsCount

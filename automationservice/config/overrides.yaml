@@ -1,41 +1,143 @@
 dataConnectors:
   temporal:
     address: temporal:7233
+    apiKey: ""
+    identity: example-automation
+    namespace: default
+    tlsEnabled: false
     workerStopTimeout: 5000
 endpoints:
   activityJob:
+    activityHeartbeatTimeout: 5000
+    activityStartToCloseTimeout: 30000
     enabled: true
+    maxConcurrentActivities: 2
+    maximumAttempts: 3
+    missedRunPolicy: FireOnce
+    overlapPolicy: Skip
+    schedule: ""
+    taskQueue: automation-activity-jobs
+    timezone: UTC
     tracingEnabled: false
+    workflowExecutionTimeout: 60000
   fanOutActivityA:
+    activityHeartbeatTimeout: 5000
+    activityStartToCloseTimeout: 30000
     enabled: true
+    maxConcurrentActivities: 2
+    maximumAttempts: 3
+    missedRunPolicy: FireOnce
+    overlapPolicy: Skip
+    schedule: ""
+    taskQueue: automation-activity-jobs
+    timezone: UTC
     tracingEnabled: false
+    workflowExecutionTimeout: 60000
   fanOutActivityB:
+    activityHeartbeatTimeout: 5000
+    activityStartToCloseTimeout: 30000
     enabled: true
+    maxConcurrentActivities: 2
+    maximumAttempts: 3
+    missedRunPolicy: FireOnce
+    overlapPolicy: Skip
+    schedule: ""
+    taskQueue: automation-activity-jobs
+    timezone: UTC
     tracingEnabled: false
+    workflowExecutionTimeout: 60000
   fanOutActivityC:
+    activityHeartbeatTimeout: 5000
+    activityStartToCloseTimeout: 30000
     enabled: true
+    maxConcurrentActivities: 1
+    maximumAttempts: 3
+    missedRunPolicy: FireOnce
+    overlapPolicy: Skip
+    schedule: ""
+    taskQueue: automation-heavy-activities
+    timezone: UTC
     tracingEnabled: false
+    workflowExecutionTimeout: 60000
   fanOutWorkflowJob:
     enabled: true
+    maxConcurrentWorkflowTasks: 4
+    maximumAttempts: 3
+    missedRunPolicy: FireOnce
+    overlapPolicy: Skip
+    schedule: ""
+    taskQueue: automation-workflow-jobs
+    timezone: UTC
     tracingEnabled: false
+    workflowExecutionTimeout: 60000
   localSchedule:
     enabled: true
+    missedRunPolicy: FireOnce
+    overlapPolicy: Skip
+    schedule: '*/5 * * * *'
+    timezone: UTC
     tracingEnabled: false
   sequentialActivityA:
+    activityHeartbeatTimeout: 5000
+    activityStartToCloseTimeout: 30000
     enabled: true
+    maxConcurrentActivities: 2
+    maximumAttempts: 3
+    missedRunPolicy: FireOnce
+    overlapPolicy: Skip
+    schedule: ""
+    taskQueue: automation-activity-jobs
+    timezone: UTC
     tracingEnabled: false
+    workflowExecutionTimeout: 60000
   sequentialActivityB:
+    activityHeartbeatTimeout: 5000
+    activityStartToCloseTimeout: 30000
     enabled: true
+    maxConcurrentActivities: 2
+    maximumAttempts: 3
+    missedRunPolicy: FireOnce
+    overlapPolicy: Skip
+    schedule: ""
+    taskQueue: automation-activity-jobs
+    timezone: UTC
     tracingEnabled: false
+    workflowExecutionTimeout: 60000
   temporalActivitySchedule:
+    activityHeartbeatTimeout: 5000
+    activityStartToCloseTimeout: 30000
     enabled: true
+    maxConcurrentActivities: 2
+    maximumAttempts: 3
+    missedRunPolicy: FireOnce
+    overlapPolicy: Skip
+    schedule: '*/10 * * * *'
+    taskQueue: automation-activity-schedules
+    timezone: UTC
     tracingEnabled: false
+    workflowExecutionTimeout: 60000
   temporalWorkflowSchedule:
     enabled: true
+    maxConcurrentWorkflowTasks: 4
+    maximumAttempts: 3
+    missedRunPolicy: FireOnce
+    overlapPolicy: Skip
+    schedule: '*/10 * * * *'
+    taskQueue: automation-workflow-schedules
+    timezone: UTC
     tracingEnabled: false
+    workflowExecutionTimeout: 60000
   workflowJob:
     enabled: true
+    maxConcurrentWorkflowTasks: 4
+    maximumAttempts: 3
+    missedRunPolicy: FireOnce
+    overlapPolicy: Skip
+    schedule: ""
+    taskQueue: automation-workflow-jobs
+    timezone: UTC
     tracingEnabled: false
+    workflowExecutionTimeout: 60000
 pools:
   defaultPool:
     executorsCount: 2

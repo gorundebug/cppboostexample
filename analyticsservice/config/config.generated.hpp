@@ -318,6 +318,34 @@ inline void ApplyConfig(const YAML::Node& value, Config& config) {
   }
   {
     const auto object = FindConfigObject(value, "endpoints", "analyticsSchedule");
+    if (const auto field = object["missedRunPolicy"]; field.IsDefined() && !field.IsNull()) {
+      config.endpoints.analyticsSchedule.missedRunPolicy =
+          servicelib::config::YamlValue(field).As<servicelib::api::ScheduleMissedRunPolicy>();
+    }
+  }
+  {
+    const auto object = FindConfigObject(value, "endpoints", "analyticsSchedule");
+    if (const auto field = object["overlapPolicy"]; field.IsDefined() && !field.IsNull()) {
+      config.endpoints.analyticsSchedule.overlapPolicy =
+          servicelib::config::YamlValue(field).As<servicelib::api::ScheduleOverlapPolicy>();
+    }
+  }
+  {
+    const auto object = FindConfigObject(value, "endpoints", "analyticsSchedule");
+    if (const auto field = object["schedule"]; field.IsDefined() && !field.IsNull()) {
+      config.endpoints.analyticsSchedule.schedule =
+          servicelib::config::YamlValue(field).As<std::string>();
+    }
+  }
+  {
+    const auto object = FindConfigObject(value, "endpoints", "analyticsSchedule");
+    if (const auto field = object["timezone"]; field.IsDefined() && !field.IsNull()) {
+      config.endpoints.analyticsSchedule.timezone =
+          servicelib::config::YamlValue(field).As<std::string>();
+    }
+  }
+  {
+    const auto object = FindConfigObject(value, "endpoints", "analyticsSchedule");
     if (const auto field = object["tracingEnabled"]; field.IsDefined() && !field.IsNull()) {
       config.endpoints.analyticsSchedule.tracingEnabled =
           servicelib::config::YamlValue(field).As<bool>();
@@ -452,6 +480,18 @@ inline void ApplyEnvironment(Config& config) {
       throw std::invalid_argument("invalid boolean in ANALYTICS_SCHEDULE_ENABLED");
     }
     config.endpoints.analyticsSchedule.enabled = parsed == "true";
+  }
+  if (const auto* value = std::getenv("ANALYTICS_SCHEDULE_MISSED_RUN_POLICY")) {
+    config.endpoints.analyticsSchedule.missedRunPolicy = value;
+  }
+  if (const auto* value = std::getenv("ANALYTICS_SCHEDULE_OVERLAP_POLICY")) {
+    config.endpoints.analyticsSchedule.overlapPolicy = value;
+  }
+  if (const auto* value = std::getenv("ANALYTICS_SCHEDULE_SCHEDULE")) {
+    config.endpoints.analyticsSchedule.schedule = value;
+  }
+  if (const auto* value = std::getenv("ANALYTICS_SCHEDULE_TIMEZONE")) {
+    config.endpoints.analyticsSchedule.timezone = value;
   }
   if (const auto* value = std::getenv("ANALYTICS_SCHEDULE_TRACING_ENABLED")) {
     const std::string_view parsed{value};

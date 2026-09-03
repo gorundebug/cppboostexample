@@ -304,10 +304,40 @@ func (c *Config) GetTypes() []*cfg.TypeConfig {
 }
 
 func (c *Config) ApplyEnvironment() error {
+	if err := c.applyActivityJobActivityHeartbeatTimeout(); err != nil {
+		return err
+	}
+	if err := c.applyActivityJobActivityStartToCloseTimeout(); err != nil {
+		return err
+	}
 	if err := c.applyActivityJobEnabled(); err != nil {
 		return err
 	}
+	if err := c.applyActivityJobMaxConcurrentActivities(); err != nil {
+		return err
+	}
+	if err := c.applyActivityJobMaximumAttempts(); err != nil {
+		return err
+	}
+	if err := c.applyActivityJobMissedRunPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyActivityJobOverlapPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyActivityJobSchedule(); err != nil {
+		return err
+	}
+	if err := c.applyActivityJobTaskQueue(); err != nil {
+		return err
+	}
+	if err := c.applyActivityJobTimezone(); err != nil {
+		return err
+	}
 	if err := c.applyActivityJobTracingEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyActivityJobWorkflowExecutionTimeout(); err != nil {
 		return err
 	}
 	if err := c.applyActivityPauseDuration(); err != nil {
@@ -334,31 +364,157 @@ func (c *Config) ApplyEnvironment() error {
 	if err := c.applyDefaultPoolExecutorsCount(); err != nil {
 		return err
 	}
+	if err := c.applyFanOutActivityAActivityHeartbeatTimeout(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityAActivityStartToCloseTimeout(); err != nil {
+		return err
+	}
 	if err := c.applyFanOutActivityAEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityAMaxConcurrentActivities(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityAMaximumAttempts(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityAMissedRunPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityAOverlapPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityASchedule(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityATaskQueue(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityATimezone(); err != nil {
 		return err
 	}
 	if err := c.applyFanOutActivityATracingEnabled(); err != nil {
 		return err
 	}
+	if err := c.applyFanOutActivityAWorkflowExecutionTimeout(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityBActivityHeartbeatTimeout(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityBActivityStartToCloseTimeout(); err != nil {
+		return err
+	}
 	if err := c.applyFanOutActivityBEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityBMaxConcurrentActivities(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityBMaximumAttempts(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityBMissedRunPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityBOverlapPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityBSchedule(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityBTaskQueue(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityBTimezone(); err != nil {
 		return err
 	}
 	if err := c.applyFanOutActivityBTracingEnabled(); err != nil {
 		return err
 	}
+	if err := c.applyFanOutActivityBWorkflowExecutionTimeout(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityCActivityHeartbeatTimeout(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityCActivityStartToCloseTimeout(); err != nil {
+		return err
+	}
 	if err := c.applyFanOutActivityCEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityCMaxConcurrentActivities(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityCMaximumAttempts(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityCMissedRunPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityCOverlapPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityCSchedule(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityCTaskQueue(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutActivityCTimezone(); err != nil {
 		return err
 	}
 	if err := c.applyFanOutActivityCTracingEnabled(); err != nil {
 		return err
 	}
+	if err := c.applyFanOutActivityCWorkflowExecutionTimeout(); err != nil {
+		return err
+	}
 	if err := c.applyFanOutWorkflowJobEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutWorkflowJobMaxConcurrentWorkflowTasks(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutWorkflowJobMaximumAttempts(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutWorkflowJobMissedRunPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutWorkflowJobOverlapPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutWorkflowJobSchedule(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutWorkflowJobTaskQueue(); err != nil {
+		return err
+	}
+	if err := c.applyFanOutWorkflowJobTimezone(); err != nil {
 		return err
 	}
 	if err := c.applyFanOutWorkflowJobTracingEnabled(); err != nil {
 		return err
 	}
+	if err := c.applyFanOutWorkflowJobWorkflowExecutionTimeout(); err != nil {
+		return err
+	}
 	if err := c.applyLocalScheduleEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyLocalScheduleMissedRunPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyLocalScheduleOverlapPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyLocalScheduleSchedule(); err != nil {
+		return err
+	}
+	if err := c.applyLocalScheduleTimezone(); err != nil {
 		return err
 	}
 	if err := c.applyLocalScheduleTracingEnabled(); err != nil {
@@ -370,25 +526,127 @@ func (c *Config) ApplyEnvironment() error {
 	if err := c.applyScheduledWorkflowPauseDuration(); err != nil {
 		return err
 	}
+	if err := c.applySequentialActivityAActivityHeartbeatTimeout(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityAActivityStartToCloseTimeout(); err != nil {
+		return err
+	}
 	if err := c.applySequentialActivityAEnabled(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityAMaxConcurrentActivities(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityAMaximumAttempts(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityAMissedRunPolicy(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityAOverlapPolicy(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityASchedule(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityATaskQueue(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityATimezone(); err != nil {
 		return err
 	}
 	if err := c.applySequentialActivityATracingEnabled(); err != nil {
 		return err
 	}
+	if err := c.applySequentialActivityAWorkflowExecutionTimeout(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityBActivityHeartbeatTimeout(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityBActivityStartToCloseTimeout(); err != nil {
+		return err
+	}
 	if err := c.applySequentialActivityBEnabled(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityBMaxConcurrentActivities(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityBMaximumAttempts(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityBMissedRunPolicy(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityBOverlapPolicy(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityBSchedule(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityBTaskQueue(); err != nil {
+		return err
+	}
+	if err := c.applySequentialActivityBTimezone(); err != nil {
 		return err
 	}
 	if err := c.applySequentialActivityBTracingEnabled(); err != nil {
 		return err
 	}
+	if err := c.applySequentialActivityBWorkflowExecutionTimeout(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalApiKey(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalActivityScheduleActivityHeartbeatTimeout(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalActivityScheduleActivityStartToCloseTimeout(); err != nil {
+		return err
+	}
 	if err := c.applyTemporalActivityScheduleEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalActivityScheduleMaxConcurrentActivities(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalActivityScheduleMaximumAttempts(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalActivityScheduleMissedRunPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalActivityScheduleOverlapPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalActivityScheduleSchedule(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalActivityScheduleTaskQueue(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalActivityScheduleTimezone(); err != nil {
 		return err
 	}
 	if err := c.applyTemporalActivityScheduleTracingEnabled(); err != nil {
 		return err
 	}
+	if err := c.applyTemporalActivityScheduleWorkflowExecutionTimeout(); err != nil {
+		return err
+	}
 	if err := c.applyTemporalAddress(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalIdentity(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalNamespace(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalTlsEnabled(); err != nil {
 		return err
 	}
 	if err := c.applyTemporalWorkerStopTimeout(); err != nil {
@@ -397,18 +655,96 @@ func (c *Config) ApplyEnvironment() error {
 	if err := c.applyTemporalWorkflowScheduleEnabled(); err != nil {
 		return err
 	}
+	if err := c.applyTemporalWorkflowScheduleMaxConcurrentWorkflowTasks(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalWorkflowScheduleMaximumAttempts(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalWorkflowScheduleMissedRunPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalWorkflowScheduleOverlapPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalWorkflowScheduleSchedule(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalWorkflowScheduleTaskQueue(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalWorkflowScheduleTimezone(); err != nil {
+		return err
+	}
 	if err := c.applyTemporalWorkflowScheduleTracingEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyTemporalWorkflowScheduleWorkflowExecutionTimeout(); err != nil {
 		return err
 	}
 	if err := c.applyWorkflowJobEnabled(); err != nil {
 		return err
 	}
+	if err := c.applyWorkflowJobMaxConcurrentWorkflowTasks(); err != nil {
+		return err
+	}
+	if err := c.applyWorkflowJobMaximumAttempts(); err != nil {
+		return err
+	}
+	if err := c.applyWorkflowJobMissedRunPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyWorkflowJobOverlapPolicy(); err != nil {
+		return err
+	}
+	if err := c.applyWorkflowJobSchedule(); err != nil {
+		return err
+	}
+	if err := c.applyWorkflowJobTaskQueue(); err != nil {
+		return err
+	}
+	if err := c.applyWorkflowJobTimezone(); err != nil {
+		return err
+	}
 	if err := c.applyWorkflowJobTracingEnabled(); err != nil {
+		return err
+	}
+	if err := c.applyWorkflowJobWorkflowExecutionTimeout(); err != nil {
 		return err
 	}
 	if err := c.applyWorkflowPauseDuration(); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (c *Config) applyActivityJobActivityHeartbeatTimeout() error {
+	value, exists := os.LookupEnv("ACTIVITY_JOB_ACTIVITY_HEARTBEAT_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert ACTIVITY_JOB_ACTIVITY_HEARTBEAT_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.ActivityJob.ActivityHeartbeatTimeout = intVal
+
+	return nil
+}
+
+func (c *Config) applyActivityJobActivityStartToCloseTimeout() error {
+	value, exists := os.LookupEnv("ACTIVITY_JOB_ACTIVITY_START_TO_CLOSE_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert ACTIVITY_JOB_ACTIVITY_START_TO_CLOSE_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.ActivityJob.ActivityStartToCloseTimeout = intVal
+
 	return nil
 }
 
@@ -427,6 +763,91 @@ func (c *Config) applyActivityJobEnabled() error {
 	return nil
 }
 
+func (c *Config) applyActivityJobMaxConcurrentActivities() error {
+	value, exists := os.LookupEnv("ACTIVITY_JOB_MAX_CONCURRENT_ACTIVITIES")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert ACTIVITY_JOB_MAX_CONCURRENT_ACTIVITIES to int: %w", err)
+	}
+	c.Endpoints.ActivityJob.MaxConcurrentActivities = intVal
+
+	return nil
+}
+
+func (c *Config) applyActivityJobMaximumAttempts() error {
+	value, exists := os.LookupEnv("ACTIVITY_JOB_MAXIMUM_ATTEMPTS")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert ACTIVITY_JOB_MAXIMUM_ATTEMPTS to int: %w", err)
+	}
+	c.Endpoints.ActivityJob.MaximumAttempts = intVal
+
+	return nil
+}
+
+func (c *Config) applyActivityJobMissedRunPolicy() error {
+	value, exists := os.LookupEnv("ACTIVITY_JOB_MISSED_RUN_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.ActivityJob.MissedRunPolicy = api.ScheduleMissedRunPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyActivityJobOverlapPolicy() error {
+	value, exists := os.LookupEnv("ACTIVITY_JOB_OVERLAP_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.ActivityJob.OverlapPolicy = api.ScheduleOverlapPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyActivityJobSchedule() error {
+	value, exists := os.LookupEnv("ACTIVITY_JOB_SCHEDULE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.ActivityJob.Schedule = value
+
+	return nil
+}
+
+func (c *Config) applyActivityJobTaskQueue() error {
+	value, exists := os.LookupEnv("ACTIVITY_JOB_TASK_QUEUE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.ActivityJob.TaskQueue = value
+
+	return nil
+}
+
+func (c *Config) applyActivityJobTimezone() error {
+	value, exists := os.LookupEnv("ACTIVITY_JOB_TIMEZONE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.ActivityJob.Timezone = value
+
+	return nil
+}
+
 func (c *Config) applyActivityJobTracingEnabled() error {
 	value, exists := os.LookupEnv("ACTIVITY_JOB_TRACING_ENABLED")
 	if !exists {
@@ -438,6 +859,21 @@ func (c *Config) applyActivityJobTracingEnabled() error {
 		return fmt.Errorf("failed to convert ACTIVITY_JOB_TRACING_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.ActivityJob.TracingEnabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyActivityJobWorkflowExecutionTimeout() error {
+	value, exists := os.LookupEnv("ACTIVITY_JOB_WORKFLOW_EXECUTION_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert ACTIVITY_JOB_WORKFLOW_EXECUTION_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.ActivityJob.WorkflowExecutionTimeout = intVal
 
 	return nil
 }
@@ -550,6 +986,36 @@ func (c *Config) applyDefaultPoolExecutorsCount() error {
 	return nil
 }
 
+func (c *Config) applyFanOutActivityAActivityHeartbeatTimeout() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_A_ACTIVITY_HEARTBEAT_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_A_ACTIVITY_HEARTBEAT_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityA.ActivityHeartbeatTimeout = intVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityAActivityStartToCloseTimeout() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_A_ACTIVITY_START_TO_CLOSE_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_A_ACTIVITY_START_TO_CLOSE_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityA.ActivityStartToCloseTimeout = intVal
+
+	return nil
+}
+
 func (c *Config) applyFanOutActivityAEnabled() error {
 	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_A_ENABLED")
 	if !exists {
@@ -561,6 +1027,91 @@ func (c *Config) applyFanOutActivityAEnabled() error {
 		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_A_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.FanOutActivityA.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityAMaxConcurrentActivities() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_A_MAX_CONCURRENT_ACTIVITIES")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_A_MAX_CONCURRENT_ACTIVITIES to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityA.MaxConcurrentActivities = intVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityAMaximumAttempts() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_A_MAXIMUM_ATTEMPTS")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_A_MAXIMUM_ATTEMPTS to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityA.MaximumAttempts = intVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityAMissedRunPolicy() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_A_MISSED_RUN_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityA.MissedRunPolicy = api.ScheduleMissedRunPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityAOverlapPolicy() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_A_OVERLAP_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityA.OverlapPolicy = api.ScheduleOverlapPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityASchedule() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_A_SCHEDULE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityA.Schedule = value
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityATaskQueue() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_A_TASK_QUEUE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityA.TaskQueue = value
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityATimezone() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_A_TIMEZONE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityA.Timezone = value
 
 	return nil
 }
@@ -580,6 +1131,51 @@ func (c *Config) applyFanOutActivityATracingEnabled() error {
 	return nil
 }
 
+func (c *Config) applyFanOutActivityAWorkflowExecutionTimeout() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_A_WORKFLOW_EXECUTION_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_A_WORKFLOW_EXECUTION_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityA.WorkflowExecutionTimeout = intVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityBActivityHeartbeatTimeout() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_B_ACTIVITY_HEARTBEAT_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_B_ACTIVITY_HEARTBEAT_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityB.ActivityHeartbeatTimeout = intVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityBActivityStartToCloseTimeout() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_B_ACTIVITY_START_TO_CLOSE_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_B_ACTIVITY_START_TO_CLOSE_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityB.ActivityStartToCloseTimeout = intVal
+
+	return nil
+}
+
 func (c *Config) applyFanOutActivityBEnabled() error {
 	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_B_ENABLED")
 	if !exists {
@@ -591,6 +1187,91 @@ func (c *Config) applyFanOutActivityBEnabled() error {
 		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_B_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.FanOutActivityB.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityBMaxConcurrentActivities() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_B_MAX_CONCURRENT_ACTIVITIES")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_B_MAX_CONCURRENT_ACTIVITIES to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityB.MaxConcurrentActivities = intVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityBMaximumAttempts() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_B_MAXIMUM_ATTEMPTS")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_B_MAXIMUM_ATTEMPTS to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityB.MaximumAttempts = intVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityBMissedRunPolicy() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_B_MISSED_RUN_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityB.MissedRunPolicy = api.ScheduleMissedRunPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityBOverlapPolicy() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_B_OVERLAP_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityB.OverlapPolicy = api.ScheduleOverlapPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityBSchedule() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_B_SCHEDULE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityB.Schedule = value
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityBTaskQueue() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_B_TASK_QUEUE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityB.TaskQueue = value
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityBTimezone() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_B_TIMEZONE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityB.Timezone = value
 
 	return nil
 }
@@ -610,6 +1291,51 @@ func (c *Config) applyFanOutActivityBTracingEnabled() error {
 	return nil
 }
 
+func (c *Config) applyFanOutActivityBWorkflowExecutionTimeout() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_B_WORKFLOW_EXECUTION_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_B_WORKFLOW_EXECUTION_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityB.WorkflowExecutionTimeout = intVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityCActivityHeartbeatTimeout() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_C_ACTIVITY_HEARTBEAT_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_C_ACTIVITY_HEARTBEAT_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityC.ActivityHeartbeatTimeout = intVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityCActivityStartToCloseTimeout() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_C_ACTIVITY_START_TO_CLOSE_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_C_ACTIVITY_START_TO_CLOSE_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityC.ActivityStartToCloseTimeout = intVal
+
+	return nil
+}
+
 func (c *Config) applyFanOutActivityCEnabled() error {
 	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_C_ENABLED")
 	if !exists {
@@ -621,6 +1347,91 @@ func (c *Config) applyFanOutActivityCEnabled() error {
 		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_C_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.FanOutActivityC.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityCMaxConcurrentActivities() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_C_MAX_CONCURRENT_ACTIVITIES")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_C_MAX_CONCURRENT_ACTIVITIES to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityC.MaxConcurrentActivities = intVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityCMaximumAttempts() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_C_MAXIMUM_ATTEMPTS")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_C_MAXIMUM_ATTEMPTS to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityC.MaximumAttempts = intVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityCMissedRunPolicy() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_C_MISSED_RUN_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityC.MissedRunPolicy = api.ScheduleMissedRunPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityCOverlapPolicy() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_C_OVERLAP_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityC.OverlapPolicy = api.ScheduleOverlapPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityCSchedule() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_C_SCHEDULE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityC.Schedule = value
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityCTaskQueue() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_C_TASK_QUEUE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityC.TaskQueue = value
+
+	return nil
+}
+
+func (c *Config) applyFanOutActivityCTimezone() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_C_TIMEZONE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutActivityC.Timezone = value
 
 	return nil
 }
@@ -640,6 +1451,21 @@ func (c *Config) applyFanOutActivityCTracingEnabled() error {
 	return nil
 }
 
+func (c *Config) applyFanOutActivityCWorkflowExecutionTimeout() error {
+	value, exists := os.LookupEnv("FAN_OUT_ACTIVITY_C_WORKFLOW_EXECUTION_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_ACTIVITY_C_WORKFLOW_EXECUTION_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.FanOutActivityC.WorkflowExecutionTimeout = intVal
+
+	return nil
+}
+
 func (c *Config) applyFanOutWorkflowJobEnabled() error {
 	value, exists := os.LookupEnv("FAN_OUT_WORKFLOW_JOB_ENABLED")
 	if !exists {
@@ -651,6 +1477,91 @@ func (c *Config) applyFanOutWorkflowJobEnabled() error {
 		return fmt.Errorf("failed to convert FAN_OUT_WORKFLOW_JOB_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.FanOutWorkflowJob.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutWorkflowJobMaxConcurrentWorkflowTasks() error {
+	value, exists := os.LookupEnv("FAN_OUT_WORKFLOW_JOB_MAX_CONCURRENT_WORKFLOW_TASKS")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_WORKFLOW_JOB_MAX_CONCURRENT_WORKFLOW_TASKS to int: %w", err)
+	}
+	c.Endpoints.FanOutWorkflowJob.MaxConcurrentWorkflowTasks = intVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutWorkflowJobMaximumAttempts() error {
+	value, exists := os.LookupEnv("FAN_OUT_WORKFLOW_JOB_MAXIMUM_ATTEMPTS")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_WORKFLOW_JOB_MAXIMUM_ATTEMPTS to int: %w", err)
+	}
+	c.Endpoints.FanOutWorkflowJob.MaximumAttempts = intVal
+
+	return nil
+}
+
+func (c *Config) applyFanOutWorkflowJobMissedRunPolicy() error {
+	value, exists := os.LookupEnv("FAN_OUT_WORKFLOW_JOB_MISSED_RUN_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutWorkflowJob.MissedRunPolicy = api.ScheduleMissedRunPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyFanOutWorkflowJobOverlapPolicy() error {
+	value, exists := os.LookupEnv("FAN_OUT_WORKFLOW_JOB_OVERLAP_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutWorkflowJob.OverlapPolicy = api.ScheduleOverlapPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyFanOutWorkflowJobSchedule() error {
+	value, exists := os.LookupEnv("FAN_OUT_WORKFLOW_JOB_SCHEDULE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutWorkflowJob.Schedule = value
+
+	return nil
+}
+
+func (c *Config) applyFanOutWorkflowJobTaskQueue() error {
+	value, exists := os.LookupEnv("FAN_OUT_WORKFLOW_JOB_TASK_QUEUE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutWorkflowJob.TaskQueue = value
+
+	return nil
+}
+
+func (c *Config) applyFanOutWorkflowJobTimezone() error {
+	value, exists := os.LookupEnv("FAN_OUT_WORKFLOW_JOB_TIMEZONE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.FanOutWorkflowJob.Timezone = value
 
 	return nil
 }
@@ -670,6 +1581,21 @@ func (c *Config) applyFanOutWorkflowJobTracingEnabled() error {
 	return nil
 }
 
+func (c *Config) applyFanOutWorkflowJobWorkflowExecutionTimeout() error {
+	value, exists := os.LookupEnv("FAN_OUT_WORKFLOW_JOB_WORKFLOW_EXECUTION_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert FAN_OUT_WORKFLOW_JOB_WORKFLOW_EXECUTION_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.FanOutWorkflowJob.WorkflowExecutionTimeout = intVal
+
+	return nil
+}
+
 func (c *Config) applyLocalScheduleEnabled() error {
 	value, exists := os.LookupEnv("LOCAL_SCHEDULE_ENABLED")
 	if !exists {
@@ -681,6 +1607,50 @@ func (c *Config) applyLocalScheduleEnabled() error {
 		return fmt.Errorf("failed to convert LOCAL_SCHEDULE_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.LocalSchedule.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyLocalScheduleMissedRunPolicy() error {
+	value, exists := os.LookupEnv("LOCAL_SCHEDULE_MISSED_RUN_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.LocalSchedule.MissedRunPolicy = api.ScheduleMissedRunPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyLocalScheduleOverlapPolicy() error {
+	value, exists := os.LookupEnv("LOCAL_SCHEDULE_OVERLAP_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.LocalSchedule.OverlapPolicy = api.ScheduleOverlapPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyLocalScheduleSchedule() error {
+	value, exists := os.LookupEnv("LOCAL_SCHEDULE_SCHEDULE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.LocalSchedule.Schedule = value
+
+	return nil
+}
+
+func (c *Config) applyLocalScheduleTimezone() error {
+	value, exists := os.LookupEnv("LOCAL_SCHEDULE_TIMEZONE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.LocalSchedule.Timezone = value
 
 	return nil
 }
@@ -730,6 +1700,36 @@ func (c *Config) applyScheduledWorkflowPauseDuration() error {
 	return nil
 }
 
+func (c *Config) applySequentialActivityAActivityHeartbeatTimeout() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_A_ACTIVITY_HEARTBEAT_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_A_ACTIVITY_HEARTBEAT_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.SequentialActivityA.ActivityHeartbeatTimeout = intVal
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityAActivityStartToCloseTimeout() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_A_ACTIVITY_START_TO_CLOSE_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_A_ACTIVITY_START_TO_CLOSE_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.SequentialActivityA.ActivityStartToCloseTimeout = intVal
+
+	return nil
+}
+
 func (c *Config) applySequentialActivityAEnabled() error {
 	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_A_ENABLED")
 	if !exists {
@@ -741,6 +1741,91 @@ func (c *Config) applySequentialActivityAEnabled() error {
 		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_A_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.SequentialActivityA.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityAMaxConcurrentActivities() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_A_MAX_CONCURRENT_ACTIVITIES")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_A_MAX_CONCURRENT_ACTIVITIES to int: %w", err)
+	}
+	c.Endpoints.SequentialActivityA.MaxConcurrentActivities = intVal
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityAMaximumAttempts() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_A_MAXIMUM_ATTEMPTS")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_A_MAXIMUM_ATTEMPTS to int: %w", err)
+	}
+	c.Endpoints.SequentialActivityA.MaximumAttempts = intVal
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityAMissedRunPolicy() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_A_MISSED_RUN_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.SequentialActivityA.MissedRunPolicy = api.ScheduleMissedRunPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityAOverlapPolicy() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_A_OVERLAP_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.SequentialActivityA.OverlapPolicy = api.ScheduleOverlapPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityASchedule() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_A_SCHEDULE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.SequentialActivityA.Schedule = value
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityATaskQueue() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_A_TASK_QUEUE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.SequentialActivityA.TaskQueue = value
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityATimezone() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_A_TIMEZONE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.SequentialActivityA.Timezone = value
 
 	return nil
 }
@@ -760,6 +1845,51 @@ func (c *Config) applySequentialActivityATracingEnabled() error {
 	return nil
 }
 
+func (c *Config) applySequentialActivityAWorkflowExecutionTimeout() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_A_WORKFLOW_EXECUTION_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_A_WORKFLOW_EXECUTION_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.SequentialActivityA.WorkflowExecutionTimeout = intVal
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityBActivityHeartbeatTimeout() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_B_ACTIVITY_HEARTBEAT_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_B_ACTIVITY_HEARTBEAT_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.SequentialActivityB.ActivityHeartbeatTimeout = intVal
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityBActivityStartToCloseTimeout() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_B_ACTIVITY_START_TO_CLOSE_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_B_ACTIVITY_START_TO_CLOSE_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.SequentialActivityB.ActivityStartToCloseTimeout = intVal
+
+	return nil
+}
+
 func (c *Config) applySequentialActivityBEnabled() error {
 	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_B_ENABLED")
 	if !exists {
@@ -771,6 +1901,91 @@ func (c *Config) applySequentialActivityBEnabled() error {
 		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_B_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.SequentialActivityB.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityBMaxConcurrentActivities() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_B_MAX_CONCURRENT_ACTIVITIES")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_B_MAX_CONCURRENT_ACTIVITIES to int: %w", err)
+	}
+	c.Endpoints.SequentialActivityB.MaxConcurrentActivities = intVal
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityBMaximumAttempts() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_B_MAXIMUM_ATTEMPTS")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_B_MAXIMUM_ATTEMPTS to int: %w", err)
+	}
+	c.Endpoints.SequentialActivityB.MaximumAttempts = intVal
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityBMissedRunPolicy() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_B_MISSED_RUN_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.SequentialActivityB.MissedRunPolicy = api.ScheduleMissedRunPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityBOverlapPolicy() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_B_OVERLAP_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.SequentialActivityB.OverlapPolicy = api.ScheduleOverlapPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityBSchedule() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_B_SCHEDULE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.SequentialActivityB.Schedule = value
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityBTaskQueue() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_B_TASK_QUEUE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.SequentialActivityB.TaskQueue = value
+
+	return nil
+}
+
+func (c *Config) applySequentialActivityBTimezone() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_B_TIMEZONE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.SequentialActivityB.Timezone = value
 
 	return nil
 }
@@ -790,6 +2005,62 @@ func (c *Config) applySequentialActivityBTracingEnabled() error {
 	return nil
 }
 
+func (c *Config) applySequentialActivityBWorkflowExecutionTimeout() error {
+	value, exists := os.LookupEnv("SEQUENTIAL_ACTIVITY_B_WORKFLOW_EXECUTION_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert SEQUENTIAL_ACTIVITY_B_WORKFLOW_EXECUTION_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.SequentialActivityB.WorkflowExecutionTimeout = intVal
+
+	return nil
+}
+
+func (c *Config) applyTemporalApiKey() error {
+	value, exists := os.LookupEnv("TEMPORAL_API_KEY")
+	if !exists {
+		return nil
+	}
+
+	c.DataConnectors.Temporal.APIKey = value
+
+	return nil
+}
+
+func (c *Config) applyTemporalActivityScheduleActivityHeartbeatTimeout() error {
+	value, exists := os.LookupEnv("TEMPORAL_ACTIVITY_SCHEDULE_ACTIVITY_HEARTBEAT_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert TEMPORAL_ACTIVITY_SCHEDULE_ACTIVITY_HEARTBEAT_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.TemporalActivitySchedule.ActivityHeartbeatTimeout = intVal
+
+	return nil
+}
+
+func (c *Config) applyTemporalActivityScheduleActivityStartToCloseTimeout() error {
+	value, exists := os.LookupEnv("TEMPORAL_ACTIVITY_SCHEDULE_ACTIVITY_START_TO_CLOSE_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert TEMPORAL_ACTIVITY_SCHEDULE_ACTIVITY_START_TO_CLOSE_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.TemporalActivitySchedule.ActivityStartToCloseTimeout = intVal
+
+	return nil
+}
+
 func (c *Config) applyTemporalActivityScheduleEnabled() error {
 	value, exists := os.LookupEnv("TEMPORAL_ACTIVITY_SCHEDULE_ENABLED")
 	if !exists {
@@ -801,6 +2072,91 @@ func (c *Config) applyTemporalActivityScheduleEnabled() error {
 		return fmt.Errorf("failed to convert TEMPORAL_ACTIVITY_SCHEDULE_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.TemporalActivitySchedule.Enabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyTemporalActivityScheduleMaxConcurrentActivities() error {
+	value, exists := os.LookupEnv("TEMPORAL_ACTIVITY_SCHEDULE_MAX_CONCURRENT_ACTIVITIES")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert TEMPORAL_ACTIVITY_SCHEDULE_MAX_CONCURRENT_ACTIVITIES to int: %w", err)
+	}
+	c.Endpoints.TemporalActivitySchedule.MaxConcurrentActivities = intVal
+
+	return nil
+}
+
+func (c *Config) applyTemporalActivityScheduleMaximumAttempts() error {
+	value, exists := os.LookupEnv("TEMPORAL_ACTIVITY_SCHEDULE_MAXIMUM_ATTEMPTS")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert TEMPORAL_ACTIVITY_SCHEDULE_MAXIMUM_ATTEMPTS to int: %w", err)
+	}
+	c.Endpoints.TemporalActivitySchedule.MaximumAttempts = intVal
+
+	return nil
+}
+
+func (c *Config) applyTemporalActivityScheduleMissedRunPolicy() error {
+	value, exists := os.LookupEnv("TEMPORAL_ACTIVITY_SCHEDULE_MISSED_RUN_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.TemporalActivitySchedule.MissedRunPolicy = api.ScheduleMissedRunPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyTemporalActivityScheduleOverlapPolicy() error {
+	value, exists := os.LookupEnv("TEMPORAL_ACTIVITY_SCHEDULE_OVERLAP_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.TemporalActivitySchedule.OverlapPolicy = api.ScheduleOverlapPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyTemporalActivityScheduleSchedule() error {
+	value, exists := os.LookupEnv("TEMPORAL_ACTIVITY_SCHEDULE_SCHEDULE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.TemporalActivitySchedule.Schedule = value
+
+	return nil
+}
+
+func (c *Config) applyTemporalActivityScheduleTaskQueue() error {
+	value, exists := os.LookupEnv("TEMPORAL_ACTIVITY_SCHEDULE_TASK_QUEUE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.TemporalActivitySchedule.TaskQueue = value
+
+	return nil
+}
+
+func (c *Config) applyTemporalActivityScheduleTimezone() error {
+	value, exists := os.LookupEnv("TEMPORAL_ACTIVITY_SCHEDULE_TIMEZONE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.TemporalActivitySchedule.Timezone = value
 
 	return nil
 }
@@ -820,6 +2176,21 @@ func (c *Config) applyTemporalActivityScheduleTracingEnabled() error {
 	return nil
 }
 
+func (c *Config) applyTemporalActivityScheduleWorkflowExecutionTimeout() error {
+	value, exists := os.LookupEnv("TEMPORAL_ACTIVITY_SCHEDULE_WORKFLOW_EXECUTION_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert TEMPORAL_ACTIVITY_SCHEDULE_WORKFLOW_EXECUTION_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.TemporalActivitySchedule.WorkflowExecutionTimeout = intVal
+
+	return nil
+}
+
 func (c *Config) applyTemporalAddress() error {
 	value, exists := os.LookupEnv("TEMPORAL_ADDRESS")
 	if !exists {
@@ -827,6 +2198,43 @@ func (c *Config) applyTemporalAddress() error {
 	}
 
 	c.DataConnectors.Temporal.Address = value
+
+	return nil
+}
+
+func (c *Config) applyTemporalIdentity() error {
+	value, exists := os.LookupEnv("TEMPORAL_IDENTITY")
+	if !exists {
+		return nil
+	}
+
+	c.DataConnectors.Temporal.Identity = value
+
+	return nil
+}
+
+func (c *Config) applyTemporalNamespace() error {
+	value, exists := os.LookupEnv("TEMPORAL_NAMESPACE")
+	if !exists {
+		return nil
+	}
+
+	c.DataConnectors.Temporal.Namespace = value
+
+	return nil
+}
+
+func (c *Config) applyTemporalTlsEnabled() error {
+	value, exists := os.LookupEnv("TEMPORAL_TLS_ENABLED")
+	if !exists {
+		return nil
+	}
+
+	boolVal, err := strconv.ParseBool(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert TEMPORAL_TLS_ENABLED to bool: %w", err)
+	}
+	c.DataConnectors.Temporal.TLSEnabled = boolVal
 
 	return nil
 }
@@ -861,6 +2269,91 @@ func (c *Config) applyTemporalWorkflowScheduleEnabled() error {
 	return nil
 }
 
+func (c *Config) applyTemporalWorkflowScheduleMaxConcurrentWorkflowTasks() error {
+	value, exists := os.LookupEnv("TEMPORAL_WORKFLOW_SCHEDULE_MAX_CONCURRENT_WORKFLOW_TASKS")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert TEMPORAL_WORKFLOW_SCHEDULE_MAX_CONCURRENT_WORKFLOW_TASKS to int: %w", err)
+	}
+	c.Endpoints.TemporalWorkflowSchedule.MaxConcurrentWorkflowTasks = intVal
+
+	return nil
+}
+
+func (c *Config) applyTemporalWorkflowScheduleMaximumAttempts() error {
+	value, exists := os.LookupEnv("TEMPORAL_WORKFLOW_SCHEDULE_MAXIMUM_ATTEMPTS")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert TEMPORAL_WORKFLOW_SCHEDULE_MAXIMUM_ATTEMPTS to int: %w", err)
+	}
+	c.Endpoints.TemporalWorkflowSchedule.MaximumAttempts = intVal
+
+	return nil
+}
+
+func (c *Config) applyTemporalWorkflowScheduleMissedRunPolicy() error {
+	value, exists := os.LookupEnv("TEMPORAL_WORKFLOW_SCHEDULE_MISSED_RUN_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.TemporalWorkflowSchedule.MissedRunPolicy = api.ScheduleMissedRunPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyTemporalWorkflowScheduleOverlapPolicy() error {
+	value, exists := os.LookupEnv("TEMPORAL_WORKFLOW_SCHEDULE_OVERLAP_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.TemporalWorkflowSchedule.OverlapPolicy = api.ScheduleOverlapPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyTemporalWorkflowScheduleSchedule() error {
+	value, exists := os.LookupEnv("TEMPORAL_WORKFLOW_SCHEDULE_SCHEDULE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.TemporalWorkflowSchedule.Schedule = value
+
+	return nil
+}
+
+func (c *Config) applyTemporalWorkflowScheduleTaskQueue() error {
+	value, exists := os.LookupEnv("TEMPORAL_WORKFLOW_SCHEDULE_TASK_QUEUE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.TemporalWorkflowSchedule.TaskQueue = value
+
+	return nil
+}
+
+func (c *Config) applyTemporalWorkflowScheduleTimezone() error {
+	value, exists := os.LookupEnv("TEMPORAL_WORKFLOW_SCHEDULE_TIMEZONE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.TemporalWorkflowSchedule.Timezone = value
+
+	return nil
+}
+
 func (c *Config) applyTemporalWorkflowScheduleTracingEnabled() error {
 	value, exists := os.LookupEnv("TEMPORAL_WORKFLOW_SCHEDULE_TRACING_ENABLED")
 	if !exists {
@@ -872,6 +2365,21 @@ func (c *Config) applyTemporalWorkflowScheduleTracingEnabled() error {
 		return fmt.Errorf("failed to convert TEMPORAL_WORKFLOW_SCHEDULE_TRACING_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.TemporalWorkflowSchedule.TracingEnabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyTemporalWorkflowScheduleWorkflowExecutionTimeout() error {
+	value, exists := os.LookupEnv("TEMPORAL_WORKFLOW_SCHEDULE_WORKFLOW_EXECUTION_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert TEMPORAL_WORKFLOW_SCHEDULE_WORKFLOW_EXECUTION_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.TemporalWorkflowSchedule.WorkflowExecutionTimeout = intVal
 
 	return nil
 }
@@ -891,6 +2399,91 @@ func (c *Config) applyWorkflowJobEnabled() error {
 	return nil
 }
 
+func (c *Config) applyWorkflowJobMaxConcurrentWorkflowTasks() error {
+	value, exists := os.LookupEnv("WORKFLOW_JOB_MAX_CONCURRENT_WORKFLOW_TASKS")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert WORKFLOW_JOB_MAX_CONCURRENT_WORKFLOW_TASKS to int: %w", err)
+	}
+	c.Endpoints.WorkflowJob.MaxConcurrentWorkflowTasks = intVal
+
+	return nil
+}
+
+func (c *Config) applyWorkflowJobMaximumAttempts() error {
+	value, exists := os.LookupEnv("WORKFLOW_JOB_MAXIMUM_ATTEMPTS")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert WORKFLOW_JOB_MAXIMUM_ATTEMPTS to int: %w", err)
+	}
+	c.Endpoints.WorkflowJob.MaximumAttempts = intVal
+
+	return nil
+}
+
+func (c *Config) applyWorkflowJobMissedRunPolicy() error {
+	value, exists := os.LookupEnv("WORKFLOW_JOB_MISSED_RUN_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.WorkflowJob.MissedRunPolicy = api.ScheduleMissedRunPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyWorkflowJobOverlapPolicy() error {
+	value, exists := os.LookupEnv("WORKFLOW_JOB_OVERLAP_POLICY")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.WorkflowJob.OverlapPolicy = api.ScheduleOverlapPolicy(value)
+
+	return nil
+}
+
+func (c *Config) applyWorkflowJobSchedule() error {
+	value, exists := os.LookupEnv("WORKFLOW_JOB_SCHEDULE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.WorkflowJob.Schedule = value
+
+	return nil
+}
+
+func (c *Config) applyWorkflowJobTaskQueue() error {
+	value, exists := os.LookupEnv("WORKFLOW_JOB_TASK_QUEUE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.WorkflowJob.TaskQueue = value
+
+	return nil
+}
+
+func (c *Config) applyWorkflowJobTimezone() error {
+	value, exists := os.LookupEnv("WORKFLOW_JOB_TIMEZONE")
+	if !exists {
+		return nil
+	}
+
+	c.Endpoints.WorkflowJob.Timezone = value
+
+	return nil
+}
+
 func (c *Config) applyWorkflowJobTracingEnabled() error {
 	value, exists := os.LookupEnv("WORKFLOW_JOB_TRACING_ENABLED")
 	if !exists {
@@ -902,6 +2495,21 @@ func (c *Config) applyWorkflowJobTracingEnabled() error {
 		return fmt.Errorf("failed to convert WORKFLOW_JOB_TRACING_ENABLED to bool: %w", err)
 	}
 	c.Endpoints.WorkflowJob.TracingEnabled = boolVal
+
+	return nil
+}
+
+func (c *Config) applyWorkflowJobWorkflowExecutionTimeout() error {
+	value, exists := os.LookupEnv("WORKFLOW_JOB_WORKFLOW_EXECUTION_TIMEOUT")
+	if !exists {
+		return nil
+	}
+
+	intVal, err := strconv.Atoi(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert WORKFLOW_JOB_WORKFLOW_EXECUTION_TIMEOUT to int: %w", err)
+	}
+	c.Endpoints.WorkflowJob.WorkflowExecutionTimeout = intVal
 
 	return nil
 }
@@ -1483,15 +3091,13 @@ func MakeConfig() *Config {
 			},
 
 			Temporal: cfg.TemporalDataConnectorConfig{
-				ID:                      temporalConnectorID,
-				Name:                    "Temporal",
-				Implementation:          api.DataConnectorImplementationTemporalGo,
-				Address:                 "temporal:7233",
-				Namespace:               "default",
-				Identity:                "example-automation",
-				MaxConcurrentActivities: 2,
-				MaxConcurrentWorkflows:  4,
-				WorkerStopTimeout:       5000,
+				ID:                temporalConnectorID,
+				Name:              "Temporal",
+				Implementation:    api.DataConnectorImplementationTemporalGo,
+				Address:           "temporal:7233",
+				Namespace:         "default",
+				Identity:          "example-automation",
+				WorkerStopTimeout: 5000,
 			},
 		},
 		Endpoints: struct {
@@ -1514,6 +3120,7 @@ func MakeConfig() *Config {
 				Enabled:                     true,
 				TaskQueue:                   "automation-activity-jobs",
 				TemporalExecutionType:       api.Activity,
+				MaxConcurrentActivities:     2,
 				Timezone:                    "UTC",
 				OverlapPolicy:               api.ScheduleOverlapPolicySkip,
 				MissedRunPolicy:             api.ScheduleMissedRunPolicyFireOnce,
@@ -1532,6 +3139,7 @@ func MakeConfig() *Config {
 				Enabled:                     true,
 				TaskQueue:                   "automation-activity-jobs",
 				TemporalExecutionType:       api.Activity,
+				MaxConcurrentActivities:     2,
 				Timezone:                    "UTC",
 				OverlapPolicy:               api.ScheduleOverlapPolicySkip,
 				MissedRunPolicy:             api.ScheduleMissedRunPolicyFireOnce,
@@ -1550,6 +3158,7 @@ func MakeConfig() *Config {
 				Enabled:                     true,
 				TaskQueue:                   "automation-activity-jobs",
 				TemporalExecutionType:       api.Activity,
+				MaxConcurrentActivities:     2,
 				Timezone:                    "UTC",
 				OverlapPolicy:               api.ScheduleOverlapPolicySkip,
 				MissedRunPolicy:             api.ScheduleMissedRunPolicyFireOnce,
@@ -1566,8 +3175,9 @@ func MakeConfig() *Config {
 				Name:                        "Fan-Out Activity C",
 				IdDataConnector:             temporalConnectorID,
 				Enabled:                     true,
-				TaskQueue:                   "automation-activity-jobs",
+				TaskQueue:                   "automation-heavy-activities",
 				TemporalExecutionType:       api.Activity,
+				MaxConcurrentActivities:     1,
 				Timezone:                    "UTC",
 				OverlapPolicy:               api.ScheduleOverlapPolicySkip,
 				MissedRunPolicy:             api.ScheduleMissedRunPolicyFireOnce,
@@ -1580,19 +3190,20 @@ func MakeConfig() *Config {
 			},
 
 			FanOutWorkflowJob: cfg.TemporalEndpointConfig{
-				ID:                       fanOutWorkflowJobEndpointID,
-				Name:                     "Fan-Out Workflow Job",
-				IdDataConnector:          temporalConnectorID,
-				Enabled:                  true,
-				TaskQueue:                "automation-workflow-jobs",
-				TemporalExecutionType:    api.Workflow,
-				Timezone:                 "UTC",
-				OverlapPolicy:            api.ScheduleOverlapPolicySkip,
-				MissedRunPolicy:          api.ScheduleMissedRunPolicyFireOnce,
-				WorkflowExecutionTimeout: 60000,
-				MaximumAttempts:          3,
-				FunctionName:             "FanoutWorkflowJobEndpoint",
-				FunctionPackage:          "workflow",
+				ID:                         fanOutWorkflowJobEndpointID,
+				Name:                       "Fan-Out Workflow Job",
+				IdDataConnector:            temporalConnectorID,
+				Enabled:                    true,
+				TaskQueue:                  "automation-workflow-jobs",
+				TemporalExecutionType:      api.Workflow,
+				MaxConcurrentWorkflowTasks: 4,
+				Timezone:                   "UTC",
+				OverlapPolicy:              api.ScheduleOverlapPolicySkip,
+				MissedRunPolicy:            api.ScheduleMissedRunPolicyFireOnce,
+				WorkflowExecutionTimeout:   60000,
+				MaximumAttempts:            3,
+				FunctionName:               "FanoutWorkflowJobEndpoint",
+				FunctionPackage:            "workflow",
 			},
 
 			LocalSchedule: cfg.CronEndpointConfig{
@@ -1616,6 +3227,7 @@ func MakeConfig() *Config {
 				Enabled:                     true,
 				TaskQueue:                   "automation-activity-jobs",
 				TemporalExecutionType:       api.Activity,
+				MaxConcurrentActivities:     2,
 				Timezone:                    "UTC",
 				OverlapPolicy:               api.ScheduleOverlapPolicySkip,
 				MissedRunPolicy:             api.ScheduleMissedRunPolicyFireOnce,
@@ -1634,6 +3246,7 @@ func MakeConfig() *Config {
 				Enabled:                     true,
 				TaskQueue:                   "automation-activity-jobs",
 				TemporalExecutionType:       api.Activity,
+				MaxConcurrentActivities:     2,
 				Timezone:                    "UTC",
 				OverlapPolicy:               api.ScheduleOverlapPolicySkip,
 				MissedRunPolicy:             api.ScheduleMissedRunPolicyFireOnce,
@@ -1652,6 +3265,7 @@ func MakeConfig() *Config {
 				Enabled:                     true,
 				TaskQueue:                   "automation-activity-schedules",
 				TemporalExecutionType:       api.Activity,
+				MaxConcurrentActivities:     2,
 				Schedule:                    "*/10 * * * *",
 				ScheduleID:                  "example-automation-activity-schedule",
 				Timezone:                    "UTC",
@@ -1667,38 +3281,40 @@ func MakeConfig() *Config {
 			},
 
 			TemporalWorkflowSchedule: cfg.TemporalEndpointConfig{
-				ID:                       temporalWorkflowScheduleEndpointID,
-				Name:                     "Temporal Workflow Schedule",
-				IdDataConnector:          temporalConnectorID,
-				Enabled:                  true,
-				TaskQueue:                "automation-workflow-schedules",
-				TemporalExecutionType:    api.Workflow,
-				Schedule:                 "*/10 * * * *",
-				ScheduleID:               "example-automation-workflow-schedule",
-				Timezone:                 "UTC",
-				OverlapPolicy:            api.ScheduleOverlapPolicySkip,
-				MissedRunPolicy:          api.ScheduleMissedRunPolicyFireOnce,
-				WorkflowExecutionTimeout: 60000,
-				MaximumAttempts:          3,
-				FunctionName:             "TemporalWorkflowSchedule",
-				FunctionPackage:          "workflow",
-				FunctionDescription:      "Create a Workflow job message identifying the durable scheduled firing.\n",
+				ID:                         temporalWorkflowScheduleEndpointID,
+				Name:                       "Temporal Workflow Schedule",
+				IdDataConnector:            temporalConnectorID,
+				Enabled:                    true,
+				TaskQueue:                  "automation-workflow-schedules",
+				TemporalExecutionType:      api.Workflow,
+				MaxConcurrentWorkflowTasks: 4,
+				Schedule:                   "*/10 * * * *",
+				ScheduleID:                 "example-automation-workflow-schedule",
+				Timezone:                   "UTC",
+				OverlapPolicy:              api.ScheduleOverlapPolicySkip,
+				MissedRunPolicy:            api.ScheduleMissedRunPolicyFireOnce,
+				WorkflowExecutionTimeout:   60000,
+				MaximumAttempts:            3,
+				FunctionName:               "TemporalWorkflowSchedule",
+				FunctionPackage:            "workflow",
+				FunctionDescription:        "Create a Workflow job message identifying the durable scheduled firing.\n",
 			},
 
 			WorkflowJob: cfg.TemporalEndpointConfig{
-				ID:                       workflowJobEndpointID,
-				Name:                     "Workflow Job",
-				IdDataConnector:          temporalConnectorID,
-				Enabled:                  true,
-				TaskQueue:                "automation-workflow-jobs",
-				TemporalExecutionType:    api.Workflow,
-				Timezone:                 "UTC",
-				OverlapPolicy:            api.ScheduleOverlapPolicySkip,
-				MissedRunPolicy:          api.ScheduleMissedRunPolicyFireOnce,
-				WorkflowExecutionTimeout: 60000,
-				MaximumAttempts:          3,
-				FunctionName:             "WorkflowJobEndpoint",
-				FunctionPackage:          "workflow",
+				ID:                         workflowJobEndpointID,
+				Name:                       "Workflow Job",
+				IdDataConnector:            temporalConnectorID,
+				Enabled:                    true,
+				TaskQueue:                  "automation-workflow-jobs",
+				TemporalExecutionType:      api.Workflow,
+				MaxConcurrentWorkflowTasks: 4,
+				Timezone:                   "UTC",
+				OverlapPolicy:              api.ScheduleOverlapPolicySkip,
+				MissedRunPolicy:            api.ScheduleMissedRunPolicyFireOnce,
+				WorkflowExecutionTimeout:   60000,
+				MaximumAttempts:            3,
+				FunctionName:               "WorkflowJobEndpoint",
+				FunctionPackage:            "workflow",
 			},
 		},
 		Pools: struct {

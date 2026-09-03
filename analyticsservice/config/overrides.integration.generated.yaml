@@ -8,6 +8,10 @@ dataConnectors:
 endpoints:
   analyticsSchedule:
     enabled: true
+    missedRunPolicy: FireOnce
+    overlapPolicy: Skip
+    schedule: '*/5 * * * *'
+    timezone: UTC
     tracingEnabled: false
   orderProcessed:
     enabled: true

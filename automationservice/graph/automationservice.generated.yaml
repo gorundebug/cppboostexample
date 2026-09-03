@@ -33,6 +33,7 @@ dataConnectors:
                 functionInitializerGroup: ""
                 functionName: ActivityJobEndpoint
                 functionPackage: activity
+                maxConcurrentActivities: 2
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Activity Job
@@ -53,6 +54,7 @@ dataConnectors:
                 functionInitializerGroup: ""
                 functionName: FanoutActivityAEndpoint
                 functionPackage: activity
+                maxConcurrentActivities: 2
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Fan-Out Activity A
@@ -73,6 +75,7 @@ dataConnectors:
                 functionInitializerGroup: ""
                 functionName: FanoutActivityBEndpoint
                 functionPackage: activity
+                maxConcurrentActivities: 2
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Fan-Out Activity B
@@ -93,6 +96,7 @@ dataConnectors:
                 functionInitializerGroup: ""
                 functionName: FanoutActivityCEndpoint
                 functionPackage: activity
+                maxConcurrentActivities: 1
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Fan-Out Activity C
@@ -100,7 +104,7 @@ dataConnectors:
                 publicFunction: false
                 schedule: ""
                 scheduleId: ""
-                taskQueue: automation-activity-jobs
+                taskQueue: automation-heavy-activities
                 temporalExecutionType: Activity
                 timezone: UTC
                 tracingEnabled: false
@@ -111,6 +115,7 @@ dataConnectors:
                 functionInitializerGroup: ""
                 functionName: FanoutWorkflowJobEndpoint
                 functionPackage: workflow
+                maxConcurrentWorkflowTasks: 4
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Fan-Out Workflow Job
@@ -131,6 +136,7 @@ dataConnectors:
                 functionInitializerGroup: ""
                 functionName: SequentialActivityAEndpoint
                 functionPackage: activity
+                maxConcurrentActivities: 2
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Sequential Activity A
@@ -151,6 +157,7 @@ dataConnectors:
                 functionInitializerGroup: ""
                 functionName: SequentialActivityBEndpoint
                 functionPackage: activity
+                maxConcurrentActivities: 2
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Sequential Activity B
@@ -172,6 +179,7 @@ dataConnectors:
                 functionInitializerGroup: ""
                 functionName: TemporalActivitySchedule
                 functionPackage: activity
+                maxConcurrentActivities: 2
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Temporal Activity Schedule
@@ -191,6 +199,7 @@ dataConnectors:
                 functionInitializerGroup: ""
                 functionName: TemporalWorkflowSchedule
                 functionPackage: workflow
+                maxConcurrentWorkflowTasks: 4
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Temporal Workflow Schedule
@@ -209,6 +218,7 @@ dataConnectors:
                 functionInitializerGroup: ""
                 functionName: WorkflowJobEndpoint
                 functionPackage: workflow
+                maxConcurrentWorkflowTasks: 4
                 maximumAttempts: 3
                 missedRunPolicy: FireOnce
                 name: Workflow Job
@@ -223,8 +233,6 @@ dataConnectors:
                 workflowExecutionTimeout: 60000
         goImplementation: temporal/go
         identity: example-automation
-        maxConcurrentActivities: 2
-        maxConcurrentWorkflows: 4
         name: Temporal
         namespace: default
         pythonImplementation: temporal/python
