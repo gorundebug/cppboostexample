@@ -39,7 +39,7 @@ services:
           exec go run ./cmd/service/main.go -config ./config/config.yaml -values ./config/overrides.yaml;
         fi
     environment:
-      GOPROXY: ${GOPROXY:-direct}
+      GOPROXY: ${GOPROXY:-https://proxy.golang.org,direct}
       GOSUMDB: ${GOSUMDB:-sum.golang.org}
       GIT_CONFIG_COUNT: ${GIT_CONFIG_COUNT:-0}
       GIT_CONFIG_KEY_0: ${GIT_CONFIG_KEY_0:-}

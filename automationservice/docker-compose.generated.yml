@@ -9,15 +9,15 @@ services:
         - "host.docker.internal:host-gateway"
       args:
         DEPENDENCY_DOCKER_REGISTRY: ${DEPENDENCY_DOCKER_REGISTRY:-docker.io}
-        GOPROXY: ${GOPROXY:-direct}
+        GOPROXY: ${GOPROXY:-https://proxy.golang.org,direct}
         GOSUMDB: ${GOSUMDB:-sum.golang.org}
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
         DEPENDENCY_GITHUB_RAW_URL: ${DEPENDENCY_GITHUB_RAW_URL:-https://github.com}
         DEPENDENCY_APT_DEBIAN_URL: ${DEPENDENCY_APT_DEBIAN_URL:-}
         DEPENDENCY_APT_DEBIAN_SECURITY_URL: ${DEPENDENCY_APT_DEBIAN_SECURITY_URL:-}
       additional_contexts:
-        servicelib-source: "${GOSERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/servicelib.git#v0.2.81}"
-        module-model_go-source: "${MODEL_GO_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.81}"
+        servicelib-source: "${GOSERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/servicelib.git#v0.2.82}"
+        module-model_go-source: "${MODEL_GO_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.82}"
     environment:
       - DEBUG=${DEBUG:-0}
       - AUTOMATION_SERVICE_HTTP_PORT
