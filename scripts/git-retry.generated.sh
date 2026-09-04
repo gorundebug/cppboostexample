@@ -5,6 +5,10 @@ git_retry() {
   git_retry_attempt=1
   git_retry_max_attempts=${DEPENDENCY_COMMAND_RETRY_ATTEMPTS:-10}
   git_retry_delay=${DEPENDENCY_COMMAND_RETRY_DELAY_SECONDS:-5}
+  # Bound one HTTP attempt so a retry or the next ordered mirror is reached
+  # promptly instead of waiting indefinitely on a stalled connection.
+  export GIT_HTTP_LOW_SPEED_LIMIT=${DEPENDENCY_GIT_LOW_SPEED_LIMIT:-1024}
+  export GIT_HTTP_LOW_SPEED_TIME=${DEPENDENCY_GIT_LOW_SPEED_TIME:-30}
   while :; do
     if "$@"; then
       return 0

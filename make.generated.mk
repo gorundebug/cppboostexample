@@ -6,7 +6,7 @@ PROJECT_DIR := $(abspath .)
 BIN_DIR := $(PROJECT_DIR)/bin
 TOOLS_DIR := $(PROJECT_DIR)/tools
 GOPRIVATE := github.com
-MODULE_VERSION := v0.2.83
+MODULE_VERSION := v0.2.84
 USE_LOCAL_MODULES ?= 1
 OS := $(shell uname -s)
 ARCH := $(shell uname -m)
@@ -52,8 +52,8 @@ DEPENDENCY_HOST_TARGETS := $(LANG_HOST_PREP_TARGETS)
 include dependency-proxy.generated.mk
 
 ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
-export GOSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/servicelib.git\#v0.2.83
-export SERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostservicelib.git\#v0.2.83
+export GOSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/servicelib.git\#v0.2.84
+export SERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostservicelib.git\#v0.2.84
 endif
 
 export DOCKER_TARGET := runtime
@@ -245,7 +245,7 @@ merge-validate: ## Re-run generated/business interface checks
 $(ACT):
 	@mkdir -p "$(TOOLS_DIR)"
 	@echo "Downloading act $(ACT_VERSION)..."
-	@curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors "$(DEPENDENCY_GITHUB_RAW_URL)/nektos/act/releases/download/$(ACT_VERSION)/act_$(OS)_$(ARCH).tar.gz" | tar -xz -C "$(TOOLS_DIR)" act
+	@curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 30 --retry 2 --retry-delay 2 --retry-max-time 30 --retry-all-errors "$(DEPENDENCY_GITHUB_RAW_URL)/nektos/act/releases/download/$(ACT_VERSION)/act_$(OS)_$(ARCH).tar.gz" | tar -xz -C "$(TOOLS_DIR)" act
 
 $(GH):
 	@mkdir -p "$(TOOLS_DIR)"
@@ -254,13 +254,13 @@ $(GH):
 	_arch=$$(uname -m | sed 's/x86_64/amd64/'); \
 	_ver=$$(echo "$(GH_VERSION)" | sed 's/v//'); \
 	if [ "$$(uname -s)" = "Darwin" ]; then \
-	  curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors "$(DEPENDENCY_GITHUB_RAW_URL)/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.zip" -o /tmp/gh.zip; \
+	  curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 30 --retry 2 --retry-delay 2 --retry-max-time 30 --retry-all-errors "$(DEPENDENCY_GITHUB_RAW_URL)/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.zip" -o /tmp/gh.zip; \
 	  rm -rf /tmp/gh_extract; \
 	  unzip -q /tmp/gh.zip "gh_$${_ver}_$${_os}_$${_arch}/bin/gh" -d /tmp/gh_extract; \
 	  mv /tmp/gh_extract/gh_$${_ver}_$${_os}_$${_arch}/bin/gh "$(GH)"; \
 	  rm -rf /tmp/gh.zip /tmp/gh_extract; \
 	else \
-	  curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors "$(DEPENDENCY_GITHUB_RAW_URL)/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.tar.gz" | tar -xz -C /tmp; \
+	  curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 30 --retry 2 --retry-delay 2 --retry-max-time 30 --retry-all-errors "$(DEPENDENCY_GITHUB_RAW_URL)/cli/cli/releases/download/$(GH_VERSION)/gh_$${_ver}_$${_os}_$${_arch}.tar.gz" | tar -xz -C /tmp; \
 	  mv /tmp/gh_$${_ver}_$${_os}_$${_arch}/bin/gh "$(GH)"; \
 	  rm -rf /tmp/gh_$${_ver}_$${_os}_$${_arch}; \
 	fi
@@ -272,7 +272,7 @@ $(GLAB):
 	@_os=$$(uname -s | tr '[:upper:]' '[:lower:]'); \
 	_arch=$$(uname -m | sed 's/amd64/x86_64/'); \
 	_ver=$$(echo "$(GLAB_VERSION)" | sed 's/v//'); \
-	curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors "$(DEPENDENCY_GITLAB_RAW_URL)/gitlab-org/cli/-/releases/$(GLAB_VERSION)/downloads/glab_$${_ver}_$${_os}_$${_arch}.tar.gz" | \
+	curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 30 --retry 2 --retry-delay 2 --retry-max-time 30 --retry-all-errors "$(DEPENDENCY_GITLAB_RAW_URL)/gitlab-org/cli/-/releases/$(GLAB_VERSION)/downloads/glab_$${_ver}_$${_os}_$${_arch}.tar.gz" | \
 	  tar -xz -C "$(TOOLS_DIR)" --strip-components=1 bin/glab
 	@chmod +x "$(GLAB)"
 

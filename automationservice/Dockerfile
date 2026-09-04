@@ -42,7 +42,7 @@ RUN --mount=type=cache,id=servicegen-go-tool-apt-lists-${TARGETARCH},target=/var
          arm64) protoc_arch=aarch_64 ;; \
          *) echo "Unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
        esac \
-    && curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors \
+    && curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 30 --retry 2 --retry-delay 2 --retry-max-time 30 --retry-all-errors \
        "${DEPENDENCY_GITHUB_RAW_URL}/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-${protoc_arch}.zip" \
        --output /tmp/protoc.zip \
     && unzip -q /tmp/protoc.zip bin/protoc -d /usr/local \

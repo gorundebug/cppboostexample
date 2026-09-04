@@ -19,7 +19,7 @@ ACT_VERSION := v0.2.144
 ACT := $(TOOLS_DIR)/act
 OS := $(shell uname -s)
 ARCH := $(shell uname -m)
-GOSERVICELIB_SOURCE_CONTEXT ?= https://github.com/gorundebug/servicelib.git\#v0.2.83
+GOSERVICELIB_SOURCE_CONTEXT ?= https://github.com/gorundebug/servicelib.git\#v0.2.84
 RUNTIME_STRIP ?= ON
 DEPENDENCY_DOWNLOAD_ENV := $(or $(wildcard $(abspath ./dependency-download-env.generated.sh)),$(wildcard $(abspath ../dependency-download-env.generated.sh)),/bin/sh)
 SHELL := $(DEPENDENCY_DOWNLOAD_ENV)
@@ -44,11 +44,11 @@ ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
 # Keep an explicit environment/command-line source context for local framework
 # development. Only replace the generated release default with the proxy URL.
 ifeq ($(origin GOSERVICELIB_SOURCE_CONTEXT),file)
-GOSERVICELIB_SOURCE_CONTEXT := $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/servicelib.git\#v0.2.83
+GOSERVICELIB_SOURCE_CONTEXT := $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/servicelib.git\#v0.2.84
 endif
 export GOSERVICELIB_SOURCE_CONTEXT
 ifneq ($(strip $(USE_LOCAL_MODULES)),1)
-export MODEL_GO_SOURCE_CONTEXT := $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostexample.git\#v0.2.83
+export MODEL_GO_SOURCE_CONTEXT := $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostexample.git\#v0.2.84
 endif
 endif
 
@@ -146,7 +146,7 @@ $(GOLANGCI_LINT):
 $(ACT):
 	@mkdir -p $(TOOLS_DIR)
 	@echo "Downloading act $(ACT_VERSION)..."
-	@curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors "$(DEPENDENCY_GITHUB_RAW_URL)/nektos/act/releases/download/$(ACT_VERSION)/act_$(OS)_$(ARCH).tar.gz" | tar -xz -C $(TOOLS_DIR) act
+	@curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 30 --retry 2 --retry-delay 2 --retry-max-time 30 --retry-all-errors "$(DEPENDENCY_GITHUB_RAW_URL)/nektos/act/releases/download/$(ACT_VERSION)/act_$(OS)_$(ARCH).tar.gz" | tar -xz -C $(TOOLS_DIR) act
 
 act: $(ACT) ## Run GitHub Actions locally via act (requires Docker)
 	$(ACT) push

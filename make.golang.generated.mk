@@ -124,7 +124,7 @@ $(BUF):
 	@set -eu; \
 	tmp=$$(mktemp "$(TOOLS_DIR)/.buf.XXXXXX"); \
 	trap 'rm -f "$$tmp"' EXIT INT TERM; \
-	curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors \
+	curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 30 --retry 2 --retry-delay 2 --retry-max-time 30 --retry-all-errors \
 	  "$(DEPENDENCY_GITHUB_RAW_URL)/bufbuild/buf/releases/download/$(BUF_VERSION)/buf-$(OS)-$(ARCH)" \
 	  --output "$$tmp"; \
 	chmod +x "$$tmp"; \
@@ -140,7 +140,7 @@ $(PROTOC):
 	_os=$$(uname -s | sed 's/Darwin/osx/;s/Linux/linux/'); \
 	_arch=$$(uname -m | sed 's/arm64/aarch_64/;s/aarch64/aarch_64/'); \
 	_ver=$$(echo "$(PROTOC_VERSION)" | sed 's/v//'); \
-	curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 60 --retry 8 --retry-delay 2 --retry-max-time 600 --retry-all-errors \
+	curl --fail --location --silent --show-error --connect-timeout 15 --speed-limit 1024 --speed-time 30 --retry 2 --retry-delay 2 --retry-max-time 30 --retry-all-errors \
 	  "$(DEPENDENCY_GITHUB_RAW_URL)/protocolbuffers/protobuf/releases/download/$(PROTOC_VERSION)/protoc-$${_ver}-$${_os}-$${_arch}.zip" \
 	  --output "$$tmp/protoc.zip"; \
 	unzip -q "$$tmp/protoc.zip" bin/protoc -d "$$tmp/extract"; \
