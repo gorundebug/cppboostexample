@@ -37,8 +37,8 @@ COPY docker/cppboost-packages.txt /tmp/cppboost-packages.txt
 RUN rm -f /etc/apt/apt.conf.d/docker-clean
 RUN --mount=type=cache,id=servicegen-apt-lists-${TARGETARCH},target=/var/lib/apt/lists,sharing=locked \
     --mount=type=cache,id=servicegen-apt-cache-${TARGETARCH},target=/var/cache/apt,sharing=locked \
-    apt-get update \
-    && xargs apt-get install --yes --no-install-recommends \
+    apt-get -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o Acquire::Retries=2 update \
+    && xargs apt-get -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o Acquire::Retries=2 install --yes --no-install-recommends \
        ca-certificates locales python3-pip \
        < /tmp/cppboost-packages.txt \
     && locale-gen en_US.UTF-8 \
@@ -160,8 +160,8 @@ RUN if [ -n "$DEPENDENCY_APT_UBUNTU_ARCHIVE_URL$DEPENDENCY_APT_UBUNTU_SECURITY_U
         -e "s|http://security.ubuntu.com/ubuntu|$DEPENDENCY_APT_UBUNTU_SECURITY_URL|g" \
         -e "s|http://ports.ubuntu.com/ubuntu-ports|$DEPENDENCY_APT_UBUNTU_PORTS_URL|g" {} +; \
     fi
-RUN apt-get update \
-    && apt-get install --yes --no-install-recommends ca-certificates \
+RUN apt-get -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o Acquire::Retries=2 update \
+    && apt-get -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o Acquire::Retries=2 install --yes --no-install-recommends ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 ENV LD_LIBRARY_PATH=/usr/local/lib/servicegen
 LABEL org.gorundebug.build-type="Release" \

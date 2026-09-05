@@ -11,7 +11,7 @@ variables:
     - apk add --no-cache bash git
     - . ./scripts/git-retry.generated.sh
     - git_retry git clone "https://github.com/gorundebug/cppboostservicelib.git" .servicelib
-    - git -C .servicelib checkout "v0.2.86"
+    - git -C .servicelib checkout "v0.2.87"
 
 build-test:
   extends: .cpp-dependencies
