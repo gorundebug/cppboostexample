@@ -3,9 +3,7 @@ package app
 import (
 	"context"
 	"net/http"
-	"os"
 	"reflect"
-	"strings"
 
 	"github.com/gorundebug/servicelib/api"
 	"github.com/gorundebug/servicelib/runtime"
@@ -22,20 +20,11 @@ import (
 type serviceDependencies struct {
 }
 
-func environmentFlagEnabled(name string) bool {
-	switch strings.ToLower(strings.TrimSpace(os.Getenv(name))) {
-	case "1", "true", "yes", "on":
-		return true
-	default:
-		return false
-	}
-}
-
 // MetricsEngine creates the metrics engine used by the service.
 // local/debug: Prometheus (pull-based, exposes /metrics endpoint).
 // staging/production: OTLP metrics (push-based, no /metrics endpoint required).
 func (d *serviceDependencies) MetricsEngine(ctx context.Context, env environment.ServiceEnvironment) (metrics.MetricsEngine, error) {
-	if environmentFlagEnabled("SERVICELIB_NOOP_METRICS") {
+	if environment.FlagEnabled("SERVICELIB_NOOP_METRICS") {
 		return metrics.NewNoopMetricsEngine(), nil
 	}
 	switch env.ServiceConfig().Environment {
@@ -50,6 +39,9 @@ func (d *serviceDependencies) MetricsEngine(ctx context.Context, env environment
 // local/debug: human-readable Logrus output.
 // staging/production: structured logs exported via OTLP.
 func (d *serviceDependencies) LogsEngine(ctx context.Context, env environment.ServiceEnvironment) (log.LogsEngine, error) {
+	if environment.FlagEnabled("SERVICELIB_NOOP_LOGS") {
+		return log.NewNoopLogsEngine(), nil
+	}
 	switch env.ServiceConfig().Environment {
 	case api.EnvironmentStaging, api.EnvironmentProduction:
 		return telemetry.CreateOTLPLogsEngine(ctx, env)
@@ -68,7 +60,7 @@ func (d *serviceDependencies) DelayPool(_ context.Context, _ environment.Service
 // local/debug: pretty human-readable output with per-request opt-in via context.
 // staging/production: traces exported via OTLP.
 func (d *serviceDependencies) TracingEngine(ctx context.Context, env environment.ServiceEnvironment) (tracing.TracingEngine, error) {
-	if environmentFlagEnabled("SERVICELIB_NOOP_TRACING") {
+	if environment.FlagEnabled("SERVICELIB_NOOP_TRACING") {
 		return tracing.NewNoopTracingEngine(), nil
 	}
 	switch env.ServiceConfig().Environment {

@@ -15,6 +15,7 @@
 #include <servicelib/runtime/config/command_line.hpp>
 #include <servicelib/runtime/config/loader.hpp>
 #include <servicelib/runtime/environment/metrics/prometheus.hpp>
+#include <servicelib/runtime/environment_variable.hpp>
 #include <servicelib/runtime/logging/logging.hpp>
 #include <servicelib/runtime/telemetry/opentelemetry/opentelemetry.hpp>
 
@@ -27,20 +28,29 @@ int main(int argc, char* argv[]) {
 
     const auto options = servicelib::config::CommandLine::Parse(argc, argv);
     using Config = example::analytics_service::config::Config;
+    const bool noop_logs =
+        servicelib::EnvironmentFlagEnabled("SERVICELIB_NOOP_LOGS");
+    const bool noop_metrics =
+        servicelib::EnvironmentFlagEnabled("SERVICELIB_NOOP_METRICS");
+    const bool noop_tracing =
+        servicelib::EnvironmentFlagEnabled("SERVICELIB_NOOP_TRACING");
     servicelib::log::Logger& bootstrap_logger =
-        std::getenv("SERVICELIB_NOOP_LOGS")
+        noop_logs
             ? servicelib::log::NoopLogger::instance()
             : servicelib::logging::createLogsEngine(
                   servicelib::logging::LogsEngineType::kBoost);
-    servicelib::metrics::PrometheusMetrics prometheus_metrics;
-    auto& metrics = std::getenv("SERVICELIB_NOOP_METRICS")
-                        ? servicelib::metrics::NoopMetrics::instance()
-                        : static_cast<servicelib::metrics::Metrics&>(
-                              prometheus_metrics);
+    std::unique_ptr<servicelib::metrics::PrometheusMetrics> prometheus_metrics;
+    servicelib::metrics::Metrics* metrics =
+        &servicelib::metrics::NoopMetrics::instance();
+    if (!noop_metrics) {
+      prometheus_metrics =
+          std::make_unique<servicelib::metrics::PrometheusMetrics>();
+      metrics = prometheus_metrics.get();
+    }
     servicelib::config::ConfigLoader<Config> loader(
         {.configPath = options.configPath,
          .overridePath = options.valuesPath},
-        {}, bootstrap_logger, metrics, "");
+        {}, bootstrap_logger, *metrics, "");
     const auto runtime_config = loader.Load();
     const auto config = loader.GetConfig();
     const auto& own_service_config =
@@ -48,22 +58,21 @@ int main(int argc, char* argv[]) {
     namespace otel = servicelib::telemetry::opentelemetry_adapter;
     std::unique_ptr<otel::OpenTelemetryLogger> otlp_logs;
     std::unique_ptr<otel::OpenTelemetryTracing> tracing;
-    const bool tracing_enabled =
-        std::getenv("SERVICELIB_NOOP_TRACING") == nullptr;
     servicelib::log::Logger* service_logger = &bootstrap_logger;
     switch (own_service_config.environment) {
       case servicelib::api::Environment::kStaging:
       case servicelib::api::Environment::kProduction:
-        otlp_logs =
-            otel::CreateOTLPLogsEngine(own_service_config.name);
-        if (tracing_enabled) {
+        if (!noop_logs) {
+          otlp_logs = otel::CreateOTLPLogsEngine(own_service_config.name);
+          service_logger = otlp_logs.get();
+        }
+        if (!noop_tracing) {
           tracing =
               otel::CreateOTLPTracingEngine(own_service_config.name);
         }
-        service_logger = otlp_logs.get();
         break;
       default:
-        if (tracing_enabled) {
+        if (!noop_tracing) {
           tracing =
               otel::CreateStdoutTracingEngine(own_service_config.name);
         }
@@ -72,11 +81,11 @@ int main(int argc, char* argv[]) {
     servicelib::async::Runtime runtime(
         {.workers = options.workers,
          .unhandledException = {},
-         .metrics = &metrics});
+         .metrics = metrics});
 
     example::analytics_service::app::Service service(runtime.executor(),
                                     config, *service_logger,
-                                    metrics, tracing.get());
+                                    *metrics, tracing.get());
     bool runtime_shutdown{};
     const auto shutdown_runtime = [&] {
       if (runtime_shutdown) return;
