@@ -11,7 +11,7 @@ use (
 // published. The version-qualified replacements apply only while GOWORK points
 // at this file; autonomous service builds use their pinned repositories.
 replace (
-	github.com/gorundebug/cppboostexample-inventory-service-api v0.2.88 => ./inventory_service_api
-	github.com/gorundebug/cppboostexample-order-service-api v0.2.88 => ./order_service_api
-	github.com/gorundebug/cppboostexample/model_go v0.2.88 => ./model_go
+	github.com/gorundebug/cppboostexample-inventory-service-api v0.2.89 => ./inventory_service_api
+	github.com/gorundebug/cppboostexample-order-service-api v0.2.89 => ./order_service_api
+	github.com/gorundebug/cppboostexample/model_go v0.2.89 => ./model_go
 )
