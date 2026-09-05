@@ -3344,19 +3344,14 @@ func MakeConfig() *Config {
 				From: callSequentialActivityAStreamID,
 				To:   callSequentialActivityBStreamID,
 				CallSemantics: &cfg.CallSemanticsGroup{
-					PriorityTaskPool: &cfg.PriorityTaskPoolCallSemanticsConfig{
-						PoolName: "Default Pool",
-						Priority: 2,
-					},
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
 				},
 			},
 			CallSequentialActivityBToProcessWorkflowJob: cfg.LinkConfig{
 				From: callSequentialActivityBStreamID,
 				To:   processWorkflowJobStreamID,
 				CallSemantics: &cfg.CallSemanticsGroup{
-					TaskPool: &cfg.TaskPoolCallSemanticsConfig{
-						PoolName: "Default Pool",
-					},
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
 				},
 			},
 			ConsumeActivityJobToActivityPause: cfg.LinkConfig{
@@ -3391,9 +3386,7 @@ func MakeConfig() *Config {
 				From: consumeFanOutWorkflowJobStreamID,
 				To:   callFanOutActivityAStreamID,
 				CallSemantics: &cfg.CallSemanticsGroup{
-					TaskPool: &cfg.TaskPoolCallSemanticsConfig{
-						PoolName: "Default Pool",
-					},
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
 				},
 			},
 			ConsumeSequentialActivityAToProcessSequentialActivityA: cfg.LinkConfig{
@@ -3421,29 +3414,21 @@ func MakeConfig() *Config {
 				From: splitActivityAResultStreamID,
 				To:   callFanOutActivityBStreamID,
 				CallSemantics: &cfg.CallSemanticsGroup{
-					PriorityTaskPool: &cfg.PriorityTaskPoolCallSemanticsConfig{
-						PoolName: "Default Pool",
-						Priority: 2,
-					},
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
 				},
 			},
 			SplitActivityAResultToCallFanOutActivityC: cfg.LinkConfig{
 				From: splitActivityAResultStreamID,
 				To:   callFanOutActivityCStreamID,
 				CallSemantics: &cfg.CallSemanticsGroup{
-					PriorityTaskPool: &cfg.PriorityTaskPoolCallSemanticsConfig{
-						PoolName: "Default Pool",
-						Priority: 7,
-					},
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
 				},
 			},
 			WorkflowPauseToCallSequentialActivityA: cfg.LinkConfig{
 				From: workflowPauseStreamID,
 				To:   callSequentialActivityAStreamID,
 				CallSemantics: &cfg.CallSemanticsGroup{
-					TaskPool: &cfg.TaskPoolCallSemanticsConfig{
-						PoolName: "Default Pool",
-					},
+					FunctionCall: &cfg.FunctionCallSemanticsConfig{},
 				},
 			},
 		},
