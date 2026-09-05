@@ -1056,7 +1056,7 @@ services:
                 from: mergeResults
                 to: splitOrderResult
             link2:
-                callSemantics: PriorityTaskPool
+                callSemantics: TaskPool
                 from: processOrder
                 poolName: Default Pool
                 priority: 1
@@ -1182,7 +1182,7 @@ services:
         startupHandler: health/startup
         statusHandler: status
 settings:
-    moduleVersion: v0.2.85
+    moduleVersion: v0.2.86
     name: Example
     repoPath: github.com/gorundebug/cppboostexample
 types:

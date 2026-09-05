@@ -418,7 +418,7 @@ inline Config MakeConfig() {
     LinkConfig value{};
     value.from = kProcessOrderStreamId;
     value.to = kSplitPipelineStreamId;
-    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kPriorityTaskPool, "Default Pool", 1, false);
+    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kTaskPool, "Default Pool", 1, false);
     return value;
   }();
   cfg.links.splitPipelineToProcessOrderItems = [] {
