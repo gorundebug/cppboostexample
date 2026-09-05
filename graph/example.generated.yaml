@@ -945,7 +945,7 @@ services:
                 from: getInventoryItemData
                 to: mergeInventoryResult
             link2:
-                callSemantics: TaskPool
+                callSemantics: PriorityTaskPool
                 from: processInventoryItem
                 poolName: Inventory Priority Workers
                 priority: 10
@@ -1182,7 +1182,7 @@ services:
         startupHandler: health/startup
         statusHandler: status
 settings:
-    moduleVersion: v0.2.84
+    moduleVersion: v0.2.85
     name: Example
     repoPath: github.com/gorundebug/cppboostexample
 types:

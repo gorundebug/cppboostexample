@@ -217,7 +217,7 @@ inline Config MakeConfig() {
     LinkConfig value{};
     value.from = kProcessInventoryItemStreamId;
     value.to = kGetInventoryItemDataStreamId;
-    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kTaskPool, "Inventory Priority Workers", 10, false);
+    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kPriorityTaskPool, "Inventory Priority Workers", 10, false);
     return value;
   }();
   cfg.modules.inventoryServiceApi = [] {
