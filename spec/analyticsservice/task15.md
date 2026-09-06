@@ -1,0 +1,33 @@
+# Task 15/17: `JoinedAnalyticsSink`
+
+> Rules: [`spec/rules.md`](../rules.md)
+
+| Field | Value |
+|-------|-------|
+| Language | `C++/Boost` |
+| Kind | `custom-sink` |
+| File | `analyticsservice/internal/functions/endpoint/joined_analytics_sink.hpp` |
+| Test | `analyticsservice/internal/functions/endpoint/joined_analytics_sink_test.cpp` |
+| Service | `Analytics Service` |
+
+
+## Behaviour
+
+Validate and record the result of the two-way analytics join.
+
+
+
+
+## Stream types
+- Input: `AnalyticsResult` — `analyticsservice/internal/types/analytics_result.hpp`
+
+## Checklist
+
+- [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
+- [ ] Open `analyticsservice/internal/functions/endpoint/joined_analytics_sink.hpp` and preserve its generated contract
+- [ ] Inspect input type `AnalyticsResult` in `analyticsservice/internal/types/analytics_result.hpp`
+- [ ] Implement the C++ function object without retaining borrowed payload/context references
+- [ ] Run `./scripts/test.generated.sh`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/joined_analytics_sink_test.cpp`
+- [ ] Re-read this checklist
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task15.md — JoinedAnalyticsSink — C++/Boost — done`

@@ -20,11 +20,30 @@
 #include <servicelib/transformation/streams.hpp>
 #include <servicelib/datasource/http/beast.hpp>
 #include <servicelib/datasource/kafka/librdkafka.hpp>
+#include <servicelib/datasource/localsource/custom.hpp>
 #include <servicelib/datasource/cron/libcron.hpp>
+#include <servicelib/datasink/localsink/custom.hpp>
 
 #include <analyticsservice/internal/functions/analytics/count_order_processed.hpp>
 #include <analyticsservice/internal/functions/cron/analytics_schedule_source.hpp>
+#include <analyticsservice/internal/functions/endpoint/analytics_orders_source.hpp>
+#include <analyticsservice/internal/functions/endpoint/analytics_payments_source.hpp>
+#include <analyticsservice/internal/functions/endpoint/analytics_shipments_source.hpp>
+#include <analyticsservice/internal/functions/endpoint/high_value_analytics_sink.hpp>
+#include <analyticsservice/internal/functions/endpoint/joined_analytics_sink.hpp>
 #include <analyticsservice/internal/functions/endpoint/order_processed_endpoint_source.hpp>
+#include <analyticsservice/internal/functions/endpoint/standard_analytics_sink.hpp>
+#include <analyticsservice/internal/functions/joinanalytics/join_order_payment_analytics.hpp>
+#include <analyticsservice/internal/functions/joinanalytics/key_orders_for_join.hpp>
+#include <analyticsservice/internal/functions/joinanalytics/key_payments_for_join.hpp>
+#include <analyticsservice/internal/functions/multijoinanalytics/key_orders_for_multi_join.hpp>
+#include <analyticsservice/internal/functions/multijoinanalytics/key_payments_for_multi_join.hpp>
+#include <analyticsservice/internal/functions/multijoinanalytics/key_shipments_for_multi_join.hpp>
+#include <analyticsservice/internal/functions/multijoinanalytics/multi_join_analytics_events.hpp>
+#include <analyticsservice/internal/functions/multijoinanalytics/route_analytics_result.hpp>
+#include <analyticsservice/internal/types/analytics_event.hpp>
+#include <analyticsservice/internal/types/analytics_key.hpp>
+#include <analyticsservice/internal/types/analytics_result.hpp>
 #include <model_cpp/include/example/model/types/automation_job.hpp>
 #include <model_cpp/include/example/model/types/order_processed.hpp>
 
@@ -57,17 +76,73 @@ class ServiceGenerated
  protected:
   struct ServiceMakers final {
     std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::AnalyticsOrdersSource>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::CustomEndpointConfig&)> analytics_orders_source;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::AnalyticsPaymentsSource>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::CustomEndpointConfig&)> analytics_payments_source;
+    std::function<boost::asio::awaitable<
         std::unique_ptr<functions::AnalyticsScheduleSource>>(
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::CronEndpointConfig&)> analytics_schedule_source;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::AnalyticsShipmentsSource>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::CustomEndpointConfig&)> analytics_shipments_source;
     std::function<boost::asio::awaitable<
         std::unique_ptr<functions::CountOrderProcessed>>(
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::ProcessStreamConfig&)> count_order_processed;
     std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::HighValueAnalyticsSink>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::CustomEndpointConfig&)> high_value_analytics_sink;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::JoinOrderPaymentAnalytics>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::JoinStreamConfig&)> join_order_payment_analytics;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::JoinedAnalyticsSink>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::CustomEndpointConfig&)> joined_analytics_sink;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::KeyOrdersForJoin>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::KeyByStreamConfig&)> key_orders_for_join;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::KeyOrdersForMultiJoin>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::KeyByStreamConfig&)> key_orders_for_multi_join;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::KeyPaymentsForJoin>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::KeyByStreamConfig&)> key_payments_for_join;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::KeyPaymentsForMultiJoin>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::KeyByStreamConfig&)> key_payments_for_multi_join;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::KeyShipmentsForMultiJoin>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::KeyByStreamConfig&)> key_shipments_for_multi_join;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::MultiJoinAnalyticsEvents>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::MultiJoinStreamConfig&)> multi_join_analytics_events;
+    std::function<boost::asio::awaitable<
         std::unique_ptr<functions::OrderProcessedEndpointSource>>(
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::KafkaEndpointConfig&)> order_processed_endpoint_source;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::RouteAnalyticsResult>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::CaseStreamConfig&)> route_analytics_result;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::StandardAnalyticsSink>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::CustomEndpointConfig&)> standard_analytics_sink;
     std::function<boost::asio::awaitable<
         std::shared_ptr<servicelib::http::Router>>(
         servicelib::Context, servicelib::IServiceEnvironment&,
@@ -80,9 +155,23 @@ class ServiceGenerated
 
   };
   struct ServiceFunctions final {
+    std::unique_ptr<functions::AnalyticsOrdersSource> analytics_orders_source;
+    std::unique_ptr<functions::AnalyticsPaymentsSource> analytics_payments_source;
     std::unique_ptr<functions::AnalyticsScheduleSource> analytics_schedule_source;
+    std::unique_ptr<functions::AnalyticsShipmentsSource> analytics_shipments_source;
     std::unique_ptr<functions::CountOrderProcessed> count_order_processed;
+    std::unique_ptr<functions::HighValueAnalyticsSink> high_value_analytics_sink;
+    std::unique_ptr<functions::JoinOrderPaymentAnalytics> join_order_payment_analytics;
+    std::unique_ptr<functions::JoinedAnalyticsSink> joined_analytics_sink;
+    std::unique_ptr<functions::KeyOrdersForJoin> key_orders_for_join;
+    std::unique_ptr<functions::KeyOrdersForMultiJoin> key_orders_for_multi_join;
+    std::unique_ptr<functions::KeyPaymentsForJoin> key_payments_for_join;
+    std::unique_ptr<functions::KeyPaymentsForMultiJoin> key_payments_for_multi_join;
+    std::unique_ptr<functions::KeyShipmentsForMultiJoin> key_shipments_for_multi_join;
+    std::unique_ptr<functions::MultiJoinAnalyticsEvents> multi_join_analytics_events;
     std::unique_ptr<functions::OrderProcessedEndpointSource> order_processed_endpoint_source;
+    std::unique_ptr<functions::RouteAnalyticsResult> route_analytics_result;
+    std::unique_ptr<functions::StandardAnalyticsSink> standard_analytics_sink;
   };
 
   ServiceMakers makers_;
@@ -102,6 +191,7 @@ class ServiceGenerated
   void initFunctions(servicelib::Context context, const config::Config& config);
   void initRuntime(servicelib::Context context);
   void initStreams(const config::Config& config);
+  void initDataSinks(const config::Config& config);
   void initDataSources(const config::Config& config);
   void stopRuntime() noexcept;
   void releaseRuntime() noexcept;
@@ -112,18 +202,105 @@ class ServiceGenerated
   using ConsumeOrderProcessedInput =
       servicelib::InputStream<example::model::types::OrderProcessed, example::model::types::OrderProcessed, std::exception_ptr,
                               ServiceGenerated>;
+  using AnalyticsOrdersInput =
+      servicelib::InputStream<example::analytics_service::types::AnalyticsEvent, std::monostate, std::exception_ptr,
+                              ServiceGenerated>;
+  using AnalyticsPaymentsInput =
+      servicelib::InputStream<example::analytics_service::types::AnalyticsEvent, std::monostate, std::exception_ptr,
+                              ServiceGenerated>;
+  using AnalyticsShipmentsInput =
+      servicelib::InputStream<example::analytics_service::types::AnalyticsEvent, std::monostate, std::exception_ptr,
+                              ServiceGenerated>;
 
 
   struct ServiceStreams final {
     AnalyticsScheduleInput* analytics_schedule{};
     ConsumeOrderProcessedInput* consume_order_processed{};
+    AnalyticsOrdersInput* analytics_orders{};
+    AnalyticsPaymentsInput* analytics_payments{};
+    AnalyticsShipmentsInput* analytics_shipments{};
     servicelib::StreamBase* count_order_processed{nullptr};
+
+    servicelib::StreamBase* split_analytics_orders{nullptr};
+
+    servicelib::StreamBase* split_analytics_payments{nullptr};
+
+    servicelib::StreamBase* key_orders_for_join{nullptr};
+
+    servicelib::StreamBase* key_payments_for_join{nullptr};
+
+    servicelib::StreamBase* join_order_payment_analytics{nullptr};
+
+    servicelib::SinkEndpointStreamRef<example::analytics_service::types::AnalyticsResult, std::monostate, std::exception_ptr> write_joined_analytics;
+
+    servicelib::StreamBase* key_orders_for_multi_join{nullptr};
+
+    servicelib::StreamBase* key_payments_for_multi_join{nullptr};
+
+    servicelib::StreamBase* key_shipments_for_multi_join{nullptr};
+
+    servicelib::StreamBase* multi_join_analytics_events{nullptr};
+
+    servicelib::StreamBase* route_analytics_result{nullptr};
+
+    servicelib::StreamBase* high_value_analytics{nullptr};
+
+    servicelib::StreamBase* standard_analytics{nullptr};
+
+    servicelib::SinkEndpointStreamRef<example::analytics_service::types::AnalyticsResult, std::monostate, std::exception_ptr> write_high_value_analytics;
+
+    servicelib::SinkEndpointStreamRef<example::analytics_service::types::AnalyticsResult, std::monostate, std::exception_ptr> write_standard_analytics;
 
   };
   ServiceStreams streams_;
 
+  struct WriteJoinedAnalyticsSinkBinding final {
+    std::function<void(servicelib::MessageContext, const example::analytics_service::types::AnalyticsResult&)>
+        consume;
+    struct Function final {
+      WriteJoinedAnalyticsSinkBinding* binding;
+      void operator()(servicelib::MessageContext context,
+                      const example::analytics_service::types::AnalyticsResult& value) const {
+        if (!binding->consume) {
+          throw std::logic_error("sink endpoint is not bound");
+        }
+        binding->consume(std::move(context), value);
+      }
+    };
+  };
+  struct WriteHighValueAnalyticsSinkBinding final {
+    std::function<void(servicelib::MessageContext, const example::analytics_service::types::AnalyticsResult&)>
+        consume;
+    struct Function final {
+      WriteHighValueAnalyticsSinkBinding* binding;
+      void operator()(servicelib::MessageContext context,
+                      const example::analytics_service::types::AnalyticsResult& value) const {
+        if (!binding->consume) {
+          throw std::logic_error("sink endpoint is not bound");
+        }
+        binding->consume(std::move(context), value);
+      }
+    };
+  };
+  struct WriteStandardAnalyticsSinkBinding final {
+    std::function<void(servicelib::MessageContext, const example::analytics_service::types::AnalyticsResult&)>
+        consume;
+    struct Function final {
+      WriteStandardAnalyticsSinkBinding* binding;
+      void operator()(servicelib::MessageContext context,
+                      const example::analytics_service::types::AnalyticsResult& value) const {
+        if (!binding->consume) {
+          throw std::logic_error("sink endpoint is not bound");
+        }
+        binding->consume(std::move(context), value);
+      }
+    };
+  };
 
   struct ServiceBindings final {
+    WriteJoinedAnalyticsSinkBinding write_joined_analytics;
+    WriteHighValueAnalyticsSinkBinding write_high_value_analytics;
+    WriteStandardAnalyticsSinkBinding write_standard_analytics;
   };
   ServiceBindings bindings_;
 
@@ -145,12 +322,36 @@ class ServiceGenerated
   };
 
 
+  using AnalyticsOrdersCustomSourceEndpoint =
+      servicelib::datasource::localsource::Endpoint<
+          example::analytics_service::types::AnalyticsEvent, std::monostate, functions::AnalyticsOrdersSource, std::exception_ptr>;
+  using AnalyticsPaymentsCustomSourceEndpoint =
+      servicelib::datasource::localsource::Endpoint<
+          example::analytics_service::types::AnalyticsEvent, std::monostate, functions::AnalyticsPaymentsSource, std::exception_ptr>;
+  using AnalyticsShipmentsCustomSourceEndpoint =
+      servicelib::datasource::localsource::Endpoint<
+          example::analytics_service::types::AnalyticsEvent, std::monostate, functions::AnalyticsShipmentsSource, std::exception_ptr>;
 
+  using WriteJoinedAnalyticsCustomSinkEndpoint =
+      servicelib::datasink::localsink::Endpoint<
+          example::analytics_service::types::AnalyticsResult, std::monostate, functions::JoinedAnalyticsSink, std::exception_ptr>;
+  using WriteHighValueAnalyticsCustomSinkEndpoint =
+      servicelib::datasink::localsink::Endpoint<
+          example::analytics_service::types::AnalyticsResult, std::monostate, functions::HighValueAnalyticsSink, std::exception_ptr>;
+  using WriteStandardAnalyticsCustomSinkEndpoint =
+      servicelib::datasink::localsink::Endpoint<
+          example::analytics_service::types::AnalyticsResult, std::monostate, functions::StandardAnalyticsSink, std::exception_ptr>;
 
 
   struct ServiceEndpoints final {
     std::shared_ptr<ConsumeOrderProcessedKafkaSourceEndpoint> consume_order_processed;
+    std::shared_ptr<AnalyticsOrdersCustomSourceEndpoint> analytics_orders;
+    std::shared_ptr<AnalyticsPaymentsCustomSourceEndpoint> analytics_payments;
+    std::shared_ptr<AnalyticsShipmentsCustomSourceEndpoint> analytics_shipments;
     std::shared_ptr<servicelib::datasource::cron::Endpoint> analytics_schedule;
+    std::shared_ptr<WriteJoinedAnalyticsCustomSinkEndpoint> write_joined_analytics;
+    std::shared_ptr<WriteHighValueAnalyticsCustomSinkEndpoint> write_high_value_analytics;
+    std::shared_ptr<WriteStandardAnalyticsCustomSinkEndpoint> write_standard_analytics;
   };
   ServiceEndpoints endpoints_;
 

@@ -18,12 +18,12 @@
 namespace example::inventory_service::config {
 
 inline constexpr int kInventoryServiceServiceId = 3;
-inline constexpr int kGetInventoryItemDataStreamId = 42;
-inline constexpr int kGetInventoryItemErrorStreamId = 43;
-inline constexpr int kMergeInventoryResultStreamId = 44;
-inline constexpr int kProcessInventoryItemStreamId = 45;
-inline constexpr int kProcessOrderItemEndpointId = 1;
-inline constexpr int kInventoryServiceApiConnectorId = 1;
+inline constexpr int kGetInventoryItemDataStreamId = 60;
+inline constexpr int kGetInventoryItemErrorStreamId = 61;
+inline constexpr int kMergeInventoryResultStreamId = 62;
+inline constexpr int kProcessInventoryItemStreamId = 63;
+inline constexpr int kProcessOrderItemEndpointId = 7;
+inline constexpr int kInventoryServiceApiConnectorId = 2;
 
 class Config final : public servicelib::config::IConfig {
  public:

@@ -1,0 +1,1 @@
+#include "analyticsservice/internal/functions/multijoinanalytics/multi_join_analytics_events.hpp"

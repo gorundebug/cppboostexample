@@ -18,24 +18,24 @@
 namespace example::order_service::config {
 
 inline constexpr int kOrderServiceServiceId = 4;
-inline constexpr int kProcessOrderItemErrorStreamId = 46;
-inline constexpr int kMapOrderItemResultToOrderStateStreamId = 47;
-inline constexpr int kMapToOrderProcessedStreamId = 48;
-inline constexpr int kMapToOrderStateStreamId = 49;
-inline constexpr int kMergeResultsStreamId = 50;
-inline constexpr int kProcessOrderStreamId = 51;
-inline constexpr int kProcessOrderItemStreamId = 52;
-inline constexpr int kProcessOrderItemsStreamId = 53;
-inline constexpr int kPublishOrderProcessedStreamId = 54;
-inline constexpr int kSoftDeadlineStreamId = 55;
-inline constexpr int kSplitOrderResultStreamId = 56;
-inline constexpr int kSplitPipelineStreamId = 57;
-inline constexpr int kOrderProcessedEndpointId = 4;
-inline constexpr int kProcessOrderEndpointId = 5;
-inline constexpr int kProcessOrderItemEndpointId = 1;
-inline constexpr int kInventoryServiceApiConnectorId = 1;
-inline constexpr int kOrderEventsConnectorId = 3;
-inline constexpr int kOrderServiceApiConnectorId = 4;
+inline constexpr int kProcessOrderItemErrorStreamId = 64;
+inline constexpr int kMapOrderItemResultToOrderStateStreamId = 65;
+inline constexpr int kMapToOrderProcessedStreamId = 66;
+inline constexpr int kMapToOrderStateStreamId = 67;
+inline constexpr int kMergeResultsStreamId = 68;
+inline constexpr int kProcessOrderStreamId = 69;
+inline constexpr int kProcessOrderItemStreamId = 70;
+inline constexpr int kProcessOrderItemsStreamId = 71;
+inline constexpr int kPublishOrderProcessedStreamId = 72;
+inline constexpr int kSoftDeadlineStreamId = 73;
+inline constexpr int kSplitOrderResultStreamId = 74;
+inline constexpr int kSplitPipelineStreamId = 75;
+inline constexpr int kOrderProcessedEndpointId = 10;
+inline constexpr int kProcessOrderEndpointId = 11;
+inline constexpr int kProcessOrderItemEndpointId = 7;
+inline constexpr int kInventoryServiceApiConnectorId = 2;
+inline constexpr int kOrderEventsConnectorId = 4;
+inline constexpr int kOrderServiceApiConnectorId = 5;
 
 class Config final : public servicelib::config::IConfig {
  public:

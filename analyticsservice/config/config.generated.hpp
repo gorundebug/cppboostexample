@@ -21,10 +21,35 @@ inline constexpr int kAnalyticsServiceServiceId = 1;
 inline constexpr int kAnalyticsScheduleStreamId = 1;
 inline constexpr int kConsumeOrderProcessedStreamId = 2;
 inline constexpr int kCountOrderProcessedStreamId = 3;
-inline constexpr int kAnalyticsScheduleEndpointId = 2;
-inline constexpr int kOrderProcessedEndpointId = 4;
-inline constexpr int kLocalCronConnectorId = 2;
-inline constexpr int kOrderEventsConnectorId = 3;
+inline constexpr int kAnalyticsOrdersStreamId = 4;
+inline constexpr int kAnalyticsPaymentsStreamId = 5;
+inline constexpr int kAnalyticsShipmentsStreamId = 6;
+inline constexpr int kSplitAnalyticsOrdersStreamId = 7;
+inline constexpr int kSplitAnalyticsPaymentsStreamId = 8;
+inline constexpr int kJoinOrderPaymentAnalyticsStreamId = 9;
+inline constexpr int kKeyOrdersForJoinStreamId = 10;
+inline constexpr int kKeyPaymentsForJoinStreamId = 11;
+inline constexpr int kWriteJoinedAnalyticsStreamId = 12;
+inline constexpr int kHighValueAnalyticsStreamId = 13;
+inline constexpr int kKeyOrdersForMultiJoinStreamId = 14;
+inline constexpr int kKeyPaymentsForMultiJoinStreamId = 15;
+inline constexpr int kKeyShipmentsForMultiJoinStreamId = 16;
+inline constexpr int kMultiJoinAnalyticsEventsStreamId = 17;
+inline constexpr int kRouteAnalyticsResultStreamId = 18;
+inline constexpr int kStandardAnalyticsStreamId = 19;
+inline constexpr int kWriteHighValueAnalyticsStreamId = 20;
+inline constexpr int kWriteStandardAnalyticsStreamId = 21;
+inline constexpr int kAnalyticsOrdersEndpointId = 1;
+inline constexpr int kAnalyticsPaymentsEndpointId = 2;
+inline constexpr int kAnalyticsScheduleEndpointId = 8;
+inline constexpr int kAnalyticsShipmentsEndpointId = 3;
+inline constexpr int kHighValueAnalyticsEndpointId = 4;
+inline constexpr int kJoinedAnalyticsEndpointId = 5;
+inline constexpr int kOrderProcessedEndpointId = 10;
+inline constexpr int kStandardAnalyticsEndpointId = 6;
+inline constexpr int kAnalyticsFunctionsConnectorId = 1;
+inline constexpr int kLocalCronConnectorId = 3;
+inline constexpr int kOrderEventsConnectorId = 4;
 
 class Config final : public servicelib::config::IConfig {
  public:
@@ -33,19 +58,44 @@ class Config final : public servicelib::config::IConfig {
   } services;
 
   struct Streams final {
+    servicelib::config::InputStreamConfig analyticsOrders;
+    servicelib::config::InputStreamConfig analyticsPayments;
     servicelib::config::InputStreamConfig analyticsSchedule;
+    servicelib::config::InputStreamConfig analyticsShipments;
     servicelib::config::InputStreamConfig consumeOrderProcessed;
     servicelib::config::ProcessStreamConfig countOrderProcessed;
+    servicelib::config::WhenStreamConfig highValueAnalytics;
+    servicelib::config::JoinStreamConfig joinOrderPaymentAnalytics;
+    servicelib::config::KeyByStreamConfig keyOrdersForJoin;
+    servicelib::config::KeyByStreamConfig keyOrdersForMultiJoin;
+    servicelib::config::KeyByStreamConfig keyPaymentsForJoin;
+    servicelib::config::KeyByStreamConfig keyPaymentsForMultiJoin;
+    servicelib::config::KeyByStreamConfig keyShipmentsForMultiJoin;
+    servicelib::config::MultiJoinStreamConfig multiJoinAnalyticsEvents;
+    servicelib::config::CaseStreamConfig routeAnalyticsResult;
+    servicelib::config::SplitStreamConfig splitAnalyticsOrders;
+    servicelib::config::SplitStreamConfig splitAnalyticsPayments;
+    servicelib::config::WhenStreamConfig standardAnalytics;
+    servicelib::config::SinkStreamConfig writeHighValueAnalytics;
+    servicelib::config::SinkStreamConfig writeJoinedAnalytics;
+    servicelib::config::SinkStreamConfig writeStandardAnalytics;
   } streams;
 
   struct DataConnectors final {
+    servicelib::config::CustomDataConnectorConfig analyticsFunctions;
     servicelib::config::CronDataConnectorConfig localCron;
     servicelib::config::KafkaDataConnectorConfig orderEvents;
   } dataConnectors;
 
   struct Endpoints final {
+    servicelib::config::CustomEndpointConfig analyticsOrders;
+    servicelib::config::CustomEndpointConfig analyticsPayments;
     servicelib::config::CronEndpointConfig analyticsSchedule;
+    servicelib::config::CustomEndpointConfig analyticsShipments;
+    servicelib::config::CustomEndpointConfig highValueAnalytics;
+    servicelib::config::CustomEndpointConfig joinedAnalytics;
     servicelib::config::KafkaEndpointConfig orderProcessed;
+    servicelib::config::CustomEndpointConfig standardAnalytics;
   } endpoints;
 
   struct Pools final {
@@ -61,6 +111,9 @@ class Config final : public servicelib::config::IConfig {
   } modules;
 
   struct Types final {
+    servicelib::config::TypeConfig analyticsEvent;
+    servicelib::config::TypeConfig analyticsKey;
+    servicelib::config::TypeConfig analyticsResult;
     servicelib::config::TypeConfig automationJob;
     servicelib::config::TypeConfig orderProcessed;
   } types;
@@ -74,17 +127,17 @@ class Config final : public servicelib::config::IConfig {
 
   std::vector<servicelib::config::StreamConfigRef> GetStreams()
       const override {
-    return { streams.analyticsSchedule, streams.consumeOrderProcessed, streams.countOrderProcessed,  };
+    return { streams.analyticsOrders, streams.analyticsPayments, streams.analyticsSchedule, streams.analyticsShipments, streams.consumeOrderProcessed, streams.countOrderProcessed, streams.highValueAnalytics, streams.joinOrderPaymentAnalytics, streams.keyOrdersForJoin, streams.keyOrdersForMultiJoin, streams.keyPaymentsForJoin, streams.keyPaymentsForMultiJoin, streams.keyShipmentsForMultiJoin, streams.multiJoinAnalyticsEvents, streams.routeAnalyticsResult, streams.splitAnalyticsOrders, streams.splitAnalyticsPayments, streams.standardAnalytics, streams.writeHighValueAnalytics, streams.writeJoinedAnalytics, streams.writeStandardAnalytics,  };
   }
 
   std::vector<servicelib::config::DataConnectorConfigRef> GetDataConnectors()
       const override {
-    return { dataConnectors.localCron, dataConnectors.orderEvents,  };
+    return { dataConnectors.analyticsFunctions, dataConnectors.localCron, dataConnectors.orderEvents,  };
   }
 
   std::vector<servicelib::config::EndpointConfigRef> GetEndpoints()
       const override {
-    return { endpoints.analyticsSchedule, endpoints.orderProcessed,  };
+    return { endpoints.analyticsOrders, endpoints.analyticsPayments, endpoints.analyticsSchedule, endpoints.analyticsShipments, endpoints.highValueAnalytics, endpoints.joinedAnalytics, endpoints.orderProcessed, endpoints.standardAnalytics,  };
   }
 
   std::vector<const servicelib::config::PoolConfig*> GetPools()
@@ -104,7 +157,7 @@ class Config final : public servicelib::config::IConfig {
 
   std::vector<const servicelib::config::TypeConfig*> GetTypes()
       const override {
-    return { &types.automationJob, &types.orderProcessed,  };
+    return { &types.analyticsEvent, &types.analyticsKey, &types.analyticsResult, &types.automationJob, &types.orderProcessed,  };
   }
 };
 
@@ -136,6 +189,32 @@ inline Config MakeConfig() {
     value.statusHandler = "status";
     return value;
   }();
+  cfg.streams.analyticsOrders = [] {
+    InputStreamConfig value{};
+    value.id = kAnalyticsOrdersStreamId;
+    value.name = "Analytics Orders";
+    value.pipeline = "analyticsSources";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = 0;
+    value.xPos = -1600;
+    value.yPos = 220;
+    value.valueType = "AnalyticsEvent";
+    value.idEndpoint = kAnalyticsOrdersEndpointId;
+    return value;
+  }();
+  cfg.streams.analyticsPayments = [] {
+    InputStreamConfig value{};
+    value.id = kAnalyticsPaymentsStreamId;
+    value.name = "Analytics Payments";
+    value.pipeline = "analyticsSources";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = 0;
+    value.xPos = -1600;
+    value.yPos = 430;
+    value.valueType = "AnalyticsEvent";
+    value.idEndpoint = kAnalyticsPaymentsEndpointId;
+    return value;
+  }();
   cfg.streams.analyticsSchedule = [] {
     InputStreamConfig value{};
     value.id = kAnalyticsScheduleStreamId;
@@ -147,6 +226,19 @@ inline Config MakeConfig() {
     value.yPos = -205;
     value.valueType = "AutomationJob";
     value.idEndpoint = kAnalyticsScheduleEndpointId;
+    return value;
+  }();
+  cfg.streams.analyticsShipments = [] {
+    InputStreamConfig value{};
+    value.id = kAnalyticsShipmentsStreamId;
+    value.name = "Analytics Shipments";
+    value.pipeline = "analyticsSources";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = 0;
+    value.xPos = -1600;
+    value.yPos = 780;
+    value.valueType = "AnalyticsEvent";
+    value.idEndpoint = kAnalyticsShipmentsEndpointId;
     return value;
   }();
   cfg.streams.consumeOrderProcessed = [] {
@@ -178,6 +270,247 @@ inline Config MakeConfig() {
     value.functionModule = "";
     return value;
   }();
+  cfg.streams.highValueAnalytics = [] {
+    WhenStreamConfig value{};
+    value.id = kHighValueAnalyticsStreamId;
+    value.name = "High Value Analytics";
+    value.pipeline = "multiJoinAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kRouteAnalyticsResultStreamId;
+    value.xPos = -400;
+    value.yPos = 650;
+    value.valueType = "AnalyticsResult";
+    return value;
+  }();
+  cfg.streams.joinOrderPaymentAnalytics = [] {
+    JoinStreamConfig value{};
+    value.id = kJoinOrderPaymentAnalyticsStreamId;
+    value.name = "Join Order Payment Analytics";
+    value.pipeline = "joinAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kKeyOrdersForJoinStreamId;
+    value.idSources = { kKeyPaymentsForJoinStreamId };
+    value.xPos = -900;
+    value.yPos = 260;
+    value.valueType = "AnalyticsResult";
+    value.joinType = JoinType::kInner;
+    value.joinStorage = JoinStorageType::kHashMap;
+    value.ttl = 60000;
+    value.renewTTL = true;
+    value.functionPackage = "joinanalytics";
+    value.functionName = "JoinOrderPaymentAnalytics";
+    value.functionDescription = "Join matching order and payment analytics events and emit their combined total.";
+    value.functionInitializerGroup = "";
+    value.functionModule = "";
+    return value;
+  }();
+  cfg.streams.keyOrdersForJoin = [] {
+    KeyByStreamConfig value{};
+    value.id = kKeyOrdersForJoinStreamId;
+    value.name = "Key Orders For Join";
+    value.pipeline = "joinAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kSplitAnalyticsOrdersStreamId;
+    value.xPos = -1160;
+    value.yPos = 170;
+    value.keyType = "AnalyticsKey";
+    value.valueType = "AnalyticsEvent";
+    value.functionPackage = "joinanalytics";
+    value.functionName = "KeyOrdersForJoin";
+    value.functionDescription = "Key the order analytics event by correlation key.";
+    value.functionInitializerGroup = "";
+    value.functionModule = "";
+    return value;
+  }();
+  cfg.streams.keyOrdersForMultiJoin = [] {
+    KeyByStreamConfig value{};
+    value.id = kKeyOrdersForMultiJoinStreamId;
+    value.name = "Key Orders For Multi Join";
+    value.pipeline = "multiJoinAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kSplitAnalyticsOrdersStreamId;
+    value.xPos = -1160;
+    value.yPos = 570;
+    value.keyType = "AnalyticsKey";
+    value.valueType = "AnalyticsEvent";
+    value.functionPackage = "multijoinanalytics";
+    value.functionName = "KeyOrdersForMultiJoin";
+    value.functionDescription = "Key the order analytics event for the multi-way join.";
+    value.functionInitializerGroup = "";
+    value.functionModule = "";
+    return value;
+  }();
+  cfg.streams.keyPaymentsForJoin = [] {
+    KeyByStreamConfig value{};
+    value.id = kKeyPaymentsForJoinStreamId;
+    value.name = "Key Payments For Join";
+    value.pipeline = "joinAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kSplitAnalyticsPaymentsStreamId;
+    value.xPos = -1160;
+    value.yPos = 350;
+    value.keyType = "AnalyticsKey";
+    value.valueType = "AnalyticsEvent";
+    value.functionPackage = "joinanalytics";
+    value.functionName = "KeyPaymentsForJoin";
+    value.functionDescription = "Key the payment analytics event by correlation key.";
+    value.functionInitializerGroup = "";
+    value.functionModule = "";
+    return value;
+  }();
+  cfg.streams.keyPaymentsForMultiJoin = [] {
+    KeyByStreamConfig value{};
+    value.id = kKeyPaymentsForMultiJoinStreamId;
+    value.name = "Key Payments For Multi Join";
+    value.pipeline = "multiJoinAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kSplitAnalyticsPaymentsStreamId;
+    value.xPos = -1160;
+    value.yPos = 740;
+    value.keyType = "AnalyticsKey";
+    value.valueType = "AnalyticsEvent";
+    value.functionPackage = "multijoinanalytics";
+    value.functionName = "KeyPaymentsForMultiJoin";
+    value.functionDescription = "Key the payment analytics event for the multi-way join.";
+    value.functionInitializerGroup = "";
+    value.functionModule = "";
+    return value;
+  }();
+  cfg.streams.keyShipmentsForMultiJoin = [] {
+    KeyByStreamConfig value{};
+    value.id = kKeyShipmentsForMultiJoinStreamId;
+    value.name = "Key Shipments For Multi Join";
+    value.pipeline = "multiJoinAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kAnalyticsShipmentsStreamId;
+    value.xPos = -1160;
+    value.yPos = 910;
+    value.keyType = "AnalyticsKey";
+    value.valueType = "AnalyticsEvent";
+    value.functionPackage = "multijoinanalytics";
+    value.functionName = "KeyShipmentsForMultiJoin";
+    value.functionDescription = "Key the shipment analytics event for the multi-way join.";
+    value.functionInitializerGroup = "";
+    value.functionModule = "";
+    return value;
+  }();
+  cfg.streams.multiJoinAnalyticsEvents = [] {
+    MultiJoinStreamConfig value{};
+    value.id = kMultiJoinAnalyticsEventsStreamId;
+    value.name = "Multi Join Analytics Events";
+    value.pipeline = "multiJoinAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kKeyOrdersForMultiJoinStreamId;
+    value.idSources = { kKeyPaymentsForMultiJoinStreamId, kKeyShipmentsForMultiJoinStreamId };
+    value.xPos = -900;
+    value.yPos = 740;
+    value.valueType = "AnalyticsResult";
+    value.joinStorage = JoinStorageType::kHashMap;
+    value.ttl = 60000;
+    value.renewTTL = true;
+    value.functionPackage = "multijoinanalytics";
+    value.functionName = "MultiJoinAnalyticsEvents";
+    value.functionDescription = "Combine matching order, payment, and shipment analytics events.";
+    value.functionInitializerGroup = "";
+    value.functionModule = "";
+    return value;
+  }();
+  cfg.streams.routeAnalyticsResult = [] {
+    CaseStreamConfig value{};
+    value.id = kRouteAnalyticsResultStreamId;
+    value.name = "Route Analytics Result";
+    value.pipeline = "multiJoinAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kMultiJoinAnalyticsEventsStreamId;
+    value.xPos = -650;
+    value.yPos = 740;
+    value.functionPackage = "multijoinanalytics";
+    value.functionName = "RouteAnalyticsResult";
+    value.functionDescription = "Route high-value analytics results to the first branch and all others to the second branch.";
+    value.functionInitializerGroup = "";
+    value.functionModule = "";
+    return value;
+  }();
+  cfg.streams.splitAnalyticsOrders = [] {
+    SplitStreamConfig value{};
+    value.id = kSplitAnalyticsOrdersStreamId;
+    value.name = "Split Analytics Orders";
+    value.pipeline = "analyticsSources";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kAnalyticsOrdersStreamId;
+    value.xPos = -1390;
+    value.yPos = 220;
+    return value;
+  }();
+  cfg.streams.splitAnalyticsPayments = [] {
+    SplitStreamConfig value{};
+    value.id = kSplitAnalyticsPaymentsStreamId;
+    value.name = "Split Analytics Payments";
+    value.pipeline = "analyticsSources";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kAnalyticsPaymentsStreamId;
+    value.xPos = -1390;
+    value.yPos = 430;
+    return value;
+  }();
+  cfg.streams.standardAnalytics = [] {
+    WhenStreamConfig value{};
+    value.id = kStandardAnalyticsStreamId;
+    value.name = "Standard Analytics";
+    value.pipeline = "multiJoinAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kRouteAnalyticsResultStreamId;
+    value.xPos = -400;
+    value.yPos = 830;
+    value.valueType = "AnalyticsResult";
+    return value;
+  }();
+  cfg.streams.writeHighValueAnalytics = [] {
+    SinkStreamConfig value{};
+    value.id = kWriteHighValueAnalyticsStreamId;
+    value.name = "Write High Value Analytics";
+    value.pipeline = "multiJoinAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kHighValueAnalyticsStreamId;
+    value.xPos = -130;
+    value.yPos = 650;
+    value.idEndpoint = kHighValueAnalyticsEndpointId;
+    value.valueType = "AnalyticsResult";
+    return value;
+  }();
+  cfg.streams.writeJoinedAnalytics = [] {
+    SinkStreamConfig value{};
+    value.id = kWriteJoinedAnalyticsStreamId;
+    value.name = "Write Joined Analytics";
+    value.pipeline = "joinAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kJoinOrderPaymentAnalyticsStreamId;
+    value.xPos = -640;
+    value.yPos = 260;
+    value.idEndpoint = kJoinedAnalyticsEndpointId;
+    value.valueType = "AnalyticsResult";
+    return value;
+  }();
+  cfg.streams.writeStandardAnalytics = [] {
+    SinkStreamConfig value{};
+    value.id = kWriteStandardAnalyticsStreamId;
+    value.name = "Write Standard Analytics";
+    value.pipeline = "multiJoinAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kStandardAnalyticsStreamId;
+    value.xPos = -130;
+    value.yPos = 830;
+    value.idEndpoint = kStandardAnalyticsEndpointId;
+    value.valueType = "AnalyticsResult";
+    return value;
+  }();
+  cfg.dataConnectors.analyticsFunctions = [] {
+    CustomDataConnectorConfig value{};
+    value.id = kAnalyticsFunctionsConnectorId;
+    value.name = "Analytics Functions";
+    value.implementation = DataConnectorImplementation::kFunction;
+    return value;
+  }();
   cfg.dataConnectors.localCron = [] {
     CronDataConnectorConfig value{};
     value.id = kLocalCronConnectorId;
@@ -199,6 +532,30 @@ inline Config MakeConfig() {
     value.password = "";
     return value;
   }();
+  cfg.endpoints.analyticsOrders = [] {
+    CustomEndpointConfig value{};
+    value.id = kAnalyticsOrdersEndpointId;
+    value.name = "Analytics Orders";
+    value.idDataConnector = kAnalyticsFunctionsConnectorId;
+    value.functionName = "AnalyticsOrders";
+    value.functionPackage = "endpoint";
+    value.publicFunction = false;
+    value.functionDescription = "Produce a deterministic order analytics event for the canonical join examples.";
+    value.functionInitializerGroup = "";
+    return value;
+  }();
+  cfg.endpoints.analyticsPayments = [] {
+    CustomEndpointConfig value{};
+    value.id = kAnalyticsPaymentsEndpointId;
+    value.name = "Analytics Payments";
+    value.idDataConnector = kAnalyticsFunctionsConnectorId;
+    value.functionName = "AnalyticsPayments";
+    value.functionPackage = "endpoint";
+    value.publicFunction = false;
+    value.functionDescription = "Produce a deterministic payment analytics event for the canonical join examples.";
+    value.functionInitializerGroup = "";
+    return value;
+  }();
   cfg.endpoints.analyticsSchedule = [] {
     CronEndpointConfig value{};
     value.id = kAnalyticsScheduleEndpointId;
@@ -214,6 +571,42 @@ inline Config MakeConfig() {
     value.functionPackage = "cron";
     value.publicFunction = false;
     value.functionDescription = "Create an analytics job message identifying the local scheduled firing.\n";
+    value.functionInitializerGroup = "";
+    return value;
+  }();
+  cfg.endpoints.analyticsShipments = [] {
+    CustomEndpointConfig value{};
+    value.id = kAnalyticsShipmentsEndpointId;
+    value.name = "Analytics Shipments";
+    value.idDataConnector = kAnalyticsFunctionsConnectorId;
+    value.functionName = "AnalyticsShipments";
+    value.functionPackage = "endpoint";
+    value.publicFunction = false;
+    value.functionDescription = "Produce a deterministic shipment analytics event for the canonical multi-way join example.";
+    value.functionInitializerGroup = "";
+    return value;
+  }();
+  cfg.endpoints.highValueAnalytics = [] {
+    CustomEndpointConfig value{};
+    value.id = kHighValueAnalyticsEndpointId;
+    value.name = "High Value Analytics";
+    value.idDataConnector = kAnalyticsFunctionsConnectorId;
+    value.functionName = "HighValueAnalytics";
+    value.functionPackage = "endpoint";
+    value.publicFunction = false;
+    value.functionDescription = "Validate and record analytics results routed to the high-value Case branch.";
+    value.functionInitializerGroup = "";
+    return value;
+  }();
+  cfg.endpoints.joinedAnalytics = [] {
+    CustomEndpointConfig value{};
+    value.id = kJoinedAnalyticsEndpointId;
+    value.name = "Joined Analytics";
+    value.idDataConnector = kAnalyticsFunctionsConnectorId;
+    value.functionName = "JoinedAnalytics";
+    value.functionPackage = "endpoint";
+    value.publicFunction = false;
+    value.functionDescription = "Validate and record the result of the two-way analytics join.";
     value.functionInitializerGroup = "";
     return value;
   }();
@@ -235,6 +628,18 @@ inline Config MakeConfig() {
     value.functionInitializerGroup = "";
     return value;
   }();
+  cfg.endpoints.standardAnalytics = [] {
+    CustomEndpointConfig value{};
+    value.id = kStandardAnalyticsEndpointId;
+    value.name = "Standard Analytics";
+    value.idDataConnector = kAnalyticsFunctionsConnectorId;
+    value.functionName = "StandardAnalytics";
+    value.functionPackage = "endpoint";
+    value.publicFunction = false;
+    value.functionDescription = "Validate and record analytics results routed to the standard Case branch.";
+    value.functionInitializerGroup = "";
+    return value;
+  }();
   cfg.modules.inventoryServiceApi = [] {
     ModuleConfig value{};
     value.name = "inventory_service_api";
@@ -251,6 +656,35 @@ inline Config MakeConfig() {
     ModuleConfig value{};
     value.name = "order_service_api";
     value.path = "github.com/gorundebug/cppboostexample-order-service-api";
+    return value;
+  }();
+  cfg.types.analyticsEvent = [] {
+    TypeConfig value{};
+    value.name = "AnalyticsEvent";
+    value.type = DataType::kStruct;
+    value.package = "";
+    value.definitionFormat = TypeDefinitionFormat::kNative;
+    value.publicType = false;
+    value.transferByValue = false;
+    return value;
+  }();
+  cfg.types.analyticsKey = [] {
+    TypeConfig value{};
+    value.name = "AnalyticsKey";
+    value.type = DataType::kString;
+    value.package = "";
+    value.publicType = false;
+    value.useAlias = false;
+    return value;
+  }();
+  cfg.types.analyticsResult = [] {
+    TypeConfig value{};
+    value.name = "AnalyticsResult";
+    value.type = DataType::kStruct;
+    value.package = "";
+    value.definitionFormat = TypeDefinitionFormat::kNative;
+    value.publicType = false;
+    value.transferByValue = false;
     return value;
   }();
   cfg.types.automationJob = [] {
@@ -436,16 +870,44 @@ inline void ApplyConfig(const YAML::Node& value, Config& config) {
     }
   }
   ApplyCustomProperties(FindConfigObject(value, "services", "analyticsService"), config.services.analyticsService);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "analyticsOrders"), config.streams.analyticsOrders);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "analyticsPayments"), config.streams.analyticsPayments);
   ApplyCustomProperties(FindConfigObject(value, "streams", "analyticsSchedule"), config.streams.analyticsSchedule);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "analyticsShipments"), config.streams.analyticsShipments);
   ApplyCustomProperties(FindConfigObject(value, "streams", "consumeOrderProcessed"), config.streams.consumeOrderProcessed);
   ApplyCustomProperties(FindConfigObject(value, "streams", "countOrderProcessed"), config.streams.countOrderProcessed);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "highValueAnalytics"), config.streams.highValueAnalytics);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "joinOrderPaymentAnalytics"), config.streams.joinOrderPaymentAnalytics);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "keyOrdersForJoin"), config.streams.keyOrdersForJoin);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "keyOrdersForMultiJoin"), config.streams.keyOrdersForMultiJoin);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "keyPaymentsForJoin"), config.streams.keyPaymentsForJoin);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "keyPaymentsForMultiJoin"), config.streams.keyPaymentsForMultiJoin);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "keyShipmentsForMultiJoin"), config.streams.keyShipmentsForMultiJoin);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "multiJoinAnalyticsEvents"), config.streams.multiJoinAnalyticsEvents);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "routeAnalyticsResult"), config.streams.routeAnalyticsResult);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "splitAnalyticsOrders"), config.streams.splitAnalyticsOrders);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "splitAnalyticsPayments"), config.streams.splitAnalyticsPayments);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "standardAnalytics"), config.streams.standardAnalytics);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "writeHighValueAnalytics"), config.streams.writeHighValueAnalytics);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "writeJoinedAnalytics"), config.streams.writeJoinedAnalytics);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "writeStandardAnalytics"), config.streams.writeStandardAnalytics);
+  ApplyCustomProperties(FindConfigObject(value, "dataConnectors", "analyticsFunctions"), config.dataConnectors.analyticsFunctions);
   ApplyCustomProperties(FindConfigObject(value, "dataConnectors", "localCron"), config.dataConnectors.localCron);
   ApplyCustomProperties(FindConfigObject(value, "dataConnectors", "orderEvents"), config.dataConnectors.orderEvents);
+  ApplyCustomProperties(FindConfigObject(value, "endpoints", "analyticsOrders"), config.endpoints.analyticsOrders);
+  ApplyCustomProperties(FindConfigObject(value, "endpoints", "analyticsPayments"), config.endpoints.analyticsPayments);
   ApplyCustomProperties(FindConfigObject(value, "endpoints", "analyticsSchedule"), config.endpoints.analyticsSchedule);
+  ApplyCustomProperties(FindConfigObject(value, "endpoints", "analyticsShipments"), config.endpoints.analyticsShipments);
+  ApplyCustomProperties(FindConfigObject(value, "endpoints", "highValueAnalytics"), config.endpoints.highValueAnalytics);
+  ApplyCustomProperties(FindConfigObject(value, "endpoints", "joinedAnalytics"), config.endpoints.joinedAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "endpoints", "orderProcessed"), config.endpoints.orderProcessed);
+  ApplyCustomProperties(FindConfigObject(value, "endpoints", "standardAnalytics"), config.endpoints.standardAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "modules", "inventoryServiceApi"), config.modules.inventoryServiceApi);
   ApplyCustomProperties(FindConfigObject(value, "modules", "model"), config.modules.model);
   ApplyCustomProperties(FindConfigObject(value, "modules", "orderServiceApi"), config.modules.orderServiceApi);
+  ApplyCustomProperties(FindConfigObject(value, "types", "analyticsEvent"), config.types.analyticsEvent);
+  ApplyCustomProperties(FindConfigObject(value, "types", "analyticsKey"), config.types.analyticsKey);
+  ApplyCustomProperties(FindConfigObject(value, "types", "analyticsResult"), config.types.analyticsResult);
   ApplyCustomProperties(FindConfigObject(value, "types", "automationJob"), config.types.automationJob);
   ApplyCustomProperties(FindConfigObject(value, "types", "orderProcessed"), config.types.orderProcessed);
   ApplyConfig(value, config.custom);

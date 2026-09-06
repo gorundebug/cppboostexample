@@ -1,4 +1,51 @@
 dataConnectors:
+    analyticsFunctions:
+        endpoints:
+            analyticsOrders:
+                functionDescription: Produce a deterministic order analytics event for the canonical join examples.
+                functionInitializerGroup: ""
+                functionName: AnalyticsOrders
+                functionPackage: endpoint
+                name: Analytics Orders
+                publicFunction: false
+            analyticsPayments:
+                functionDescription: Produce a deterministic payment analytics event for the canonical join examples.
+                functionInitializerGroup: ""
+                functionName: AnalyticsPayments
+                functionPackage: endpoint
+                name: Analytics Payments
+                publicFunction: false
+            analyticsShipments:
+                functionDescription: Produce a deterministic shipment analytics event for the canonical multi-way join example.
+                functionInitializerGroup: ""
+                functionName: AnalyticsShipments
+                functionPackage: endpoint
+                name: Analytics Shipments
+                publicFunction: false
+            highValueAnalytics:
+                functionDescription: Validate and record analytics results routed to the high-value Case branch.
+                functionInitializerGroup: ""
+                functionName: HighValueAnalytics
+                functionPackage: endpoint
+                name: High Value Analytics
+                publicFunction: false
+            joinedAnalytics:
+                functionDescription: Validate and record the result of the two-way analytics join.
+                functionInitializerGroup: ""
+                functionName: JoinedAnalytics
+                functionPackage: endpoint
+                name: Joined Analytics
+                publicFunction: false
+            standardAnalytics:
+                functionDescription: Validate and record analytics results routed to the standard Case branch.
+                functionInitializerGroup: ""
+                functionName: StandardAnalytics
+                functionPackage: endpoint
+                name: Standard Analytics
+                publicFunction: false
+        implementation: function
+        name: Analytics Functions
+        type: Custom
     inventoryServiceApi:
         address: dns:///localhost:9202
         connectionsCount: 1
@@ -366,6 +413,63 @@ services:
                     countOrderProcessed:
                         x: -1390
                         "y": -19
+                analyticsSources:
+                    analyticsOrders:
+                        x: -1600
+                        "y": 220
+                    analyticsPayments:
+                        x: -1600
+                        "y": 430
+                    analyticsShipments:
+                        x: -1600
+                        "y": 780
+                    splitAnalyticsOrders:
+                        x: -1390
+                        "y": 220
+                    splitAnalyticsPayments:
+                        x: -1390
+                        "y": 430
+                joinAnalytics:
+                    joinOrderPaymentAnalytics:
+                        x: -900
+                        "y": 260
+                    keyOrdersForJoin:
+                        x: -1160
+                        "y": 170
+                    keyPaymentsForJoin:
+                        x: -1160
+                        "y": 350
+                    writeJoinedAnalytics:
+                        x: -640
+                        "y": 260
+                multiJoinAnalytics:
+                    highValueAnalytics:
+                        x: -400
+                        "y": 650
+                    keyOrdersForMultiJoin:
+                        x: -1160
+                        "y": 570
+                    keyPaymentsForMultiJoin:
+                        x: -1160
+                        "y": 740
+                    keyShipmentsForMultiJoin:
+                        x: -1160
+                        "y": 910
+                    multiJoinAnalyticsEvents:
+                        x: -900
+                        "y": 740
+                    routeAnalyticsResult:
+                        x: -650
+                        "y": 740
+                    standardAnalytics:
+                        x: -400
+                        "y": 830
+                    writeHighValueAnalytics:
+                        x: -130
+                        "y": 650
+                    writeStandardAnalytics:
+                        x: -130
+                        "y": 830
         defaultCallSemantics: FunctionCall
         environment: ""
         golangVersion: 1.25.4
@@ -402,6 +506,156 @@ services:
                     source: consumeOrderProcessed
                     type: Process
                     valueType: orderProcessed
+            analyticsSources:
+                analyticsOrders:
+                    endpoint: analyticsOrders
+                    name: Analytics Orders
+                    type: Input
+                    valueType: analyticsEvent
+                analyticsPayments:
+                    endpoint: analyticsPayments
+                    name: Analytics Payments
+                    type: Input
+                    valueType: analyticsEvent
+                analyticsShipments:
+                    endpoint: analyticsShipments
+                    name: Analytics Shipments
+                    type: Input
+                    valueType: analyticsEvent
+                splitAnalyticsOrders:
+                    name: Split Analytics Orders
+                    source: analyticsOrders
+                    type: Split
+                splitAnalyticsPayments:
+                    name: Split Analytics Payments
+                    source: analyticsPayments
+                    type: Split
+            joinAnalytics:
+                joinOrderPaymentAnalytics:
+                    functionDescription: Join matching order and payment analytics events and emit their combined total.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: JoinOrderPaymentAnalytics
+                    functionPackage: joinanalytics
+                    joinStorage: HashMap
+                    joinType: Inner
+                    name: Join Order Payment Analytics
+                    renewTTL: true
+                    source: keyOrdersForJoin
+                    sources:
+                        - keyPaymentsForJoin
+                    ttl: 60000
+                    type: Join
+                    valueType: analyticsResult
+                keyOrdersForJoin:
+                    functionDescription: Key the order analytics event by correlation key.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: KeyOrdersForJoin
+                    functionPackage: joinanalytics
+                    keyType: analyticsKey
+                    name: Key Orders For Join
+                    source: splitAnalyticsOrders
+                    type: KeyBy
+                    valueType: analyticsEvent
+                keyPaymentsForJoin:
+                    functionDescription: Key the payment analytics event by correlation key.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: KeyPaymentsForJoin
+                    functionPackage: joinanalytics
+                    keyType: analyticsKey
+                    name: Key Payments For Join
+                    source: splitAnalyticsPayments
+                    type: KeyBy
+                    valueType: analyticsEvent
+                writeJoinedAnalytics:
+                    endpoint: joinedAnalytics
+                    name: Write Joined Analytics
+                    source: joinOrderPaymentAnalytics
+                    type: Sink
+                    valueType: analyticsResult
+            multiJoinAnalytics:
+                highValueAnalytics:
+                    name: High Value Analytics
+                    source: routeAnalyticsResult
+                    type: When
+                    valueType: analyticsResult
+                keyOrdersForMultiJoin:
+                    functionDescription: Key the order analytics event for the multi-way join.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: KeyOrdersForMultiJoin
+                    functionPackage: multijoinanalytics
+                    keyType: analyticsKey
+                    name: Key Orders For Multi Join
+                    source: splitAnalyticsOrders
+                    type: KeyBy
+                    valueType: analyticsEvent
+                keyPaymentsForMultiJoin:
+                    functionDescription: Key the payment analytics event for the multi-way join.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: KeyPaymentsForMultiJoin
+                    functionPackage: multijoinanalytics
+                    keyType: analyticsKey
+                    name: Key Payments For Multi Join
+                    source: splitAnalyticsPayments
+                    type: KeyBy
+                    valueType: analyticsEvent
+                keyShipmentsForMultiJoin:
+                    functionDescription: Key the shipment analytics event for the multi-way join.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: KeyShipmentsForMultiJoin
+                    functionPackage: multijoinanalytics
+                    keyType: analyticsKey
+                    name: Key Shipments For Multi Join
+                    source: analyticsShipments
+                    type: KeyBy
+                    valueType: analyticsEvent
+                multiJoinAnalyticsEvents:
+                    functionDescription: Combine matching order, payment, and shipment analytics events.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: MultiJoinAnalyticsEvents
+                    functionPackage: multijoinanalytics
+                    joinStorage: HashMap
+                    name: Multi Join Analytics Events
+                    renewTTL: true
+                    source: keyOrdersForMultiJoin
+                    sources:
+                        - keyPaymentsForMultiJoin
+                        - keyShipmentsForMultiJoin
+                    ttl: 60000
+                    type: MultiJoin
+                    valueType: analyticsResult
+                routeAnalyticsResult:
+                    functionDescription: Route high-value analytics results to the first branch and all others to the second branch.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: RouteAnalyticsResult
+                    functionPackage: multijoinanalytics
+                    name: Route Analytics Result
+                    source: multiJoinAnalyticsEvents
+                    type: Case
+                standardAnalytics:
+                    name: Standard Analytics
+                    source: routeAnalyticsResult
+                    type: When
+                    valueType: analyticsResult
+                writeHighValueAnalytics:
+                    endpoint: highValueAnalytics
+                    name: Write High Value Analytics
+                    source: highValueAnalytics
+                    type: Sink
+                    valueType: analyticsResult
+                writeStandardAnalytics:
+                    endpoint: standardAnalytics
+                    name: Write Standard Analytics
+                    source: standardAnalytics
+                    type: Sink
+                    valueType: analyticsResult
         programmingLanguage: CppBoost
         readinessHandler: health/ready
         shutdownTimeout: 30000
@@ -1186,6 +1440,26 @@ settings:
     name: Example
     repoPath: github.com/gorundebug/cppboostexample
 types:
+    analyticsEvent:
+        definitionFormat: Native
+        description: 'Input for the canonical analytics joins. Fields: Key AnalyticsKey, Value int, Kind string.'
+        name: AnalyticsEvent
+        publicType: false
+        transferByValue: false
+        type: struct
+    analyticsKey:
+        description: Correlation key used by the canonical analytics joins.
+        name: AnalyticsKey
+        publicType: false
+        type: string
+        useAlias: false
+    analyticsResult:
+        definitionFormat: Native
+        description: 'Output of the canonical analytics joins. Fields: Key AnalyticsKey, Total int, Kind string.'
+        name: AnalyticsResult
+        publicType: false
+        transferByValue: false
+        type: struct
     automationJob:
         description: Automation job payload and result.
         module: model

@@ -1,0 +1,1 @@
+#include "analyticsservice/internal/functions/joinanalytics/key_payments_for_join.hpp"

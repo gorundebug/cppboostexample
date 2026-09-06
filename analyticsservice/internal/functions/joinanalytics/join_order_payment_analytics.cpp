@@ -1,0 +1,1 @@
+#include "analyticsservice/internal/functions/joinanalytics/join_order_payment_analytics.hpp"

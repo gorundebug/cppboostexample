@@ -5,8 +5,26 @@
 
 #include <servicelib/runtime/serde/serde.hpp>
 #include <servicelib/runtime/serde/serdeimpl.hpp>
+#include <analyticsservice/internal/serdes/analytics_event_serde.hpp>
+#include <analyticsservice/internal/serdes/analytics_result_serde.hpp>
 #include <model_cpp/include/example/model/serdes/order_processed_serde.hpp>
 
+
+template <>
+struct servicelib::serde::DefaultSerdeFactory<example::analytics_service::types::AnalyticsEvent> final {
+  static std::shared_ptr<const servicelib::serde::Serde<example::analytics_service::types::AnalyticsEvent>>
+  Make(servicelib::serde::SerdeLimits) {
+    return std::make_shared<example::analytics_service::types::serde::AnalyticsEventSerde>();
+  }
+};
+
+template <>
+struct servicelib::serde::DefaultSerdeFactory<example::analytics_service::types::AnalyticsResult> final {
+  static std::shared_ptr<const servicelib::serde::Serde<example::analytics_service::types::AnalyticsResult>>
+  Make(servicelib::serde::SerdeLimits) {
+    return std::make_shared<example::analytics_service::types::serde::AnalyticsResultSerde>();
+  }
+};
 
 template <>
 struct servicelib::serde::DefaultSerdeFactory<example::model::types::OrderProcessed> final {
