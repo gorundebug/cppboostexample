@@ -117,6 +117,7 @@ go-mod-sync: ## Sync Go modules with published versions after git-push
 	@cd ./model_go && GOWORK=off GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
 	@cd ./order_service_api && GOWORK=off GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
 	@cd ./automationservice && GOWORK=off GOPRIVATE="$(GOPRIVATE)" go mod tidy -e
+	@go work use
 
 $(BUF):
 	@mkdir -p "$(TOOLS_DIR)"
