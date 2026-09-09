@@ -12,6 +12,7 @@
 
 #include <boost/asio/awaitable.hpp>
 #include <mutex>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <stop_token>
@@ -40,7 +41,7 @@ struct ProcessOrderSource final {
   struct SharedState final {
     std::mutex mutex;
     std::stop_source cancel;
-    example::order_service::types::Order order;
+    std::optional<servicelib::Payload<example::order_service::types::Order>> order;
     std::size_t expectedItems{};
     std::vector<example::model::types::OrderItemResult> results;
     bool responseSent{};
@@ -59,6 +60,7 @@ struct ProcessOrderSource final {
       servicelib::datasource::http::HandlerData& data) const {
     try {
       auto shared = std::make_shared<SharedState>();
+      example::order_service::types::Order order;
       const auto parsed = boost::json::parse(data.request.body);
       const auto& json = parsed.as_object();
       const auto* itemsValue = json.if_contains("items");
@@ -72,14 +74,14 @@ struct ProcessOrderSource final {
               .value_or("")};
       if (orderId.empty()) orderId = servicelib::http::NewStreamId();
 
-      shared->order.id = std::move(orderId);
-      shared->order.customer_id =
+      order.id = std::move(orderId);
+      order.customer_id =
           stringField(json, "customer_id", "customerId", "");
-      shared->order.trace_id = std::string{
+      order.trace_id = std::string{
           servicelib::http::Header(data.request.headers, "X-Trace")
               .value_or("")};
-      shared->order.created_at = nowString();
-      shared->order.items.reserve(itemsValue->as_array().size());
+      order.created_at = nowString();
+      order.items.reserve(itemsValue->as_array().size());
 
       for (const auto& itemValue : itemsValue->as_array()) {
         const auto& itemJson = itemValue.as_object();
@@ -89,17 +91,21 @@ struct ProcessOrderSource final {
         }
         const auto unitPrice =
             doubleField(itemJson, "unit_price", "unitPrice", 0.0);
-        shared->order.items.push_back(example::model::types::OrderItem{
-            shared->order.id,
+        order.items.push_back(example::model::types::OrderItem{
+            order.id,
             stringField(itemJson, "item_id", "itemId"),
             stringField(itemJson, "sku", "sku"),
             quantity,
             unitPrice,
         });
-        shared->order.total_amount +=
+        order.total_amount +=
             static_cast<double>(quantity) * unitPrice;
       }
-      shared->expectedItems = shared->order.items.size();
+      shared->expectedItems = order.items.size();
+
+      shared->results.reserve(shared->expectedItems);
+      shared->order.emplace(servicelib::Payload<
+          example::order_service::types::Order>::make(std::move(order)));
 
       const auto deadline = std::chrono::steady_clock::now() + timeout_;
       if (!context.deadline() || deadline < *context.deadline()) {
@@ -121,7 +127,7 @@ struct ProcessOrderSource final {
       servicelib::datasource::http::HandlerData&, auto resultContext) const {
     const auto shared = state.shared;
     resultContext.setResultCallback(
-        shared->order.id,
+        shared->order->get().id,
         [resultContext, shared](
             servicelib::MessageContext, auto&, State&,
             const example::order_service::types::OrderState& value,
@@ -151,18 +157,18 @@ struct ProcessOrderSource final {
             totalAmount +=
                 item.unit_price * static_cast<double>(item.requested_qty);
           }
-          if (shared->results.empty()) totalAmount = shared->order.total_amount;
+          if (shared->results.empty()) totalAmount = shared->order->get().total_amount;
 
           data.response.status = 200;
           data.response.contentType = "application/json";
-          data.setResponseBody(makeResponse(shared->order.id, status,
+          data.setResponseBody(makeResponse(shared->order->get().id, status,
                                             shared->results, totalAmount));
           shared->responseSent = true;
           resultContext.done();
           return true;
         });
 
-    streamContext.collect(std::move(context), shared->order);
+    streamContext.collect(std::move(context), *shared->order);
   }
 
   std::string getMessageId(
