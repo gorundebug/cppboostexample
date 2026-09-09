@@ -10,29 +10,29 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-LOCAL_STATE_DIR="$PROJECT_DIR/.servicegen"
-MERGE_LOG="$LOCAL_STATE_DIR/merge.log"
-mkdir -p "$LOCAL_STATE_DIR"
-: > "$MERGE_LOG"
+PROJECT_DIR="${SERVICEGEN_PROJECT_DIR_OVERRIDE:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+if [[ ! -d "$PROJECT_DIR" ]]; then
+    printf '%s\n' "[SG_MERGE_INVALID_ARGUMENT] project directory '$PROJECT_DIR' was not found" >&2
+    exit 1
+fi
+PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd)"
+MERGE_LOG=""
 
 log() {
     printf '%s\n' "$*"
-    printf '%s\n' "$*" >> "$MERGE_LOG"
+    if [[ -n "$MERGE_LOG" ]]; then printf '%s\n' "$*" >> "$MERGE_LOG"; fi
 }
 
 log_error() {
     printf '%s\n' "$*" >&2
-    printf '%s\n' "$*" >> "$MERGE_LOG"
+    if [[ -n "$MERGE_LOG" ]]; then printf '%s\n' "$*" >> "$MERGE_LOG"; fi
 }
-
-log "Servicegen merge started at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
-log "Log: $MERGE_LOG"
 
 DRY_RUN=0
 REMOVE_STALE=0
 ARCHIVE=""
 EXPLICIT_OVERWRITE_LIST=""
+REPORT_JSON=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --dry-run)
@@ -51,6 +51,14 @@ while [[ $# -gt 0 ]]; do
             EXPLICIT_OVERWRITE_LIST="$2"
             shift 2
             ;;
+        --report-json)
+            if [[ $# -lt 2 || -z "$2" ]]; then
+                log_error "[SG_MERGE_INVALID_ARGUMENT] --report-json requires a file"
+                exit 2
+            fi
+            REPORT_JSON="$2"
+            shift 2
+            ;;
         -*)
             log_error "[SG_MERGE_INVALID_ARGUMENT] unsupported option '$1'"
             exit 2
@@ -67,7 +75,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$ARCHIVE" ]]; then
-    log_error "[SG_MERGE_INVALID_ARGUMENT] Usage: $0 [--dry-run] [--remove-stale] [--overwrite-list <file>] <archive.zip|archive.tar.gz>"
+    log_error "[SG_MERGE_INVALID_ARGUMENT] Usage: $0 [--dry-run] [--remove-stale] [--overwrite-list <file>] [--report-json <file>] <archive.zip|archive.tar.gz>"
     exit 2
 fi
 if [[ ! -f "$ARCHIVE" ]]; then
@@ -84,6 +92,18 @@ MERGE_FILE_HOOK="$SCRIPT_DIR/merge_file.sh"
 MERGE_POST_HOOK="$SCRIPT_DIR/merge_post.sh"
 TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/servicegen-merge.XXXXXX")"
 trap 'rm -rf "$TMP_DIR"' EXIT
+REPORT_EVENTS="$TMP_DIR/report-events.bin"
+: > "$REPORT_EVENTS"
+if [[ "$DRY_RUN" -eq 1 ]]; then
+    MERGE_LOG="$TMP_DIR/merge.log"
+else
+    LOCAL_STATE_DIR="$PROJECT_DIR/.servicegen"
+    MERGE_LOG="$LOCAL_STATE_DIR/merge.log"
+    mkdir -p "$LOCAL_STATE_DIR"
+fi
+: > "$MERGE_LOG"
+log "Servicegen merge started at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+log "Log: $MERGE_LOG"
 
 log "Unpacking '$ARCHIVE' ..."
 case "$ARCHIVE" in
@@ -303,6 +323,7 @@ while IFS= read -r src; do
         log_error "[SG_MERGE_HOOK_INVALID_ACTION] invalid resolved action '$action' for '$rel'"
         exit 1
     fi
+    printf '%s\0%s\0' "$action" "$rel" >> "$REPORT_EVENTS"
 done < <(find "$SRC_ROOT" -type f -print | LC_ALL=C sort)
 
 if [[ -n "$EXPLICIT_OVERWRITE_LIST" ]]; then
@@ -320,6 +341,7 @@ while IFS= read -r current; do
     if [[ ! -f "$SRC_ROOT/$rel" ]]; then
         log "  STALE $rel"
         STALE=$((STALE + 1))
+        printf 'STALE\0%s\0' "$rel" >> "$REPORT_EVENTS"
         if [[ "$REMOVE_STALE" -eq 1 && "$DRY_RUN" -eq 0 ]]; then
             validate_relative_path "$rel" || {
                 log_error "[SG_MERGE_INVALID_PATH] refusing to remove invalid path '$rel'"
@@ -402,6 +424,70 @@ log "  file hook overrides: $HOOK_OVERRIDES"
 log "  post hooks executed: $POST_HOOKS"
 if [[ "$DRY_RUN" -eq 1 ]]; then
     log "  mode: dry-run; project was not changed"
+fi
+
+if [[ -n "$REPORT_JSON" ]]; then
+    python3 - \
+        "$REPORT_JSON" "$REPORT_EVENTS" "$DRY_RUN" "$REMOVE_STALE" \
+        "$ADDED" "$UPDATED" "$OVERWRITTEN" "$PRESERVED" "$STALE" \
+        "$REMOVED" "$HOOK_OVERRIDES" "$POST_HOOKS" "$VALIDATION_STATUS" <<'PY'
+import json
+import os
+import sys
+from pathlib import Path
+
+(
+    report_path,
+    events_path,
+    dry_run,
+    remove_stale,
+    added,
+    updated,
+    overwritten,
+    preserved,
+    stale,
+    removed,
+    hook_overrides,
+    post_hooks,
+    validation_status,
+) = sys.argv[1:]
+parts = Path(events_path).read_bytes().split(b"\0")
+if parts and parts[-1] == b"":
+    parts.pop()
+if len(parts) % 2:
+    raise SystemExit("invalid internal merge report event stream")
+files = [
+    {"action": parts[index].decode("utf-8"), "path": parts[index + 1].decode("utf-8")}
+    for index in range(0, len(parts), 2)
+]
+status_code = int(validation_status)
+payload = {
+    "schemaVersion": "1.0",
+    "operation": "merge-preview" if dry_run == "1" else "merge-apply",
+    "status": "success" if status_code == 0 else "failed",
+    "options": {
+        "dryRun": dry_run == "1",
+        "removeStale": remove_stale == "1",
+    },
+    "summary": {
+        "added": int(added),
+        "generatedUpdated": int(updated),
+        "overwritten": int(overwritten),
+        "preserved": int(preserved),
+        "stale": int(stale),
+        "removed": int(removed),
+        "fileHookOverrides": int(hook_overrides),
+        "postHooksExecuted": int(post_hooks),
+    },
+    "files": files,
+    "validationExitCode": status_code,
+}
+target = Path(report_path)
+target.parent.mkdir(parents=True, exist_ok=True)
+temporary = target.with_name(f".{target.name}.tmp.{os.getpid()}")
+temporary.write_text(json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n")
+temporary.replace(target)
+PY
 fi
 
 if [[ "$DRY_RUN" -eq 0 && -n "$SELF_UPDATE" ]]; then
