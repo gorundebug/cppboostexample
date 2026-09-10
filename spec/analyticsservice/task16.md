@@ -1,33 +1,33 @@
-# Task 16/17: `HighValueAnalyticsSink`
+# Task 16/22: `AnalyticsPaymentsSource`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `C++/Boost` |
-| Kind | `custom-sink` |
-| File | `analyticsservice/internal/functions/endpoint/high_value_analytics_sink.hpp` |
-| Test | `analyticsservice/internal/functions/endpoint/high_value_analytics_sink_test.cpp` |
+| Kind | `custom-source` |
+| File | `analyticsservice/internal/functions/endpoint/analytics_payments_source.hpp` |
+| Test | `analyticsservice/internal/functions/endpoint/analytics_payments_source_test.cpp` |
 | Service | `Analytics Service` |
 
 
 ## Behaviour
 
-Validate and record analytics results routed to the high-value Case branch.
+Produce a deterministic payment analytics event for the canonical join examples.
 
 
 
 
 ## Stream types
-- Input: `AnalyticsResult` — `analyticsservice/internal/types/analytics_result.hpp`
+- Input: `AnalyticsEvent` — `analyticsservice/internal/types/analytics_event.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `analyticsservice/internal/functions/endpoint/high_value_analytics_sink.hpp` and preserve its generated contract
-- [ ] Inspect input type `AnalyticsResult` in `analyticsservice/internal/types/analytics_result.hpp`
+- [ ] Open `analyticsservice/internal/functions/endpoint/analytics_payments_source.hpp` and preserve its generated contract
+- [ ] Inspect input type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/high_value_analytics_sink_test.cpp`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/analytics_payments_source_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task16.md — HighValueAnalyticsSink — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task16.md — AnalyticsPaymentsSource — C++/Boost — done`

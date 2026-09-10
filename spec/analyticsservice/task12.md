@@ -1,33 +1,35 @@
-# Task 12/17: `AnalyticsOrdersSource`
+# Task 12/22: `RouteAnalyticsResult`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `C++/Boost` |
-| Kind | `custom-source` |
-| File | `analyticsservice/internal/functions/endpoint/analytics_orders_source.hpp` |
-| Test | `analyticsservice/internal/functions/endpoint/analytics_orders_source_test.cpp` |
+| Kind | `case` |
+| File | `analyticsservice/internal/functions/multijoinanalytics/route_analytics_result.hpp` |
+| Test | `analyticsservice/internal/functions/multijoinanalytics/route_analytics_result_test.cpp` |
 | Service | `Analytics Service` |
 
 
 ## Behaviour
 
-Produce a deterministic order analytics event for the canonical join examples.
+Route high-value analytics results to the first branch and all others to the second branch.
 
 
 
 
 ## Stream types
-- Input: `AnalyticsEvent` — `analyticsservice/internal/types/analytics_event.hpp`
+- Input: `AnalyticsResult` — `analyticsservice/internal/types/analytics_result.hpp`
+- Output: `AnalyticsResult` — `analyticsservice/internal/types/analytics_result.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `analyticsservice/internal/functions/endpoint/analytics_orders_source.hpp` and preserve its generated contract
-- [ ] Inspect input type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
+- [ ] Open `analyticsservice/internal/functions/multijoinanalytics/route_analytics_result.hpp` and preserve its generated contract
+- [ ] Inspect input type `AnalyticsResult` in `analyticsservice/internal/types/analytics_result.hpp`
+- [ ] Inspect output type `AnalyticsResult` in `analyticsservice/internal/types/analytics_result.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/analytics_orders_source_test.cpp`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/multijoinanalytics/route_analytics_result_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task12.md — AnalyticsOrdersSource — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task12.md — RouteAnalyticsResult — C++/Boost — done`

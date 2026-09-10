@@ -115,6 +115,9 @@ add_executable(example_analytics_service
 
     internal/app/service.cpp
     internal/functions/analytics/count_order_processed.cpp
+    internal/functions/cycleanalytics/advance_cycle_analytics.cpp
+    internal/functions/cycleanalytics/complete_cycle_analytics.cpp
+    internal/functions/cycleanalytics/continue_cycle_analytics.cpp
     internal/functions/joinanalytics/join_order_payment_analytics.cpp
     internal/functions/joinanalytics/key_orders_for_join.cpp
     internal/functions/joinanalytics/key_payments_for_join.cpp
@@ -158,9 +161,14 @@ include(GoogleTest)
 add_executable(example_analytics_service_unit_tests
     internal/functions/analytics/count_order_processed_test.cpp
     internal/functions/cron/analytics_schedule_source_test.cpp
+    internal/functions/cycleanalytics/advance_cycle_analytics_test.cpp
+    internal/functions/cycleanalytics/complete_cycle_analytics_test.cpp
+    internal/functions/cycleanalytics/continue_cycle_analytics_test.cpp
     internal/functions/endpoint/analytics_orders_source_test.cpp
     internal/functions/endpoint/analytics_payments_source_test.cpp
     internal/functions/endpoint/analytics_shipments_source_test.cpp
+    internal/functions/endpoint/cycle_analytics_input_source_test.cpp
+    internal/functions/endpoint/cycle_analytics_result_sink_test.cpp
     internal/functions/endpoint/high_value_analytics_sink_test.cpp
     internal/functions/endpoint/joined_analytics_sink_test.cpp
     internal/functions/endpoint/order_processed_endpoint_source_test.cpp

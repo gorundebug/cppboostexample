@@ -1,34 +1,35 @@
-# Task 10/17: `AnalyticsScheduleSource`
+# Task 10/22: `KeyShipmentsForMultiJoin`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `C++/Boost` |
-| Kind | `schedule-source` |
-| File | `analyticsservice/internal/functions/cron/analytics_schedule_source.hpp` |
-| Test | `analyticsservice/internal/functions/cron/analytics_schedule_source_test.cpp` |
+| Kind | `keyBy` |
+| File | `analyticsservice/internal/functions/multijoinanalytics/key_shipments_for_multi_join.hpp` |
+| Test | `analyticsservice/internal/functions/multijoinanalytics/key_shipments_for_multi_join_test.cpp` |
 | Service | `Analytics Service` |
 
 
 ## Behaviour
 
-Create an analytics job message identifying the local scheduled firing.
-
+Key the shipment analytics event for the multi-way join.
 
 
 
 
 ## Stream types
-- Input: `AnalyticsKey` — `analyticsservice/internal/types/analytics_key.hpp`
+- Input: `AnalyticsEvent` — `analyticsservice/internal/types/analytics_event.hpp`
+- Output: `AnalyticsEvent` — `analyticsservice/internal/types/analytics_event.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `analyticsservice/internal/functions/cron/analytics_schedule_source.hpp` and preserve its generated contract
-- [ ] Inspect input type `AnalyticsKey` in `analyticsservice/internal/types/analytics_key.hpp`
+- [ ] Open `analyticsservice/internal/functions/multijoinanalytics/key_shipments_for_multi_join.hpp` and preserve its generated contract
+- [ ] Inspect input type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
+- [ ] Inspect output type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/cron/analytics_schedule_source_test.cpp`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/multijoinanalytics/key_shipments_for_multi_join_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task10.md — AnalyticsScheduleSource — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task10.md — KeyShipmentsForMultiJoin — C++/Boost — done`

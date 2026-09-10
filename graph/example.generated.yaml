@@ -22,6 +22,20 @@ dataConnectors:
                 functionPackage: endpoint
                 name: Analytics Shipments
                 publicFunction: false
+            cycleAnalyticsInput:
+                functionDescription: Produce one deterministic analytics event that exercises the finite feedback cycle.
+                functionInitializerGroup: ""
+                functionName: CycleAnalyticsInput
+                functionPackage: endpoint
+                name: Cycle Analytics Input
+                publicFunction: false
+            cycleAnalyticsResult:
+                functionDescription: Validate the terminal event emitted after three passes through the feedback cycle.
+                functionInitializerGroup: ""
+                functionName: CycleAnalyticsResult
+                functionPackage: endpoint
+                name: Cycle Analytics Result
+                publicFunction: false
             highValueAnalytics:
                 functionDescription: Validate and record analytics results routed to the high-value Case branch.
                 functionInitializerGroup: ""
@@ -429,6 +443,31 @@ services:
                     splitAnalyticsPayments:
                         x: -1390
                         "y": 430
+                cycleAnalytics:
+                    advanceCycleAnalytics:
+                        x: -1100
+                        "y": 1160
+                    completeCycleAnalytics:
+                        x: -600
+                        "y": 1260
+                    continueCycleAnalytics:
+                        x: -600
+                        "y": 1060
+                    cycleAnalyticsInput:
+                        x: -1600
+                        "y": 1160
+                    cycleAnalyticsLink:
+                        x: -1100
+                        "y": 960
+                    mergeCycleAnalytics:
+                        x: -1350
+                        "y": 1160
+                    splitCycleAnalytics:
+                        x: -850
+                        "y": 1160
+                    writeCycleAnalytics:
+                        x: -350
+                        "y": 1260
                 joinAnalytics:
                     joinOrderPaymentAnalytics:
                         x: -900
@@ -530,6 +569,60 @@ services:
                     name: Split Analytics Payments
                     source: analyticsPayments
                     type: Split
+            cycleAnalytics:
+                advanceCycleAnalytics:
+                    functionDescription: Increment the cycle counter while preserving the analytics event identity.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: AdvanceCycleAnalytics
+                    functionPackage: cycleanalytics
+                    name: Advance Cycle Analytics
+                    source: mergeCycleAnalytics
+                    type: Map
+                    valueType: analyticsEvent
+                completeCycleAnalytics:
+                    functionDescription: Keep the terminal analytics event once its cycle counter reaches three.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: CompleteCycleAnalytics
+                    functionPackage: cycleanalytics
+                    name: Complete Cycle Analytics
+                    source: splitCycleAnalytics
+                    type: Filter
+                continueCycleAnalytics:
+                    functionDescription: Keep intermediate analytics events whose cycle counter is below three.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: ContinueCycleAnalytics
+                    functionPackage: cycleanalytics
+                    name: Continue Cycle Analytics
+                    source: splitCycleAnalytics
+                    type: Filter
+                cycleAnalyticsInput:
+                    endpoint: cycleAnalyticsInput
+                    name: Cycle Analytics Input
+                    type: Input
+                    valueType: analyticsEvent
+                cycleAnalyticsLink:
+                    name: Cycle Analytics Link
+                    source: continueCycleAnalytics
+                    type: CycleLink
+                mergeCycleAnalytics:
+                    name: Merge Cycle Analytics
+                    sources:
+                        - cycleAnalyticsInput
+                        - cycleAnalyticsLink
+                    type: Merge
+                splitCycleAnalytics:
+                    name: Split Cycle Analytics
+                    source: advanceCycleAnalytics
+                    type: Split
+                writeCycleAnalytics:
+                    endpoint: cycleAnalyticsResult
+                    name: Write Cycle Analytics
+                    source: completeCycleAnalytics
+                    type: Sink
+                    valueType: analyticsEvent
             joinAnalytics:
                 joinOrderPaymentAnalytics:
                     functionDescription: Join matching order and payment analytics events and emit their combined total.

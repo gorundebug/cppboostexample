@@ -26,27 +26,37 @@ inline constexpr int kAnalyticsPaymentsStreamId = 5;
 inline constexpr int kAnalyticsShipmentsStreamId = 6;
 inline constexpr int kSplitAnalyticsOrdersStreamId = 7;
 inline constexpr int kSplitAnalyticsPaymentsStreamId = 8;
-inline constexpr int kJoinOrderPaymentAnalyticsStreamId = 9;
-inline constexpr int kKeyOrdersForJoinStreamId = 10;
-inline constexpr int kKeyPaymentsForJoinStreamId = 11;
-inline constexpr int kWriteJoinedAnalyticsStreamId = 12;
-inline constexpr int kHighValueAnalyticsStreamId = 13;
-inline constexpr int kKeyOrdersForMultiJoinStreamId = 14;
-inline constexpr int kKeyPaymentsForMultiJoinStreamId = 15;
-inline constexpr int kKeyShipmentsForMultiJoinStreamId = 16;
-inline constexpr int kMultiJoinAnalyticsEventsStreamId = 17;
-inline constexpr int kRouteAnalyticsResultStreamId = 18;
-inline constexpr int kStandardAnalyticsStreamId = 19;
-inline constexpr int kWriteHighValueAnalyticsStreamId = 20;
-inline constexpr int kWriteStandardAnalyticsStreamId = 21;
+inline constexpr int kAdvanceCycleAnalyticsStreamId = 9;
+inline constexpr int kCompleteCycleAnalyticsStreamId = 10;
+inline constexpr int kContinueCycleAnalyticsStreamId = 11;
+inline constexpr int kCycleAnalyticsInputStreamId = 12;
+inline constexpr int kCycleAnalyticsLinkStreamId = 13;
+inline constexpr int kMergeCycleAnalyticsStreamId = 14;
+inline constexpr int kSplitCycleAnalyticsStreamId = 15;
+inline constexpr int kWriteCycleAnalyticsStreamId = 16;
+inline constexpr int kJoinOrderPaymentAnalyticsStreamId = 17;
+inline constexpr int kKeyOrdersForJoinStreamId = 18;
+inline constexpr int kKeyPaymentsForJoinStreamId = 19;
+inline constexpr int kWriteJoinedAnalyticsStreamId = 20;
+inline constexpr int kHighValueAnalyticsStreamId = 21;
+inline constexpr int kKeyOrdersForMultiJoinStreamId = 22;
+inline constexpr int kKeyPaymentsForMultiJoinStreamId = 23;
+inline constexpr int kKeyShipmentsForMultiJoinStreamId = 24;
+inline constexpr int kMultiJoinAnalyticsEventsStreamId = 25;
+inline constexpr int kRouteAnalyticsResultStreamId = 26;
+inline constexpr int kStandardAnalyticsStreamId = 27;
+inline constexpr int kWriteHighValueAnalyticsStreamId = 28;
+inline constexpr int kWriteStandardAnalyticsStreamId = 29;
 inline constexpr int kAnalyticsOrdersEndpointId = 1;
 inline constexpr int kAnalyticsPaymentsEndpointId = 2;
-inline constexpr int kAnalyticsScheduleEndpointId = 8;
+inline constexpr int kAnalyticsScheduleEndpointId = 10;
 inline constexpr int kAnalyticsShipmentsEndpointId = 3;
-inline constexpr int kHighValueAnalyticsEndpointId = 4;
-inline constexpr int kJoinedAnalyticsEndpointId = 5;
-inline constexpr int kOrderProcessedEndpointId = 10;
-inline constexpr int kStandardAnalyticsEndpointId = 6;
+inline constexpr int kCycleAnalyticsInputEndpointId = 4;
+inline constexpr int kCycleAnalyticsResultEndpointId = 5;
+inline constexpr int kHighValueAnalyticsEndpointId = 6;
+inline constexpr int kJoinedAnalyticsEndpointId = 7;
+inline constexpr int kOrderProcessedEndpointId = 12;
+inline constexpr int kStandardAnalyticsEndpointId = 8;
 inline constexpr int kAnalyticsFunctionsConnectorId = 1;
 inline constexpr int kLocalCronConnectorId = 3;
 inline constexpr int kOrderEventsConnectorId = 4;
@@ -58,12 +68,17 @@ class Config final : public servicelib::config::IConfig {
   } services;
 
   struct Streams final {
+    servicelib::config::MapStreamConfig advanceCycleAnalytics;
     servicelib::config::InputStreamConfig analyticsOrders;
     servicelib::config::InputStreamConfig analyticsPayments;
     servicelib::config::InputStreamConfig analyticsSchedule;
     servicelib::config::InputStreamConfig analyticsShipments;
+    servicelib::config::FilterStreamConfig completeCycleAnalytics;
     servicelib::config::InputStreamConfig consumeOrderProcessed;
+    servicelib::config::FilterStreamConfig continueCycleAnalytics;
     servicelib::config::ProcessStreamConfig countOrderProcessed;
+    servicelib::config::InputStreamConfig cycleAnalyticsInput;
+    servicelib::config::CycleLinkStreamConfig cycleAnalyticsLink;
     servicelib::config::WhenStreamConfig highValueAnalytics;
     servicelib::config::JoinStreamConfig joinOrderPaymentAnalytics;
     servicelib::config::KeyByStreamConfig keyOrdersForJoin;
@@ -71,11 +86,14 @@ class Config final : public servicelib::config::IConfig {
     servicelib::config::KeyByStreamConfig keyPaymentsForJoin;
     servicelib::config::KeyByStreamConfig keyPaymentsForMultiJoin;
     servicelib::config::KeyByStreamConfig keyShipmentsForMultiJoin;
+    servicelib::config::MergeStreamConfig mergeCycleAnalytics;
     servicelib::config::MultiJoinStreamConfig multiJoinAnalyticsEvents;
     servicelib::config::CaseStreamConfig routeAnalyticsResult;
     servicelib::config::SplitStreamConfig splitAnalyticsOrders;
     servicelib::config::SplitStreamConfig splitAnalyticsPayments;
+    servicelib::config::SplitStreamConfig splitCycleAnalytics;
     servicelib::config::WhenStreamConfig standardAnalytics;
+    servicelib::config::SinkStreamConfig writeCycleAnalytics;
     servicelib::config::SinkStreamConfig writeHighValueAnalytics;
     servicelib::config::SinkStreamConfig writeJoinedAnalytics;
     servicelib::config::SinkStreamConfig writeStandardAnalytics;
@@ -92,6 +110,8 @@ class Config final : public servicelib::config::IConfig {
     servicelib::config::CustomEndpointConfig analyticsPayments;
     servicelib::config::CronEndpointConfig analyticsSchedule;
     servicelib::config::CustomEndpointConfig analyticsShipments;
+    servicelib::config::CustomEndpointConfig cycleAnalyticsInput;
+    servicelib::config::CustomEndpointConfig cycleAnalyticsResult;
     servicelib::config::CustomEndpointConfig highValueAnalytics;
     servicelib::config::CustomEndpointConfig joinedAnalytics;
     servicelib::config::KafkaEndpointConfig orderProcessed;
@@ -127,7 +147,7 @@ class Config final : public servicelib::config::IConfig {
 
   std::vector<servicelib::config::StreamConfigRef> GetStreams()
       const override {
-    return { streams.analyticsOrders, streams.analyticsPayments, streams.analyticsSchedule, streams.analyticsShipments, streams.consumeOrderProcessed, streams.countOrderProcessed, streams.highValueAnalytics, streams.joinOrderPaymentAnalytics, streams.keyOrdersForJoin, streams.keyOrdersForMultiJoin, streams.keyPaymentsForJoin, streams.keyPaymentsForMultiJoin, streams.keyShipmentsForMultiJoin, streams.multiJoinAnalyticsEvents, streams.routeAnalyticsResult, streams.splitAnalyticsOrders, streams.splitAnalyticsPayments, streams.standardAnalytics, streams.writeHighValueAnalytics, streams.writeJoinedAnalytics, streams.writeStandardAnalytics,  };
+    return { streams.advanceCycleAnalytics, streams.analyticsOrders, streams.analyticsPayments, streams.analyticsSchedule, streams.analyticsShipments, streams.completeCycleAnalytics, streams.consumeOrderProcessed, streams.continueCycleAnalytics, streams.countOrderProcessed, streams.cycleAnalyticsInput, streams.cycleAnalyticsLink, streams.highValueAnalytics, streams.joinOrderPaymentAnalytics, streams.keyOrdersForJoin, streams.keyOrdersForMultiJoin, streams.keyPaymentsForJoin, streams.keyPaymentsForMultiJoin, streams.keyShipmentsForMultiJoin, streams.mergeCycleAnalytics, streams.multiJoinAnalyticsEvents, streams.routeAnalyticsResult, streams.splitAnalyticsOrders, streams.splitAnalyticsPayments, streams.splitCycleAnalytics, streams.standardAnalytics, streams.writeCycleAnalytics, streams.writeHighValueAnalytics, streams.writeJoinedAnalytics, streams.writeStandardAnalytics,  };
   }
 
   std::vector<servicelib::config::DataConnectorConfigRef> GetDataConnectors()
@@ -137,7 +157,7 @@ class Config final : public servicelib::config::IConfig {
 
   std::vector<servicelib::config::EndpointConfigRef> GetEndpoints()
       const override {
-    return { endpoints.analyticsOrders, endpoints.analyticsPayments, endpoints.analyticsSchedule, endpoints.analyticsShipments, endpoints.highValueAnalytics, endpoints.joinedAnalytics, endpoints.orderProcessed, endpoints.standardAnalytics,  };
+    return { endpoints.analyticsOrders, endpoints.analyticsPayments, endpoints.analyticsSchedule, endpoints.analyticsShipments, endpoints.cycleAnalyticsInput, endpoints.cycleAnalyticsResult, endpoints.highValueAnalytics, endpoints.joinedAnalytics, endpoints.orderProcessed, endpoints.standardAnalytics,  };
   }
 
   std::vector<const servicelib::config::PoolConfig*> GetPools()
@@ -187,6 +207,23 @@ inline Config MakeConfig() {
     value.modulePath = "github.com/gorundebug/cppboostexample-analyticsservice";
     value.shutdownTimeout = 30000;
     value.statusHandler = "status";
+    return value;
+  }();
+  cfg.streams.advanceCycleAnalytics = [] {
+    MapStreamConfig value{};
+    value.id = kAdvanceCycleAnalyticsStreamId;
+    value.name = "Advance Cycle Analytics";
+    value.pipeline = "cycleAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kMergeCycleAnalyticsStreamId;
+    value.xPos = -1100;
+    value.yPos = 1160;
+    value.valueType = "AnalyticsEvent";
+    value.functionPackage = "cycleanalytics";
+    value.functionName = "AdvanceCycleAnalytics";
+    value.functionDescription = "Increment the cycle counter while preserving the analytics event identity.";
+    value.functionInitializerGroup = "";
+    value.functionModule = "";
     return value;
   }();
   cfg.streams.analyticsOrders = [] {
@@ -241,6 +278,22 @@ inline Config MakeConfig() {
     value.idEndpoint = kAnalyticsShipmentsEndpointId;
     return value;
   }();
+  cfg.streams.completeCycleAnalytics = [] {
+    FilterStreamConfig value{};
+    value.id = kCompleteCycleAnalyticsStreamId;
+    value.name = "Complete Cycle Analytics";
+    value.pipeline = "cycleAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kSplitCycleAnalyticsStreamId;
+    value.xPos = -600;
+    value.yPos = 1260;
+    value.functionPackage = "cycleanalytics";
+    value.functionName = "CompleteCycleAnalytics";
+    value.functionDescription = "Keep the terminal analytics event once its cycle counter reaches three.";
+    value.functionInitializerGroup = "";
+    value.functionModule = "";
+    return value;
+  }();
   cfg.streams.consumeOrderProcessed = [] {
     InputStreamConfig value{};
     value.id = kConsumeOrderProcessedStreamId;
@@ -252,6 +305,22 @@ inline Config MakeConfig() {
     value.yPos = -205;
     value.valueType = "OrderProcessed";
     value.idEndpoint = kOrderProcessedEndpointId;
+    return value;
+  }();
+  cfg.streams.continueCycleAnalytics = [] {
+    FilterStreamConfig value{};
+    value.id = kContinueCycleAnalyticsStreamId;
+    value.name = "Continue Cycle Analytics";
+    value.pipeline = "cycleAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kSplitCycleAnalyticsStreamId;
+    value.xPos = -600;
+    value.yPos = 1060;
+    value.functionPackage = "cycleanalytics";
+    value.functionName = "ContinueCycleAnalytics";
+    value.functionDescription = "Keep intermediate analytics events whose cycle counter is below three.";
+    value.functionInitializerGroup = "";
+    value.functionModule = "";
     return value;
   }();
   cfg.streams.countOrderProcessed = [] {
@@ -268,6 +337,30 @@ inline Config MakeConfig() {
     value.functionDescription = "Count successful and unsuccessful orders independently, then return the event unchanged.\n";
     value.functionInitializerGroup = "";
     value.functionModule = "";
+    return value;
+  }();
+  cfg.streams.cycleAnalyticsInput = [] {
+    InputStreamConfig value{};
+    value.id = kCycleAnalyticsInputStreamId;
+    value.name = "Cycle Analytics Input";
+    value.pipeline = "cycleAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = 0;
+    value.xPos = -1600;
+    value.yPos = 1160;
+    value.valueType = "AnalyticsEvent";
+    value.idEndpoint = kCycleAnalyticsInputEndpointId;
+    return value;
+  }();
+  cfg.streams.cycleAnalyticsLink = [] {
+    CycleLinkStreamConfig value{};
+    value.id = kCycleAnalyticsLinkStreamId;
+    value.name = "Cycle Analytics Link";
+    value.pipeline = "cycleAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kContinueCycleAnalyticsStreamId;
+    value.xPos = -1100;
+    value.yPos = 960;
     return value;
   }();
   cfg.streams.highValueAnalytics = [] {
@@ -394,6 +487,17 @@ inline Config MakeConfig() {
     value.functionModule = "";
     return value;
   }();
+  cfg.streams.mergeCycleAnalytics = [] {
+    MergeStreamConfig value{};
+    value.id = kMergeCycleAnalyticsStreamId;
+    value.name = "Merge Cycle Analytics";
+    value.pipeline = "cycleAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSources = { kCycleAnalyticsInputStreamId, kCycleAnalyticsLinkStreamId };
+    value.xPos = -1350;
+    value.yPos = 1160;
+    return value;
+  }();
   cfg.streams.multiJoinAnalyticsEvents = [] {
     MultiJoinStreamConfig value{};
     value.id = kMultiJoinAnalyticsEventsStreamId;
@@ -453,6 +557,17 @@ inline Config MakeConfig() {
     value.yPos = 430;
     return value;
   }();
+  cfg.streams.splitCycleAnalytics = [] {
+    SplitStreamConfig value{};
+    value.id = kSplitCycleAnalyticsStreamId;
+    value.name = "Split Cycle Analytics";
+    value.pipeline = "cycleAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kAdvanceCycleAnalyticsStreamId;
+    value.xPos = -850;
+    value.yPos = 1160;
+    return value;
+  }();
   cfg.streams.standardAnalytics = [] {
     WhenStreamConfig value{};
     value.id = kStandardAnalyticsStreamId;
@@ -463,6 +578,19 @@ inline Config MakeConfig() {
     value.xPos = -400;
     value.yPos = 830;
     value.valueType = "AnalyticsResult";
+    return value;
+  }();
+  cfg.streams.writeCycleAnalytics = [] {
+    SinkStreamConfig value{};
+    value.id = kWriteCycleAnalyticsStreamId;
+    value.name = "Write Cycle Analytics";
+    value.pipeline = "cycleAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kCompleteCycleAnalyticsStreamId;
+    value.xPos = -350;
+    value.yPos = 1260;
+    value.idEndpoint = kCycleAnalyticsResultEndpointId;
+    value.valueType = "AnalyticsEvent";
     return value;
   }();
   cfg.streams.writeHighValueAnalytics = [] {
@@ -583,6 +711,30 @@ inline Config MakeConfig() {
     value.functionPackage = "endpoint";
     value.publicFunction = false;
     value.functionDescription = "Produce a deterministic shipment analytics event for the canonical multi-way join example.";
+    value.functionInitializerGroup = "";
+    return value;
+  }();
+  cfg.endpoints.cycleAnalyticsInput = [] {
+    CustomEndpointConfig value{};
+    value.id = kCycleAnalyticsInputEndpointId;
+    value.name = "Cycle Analytics Input";
+    value.idDataConnector = kAnalyticsFunctionsConnectorId;
+    value.functionName = "CycleAnalyticsInput";
+    value.functionPackage = "endpoint";
+    value.publicFunction = false;
+    value.functionDescription = "Produce one deterministic analytics event that exercises the finite feedback cycle.";
+    value.functionInitializerGroup = "";
+    return value;
+  }();
+  cfg.endpoints.cycleAnalyticsResult = [] {
+    CustomEndpointConfig value{};
+    value.id = kCycleAnalyticsResultEndpointId;
+    value.name = "Cycle Analytics Result";
+    value.idDataConnector = kAnalyticsFunctionsConnectorId;
+    value.functionName = "CycleAnalyticsResult";
+    value.functionPackage = "endpoint";
+    value.publicFunction = false;
+    value.functionDescription = "Validate the terminal event emitted after three passes through the feedback cycle.";
     value.functionInitializerGroup = "";
     return value;
   }();
@@ -870,12 +1022,17 @@ inline void ApplyConfig(const YAML::Node& value, Config& config) {
     }
   }
   ApplyCustomProperties(FindConfigObject(value, "services", "analyticsService"), config.services.analyticsService);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "advanceCycleAnalytics"), config.streams.advanceCycleAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "analyticsOrders"), config.streams.analyticsOrders);
   ApplyCustomProperties(FindConfigObject(value, "streams", "analyticsPayments"), config.streams.analyticsPayments);
   ApplyCustomProperties(FindConfigObject(value, "streams", "analyticsSchedule"), config.streams.analyticsSchedule);
   ApplyCustomProperties(FindConfigObject(value, "streams", "analyticsShipments"), config.streams.analyticsShipments);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "completeCycleAnalytics"), config.streams.completeCycleAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "consumeOrderProcessed"), config.streams.consumeOrderProcessed);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "continueCycleAnalytics"), config.streams.continueCycleAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "countOrderProcessed"), config.streams.countOrderProcessed);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "cycleAnalyticsInput"), config.streams.cycleAnalyticsInput);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "cycleAnalyticsLink"), config.streams.cycleAnalyticsLink);
   ApplyCustomProperties(FindConfigObject(value, "streams", "highValueAnalytics"), config.streams.highValueAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "joinOrderPaymentAnalytics"), config.streams.joinOrderPaymentAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "keyOrdersForJoin"), config.streams.keyOrdersForJoin);
@@ -883,11 +1040,14 @@ inline void ApplyConfig(const YAML::Node& value, Config& config) {
   ApplyCustomProperties(FindConfigObject(value, "streams", "keyPaymentsForJoin"), config.streams.keyPaymentsForJoin);
   ApplyCustomProperties(FindConfigObject(value, "streams", "keyPaymentsForMultiJoin"), config.streams.keyPaymentsForMultiJoin);
   ApplyCustomProperties(FindConfigObject(value, "streams", "keyShipmentsForMultiJoin"), config.streams.keyShipmentsForMultiJoin);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "mergeCycleAnalytics"), config.streams.mergeCycleAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "multiJoinAnalyticsEvents"), config.streams.multiJoinAnalyticsEvents);
   ApplyCustomProperties(FindConfigObject(value, "streams", "routeAnalyticsResult"), config.streams.routeAnalyticsResult);
   ApplyCustomProperties(FindConfigObject(value, "streams", "splitAnalyticsOrders"), config.streams.splitAnalyticsOrders);
   ApplyCustomProperties(FindConfigObject(value, "streams", "splitAnalyticsPayments"), config.streams.splitAnalyticsPayments);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "splitCycleAnalytics"), config.streams.splitCycleAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "standardAnalytics"), config.streams.standardAnalytics);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "writeCycleAnalytics"), config.streams.writeCycleAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "writeHighValueAnalytics"), config.streams.writeHighValueAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "writeJoinedAnalytics"), config.streams.writeJoinedAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "writeStandardAnalytics"), config.streams.writeStandardAnalytics);
@@ -898,6 +1058,8 @@ inline void ApplyConfig(const YAML::Node& value, Config& config) {
   ApplyCustomProperties(FindConfigObject(value, "endpoints", "analyticsPayments"), config.endpoints.analyticsPayments);
   ApplyCustomProperties(FindConfigObject(value, "endpoints", "analyticsSchedule"), config.endpoints.analyticsSchedule);
   ApplyCustomProperties(FindConfigObject(value, "endpoints", "analyticsShipments"), config.endpoints.analyticsShipments);
+  ApplyCustomProperties(FindConfigObject(value, "endpoints", "cycleAnalyticsInput"), config.endpoints.cycleAnalyticsInput);
+  ApplyCustomProperties(FindConfigObject(value, "endpoints", "cycleAnalyticsResult"), config.endpoints.cycleAnalyticsResult);
   ApplyCustomProperties(FindConfigObject(value, "endpoints", "highValueAnalytics"), config.endpoints.highValueAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "endpoints", "joinedAnalytics"), config.endpoints.joinedAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "endpoints", "orderProcessed"), config.endpoints.orderProcessed);

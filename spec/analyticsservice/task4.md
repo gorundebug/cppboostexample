@@ -1,35 +1,36 @@
-# Task 4/17: `KeyOrdersForMultiJoin`
+# Task 4/22: `CountOrderProcessed`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `C++/Boost` |
-| Kind | `keyBy` |
-| File | `analyticsservice/internal/functions/multijoinanalytics/key_orders_for_multi_join.hpp` |
-| Test | `analyticsservice/internal/functions/multijoinanalytics/key_orders_for_multi_join_test.cpp` |
+| Kind | `process` |
+| File | `analyticsservice/internal/functions/analytics/count_order_processed.hpp` |
+| Test | `analyticsservice/internal/functions/analytics/count_order_processed_test.cpp` |
 | Service | `Analytics Service` |
 
 
 ## Behaviour
 
-Key the order analytics event for the multi-way join.
+Count successful and unsuccessful orders independently, then return the event unchanged.
+
 
 
 
 
 ## Stream types
-- Input: `AnalyticsEvent` — `analyticsservice/internal/types/analytics_event.hpp`
-- Output: `AnalyticsEvent` — `analyticsservice/internal/types/analytics_event.hpp`
+- Input: `OrderProcessed` — `model_cpp/include/example/model/types/order_processed.hpp`
+- Output: `OrderProcessed` — `model_cpp/include/example/model/types/order_processed.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `analyticsservice/internal/functions/multijoinanalytics/key_orders_for_multi_join.hpp` and preserve its generated contract
-- [ ] Inspect input type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
-- [ ] Inspect output type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
+- [ ] Open `analyticsservice/internal/functions/analytics/count_order_processed.hpp` and preserve its generated contract
+- [ ] Inspect input type `OrderProcessed` in `model_cpp/include/example/model/types/order_processed.hpp`
+- [ ] Inspect output type `OrderProcessed` in `model_cpp/include/example/model/types/order_processed.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/multijoinanalytics/key_orders_for_multi_join_test.cpp`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/analytics/count_order_processed_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task4.md — KeyOrdersForMultiJoin — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task4.md — CountOrderProcessed — C++/Boost — done`

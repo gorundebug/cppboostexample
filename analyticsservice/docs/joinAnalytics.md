@@ -7,17 +7,17 @@ flowchart LR
     s7["Split Analytics Orders"]
     s8["Split Analytics Payments"]
   end
-  s9("Join Order Payment Analytics
+  s17("Join Order Payment Analytics
 AnalyticsResult")
-  s10{{"Key Orders For Join
+  s18{{"Key Orders For Join
 AnalyticsEvent"}}
-  s11{{"Key Payments For Join
+  s19{{"Key Payments For Join
 AnalyticsEvent"}}
-  s12[\"Write Joined Analytics
+  s20[\"Write Joined Analytics
 AnalyticsResult"/]
-  s10 --> s9
-  s11 --> s9
-  s7 -.-> s10
-  s8 -.-> s11
-  s9 --> s12
+  s18 --> s17
+  s19 --> s17
+  s7 -.-> s18
+  s8 -.-> s19
+  s17 --> s20
 ```

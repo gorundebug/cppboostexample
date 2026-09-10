@@ -1,35 +1,35 @@
-# Task 9/17: `RouteAnalyticsResult`
+# Task 9/22: `KeyPaymentsForMultiJoin`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `C++/Boost` |
-| Kind | `case` |
-| File | `analyticsservice/internal/functions/multijoinanalytics/route_analytics_result.hpp` |
-| Test | `analyticsservice/internal/functions/multijoinanalytics/route_analytics_result_test.cpp` |
+| Kind | `keyBy` |
+| File | `analyticsservice/internal/functions/multijoinanalytics/key_payments_for_multi_join.hpp` |
+| Test | `analyticsservice/internal/functions/multijoinanalytics/key_payments_for_multi_join_test.cpp` |
 | Service | `Analytics Service` |
 
 
 ## Behaviour
 
-Route high-value analytics results to the first branch and all others to the second branch.
+Key the payment analytics event for the multi-way join.
 
 
 
 
 ## Stream types
-- Input: `AnalyticsResult` — `analyticsservice/internal/types/analytics_result.hpp`
-- Output: `AnalyticsResult` — `analyticsservice/internal/types/analytics_result.hpp`
+- Input: `AnalyticsEvent` — `analyticsservice/internal/types/analytics_event.hpp`
+- Output: `AnalyticsEvent` — `analyticsservice/internal/types/analytics_event.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `analyticsservice/internal/functions/multijoinanalytics/route_analytics_result.hpp` and preserve its generated contract
-- [ ] Inspect input type `AnalyticsResult` in `analyticsservice/internal/types/analytics_result.hpp`
-- [ ] Inspect output type `AnalyticsResult` in `analyticsservice/internal/types/analytics_result.hpp`
+- [ ] Open `analyticsservice/internal/functions/multijoinanalytics/key_payments_for_multi_join.hpp` and preserve its generated contract
+- [ ] Inspect input type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
+- [ ] Inspect output type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/multijoinanalytics/route_analytics_result_test.cpp`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/multijoinanalytics/key_payments_for_multi_join_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task9.md — RouteAnalyticsResult — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task9.md — KeyPaymentsForMultiJoin — C++/Boost — done`
