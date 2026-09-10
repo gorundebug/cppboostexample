@@ -97,8 +97,12 @@ The generated Nexus bootstrap creates three Conan repositories:
 
 - `conan-proxy` caches ConanCenter;
 - `conan-hosted` stores binary packages built locally;
-- `conan-group` is the single read endpoint, with hosted packages taking
-  precedence over the public proxy.
+- `conan-group` remains available for tools that support a combined endpoint.
+
+Generated builds configure `conan-hosted` as the authenticated upload remote
+and `conan-proxy` as the read remote. This avoids relying on repository-manager
+group search when resolving newly added Conan packages, while all external
+downloads still pass through Nexus.
 
 Proxy mode enables publication through a dedicated local account that can
 write only to `conan-hosted`. Credentials are kept in

@@ -24,7 +24,6 @@ export MODULE_MODEL_CPP_SOURCE_CONTEXT := ../model_cpp
 endif
 
 ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
-export DEPENDENCY_CONAN_HOME := $(DEPENDENCY_PROXY_DIR)/conan2
 export SERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostservicelib.git\#v0.2.111
 endif
 
