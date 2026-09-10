@@ -216,8 +216,8 @@ inline Config MakeConfig() {
     value.pipeline = "cycleAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kMergeCycleAnalyticsStreamId;
-    value.xPos = -1100;
-    value.yPos = 1160;
+    value.xPos = -1502;
+    value.yPos = -1648;
     value.valueType = "AnalyticsEvent";
     value.functionPackage = "cycleanalytics";
     value.functionName = "AdvanceCycleAnalytics";
@@ -233,8 +233,8 @@ inline Config MakeConfig() {
     value.pipeline = "analyticsSources";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = 0;
-    value.xPos = -1600;
-    value.yPos = 220;
+    value.xPos = -1739;
+    value.yPos = -1133;
     value.valueType = "AnalyticsEvent";
     value.idEndpoint = kAnalyticsOrdersEndpointId;
     return value;
@@ -246,8 +246,8 @@ inline Config MakeConfig() {
     value.pipeline = "analyticsSources";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = 0;
-    value.xPos = -1600;
-    value.yPos = 430;
+    value.xPos = -2307;
+    value.yPos = -767;
     value.valueType = "AnalyticsEvent";
     value.idEndpoint = kAnalyticsPaymentsEndpointId;
     return value;
@@ -259,8 +259,8 @@ inline Config MakeConfig() {
     value.pipeline = "analytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = 0;
-    value.xPos = -1600;
-    value.yPos = -205;
+    value.xPos = -1905;
+    value.yPos = -497;
     value.valueType = "AutomationJob";
     value.idEndpoint = kAnalyticsScheduleEndpointId;
     return value;
@@ -272,8 +272,8 @@ inline Config MakeConfig() {
     value.pipeline = "analyticsSources";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = 0;
-    value.xPos = -1600;
-    value.yPos = 780;
+    value.xPos = 12;
+    value.yPos = -1308;
     value.valueType = "AnalyticsEvent";
     value.idEndpoint = kAnalyticsShipmentsEndpointId;
     return value;
@@ -285,8 +285,8 @@ inline Config MakeConfig() {
     value.pipeline = "cycleAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kSplitCycleAnalyticsStreamId;
-    value.xPos = -600;
-    value.yPos = 1260;
+    value.xPos = -529;
+    value.yPos = -1718;
     value.functionPackage = "cycleanalytics";
     value.functionName = "CompleteCycleAnalytics";
     value.functionDescription = "Keep the terminal analytics event once its cycle counter reaches three.";
@@ -301,8 +301,8 @@ inline Config MakeConfig() {
     value.pipeline = "analytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kCountOrderProcessedStreamId;
-    value.xPos = -1190;
-    value.yPos = -205;
+    value.xPos = -1453;
+    value.yPos = -510;
     value.valueType = "OrderProcessed";
     value.idEndpoint = kOrderProcessedEndpointId;
     return value;
@@ -314,8 +314,8 @@ inline Config MakeConfig() {
     value.pipeline = "cycleAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kSplitCycleAnalyticsStreamId;
-    value.xPos = -600;
-    value.yPos = 1060;
+    value.xPos = -879;
+    value.yPos = -2196;
     value.functionPackage = "cycleanalytics";
     value.functionName = "ContinueCycleAnalytics";
     value.functionDescription = "Keep intermediate analytics events whose cycle counter is below three.";
@@ -330,8 +330,8 @@ inline Config MakeConfig() {
     value.pipeline = "analytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kConsumeOrderProcessedStreamId;
-    value.xPos = -1390;
-    value.yPos = -19;
+    value.xPos = -1695;
+    value.yPos = -518;
     value.functionPackage = "analytics";
     value.functionName = "CountOrderProcessed";
     value.functionDescription = "Count successful and unsuccessful orders independently, then return the event unchanged.\n";
@@ -346,8 +346,8 @@ inline Config MakeConfig() {
     value.pipeline = "cycleAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = 0;
-    value.xPos = -1600;
-    value.yPos = 1160;
+    value.xPos = -2362;
+    value.yPos = -1830;
     value.valueType = "AnalyticsEvent";
     value.idEndpoint = kCycleAnalyticsInputEndpointId;
     return value;
@@ -359,8 +359,8 @@ inline Config MakeConfig() {
     value.pipeline = "cycleAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kContinueCycleAnalyticsStreamId;
-    value.xPos = -1100;
-    value.yPos = 960;
+    value.xPos = -1311;
+    value.yPos = -2114;
     return value;
   }();
   cfg.streams.highValueAnalytics = [] {
@@ -370,8 +370,8 @@ inline Config MakeConfig() {
     value.pipeline = "multiJoinAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kRouteAnalyticsResultStreamId;
-    value.xPos = -400;
-    value.yPos = 650;
+    value.xPos = 398;
+    value.yPos = -1650;
     value.valueType = "AnalyticsResult";
     return value;
   }();
@@ -383,8 +383,8 @@ inline Config MakeConfig() {
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kKeyOrdersForJoinStreamId;
     value.idSources = { kKeyPaymentsForJoinStreamId };
-    value.xPos = -900;
-    value.yPos = 260;
+    value.xPos = -637;
+    value.yPos = -1050;
     value.valueType = "AnalyticsResult";
     value.joinType = JoinType::kInner;
     value.joinStorage = JoinStorageType::kHashMap;
@@ -404,8 +404,8 @@ inline Config MakeConfig() {
     value.pipeline = "joinAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kSplitAnalyticsOrdersStreamId;
-    value.xPos = -1160;
-    value.yPos = 170;
+    value.xPos = -1258;
+    value.yPos = -1007;
     value.keyType = "AnalyticsKey";
     value.valueType = "AnalyticsEvent";
     value.functionPackage = "joinanalytics";
@@ -422,8 +422,8 @@ inline Config MakeConfig() {
     value.pipeline = "multiJoinAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kSplitAnalyticsOrdersStreamId;
-    value.xPos = -1160;
-    value.yPos = 570;
+    value.xPos = -1325;
+    value.yPos = -1256;
     value.keyType = "AnalyticsKey";
     value.valueType = "AnalyticsEvent";
     value.functionPackage = "multijoinanalytics";
@@ -440,8 +440,8 @@ inline Config MakeConfig() {
     value.pipeline = "joinAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kSplitAnalyticsPaymentsStreamId;
-    value.xPos = -1160;
-    value.yPos = 350;
+    value.xPos = -1377;
+    value.yPos = -723;
     value.keyType = "AnalyticsKey";
     value.valueType = "AnalyticsEvent";
     value.functionPackage = "joinanalytics";
@@ -458,8 +458,8 @@ inline Config MakeConfig() {
     value.pipeline = "multiJoinAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kSplitAnalyticsPaymentsStreamId;
-    value.xPos = -1160;
-    value.yPos = 740;
+    value.xPos = -1984;
+    value.yPos = -1293;
     value.keyType = "AnalyticsKey";
     value.valueType = "AnalyticsEvent";
     value.functionPackage = "multijoinanalytics";
@@ -476,8 +476,8 @@ inline Config MakeConfig() {
     value.pipeline = "multiJoinAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kAnalyticsShipmentsStreamId;
-    value.xPos = -1160;
-    value.yPos = 910;
+    value.xPos = -365;
+    value.yPos = -1315;
     value.keyType = "AnalyticsKey";
     value.valueType = "AnalyticsEvent";
     value.functionPackage = "multijoinanalytics";
@@ -494,8 +494,8 @@ inline Config MakeConfig() {
     value.pipeline = "cycleAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSources = { kCycleAnalyticsInputStreamId, kCycleAnalyticsLinkStreamId };
-    value.xPos = -1350;
-    value.yPos = 1160;
+    value.xPos = -1830;
+    value.yPos = -1827;
     return value;
   }();
   cfg.streams.multiJoinAnalyticsEvents = [] {
@@ -506,8 +506,8 @@ inline Config MakeConfig() {
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kKeyOrdersForMultiJoinStreamId;
     value.idSources = { kKeyPaymentsForMultiJoinStreamId, kKeyShipmentsForMultiJoinStreamId };
-    value.xPos = -900;
-    value.yPos = 740;
+    value.xPos = -812;
+    value.yPos = -1446;
     value.valueType = "AnalyticsResult";
     value.joinStorage = JoinStorageType::kHashMap;
     value.ttl = 60000;
@@ -526,8 +526,8 @@ inline Config MakeConfig() {
     value.pipeline = "multiJoinAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kMultiJoinAnalyticsEventsStreamId;
-    value.xPos = -650;
-    value.yPos = 740;
+    value.xPos = -89;
+    value.yPos = -1589;
     value.functionPackage = "multijoinanalytics";
     value.functionName = "RouteAnalyticsResult";
     value.functionDescription = "Route high-value analytics results to the first branch and all others to the second branch.";
@@ -542,8 +542,8 @@ inline Config MakeConfig() {
     value.pipeline = "analyticsSources";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kAnalyticsOrdersStreamId;
-    value.xPos = -1390;
-    value.yPos = 220;
+    value.xPos = -1529;
+    value.yPos = -1100;
     return value;
   }();
   cfg.streams.splitAnalyticsPayments = [] {
@@ -553,8 +553,8 @@ inline Config MakeConfig() {
     value.pipeline = "analyticsSources";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kAnalyticsPaymentsStreamId;
-    value.xPos = -1390;
-    value.yPos = 430;
+    value.xPos = -1945;
+    value.yPos = -776;
     return value;
   }();
   cfg.streams.splitCycleAnalytics = [] {
@@ -564,8 +564,8 @@ inline Config MakeConfig() {
     value.pipeline = "cycleAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kAdvanceCycleAnalyticsStreamId;
-    value.xPos = -850;
-    value.yPos = 1160;
+    value.xPos = -830;
+    value.yPos = -1687;
     return value;
   }();
   cfg.streams.standardAnalytics = [] {
@@ -575,8 +575,8 @@ inline Config MakeConfig() {
     value.pipeline = "multiJoinAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kRouteAnalyticsResultStreamId;
-    value.xPos = -400;
-    value.yPos = 830;
+    value.xPos = 463;
+    value.yPos = -1449;
     value.valueType = "AnalyticsResult";
     return value;
   }();
@@ -587,8 +587,8 @@ inline Config MakeConfig() {
     value.pipeline = "cycleAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kCompleteCycleAnalyticsStreamId;
-    value.xPos = -350;
-    value.yPos = 1260;
+    value.xPos = -545;
+    value.yPos = -2204;
     value.idEndpoint = kCycleAnalyticsResultEndpointId;
     value.valueType = "AnalyticsEvent";
     return value;
@@ -600,8 +600,8 @@ inline Config MakeConfig() {
     value.pipeline = "multiJoinAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kHighValueAnalyticsStreamId;
-    value.xPos = -130;
-    value.yPos = 650;
+    value.xPos = 820;
+    value.yPos = -1669;
     value.idEndpoint = kHighValueAnalyticsEndpointId;
     value.valueType = "AnalyticsResult";
     return value;
@@ -613,8 +613,8 @@ inline Config MakeConfig() {
     value.pipeline = "joinAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kJoinOrderPaymentAnalyticsStreamId;
-    value.xPos = -640;
-    value.yPos = 260;
+    value.xPos = -231;
+    value.yPos = -1079;
     value.idEndpoint = kJoinedAnalyticsEndpointId;
     value.valueType = "AnalyticsResult";
     return value;
@@ -626,8 +626,8 @@ inline Config MakeConfig() {
     value.pipeline = "multiJoinAnalytics";
     value.idService = kAnalyticsServiceServiceId;
     value.idSource = kStandardAnalyticsStreamId;
-    value.xPos = -130;
-    value.yPos = 830;
+    value.xPos = 966;
+    value.yPos = -1453;
     value.idEndpoint = kStandardAnalyticsEndpointId;
     value.valueType = "AnalyticsResult";
     return value;

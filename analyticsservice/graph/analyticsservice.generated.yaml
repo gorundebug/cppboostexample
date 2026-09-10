@@ -120,96 +120,96 @@ services:
             pipelines:
                 analytics:
                     analyticsSchedule:
-                        x: -1600
-                        "y": -205
+                        x: -1905
+                        "y": -497
                     consumeOrderProcessed:
-                        x: -1190
-                        "y": -205
+                        x: -1453
+                        "y": -510
                     countOrderProcessed:
-                        x: -1390
-                        "y": -19
+                        x: -1695
+                        "y": -518
                 analyticsSources:
                     analyticsOrders:
-                        x: -1600
-                        "y": 220
+                        x: -1739
+                        "y": -1133
                     analyticsPayments:
-                        x: -1600
-                        "y": 430
+                        x: -2307
+                        "y": -767
                     analyticsShipments:
-                        x: -1600
-                        "y": 780
+                        x: 12
+                        "y": -1308
                     splitAnalyticsOrders:
-                        x: -1390
-                        "y": 220
+                        x: -1529
+                        "y": -1100
                     splitAnalyticsPayments:
-                        x: -1390
-                        "y": 430
+                        x: -1945
+                        "y": -776
                 cycleAnalytics:
                     advanceCycleAnalytics:
-                        x: -1100
-                        "y": 1160
+                        x: -1502
+                        "y": -1648
                     completeCycleAnalytics:
-                        x: -600
-                        "y": 1260
+                        x: -529
+                        "y": -1718
                     continueCycleAnalytics:
-                        x: -600
-                        "y": 1060
+                        x: -879
+                        "y": -2196
                     cycleAnalyticsInput:
-                        x: -1600
-                        "y": 1160
+                        x: -2362
+                        "y": -1830
                     cycleAnalyticsLink:
-                        x: -1100
-                        "y": 960
+                        x: -1311
+                        "y": -2114
                     mergeCycleAnalytics:
-                        x: -1350
-                        "y": 1160
+                        x: -1830
+                        "y": -1827
                     splitCycleAnalytics:
-                        x: -850
-                        "y": 1160
+                        x: -830
+                        "y": -1687
                     writeCycleAnalytics:
-                        x: -350
-                        "y": 1260
+                        x: -545
+                        "y": -2204
                 joinAnalytics:
                     joinOrderPaymentAnalytics:
-                        x: -900
-                        "y": 260
+                        x: -637
+                        "y": -1050
                     keyOrdersForJoin:
-                        x: -1160
-                        "y": 170
+                        x: -1258
+                        "y": -1007
                     keyPaymentsForJoin:
-                        x: -1160
-                        "y": 350
+                        x: -1377
+                        "y": -723
                     writeJoinedAnalytics:
-                        x: -640
-                        "y": 260
+                        x: -231
+                        "y": -1079
                 multiJoinAnalytics:
                     highValueAnalytics:
-                        x: -400
-                        "y": 650
+                        x: 398
+                        "y": -1650
                     keyOrdersForMultiJoin:
-                        x: -1160
-                        "y": 570
+                        x: -1325
+                        "y": -1256
                     keyPaymentsForMultiJoin:
-                        x: -1160
-                        "y": 740
+                        x: -1984
+                        "y": -1293
                     keyShipmentsForMultiJoin:
-                        x: -1160
-                        "y": 910
+                        x: -365
+                        "y": -1315
                     multiJoinAnalyticsEvents:
-                        x: -900
-                        "y": 740
+                        x: -812
+                        "y": -1446
                     routeAnalyticsResult:
-                        x: -650
-                        "y": 740
+                        x: -89
+                        "y": -1589
                     standardAnalytics:
-                        x: -400
-                        "y": 830
+                        x: 463
+                        "y": -1449
                     writeHighValueAnalytics:
-                        x: -130
-                        "y": 650
+                        x: 820
+                        "y": -1669
                     writeStandardAnalytics:
-                        x: -130
-                        "y": 830
+                        x: 966
+                        "y": -1453
         defaultCallSemantics: FunctionCall
         environment: ""
         golangVersion: 1.25.4
@@ -456,7 +456,7 @@ services:
         startupHandler: health/startup
         statusHandler: status
 settings:
-    moduleVersion: v0.2.110
+    moduleVersion: v0.2.111
     name: Example
     repoPath: github.com/gorundebug/cppboostexample
 types:
