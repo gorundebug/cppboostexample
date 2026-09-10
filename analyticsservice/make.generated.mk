@@ -23,7 +23,7 @@ export MODULE_MODEL_CPP_SOURCE_CONTEXT := ../model_cpp
 endif
 
 ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
-export SERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostservicelib.git\#v0.2.113
+export SERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostservicelib.git\#v0.2.114
 endif
 
 .PHONY: cpp-tools build test release-build release-test asan-build asan-start asan-up asan-down asan-test \
