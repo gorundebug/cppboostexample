@@ -2,5 +2,5 @@ apiVersion: v2
 name: orderservice
 description: Helm chart for Order Service
 type: application
-version: 0.2.115
-appVersion: "0.2.115"
+version: 0.2.116
+appVersion: "0.2.116"
