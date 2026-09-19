@@ -149,8 +149,8 @@ make -C service-name docker-build USE_LOCAL_MODULES=1
 ### Calling service-local SubStreams
 
 If the model declares a SubStream, its owning service exposes a typed accessor:
-`Lookup()` in Go, `getLookupSubStream()` in TypeScript, or
-`get_lookup_substream()` in Python, Rust and C++ (for an entry named Lookup).
+`Lookup()` in Go, `getLookupSubStream()` in TypeScript and C++, or
+`get_lookup_substream()` in Python and Rust (for an entry named Lookup).
 Inject the handle through a custom maker instead of editing generated graph
 assembly. Capture handles during construction and invoke them after graph binding.
 
