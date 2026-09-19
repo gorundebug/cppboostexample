@@ -1,34 +1,36 @@
-# Task 13/22: `AnalyticsScheduleSource`
+# Task 13/26: `MultiJoinAnalyticsEvents`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `C++/Boost` |
-| Kind | `schedule-source` |
-| File | `analyticsservice/internal/functions/cron/analytics_schedule_source.hpp` |
-| Test | `analyticsservice/internal/functions/cron/analytics_schedule_source_test.cpp` |
+| Kind | `multiJoin` |
+| File | `analyticsservice/internal/functions/multijoinanalytics/multi_join_analytics_events.hpp` |
+| Test | `analyticsservice/internal/functions/multijoinanalytics/multi_join_analytics_events_test.cpp` |
 | Service | `Analytics Service` |
 
 
 ## Behaviour
 
-Create an analytics job message identifying the local scheduled firing.
-
+Combine matching order, payment, and shipment analytics events.
 
 
 
 
 ## Stream types
-- Input: `AnalyticsKey` — `analyticsservice/internal/types/analytics_key.hpp`
+- Input: `AnalyticsEvent` — `analyticsservice/internal/types/analytics_event.hpp`
+- Output: `AnalyticsResult` — `analyticsservice/internal/types/analytics_result.hpp`
+- Key: `AnalyticsKey` — `analyticsservice/internal/types/analytics_key.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `analyticsservice/internal/functions/cron/analytics_schedule_source.hpp` and preserve its generated contract
-- [ ] Inspect input type `AnalyticsKey` in `analyticsservice/internal/types/analytics_key.hpp`
+- [ ] Open `analyticsservice/internal/functions/multijoinanalytics/multi_join_analytics_events.hpp` and preserve its generated contract
+- [ ] Inspect input type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
+- [ ] Inspect output type `AnalyticsResult` in `analyticsservice/internal/types/analytics_result.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/cron/analytics_schedule_source_test.cpp`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/multijoinanalytics/multi_join_analytics_events_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task13.md — AnalyticsScheduleSource — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task13.md — MultiJoinAnalyticsEvents — C++/Boost — done`

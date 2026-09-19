@@ -57,6 +57,20 @@ dataConnectors:
                 functionPackage: endpoint
                 name: Standard Analytics
                 publicFunction: false
+            substreamAnalyticsInput:
+                functionDescription: Produce one deterministic analytics event that invokes the service-local SubStream example.
+                functionInitializerGroup: ""
+                functionName: SubstreamAnalyticsInput
+                functionPackage: endpoint
+                name: Substream Analytics Input
+                publicFunction: false
+            substreamAnalyticsResult:
+                functionDescription: Validate and record the result returned by the service-local SubStream example.
+                functionInitializerGroup: ""
+                functionName: SubstreamAnalyticsResult
+                functionPackage: endpoint
+                name: Substream Analytics Result
+                publicFunction: false
         implementation: function
         name: Analytics Functions
         type: Custom
@@ -509,6 +523,22 @@ services:
                     writeStandardAnalytics:
                         x: 966
                         "y": -1453
+                substreamAnalytics:
+                    analyzeAnalyticsSubstream:
+                        x: -1740
+                        "y": -2860
+                    buildSubstreamAnalyticsResult:
+                        x: -1110
+                        "y": -2860
+                    invokeAnalyticsSubstream:
+                        x: -1740
+                        "y": -2530
+                    substreamAnalyticsInput:
+                        x: -2362
+                        "y": -2530
+                    writeSubstreamAnalytics:
+                        x: -1110
+                        "y": -2530
         defaultCallSemantics: FunctionCall
         environment: ""
         golangVersion: 1.25.4
@@ -747,6 +777,43 @@ services:
                     endpoint: standardAnalytics
                     name: Write Standard Analytics
                     source: standardAnalytics
+                    type: Sink
+                    valueType: analyticsResult
+            substreamAnalytics:
+                analyzeAnalyticsSubstream:
+                    name: Analyze Analytics Substream
+                    source: buildSubstreamAnalyticsResult
+                    type: SubStream
+                    valueType: analyticsEvent
+                buildSubstreamAnalyticsResult:
+                    functionDescription: Transform one callable SubStream input into its analytics result.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: BuildSubstreamAnalyticsResult
+                    functionPackage: substreamanalytics
+                    name: Build Substream Analytics Result
+                    source: analyzeAnalyticsSubstream
+                    type: Map
+                    valueType: analyticsResult
+                invokeAnalyticsSubstream:
+                    functionDescription: Invoke the service-local analytics SubStream and emit its returned result.
+                    functionInitializerGroup: ""
+                    functionModule: ""
+                    functionName: InvokeAnalyticsSubstream
+                    functionPackage: substreamanalytics
+                    name: Invoke Analytics Substream
+                    source: substreamAnalyticsInput
+                    type: Map
+                    valueType: analyticsResult
+                substreamAnalyticsInput:
+                    endpoint: substreamAnalyticsInput
+                    name: Substream Analytics Input
+                    type: Input
+                    valueType: analyticsEvent
+                writeSubstreamAnalytics:
+                    endpoint: substreamAnalyticsResult
+                    name: Write Substream Analytics
+                    source: invokeAnalyticsSubstream
                     type: Sink
                     valueType: analyticsResult
         programmingLanguage: CppBoost

@@ -1,33 +1,34 @@
-# Task 15/22: `AnalyticsOrdersSource`
+# Task 15/26: `AnalyticsScheduleSource`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `C++/Boost` |
-| Kind | `custom-source` |
-| File | `analyticsservice/internal/functions/endpoint/analytics_orders_source.hpp` |
-| Test | `analyticsservice/internal/functions/endpoint/analytics_orders_source_test.cpp` |
+| Kind | `schedule-source` |
+| File | `analyticsservice/internal/functions/cron/analytics_schedule_source.hpp` |
+| Test | `analyticsservice/internal/functions/cron/analytics_schedule_source_test.cpp` |
 | Service | `Analytics Service` |
 
 
 ## Behaviour
 
-Produce a deterministic order analytics event for the canonical join examples.
+Create an analytics job message identifying the local scheduled firing.
+
 
 
 
 
 ## Stream types
-- Input: `AnalyticsEvent` — `analyticsservice/internal/types/analytics_event.hpp`
+- Input: `AnalyticsKey` — `analyticsservice/internal/types/analytics_key.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `analyticsservice/internal/functions/endpoint/analytics_orders_source.hpp` and preserve its generated contract
-- [ ] Inspect input type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
+- [ ] Open `analyticsservice/internal/functions/cron/analytics_schedule_source.hpp` and preserve its generated contract
+- [ ] Inspect input type `AnalyticsKey` in `analyticsservice/internal/types/analytics_key.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/analytics_orders_source_test.cpp`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/cron/analytics_schedule_source_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task15.md — AnalyticsOrdersSource — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task15.md — AnalyticsScheduleSource — C++/Boost — done`

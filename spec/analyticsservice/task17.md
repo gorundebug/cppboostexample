@@ -1,4 +1,4 @@
-# Task 17/22: `AnalyticsShipmentsSource`
+# Task 17/26: `AnalyticsOrdersSource`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
@@ -6,14 +6,14 @@
 |-------|-------|
 | Language | `C++/Boost` |
 | Kind | `custom-source` |
-| File | `analyticsservice/internal/functions/endpoint/analytics_shipments_source.hpp` |
-| Test | `analyticsservice/internal/functions/endpoint/analytics_shipments_source_test.cpp` |
+| File | `analyticsservice/internal/functions/endpoint/analytics_orders_source.hpp` |
+| Test | `analyticsservice/internal/functions/endpoint/analytics_orders_source_test.cpp` |
 | Service | `Analytics Service` |
 
 
 ## Behaviour
 
-Produce a deterministic shipment analytics event for the canonical multi-way join example.
+Produce a deterministic order analytics event for the canonical join examples.
 
 
 
@@ -24,10 +24,10 @@ Produce a deterministic shipment analytics event for the canonical multi-way joi
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `analyticsservice/internal/functions/endpoint/analytics_shipments_source.hpp` and preserve its generated contract
+- [ ] Open `analyticsservice/internal/functions/endpoint/analytics_orders_source.hpp` and preserve its generated contract
 - [ ] Inspect input type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/analytics_shipments_source_test.cpp`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/analytics_orders_source_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task17.md — AnalyticsShipmentsSource — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task17.md — AnalyticsOrdersSource — C++/Boost — done`

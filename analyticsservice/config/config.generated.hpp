@@ -47,16 +47,23 @@ inline constexpr int kRouteAnalyticsResultStreamId = 26;
 inline constexpr int kStandardAnalyticsStreamId = 27;
 inline constexpr int kWriteHighValueAnalyticsStreamId = 28;
 inline constexpr int kWriteStandardAnalyticsStreamId = 29;
+inline constexpr int kAnalyzeAnalyticsSubstreamStreamId = 30;
+inline constexpr int kBuildSubstreamAnalyticsResultStreamId = 31;
+inline constexpr int kInvokeAnalyticsSubstreamStreamId = 32;
+inline constexpr int kSubstreamAnalyticsInputStreamId = 33;
+inline constexpr int kWriteSubstreamAnalyticsStreamId = 34;
 inline constexpr int kAnalyticsOrdersEndpointId = 1;
 inline constexpr int kAnalyticsPaymentsEndpointId = 2;
-inline constexpr int kAnalyticsScheduleEndpointId = 10;
+inline constexpr int kAnalyticsScheduleEndpointId = 12;
 inline constexpr int kAnalyticsShipmentsEndpointId = 3;
 inline constexpr int kCycleAnalyticsInputEndpointId = 4;
 inline constexpr int kCycleAnalyticsResultEndpointId = 5;
 inline constexpr int kHighValueAnalyticsEndpointId = 6;
 inline constexpr int kJoinedAnalyticsEndpointId = 7;
-inline constexpr int kOrderProcessedEndpointId = 12;
+inline constexpr int kOrderProcessedEndpointId = 14;
 inline constexpr int kStandardAnalyticsEndpointId = 8;
+inline constexpr int kSubstreamAnalyticsInputEndpointId = 9;
+inline constexpr int kSubstreamAnalyticsResultEndpointId = 10;
 inline constexpr int kAnalyticsFunctionsConnectorId = 1;
 inline constexpr int kLocalCronConnectorId = 3;
 inline constexpr int kOrderEventsConnectorId = 4;
@@ -73,6 +80,8 @@ class Config final : public servicelib::config::IConfig {
     servicelib::config::InputStreamConfig analyticsPayments;
     servicelib::config::InputStreamConfig analyticsSchedule;
     servicelib::config::InputStreamConfig analyticsShipments;
+    servicelib::config::SubStreamConfig analyzeAnalyticsSubstream;
+    servicelib::config::MapStreamConfig buildSubstreamAnalyticsResult;
     servicelib::config::FilterStreamConfig completeCycleAnalytics;
     servicelib::config::InputStreamConfig consumeOrderProcessed;
     servicelib::config::FilterStreamConfig continueCycleAnalytics;
@@ -80,6 +89,7 @@ class Config final : public servicelib::config::IConfig {
     servicelib::config::InputStreamConfig cycleAnalyticsInput;
     servicelib::config::CycleLinkStreamConfig cycleAnalyticsLink;
     servicelib::config::WhenStreamConfig highValueAnalytics;
+    servicelib::config::MapStreamConfig invokeAnalyticsSubstream;
     servicelib::config::JoinStreamConfig joinOrderPaymentAnalytics;
     servicelib::config::KeyByStreamConfig keyOrdersForJoin;
     servicelib::config::KeyByStreamConfig keyOrdersForMultiJoin;
@@ -93,10 +103,12 @@ class Config final : public servicelib::config::IConfig {
     servicelib::config::SplitStreamConfig splitAnalyticsPayments;
     servicelib::config::SplitStreamConfig splitCycleAnalytics;
     servicelib::config::WhenStreamConfig standardAnalytics;
+    servicelib::config::InputStreamConfig substreamAnalyticsInput;
     servicelib::config::SinkStreamConfig writeCycleAnalytics;
     servicelib::config::SinkStreamConfig writeHighValueAnalytics;
     servicelib::config::SinkStreamConfig writeJoinedAnalytics;
     servicelib::config::SinkStreamConfig writeStandardAnalytics;
+    servicelib::config::SinkStreamConfig writeSubstreamAnalytics;
   } streams;
 
   struct DataConnectors final {
@@ -116,6 +128,8 @@ class Config final : public servicelib::config::IConfig {
     servicelib::config::CustomEndpointConfig joinedAnalytics;
     servicelib::config::KafkaEndpointConfig orderProcessed;
     servicelib::config::CustomEndpointConfig standardAnalytics;
+    servicelib::config::CustomEndpointConfig substreamAnalyticsInput;
+    servicelib::config::CustomEndpointConfig substreamAnalyticsResult;
   } endpoints;
 
   struct Pools final {
@@ -147,7 +161,7 @@ class Config final : public servicelib::config::IConfig {
 
   std::vector<servicelib::config::StreamConfigRef> GetStreams()
       const override {
-    return { streams.advanceCycleAnalytics, streams.analyticsOrders, streams.analyticsPayments, streams.analyticsSchedule, streams.analyticsShipments, streams.completeCycleAnalytics, streams.consumeOrderProcessed, streams.continueCycleAnalytics, streams.countOrderProcessed, streams.cycleAnalyticsInput, streams.cycleAnalyticsLink, streams.highValueAnalytics, streams.joinOrderPaymentAnalytics, streams.keyOrdersForJoin, streams.keyOrdersForMultiJoin, streams.keyPaymentsForJoin, streams.keyPaymentsForMultiJoin, streams.keyShipmentsForMultiJoin, streams.mergeCycleAnalytics, streams.multiJoinAnalyticsEvents, streams.routeAnalyticsResult, streams.splitAnalyticsOrders, streams.splitAnalyticsPayments, streams.splitCycleAnalytics, streams.standardAnalytics, streams.writeCycleAnalytics, streams.writeHighValueAnalytics, streams.writeJoinedAnalytics, streams.writeStandardAnalytics,  };
+    return { streams.advanceCycleAnalytics, streams.analyticsOrders, streams.analyticsPayments, streams.analyticsSchedule, streams.analyticsShipments, streams.analyzeAnalyticsSubstream, streams.buildSubstreamAnalyticsResult, streams.completeCycleAnalytics, streams.consumeOrderProcessed, streams.continueCycleAnalytics, streams.countOrderProcessed, streams.cycleAnalyticsInput, streams.cycleAnalyticsLink, streams.highValueAnalytics, streams.invokeAnalyticsSubstream, streams.joinOrderPaymentAnalytics, streams.keyOrdersForJoin, streams.keyOrdersForMultiJoin, streams.keyPaymentsForJoin, streams.keyPaymentsForMultiJoin, streams.keyShipmentsForMultiJoin, streams.mergeCycleAnalytics, streams.multiJoinAnalyticsEvents, streams.routeAnalyticsResult, streams.splitAnalyticsOrders, streams.splitAnalyticsPayments, streams.splitCycleAnalytics, streams.standardAnalytics, streams.substreamAnalyticsInput, streams.writeCycleAnalytics, streams.writeHighValueAnalytics, streams.writeJoinedAnalytics, streams.writeStandardAnalytics, streams.writeSubstreamAnalytics,  };
   }
 
   std::vector<servicelib::config::DataConnectorConfigRef> GetDataConnectors()
@@ -157,7 +171,7 @@ class Config final : public servicelib::config::IConfig {
 
   std::vector<servicelib::config::EndpointConfigRef> GetEndpoints()
       const override {
-    return { endpoints.analyticsOrders, endpoints.analyticsPayments, endpoints.analyticsSchedule, endpoints.analyticsShipments, endpoints.cycleAnalyticsInput, endpoints.cycleAnalyticsResult, endpoints.highValueAnalytics, endpoints.joinedAnalytics, endpoints.orderProcessed, endpoints.standardAnalytics,  };
+    return { endpoints.analyticsOrders, endpoints.analyticsPayments, endpoints.analyticsSchedule, endpoints.analyticsShipments, endpoints.cycleAnalyticsInput, endpoints.cycleAnalyticsResult, endpoints.highValueAnalytics, endpoints.joinedAnalytics, endpoints.orderProcessed, endpoints.standardAnalytics, endpoints.substreamAnalyticsInput, endpoints.substreamAnalyticsResult,  };
   }
 
   std::vector<const servicelib::config::PoolConfig*> GetPools()
@@ -278,6 +292,35 @@ inline Config MakeConfig() {
     value.idEndpoint = kAnalyticsShipmentsEndpointId;
     return value;
   }();
+  cfg.streams.analyzeAnalyticsSubstream = [] {
+    SubStreamConfig value{};
+    value.id = kAnalyzeAnalyticsSubstreamStreamId;
+    value.name = "Analyze Analytics Substream";
+    value.pipeline = "substreamAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kBuildSubstreamAnalyticsResultStreamId;
+    value.xPos = -1740;
+    value.yPos = -2860;
+    value.valueType = "AnalyticsEvent";
+    return value;
+  }();
+  cfg.streams.buildSubstreamAnalyticsResult = [] {
+    MapStreamConfig value{};
+    value.id = kBuildSubstreamAnalyticsResultStreamId;
+    value.name = "Build Substream Analytics Result";
+    value.pipeline = "substreamAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kAnalyzeAnalyticsSubstreamStreamId;
+    value.xPos = -1110;
+    value.yPos = -2860;
+    value.valueType = "AnalyticsResult";
+    value.functionPackage = "substreamanalytics";
+    value.functionName = "BuildSubstreamAnalyticsResult";
+    value.functionDescription = "Transform one callable SubStream input into its analytics result.";
+    value.functionInitializerGroup = "";
+    value.functionModule = "";
+    return value;
+  }();
   cfg.streams.completeCycleAnalytics = [] {
     FilterStreamConfig value{};
     value.id = kCompleteCycleAnalyticsStreamId;
@@ -373,6 +416,23 @@ inline Config MakeConfig() {
     value.xPos = 398;
     value.yPos = -1650;
     value.valueType = "AnalyticsResult";
+    return value;
+  }();
+  cfg.streams.invokeAnalyticsSubstream = [] {
+    MapStreamConfig value{};
+    value.id = kInvokeAnalyticsSubstreamStreamId;
+    value.name = "Invoke Analytics Substream";
+    value.pipeline = "substreamAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kSubstreamAnalyticsInputStreamId;
+    value.xPos = -1740;
+    value.yPos = -2530;
+    value.valueType = "AnalyticsResult";
+    value.functionPackage = "substreamanalytics";
+    value.functionName = "InvokeAnalyticsSubstream";
+    value.functionDescription = "Invoke the service-local analytics SubStream and emit its returned result.";
+    value.functionInitializerGroup = "";
+    value.functionModule = "";
     return value;
   }();
   cfg.streams.joinOrderPaymentAnalytics = [] {
@@ -580,6 +640,19 @@ inline Config MakeConfig() {
     value.valueType = "AnalyticsResult";
     return value;
   }();
+  cfg.streams.substreamAnalyticsInput = [] {
+    InputStreamConfig value{};
+    value.id = kSubstreamAnalyticsInputStreamId;
+    value.name = "Substream Analytics Input";
+    value.pipeline = "substreamAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = 0;
+    value.xPos = -2362;
+    value.yPos = -2530;
+    value.valueType = "AnalyticsEvent";
+    value.idEndpoint = kSubstreamAnalyticsInputEndpointId;
+    return value;
+  }();
   cfg.streams.writeCycleAnalytics = [] {
     SinkStreamConfig value{};
     value.id = kWriteCycleAnalyticsStreamId;
@@ -629,6 +702,19 @@ inline Config MakeConfig() {
     value.xPos = 966;
     value.yPos = -1453;
     value.idEndpoint = kStandardAnalyticsEndpointId;
+    value.valueType = "AnalyticsResult";
+    return value;
+  }();
+  cfg.streams.writeSubstreamAnalytics = [] {
+    SinkStreamConfig value{};
+    value.id = kWriteSubstreamAnalyticsStreamId;
+    value.name = "Write Substream Analytics";
+    value.pipeline = "substreamAnalytics";
+    value.idService = kAnalyticsServiceServiceId;
+    value.idSource = kInvokeAnalyticsSubstreamStreamId;
+    value.xPos = -1110;
+    value.yPos = -2530;
+    value.idEndpoint = kSubstreamAnalyticsResultEndpointId;
     value.valueType = "AnalyticsResult";
     return value;
   }();
@@ -789,6 +875,30 @@ inline Config MakeConfig() {
     value.functionPackage = "endpoint";
     value.publicFunction = false;
     value.functionDescription = "Validate and record analytics results routed to the standard Case branch.";
+    value.functionInitializerGroup = "";
+    return value;
+  }();
+  cfg.endpoints.substreamAnalyticsInput = [] {
+    CustomEndpointConfig value{};
+    value.id = kSubstreamAnalyticsInputEndpointId;
+    value.name = "Substream Analytics Input";
+    value.idDataConnector = kAnalyticsFunctionsConnectorId;
+    value.functionName = "SubstreamAnalyticsInput";
+    value.functionPackage = "endpoint";
+    value.publicFunction = false;
+    value.functionDescription = "Produce one deterministic analytics event that invokes the service-local SubStream example.";
+    value.functionInitializerGroup = "";
+    return value;
+  }();
+  cfg.endpoints.substreamAnalyticsResult = [] {
+    CustomEndpointConfig value{};
+    value.id = kSubstreamAnalyticsResultEndpointId;
+    value.name = "Substream Analytics Result";
+    value.idDataConnector = kAnalyticsFunctionsConnectorId;
+    value.functionName = "SubstreamAnalyticsResult";
+    value.functionPackage = "endpoint";
+    value.publicFunction = false;
+    value.functionDescription = "Validate and record the result returned by the service-local SubStream example.";
     value.functionInitializerGroup = "";
     return value;
   }();
@@ -1027,6 +1137,8 @@ inline void ApplyConfig(const YAML::Node& value, Config& config) {
   ApplyCustomProperties(FindConfigObject(value, "streams", "analyticsPayments"), config.streams.analyticsPayments);
   ApplyCustomProperties(FindConfigObject(value, "streams", "analyticsSchedule"), config.streams.analyticsSchedule);
   ApplyCustomProperties(FindConfigObject(value, "streams", "analyticsShipments"), config.streams.analyticsShipments);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "analyzeAnalyticsSubstream"), config.streams.analyzeAnalyticsSubstream);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "buildSubstreamAnalyticsResult"), config.streams.buildSubstreamAnalyticsResult);
   ApplyCustomProperties(FindConfigObject(value, "streams", "completeCycleAnalytics"), config.streams.completeCycleAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "consumeOrderProcessed"), config.streams.consumeOrderProcessed);
   ApplyCustomProperties(FindConfigObject(value, "streams", "continueCycleAnalytics"), config.streams.continueCycleAnalytics);
@@ -1034,6 +1146,7 @@ inline void ApplyConfig(const YAML::Node& value, Config& config) {
   ApplyCustomProperties(FindConfigObject(value, "streams", "cycleAnalyticsInput"), config.streams.cycleAnalyticsInput);
   ApplyCustomProperties(FindConfigObject(value, "streams", "cycleAnalyticsLink"), config.streams.cycleAnalyticsLink);
   ApplyCustomProperties(FindConfigObject(value, "streams", "highValueAnalytics"), config.streams.highValueAnalytics);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "invokeAnalyticsSubstream"), config.streams.invokeAnalyticsSubstream);
   ApplyCustomProperties(FindConfigObject(value, "streams", "joinOrderPaymentAnalytics"), config.streams.joinOrderPaymentAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "keyOrdersForJoin"), config.streams.keyOrdersForJoin);
   ApplyCustomProperties(FindConfigObject(value, "streams", "keyOrdersForMultiJoin"), config.streams.keyOrdersForMultiJoin);
@@ -1047,10 +1160,12 @@ inline void ApplyConfig(const YAML::Node& value, Config& config) {
   ApplyCustomProperties(FindConfigObject(value, "streams", "splitAnalyticsPayments"), config.streams.splitAnalyticsPayments);
   ApplyCustomProperties(FindConfigObject(value, "streams", "splitCycleAnalytics"), config.streams.splitCycleAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "standardAnalytics"), config.streams.standardAnalytics);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "substreamAnalyticsInput"), config.streams.substreamAnalyticsInput);
   ApplyCustomProperties(FindConfigObject(value, "streams", "writeCycleAnalytics"), config.streams.writeCycleAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "writeHighValueAnalytics"), config.streams.writeHighValueAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "writeJoinedAnalytics"), config.streams.writeJoinedAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "streams", "writeStandardAnalytics"), config.streams.writeStandardAnalytics);
+  ApplyCustomProperties(FindConfigObject(value, "streams", "writeSubstreamAnalytics"), config.streams.writeSubstreamAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "dataConnectors", "analyticsFunctions"), config.dataConnectors.analyticsFunctions);
   ApplyCustomProperties(FindConfigObject(value, "dataConnectors", "localCron"), config.dataConnectors.localCron);
   ApplyCustomProperties(FindConfigObject(value, "dataConnectors", "orderEvents"), config.dataConnectors.orderEvents);
@@ -1064,6 +1179,8 @@ inline void ApplyConfig(const YAML::Node& value, Config& config) {
   ApplyCustomProperties(FindConfigObject(value, "endpoints", "joinedAnalytics"), config.endpoints.joinedAnalytics);
   ApplyCustomProperties(FindConfigObject(value, "endpoints", "orderProcessed"), config.endpoints.orderProcessed);
   ApplyCustomProperties(FindConfigObject(value, "endpoints", "standardAnalytics"), config.endpoints.standardAnalytics);
+  ApplyCustomProperties(FindConfigObject(value, "endpoints", "substreamAnalyticsInput"), config.endpoints.substreamAnalyticsInput);
+  ApplyCustomProperties(FindConfigObject(value, "endpoints", "substreamAnalyticsResult"), config.endpoints.substreamAnalyticsResult);
   ApplyCustomProperties(FindConfigObject(value, "modules", "inventoryServiceApi"), config.modules.inventoryServiceApi);
   ApplyCustomProperties(FindConfigObject(value, "modules", "model"), config.modules.model);
   ApplyCustomProperties(FindConfigObject(value, "modules", "orderServiceApi"), config.modules.orderServiceApi);

@@ -126,6 +126,8 @@ add_executable(example_analytics_service
     internal/functions/multijoinanalytics/key_shipments_for_multi_join.cpp
     internal/functions/multijoinanalytics/multi_join_analytics_events.cpp
     internal/functions/multijoinanalytics/route_analytics_result.cpp
+    internal/functions/substreamanalytics/build_substream_analytics_result.cpp
+    internal/functions/substreamanalytics/invoke_analytics_substream.cpp
 )
 target_compile_features(example_analytics_service PRIVATE cxx_std_20)
 target_include_directories(example_analytics_service PRIVATE "${_servicegen_include_root}")
@@ -173,6 +175,8 @@ add_executable(example_analytics_service_unit_tests
     internal/functions/endpoint/joined_analytics_sink_test.cpp
     internal/functions/endpoint/order_processed_endpoint_source_test.cpp
     internal/functions/endpoint/standard_analytics_sink_test.cpp
+    internal/functions/endpoint/substream_analytics_input_source_test.cpp
+    internal/functions/endpoint/substream_analytics_result_sink_test.cpp
     internal/functions/joinanalytics/join_order_payment_analytics_test.cpp
     internal/functions/joinanalytics/key_orders_for_join_test.cpp
     internal/functions/joinanalytics/key_payments_for_join_test.cpp
@@ -181,6 +185,8 @@ add_executable(example_analytics_service_unit_tests
     internal/functions/multijoinanalytics/key_shipments_for_multi_join_test.cpp
     internal/functions/multijoinanalytics/multi_join_analytics_events_test.cpp
     internal/functions/multijoinanalytics/route_analytics_result_test.cpp
+    internal/functions/substreamanalytics/build_substream_analytics_result_test.cpp
+    internal/functions/substreamanalytics/invoke_analytics_substream_test.cpp
 )
 target_compile_features(example_analytics_service_unit_tests PRIVATE cxx_std_20)
 target_include_directories(example_analytics_service_unit_tests PRIVATE

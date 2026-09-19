@@ -1,4 +1,4 @@
-# Task 22/22: `StandardAnalyticsSink`
+# Task 22/26: `JoinedAnalyticsSink`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
@@ -6,14 +6,14 @@
 |-------|-------|
 | Language | `C++/Boost` |
 | Kind | `custom-sink` |
-| File | `analyticsservice/internal/functions/endpoint/standard_analytics_sink.hpp` |
-| Test | `analyticsservice/internal/functions/endpoint/standard_analytics_sink_test.cpp` |
+| File | `analyticsservice/internal/functions/endpoint/joined_analytics_sink.hpp` |
+| Test | `analyticsservice/internal/functions/endpoint/joined_analytics_sink_test.cpp` |
 | Service | `Analytics Service` |
 
 
 ## Behaviour
 
-Validate and record analytics results routed to the standard Case branch.
+Validate and record the result of the two-way analytics join.
 
 
 
@@ -24,10 +24,10 @@ Validate and record analytics results routed to the standard Case branch.
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `analyticsservice/internal/functions/endpoint/standard_analytics_sink.hpp` and preserve its generated contract
+- [ ] Open `analyticsservice/internal/functions/endpoint/joined_analytics_sink.hpp` and preserve its generated contract
 - [ ] Inspect input type `AnalyticsResult` in `analyticsservice/internal/types/analytics_result.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/standard_analytics_sink_test.cpp`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/joined_analytics_sink_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task22.md — StandardAnalyticsSink — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task22.md — JoinedAnalyticsSink — C++/Boost — done`

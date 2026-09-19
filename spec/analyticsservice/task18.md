@@ -1,4 +1,4 @@
-# Task 18/22: `CycleAnalyticsInputSource`
+# Task 18/26: `AnalyticsPaymentsSource`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
@@ -6,14 +6,14 @@
 |-------|-------|
 | Language | `C++/Boost` |
 | Kind | `custom-source` |
-| File | `analyticsservice/internal/functions/endpoint/cycle_analytics_input_source.hpp` |
-| Test | `analyticsservice/internal/functions/endpoint/cycle_analytics_input_source_test.cpp` |
+| File | `analyticsservice/internal/functions/endpoint/analytics_payments_source.hpp` |
+| Test | `analyticsservice/internal/functions/endpoint/analytics_payments_source_test.cpp` |
 | Service | `Analytics Service` |
 
 
 ## Behaviour
 
-Produce one deterministic analytics event that exercises the finite feedback cycle.
+Produce a deterministic payment analytics event for the canonical join examples.
 
 
 
@@ -24,10 +24,10 @@ Produce one deterministic analytics event that exercises the finite feedback cyc
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `analyticsservice/internal/functions/endpoint/cycle_analytics_input_source.hpp` and preserve its generated contract
+- [ ] Open `analyticsservice/internal/functions/endpoint/analytics_payments_source.hpp` and preserve its generated contract
 - [ ] Inspect input type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/cycle_analytics_input_source_test.cpp`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/analytics_payments_source_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task18.md — CycleAnalyticsInputSource — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task18.md — AnalyticsPaymentsSource — C++/Boost — done`

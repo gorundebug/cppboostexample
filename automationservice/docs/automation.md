@@ -2,110 +2,110 @@
 
 ```mermaid
 flowchart LR
-  s30["Activity Pause"]
-  s31[\"Call Fan-Out Activity A
+  s35["Activity Pause"]
+  s36[\"Call Fan-Out Activity A
 AutomationJob"/]
-  s32[\"Call Fan-Out Activity B
+  s37[\"Call Fan-Out Activity B
 AutomationJob"/]
-  s33[\"Call Fan-Out Activity C
+  s38[\"Call Fan-Out Activity C
 AutomationJob"/]
-  s34[\"Call Sequential Activity A
+  s39[\"Call Sequential Activity A
 AutomationJob"/]
-  s35[\"Call Sequential Activity B
+  s40[\"Call Sequential Activity B
 AutomationJob"/]
-  s36(["Consume Activity Job
+  s41(["Consume Activity Job
 AutomationJob"])
-  s37(["Consume Fan-Out Activity A
+  s42(["Consume Fan-Out Activity A
 AutomationJob"])
-  s38(["Consume Fan-Out Activity B
+  s43(["Consume Fan-Out Activity B
 AutomationJob"])
-  s39(["Consume Fan-Out Activity C
+  s44(["Consume Fan-Out Activity C
 AutomationJob"])
-  s40(["Consume Fan-Out Workflow Job
+  s45(["Consume Fan-Out Workflow Job
 AutomationJob"])
-  s41(["Consume Sequential Activity A
+  s46(["Consume Sequential Activity A
 AutomationJob"])
-  s42(["Consume Sequential Activity B
+  s47(["Consume Sequential Activity B
 AutomationJob"])
-  s43(["Consume Workflow Job
+  s48(["Consume Workflow Job
 AutomationJob"])
-  s44(["Local Schedule
+  s49(["Local Schedule
 AutomationJob"])
-  s45["Observe Activity Result
+  s50["Observe Activity Result
 AutomationJob"]
-  s46["Observe Fan-Out Activity B
+  s51["Observe Fan-Out Activity B
 AutomationJob"]
-  s47["Observe Fan-Out Activity C
+  s52["Observe Fan-Out Activity C
 AutomationJob"]
-  s48["Observe Workflow Result
+  s53["Observe Workflow Result
 AutomationJob"]
-  s49["Process Activity Job
+  s54["Process Activity Job
 AutomationJob"]
-  s50["Process Fan-Out Activity A
+  s55["Process Fan-Out Activity A
 AutomationJob"]
-  s51["Process Fan-Out Activity B
+  s56["Process Fan-Out Activity B
 AutomationJob"]
-  s52["Process Fan-Out Activity C
+  s57["Process Fan-Out Activity C
 AutomationJob"]
-  s53["Process Scheduled Activity
+  s58["Process Scheduled Activity
 AutomationJob"]
-  s54["Process Scheduled Workflow
+  s59["Process Scheduled Workflow
 AutomationJob"]
-  s55["Process Sequential Activity A
+  s60["Process Sequential Activity A
 AutomationJob"]
-  s56["Process Sequential Activity B
+  s61["Process Sequential Activity B
 AutomationJob"]
-  s57["Process Workflow Job
+  s62["Process Workflow Job
 AutomationJob"]
-  s58["Scheduled Activity Pause"]
-  s59["Scheduled Workflow Pause"]
-  s60["Split Activity A Result"]
-  s61["Split On-Demand Jobs"]
-  s62[\"Submit Activity Job
+  s63["Scheduled Activity Pause"]
+  s64["Scheduled Workflow Pause"]
+  s65["Split Activity A Result"]
+  s66["Split On-Demand Jobs"]
+  s67[\"Submit Activity Job
 AutomationJob"/]
-  s63[\"Submit Fan-Out Workflow Job
+  s68[\"Submit Fan-Out Workflow Job
 AutomationJob"/]
-  s64[\"Submit Workflow Job
+  s69[\"Submit Workflow Job
 AutomationJob"/]
-  s65(["Temporal Activity Schedule
+  s70(["Temporal Activity Schedule
 AutomationJob"])
-  s66(["Temporal Workflow Schedule
+  s71(["Temporal Workflow Schedule
 AutomationJob"])
-  s67["Workflow Pause"]
-  s36 --> s30
-  s40 --> s31
-  s60 --> s32
-  s60 --> s33
-  s67 --> s34
-  s34 --> s35
-  s49 --> s36
-  s50 --> s37
-  s51 --> s38
-  s52 --> s39
-  s55 --> s41
-  s56 --> s42
-  s57 --> s43
-  s62 --> s45
-  s32 --> s46
-  s33 --> s47
-  s64 --> s48
-  s30 --> s49
-  s37 --> s50
-  s38 --> s51
-  s39 --> s52
-  s58 --> s53
-  s59 --> s54
-  s41 --> s55
-  s42 --> s56
-  s35 --> s57
-  s65 --> s58
-  s66 --> s59
-  s31 --> s60
-  s44 --> s61
-  s61 --> s62
-  s61 --> s63
-  s61 --> s64
-  s53 --> s65
-  s54 --> s66
-  s43 --> s67
+  s72["Workflow Pause"]
+  s41 --> s35
+  s45 --> s36
+  s65 --> s37
+  s65 --> s38
+  s72 --> s39
+  s39 --> s40
+  s54 --> s41
+  s55 --> s42
+  s56 --> s43
+  s57 --> s44
+  s60 --> s46
+  s61 --> s47
+  s62 --> s48
+  s67 --> s50
+  s37 --> s51
+  s38 --> s52
+  s69 --> s53
+  s35 --> s54
+  s42 --> s55
+  s43 --> s56
+  s44 --> s57
+  s63 --> s58
+  s64 --> s59
+  s46 --> s60
+  s47 --> s61
+  s40 --> s62
+  s70 --> s63
+  s71 --> s64
+  s36 --> s65
+  s49 --> s66
+  s66 --> s67
+  s66 --> s68
+  s66 --> s69
+  s58 --> s70
+  s59 --> s71
+  s48 --> s72
 ```

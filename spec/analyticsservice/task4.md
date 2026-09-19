@@ -1,36 +1,35 @@
-# Task 4/22: `CountOrderProcessed`
+# Task 4/26: `ContinueCycleAnalytics`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `C++/Boost` |
-| Kind | `process` |
-| File | `analyticsservice/internal/functions/analytics/count_order_processed.hpp` |
-| Test | `analyticsservice/internal/functions/analytics/count_order_processed_test.cpp` |
+| Kind | `filter` |
+| File | `analyticsservice/internal/functions/cycleanalytics/continue_cycle_analytics.hpp` |
+| Test | `analyticsservice/internal/functions/cycleanalytics/continue_cycle_analytics_test.cpp` |
 | Service | `Analytics Service` |
 
 
 ## Behaviour
 
-Count successful and unsuccessful orders independently, then return the event unchanged.
-
+Keep intermediate analytics events whose cycle counter is below three.
 
 
 
 
 ## Stream types
-- Input: `OrderProcessed` — `model_cpp/include/example/model/types/order_processed.hpp`
-- Output: `OrderProcessed` — `model_cpp/include/example/model/types/order_processed.hpp`
+- Input: `AnalyticsEvent` — `analyticsservice/internal/types/analytics_event.hpp`
+- Output: `AnalyticsEvent` — `analyticsservice/internal/types/analytics_event.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `analyticsservice/internal/functions/analytics/count_order_processed.hpp` and preserve its generated contract
-- [ ] Inspect input type `OrderProcessed` in `model_cpp/include/example/model/types/order_processed.hpp`
-- [ ] Inspect output type `OrderProcessed` in `model_cpp/include/example/model/types/order_processed.hpp`
+- [ ] Open `analyticsservice/internal/functions/cycleanalytics/continue_cycle_analytics.hpp` and preserve its generated contract
+- [ ] Inspect input type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
+- [ ] Inspect output type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/analytics/count_order_processed_test.cpp`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/cycleanalytics/continue_cycle_analytics_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task4.md — CountOrderProcessed — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task4.md — ContinueCycleAnalytics — C++/Boost — done`

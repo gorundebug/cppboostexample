@@ -103,6 +103,13 @@ void ServiceGenerated::initMakers() {
     return functions::MakeAnalyticsShipmentsSource(
         std::move(context), environment, config);
   };
+  makers_.build_substream_analytics_result = [](
+      servicelib::Context context, servicelib::IServiceEnvironment& environment,
+      const servicelib::config::MapStreamConfig& config) -> boost::asio::awaitable<
+          std::unique_ptr<functions::BuildSubstreamAnalyticsResult>> {
+    return functions::MakeBuildSubstreamAnalyticsResult(
+        std::move(context), environment, config);
+  };
   makers_.complete_cycle_analytics = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,
       const servicelib::config::FilterStreamConfig& config) -> boost::asio::awaitable<
@@ -143,6 +150,13 @@ void ServiceGenerated::initMakers() {
       const servicelib::config::CustomEndpointConfig& config) -> boost::asio::awaitable<
           std::unique_ptr<functions::HighValueAnalyticsSink>> {
     return functions::MakeHighValueAnalyticsSink(
+        std::move(context), environment, config);
+  };
+  makers_.invoke_analytics_substream = [](
+      servicelib::Context context, servicelib::IServiceEnvironment& environment,
+      const servicelib::config::MapStreamConfig& config) -> boost::asio::awaitable<
+          std::unique_ptr<functions::InvokeAnalyticsSubstream>> {
+    return functions::MakeInvokeAnalyticsSubstream(
         std::move(context), environment, config);
   };
   makers_.join_order_payment_analytics = [](
@@ -220,6 +234,20 @@ void ServiceGenerated::initMakers() {
       const servicelib::config::CustomEndpointConfig& config) -> boost::asio::awaitable<
           std::unique_ptr<functions::StandardAnalyticsSink>> {
     return functions::MakeStandardAnalyticsSink(
+        std::move(context), environment, config);
+  };
+  makers_.substream_analytics_input_source = [](
+      servicelib::Context context, servicelib::IServiceEnvironment& environment,
+      const servicelib::config::CustomEndpointConfig& config) -> boost::asio::awaitable<
+          std::unique_ptr<functions::SubstreamAnalyticsInputSource>> {
+    return functions::MakeSubstreamAnalyticsInputSource(
+        std::move(context), environment, config);
+  };
+  makers_.substream_analytics_result_sink = [](
+      servicelib::Context context, servicelib::IServiceEnvironment& environment,
+      const servicelib::config::CustomEndpointConfig& config) -> boost::asio::awaitable<
+          std::unique_ptr<functions::SubstreamAnalyticsResultSink>> {
+    return functions::MakeSubstreamAnalyticsResultSink(
         std::move(context), environment, config);
   };
   makers_.http_router = [](
@@ -328,6 +356,9 @@ void ServiceGenerated::initFunctions(
   if (!makers_.analytics_shipments_source) {
     throw std::logic_error("function maker AnalyticsShipmentsSource is not configured");
   }
+  if (!makers_.build_substream_analytics_result) {
+    throw std::logic_error("function maker BuildSubstreamAnalyticsResult is not configured");
+  }
   if (!makers_.complete_cycle_analytics) {
     throw std::logic_error("function maker CompleteCycleAnalytics is not configured");
   }
@@ -345,6 +376,9 @@ void ServiceGenerated::initFunctions(
   }
   if (!makers_.high_value_analytics_sink) {
     throw std::logic_error("function maker HighValueAnalyticsSink is not configured");
+  }
+  if (!makers_.invoke_analytics_substream) {
+    throw std::logic_error("function maker InvokeAnalyticsSubstream is not configured");
   }
   if (!makers_.join_order_payment_analytics) {
     throw std::logic_error("function maker JoinOrderPaymentAnalytics is not configured");
@@ -379,13 +413,19 @@ void ServiceGenerated::initFunctions(
   if (!makers_.standard_analytics_sink) {
     throw std::logic_error("function maker StandardAnalyticsSink is not configured");
   }
+  if (!makers_.substream_analytics_input_source) {
+    throw std::logic_error("function maker SubstreamAnalyticsInputSource is not configured");
+  }
+  if (!makers_.substream_analytics_result_sink) {
+    throw std::logic_error("function maker SubstreamAnalyticsResultSink is not configured");
+  }
   std::stop_source maker_cancellation;
   std::mutex maker_error_mutex;
   std::exception_ptr first_maker_error;
   const auto maker_context = context.withExternalCancellation(
       maker_cancellation.get_token());
   std::vector<std::future<void>> maker_tasks;
-  maker_tasks.reserve(22);
+  maker_tasks.reserve(26);
   maker_tasks.push_back(boost::asio::co_spawn(
       executor_,
       [](ServiceGenerated* service, servicelib::config::MapStreamConfig function_config,
@@ -510,6 +550,31 @@ void ServiceGenerated::initFunctions(
     }
     co_return;
   }(this, cfg.endpoints.analyticsShipments, maker_context, &maker_cancellation,
+    &maker_error_mutex, &first_maker_error), boost::asio::use_future));
+  maker_tasks.push_back(boost::asio::co_spawn(
+      executor_,
+      [](ServiceGenerated* service, servicelib::config::MapStreamConfig function_config,
+         servicelib::Context maker_context,
+         std::stop_source* maker_cancellation,
+         std::mutex* maker_error_mutex,
+         std::exception_ptr* first_maker_error)
+          -> boost::asio::awaitable<void> {
+    try {
+      service->functions_.build_substream_analytics_result = co_await service->makers_.build_substream_analytics_result(
+          maker_context, *service, function_config);
+      if (!service->functions_.build_substream_analytics_result) {
+        throw std::logic_error("function maker BuildSubstreamAnalyticsResult returned null");
+      }
+    } catch (...) {
+      maker_cancellation->request_stop();
+      const std::lock_guard lock(*maker_error_mutex);
+      if (!*first_maker_error) {
+        *first_maker_error = std::current_exception();
+      }
+      throw;
+    }
+    co_return;
+  }(this, cfg.streams.buildSubstreamAnalyticsResult, maker_context, &maker_cancellation,
     &maker_error_mutex, &first_maker_error), boost::asio::use_future));
   maker_tasks.push_back(boost::asio::co_spawn(
       executor_,
@@ -660,6 +725,31 @@ void ServiceGenerated::initFunctions(
     }
     co_return;
   }(this, cfg.endpoints.highValueAnalytics, maker_context, &maker_cancellation,
+    &maker_error_mutex, &first_maker_error), boost::asio::use_future));
+  maker_tasks.push_back(boost::asio::co_spawn(
+      executor_,
+      [](ServiceGenerated* service, servicelib::config::MapStreamConfig function_config,
+         servicelib::Context maker_context,
+         std::stop_source* maker_cancellation,
+         std::mutex* maker_error_mutex,
+         std::exception_ptr* first_maker_error)
+          -> boost::asio::awaitable<void> {
+    try {
+      service->functions_.invoke_analytics_substream = co_await service->makers_.invoke_analytics_substream(
+          maker_context, *service, function_config);
+      if (!service->functions_.invoke_analytics_substream) {
+        throw std::logic_error("function maker InvokeAnalyticsSubstream returned null");
+      }
+    } catch (...) {
+      maker_cancellation->request_stop();
+      const std::lock_guard lock(*maker_error_mutex);
+      if (!*first_maker_error) {
+        *first_maker_error = std::current_exception();
+      }
+      throw;
+    }
+    co_return;
+  }(this, cfg.streams.invokeAnalyticsSubstream, maker_context, &maker_cancellation,
     &maker_error_mutex, &first_maker_error), boost::asio::use_future));
   maker_tasks.push_back(boost::asio::co_spawn(
       executor_,
@@ -936,6 +1026,56 @@ void ServiceGenerated::initFunctions(
     co_return;
   }(this, cfg.endpoints.standardAnalytics, maker_context, &maker_cancellation,
     &maker_error_mutex, &first_maker_error), boost::asio::use_future));
+  maker_tasks.push_back(boost::asio::co_spawn(
+      executor_,
+      [](ServiceGenerated* service, servicelib::config::CustomEndpointConfig function_config,
+         servicelib::Context maker_context,
+         std::stop_source* maker_cancellation,
+         std::mutex* maker_error_mutex,
+         std::exception_ptr* first_maker_error)
+          -> boost::asio::awaitable<void> {
+    try {
+      service->functions_.substream_analytics_input_source = co_await service->makers_.substream_analytics_input_source(
+          maker_context, *service, function_config);
+      if (!service->functions_.substream_analytics_input_source) {
+        throw std::logic_error("function maker SubstreamAnalyticsInputSource returned null");
+      }
+    } catch (...) {
+      maker_cancellation->request_stop();
+      const std::lock_guard lock(*maker_error_mutex);
+      if (!*first_maker_error) {
+        *first_maker_error = std::current_exception();
+      }
+      throw;
+    }
+    co_return;
+  }(this, cfg.endpoints.substreamAnalyticsInput, maker_context, &maker_cancellation,
+    &maker_error_mutex, &first_maker_error), boost::asio::use_future));
+  maker_tasks.push_back(boost::asio::co_spawn(
+      executor_,
+      [](ServiceGenerated* service, servicelib::config::CustomEndpointConfig function_config,
+         servicelib::Context maker_context,
+         std::stop_source* maker_cancellation,
+         std::mutex* maker_error_mutex,
+         std::exception_ptr* first_maker_error)
+          -> boost::asio::awaitable<void> {
+    try {
+      service->functions_.substream_analytics_result_sink = co_await service->makers_.substream_analytics_result_sink(
+          maker_context, *service, function_config);
+      if (!service->functions_.substream_analytics_result_sink) {
+        throw std::logic_error("function maker SubstreamAnalyticsResultSink returned null");
+      }
+    } catch (...) {
+      maker_cancellation->request_stop();
+      const std::lock_guard lock(*maker_error_mutex);
+      if (!*first_maker_error) {
+        *first_maker_error = std::current_exception();
+      }
+      throw;
+    }
+    co_return;
+  }(this, cfg.endpoints.substreamAnalyticsResult, maker_context, &maker_cancellation,
+    &maker_error_mutex, &first_maker_error), boost::asio::use_future));
 
   for (auto& task : maker_tasks) {
     try {
@@ -1036,8 +1176,18 @@ void ServiceGenerated::initStreams(const config::Config& cfg) {
   streams_.write_high_value_analytics = write_high_value_analytics;
   [[maybe_unused]] auto& write_standard_analytics = route_analytics_result.template get<1>().sink(cfg.streams.writeStandardAnalytics, servicelib::StreamType<std::exception_ptr>{}, servicelib::StreamFunction(WriteStandardAnalyticsSinkBinding::Function{&bindings_.write_standard_analytics}));
   streams_.write_standard_analytics = write_standard_analytics;
+  streams_.analyze_analytics_substream = servicelib::makeSubStream<example::analytics_service::types::AnalyticsEvent, example::analytics_service::types::AnalyticsResult, ServiceGenerated>(cfg.streams.analyzeAnalyticsSubstream, *this);
+  auto& build_substream_analytics_result = (*streams_.analyze_analytics_substream).map(cfg.streams.buildSubstreamAnalyticsResult, servicelib::StreamType<example::analytics_service::types::AnalyticsResult>{}, servicelib::StreamFunction(std::ref(*functions_.build_substream_analytics_result)));
+  streams_.build_substream_analytics_result = std::addressof(build_substream_analytics_result);
+  streams_.substream_analytics_input = &servicelib::makeInputStreamRef<example::analytics_service::types::AnalyticsEvent, std::monostate, std::exception_ptr, ServiceGenerated>(cfg.streams.substreamAnalyticsInput, nullptr, *this);
+  auto& invoke_analytics_substream = (*streams_.substream_analytics_input).map(cfg.streams.invokeAnalyticsSubstream, servicelib::StreamType<example::analytics_service::types::AnalyticsResult>{}, servicelib::StreamFunction(std::ref(*functions_.invoke_analytics_substream)));
+  streams_.invoke_analytics_substream = std::addressof(invoke_analytics_substream);
+  [[maybe_unused]] auto& write_substream_analytics = invoke_analytics_substream.sink(cfg.streams.writeSubstreamAnalytics, servicelib::StreamType<std::exception_ptr>{}, servicelib::StreamFunction(WriteSubstreamAnalyticsSinkBinding::Function{&bindings_.write_substream_analytics}));
+  streams_.write_substream_analytics = write_substream_analytics;
   streams_.consume_order_processed->setSource(count_order_processed);
   streams_.cycle_analytics_link->setSource(continue_cycle_analytics);
+  streams_.analyze_analytics_substream->setSource(build_substream_analytics_result);
+  analyze_analytics_substream_substream_->bind(streams_.analyze_analytics_substream);
 }
 
 void ServiceGenerated::initDataSinks(const config::Config& cfg) {
@@ -1089,6 +1239,17 @@ void ServiceGenerated::initDataSinks(const config::Config& cfg) {
                           servicelib::Payload<example::analytics_service::types::AnalyticsResult>::make(value));
       };
   registerDataSink(endpoints_.write_standard_analytics);
+  endpoints_.write_substream_analytics =
+      std::make_shared<WriteSubstreamAnalyticsCustomSinkEndpoint>(
+          streams_.write_substream_analytics.get(),
+          *functions_.substream_analytics_result_sink);
+  bindings_.write_substream_analytics.consume =
+      [endpoint = endpoints_.write_substream_analytics.get()](
+          servicelib::MessageContext context, const example::analytics_service::types::AnalyticsResult& value) {
+        endpoint->consume(std::move(context),
+                          servicelib::Payload<example::analytics_service::types::AnalyticsResult>::make(value));
+      };
+  registerDataSink(endpoints_.write_substream_analytics);
 }
 
 void ServiceGenerated::initDataSources(
@@ -1124,6 +1285,11 @@ void ServiceGenerated::initDataSources(
       *functions_.cycle_analytics_input_source,
       *functions_.cycle_analytics_input_source);
   registerDataSource(endpoints_.cycle_analytics_input);
+  endpoints_.substream_analytics_input = SubstreamAnalyticsInputCustomSourceEndpoint::make(
+      *this, *streams_.substream_analytics_input,
+      *functions_.substream_analytics_input_source,
+      *functions_.substream_analytics_input_source);
+  registerDataSource(endpoints_.substream_analytics_input);
   connectors_.local_cron_cron_source =
       servicelib::datasource::cron::LibcronDataSource::make(
           *this, cfg.dataConnectors.localCron.id);

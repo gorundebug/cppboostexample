@@ -2,6 +2,7 @@
 #pragma once
 
 #include <memory>
+
 #include <functional>
 #include <optional>
 #include <stdexcept>
@@ -32,6 +33,7 @@
 
 namespace example::inventory_service::app {
 
+
 struct DataTypes final {
   template <typename>
   struct DataType {};
@@ -55,6 +57,8 @@ class ServiceGenerated
   servicelib::log::Logger& getLogger() override;
   servicelib::metrics::Metrics& getMetrics() override;
   servicelib::tracing::Tracing* getTracing() override;
+
+
 
  protected:
   struct ServiceMakers final {
@@ -103,12 +107,14 @@ class ServiceGenerated
   void stopRuntime() noexcept;
   void releaseRuntime() noexcept;
 
+
   using ProcessInventoryItemInput =
       servicelib::InputStream<example::model::types::OrderItem, example::model::types::OrderItemResult, std::exception_ptr,
                               ServiceGenerated>;
 
 
   struct ServiceStreams final {
+
     ProcessInventoryItemInput* process_inventory_item{};
     servicelib::StreamBase* get_inventory_item_data{nullptr};
 

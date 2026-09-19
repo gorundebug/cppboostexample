@@ -146,6 +146,30 @@ make -C service-name docker-build USE_LOCAL_MODULES=1
 
 ## Quality and generated code
 
+### Calling service-local SubStreams
+
+If the model declares a SubStream, its owning service exposes a typed accessor:
+`Lookup()` in Go, `getLookupSubStream()` in TypeScript, or
+`get_lookup_substream()` in Python, Rust and C++ (for an entry named Lookup).
+Inject the handle through a custom maker instead of editing generated graph
+assembly. Capture handles during construction and invoke them after graph binding.
+
+The entry's `valueType` is the argument type; its `source` is the result producer,
+not another invocation. The graph is shared and concurrent calls keep separate
+collector state. The collector returns true when it has enough results; false
+continues collecting. Python uses an async value-only callback with ContextVars;
+the other runtimes pass context explicitly. No endpoint or extra message ID is
+required. Keep the service alive while using its handles.
+
+Preserve runtime context in business emissions. Use cancellation/deadlines for
+uncertain completion. Completion discards late results but does not forcibly stop
+running branches. Business failures remain explicit result values or error paths.
+Existing Join keys and pools are unchanged; avoid waiting while occupying all
+workers required by the substream. Temporal is available only in Go, Python and
+TypeScript, using deterministic workflow code and workflow-aware scheduling.
+
+### Commands
+
 ```sh
 make gen             # [mixed] regenerate transport and schema-owned sources
 make build           # [mixed] build every service

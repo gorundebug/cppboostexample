@@ -1,33 +1,33 @@
-# Task 20/22: `JoinedAnalyticsSink`
+# Task 20/26: `CycleAnalyticsInputSource`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `C++/Boost` |
-| Kind | `custom-sink` |
-| File | `analyticsservice/internal/functions/endpoint/joined_analytics_sink.hpp` |
-| Test | `analyticsservice/internal/functions/endpoint/joined_analytics_sink_test.cpp` |
+| Kind | `custom-source` |
+| File | `analyticsservice/internal/functions/endpoint/cycle_analytics_input_source.hpp` |
+| Test | `analyticsservice/internal/functions/endpoint/cycle_analytics_input_source_test.cpp` |
 | Service | `Analytics Service` |
 
 
 ## Behaviour
 
-Validate and record the result of the two-way analytics join.
+Produce one deterministic analytics event that exercises the finite feedback cycle.
 
 
 
 
 ## Stream types
-- Input: `AnalyticsResult` — `analyticsservice/internal/types/analytics_result.hpp`
+- Input: `AnalyticsEvent` — `analyticsservice/internal/types/analytics_event.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `analyticsservice/internal/functions/endpoint/joined_analytics_sink.hpp` and preserve its generated contract
-- [ ] Inspect input type `AnalyticsResult` in `analyticsservice/internal/types/analytics_result.hpp`
+- [ ] Open `analyticsservice/internal/functions/endpoint/cycle_analytics_input_source.hpp` and preserve its generated contract
+- [ ] Inspect input type `AnalyticsEvent` in `analyticsservice/internal/types/analytics_event.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/joined_analytics_sink_test.cpp`
+- [ ] Implement meaningful assertions in `analyticsservice/internal/functions/endpoint/cycle_analytics_input_source_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task20.md — JoinedAnalyticsSink — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] analyticsservice/task20.md — CycleAnalyticsInputSource — C++/Boost — done`

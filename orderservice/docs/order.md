@@ -4,38 +4,38 @@
 flowchart LR
   subgraph ext[" "]
     style ext fill:#f5f5f5,stroke:#bbb,stroke-dasharray:4
-    s72[/"ProcessOrderItemError
+    s77[/"ProcessOrderItemError
 OrderState"/]
   end
-  s73["Map Order Item Result To Order State
+  s78["Map Order Item Result To Order State
 OrderState"]
-  s74["MapToOrderProcessed
+  s79["MapToOrderProcessed
 OrderProcessed"]
-  s75["Map to Order State
+  s80["Map to Order State
 OrderState"]
-  s76(("Merge Results"))
-  s77(["Process Order
+  s81(("Merge Results"))
+  s82(["Process Order
 Order"])
-  s78[\"Process Order Item
+  s83[\"Process Order Item
 OrderItemResult"/]
-  s79["Process Order Items
+  s84["Process Order Items
 OrderItem"]
-  s80[\"Publish Order Processed
+  s85[\"Publish Order Processed
 OrderProcessed"/]
-  s81["Soft Deadline"]
-  s82["Split Order Result"]
-  s83["Split Pipeline"]
-  s78 --> s73
-  s82 --> s74
-  s81 --> s75
-  s75 --> s76
-  s73 --> s76
-  s72 -.-> s76
-  s82 --> s77
-  s79 --> s78
-  s83 --> s79
-  s74 --> s80
-  s83 --> s81
-  s76 --> s82
-  s77 --> s83
+  s86["Soft Deadline"]
+  s87["Split Order Result"]
+  s88["Split Pipeline"]
+  s83 --> s78
+  s87 --> s79
+  s86 --> s80
+  s80 --> s81
+  s78 --> s81
+  s77 -.-> s81
+  s87 --> s82
+  s84 --> s83
+  s88 --> s84
+  s79 --> s85
+  s88 --> s86
+  s81 --> s87
+  s82 --> s88
 ```

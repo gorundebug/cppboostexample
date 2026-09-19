@@ -2,16 +2,16 @@
 
 ```mermaid
 flowchart LR
-  s68[["Get Inventory Item Data
+  s73[["Get Inventory Item Data
 OrderItemResult"]]
-  s69[/"Get Inventory Item Error
+  s74[/"Get Inventory Item Error
 OrderItemResult"/]
-  s70(("Merge Inventory Result"))
-  s71(["Process Inventory Item
+  s75(("Merge Inventory Result"))
+  s76(["Process Inventory Item
 OrderItem"])
-  s71 --> s68
-  s68 --> s69
-  s68 --> s70
-  s69 --> s70
-  s70 --> s71
+  s76 --> s73
+  s73 --> s74
+  s73 --> s75
+  s74 --> s75
+  s75 --> s76
 ```

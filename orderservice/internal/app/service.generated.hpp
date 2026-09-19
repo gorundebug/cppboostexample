@@ -2,6 +2,7 @@
 #pragma once
 
 #include <memory>
+
 #include <functional>
 #include <optional>
 #include <stdexcept>
@@ -45,6 +46,7 @@
 
 namespace example::order_service::app {
 
+
 struct DataTypes final {
   template <typename>
   struct DataType {};
@@ -68,6 +70,8 @@ class ServiceGenerated
   servicelib::log::Logger& getLogger() override;
   servicelib::metrics::Metrics& getMetrics() override;
   servicelib::tracing::Tracing* getTracing() override;
+
+
 
  protected:
   struct ServiceMakers final {
@@ -151,12 +155,14 @@ class ServiceGenerated
   void stopRuntime() noexcept;
   void releaseRuntime() noexcept;
 
+
   using ProcessOrderInput =
       servicelib::InputStream<example::order_service::types::Order, example::order_service::types::OrderState, std::exception_ptr,
                               ServiceGenerated>;
 
 
   struct ServiceStreams final {
+
     ProcessOrderInput* process_order{};
     servicelib::StreamBase* split_pipeline{nullptr};
 

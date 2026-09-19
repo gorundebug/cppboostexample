@@ -2,6 +2,8 @@
 #pragma once
 
 #include <memory>
+#include <atomic>
+
 #include <functional>
 #include <optional>
 #include <stdexcept>
@@ -38,6 +40,8 @@
 #include <analyticsservice/internal/functions/endpoint/joined_analytics_sink.hpp>
 #include <analyticsservice/internal/functions/endpoint/order_processed_endpoint_source.hpp>
 #include <analyticsservice/internal/functions/endpoint/standard_analytics_sink.hpp>
+#include <analyticsservice/internal/functions/endpoint/substream_analytics_input_source.hpp>
+#include <analyticsservice/internal/functions/endpoint/substream_analytics_result_sink.hpp>
 #include <analyticsservice/internal/functions/joinanalytics/join_order_payment_analytics.hpp>
 #include <analyticsservice/internal/functions/joinanalytics/key_orders_for_join.hpp>
 #include <analyticsservice/internal/functions/joinanalytics/key_payments_for_join.hpp>
@@ -46,6 +50,8 @@
 #include <analyticsservice/internal/functions/multijoinanalytics/key_shipments_for_multi_join.hpp>
 #include <analyticsservice/internal/functions/multijoinanalytics/multi_join_analytics_events.hpp>
 #include <analyticsservice/internal/functions/multijoinanalytics/route_analytics_result.hpp>
+#include <analyticsservice/internal/functions/substreamanalytics/build_substream_analytics_result.hpp>
+#include <analyticsservice/internal/functions/substreamanalytics/invoke_analytics_substream.hpp>
 #include <analyticsservice/internal/types/analytics_event.hpp>
 #include <analyticsservice/internal/types/analytics_key.hpp>
 #include <analyticsservice/internal/types/analytics_result.hpp>
@@ -54,6 +60,29 @@
 
 
 namespace example::analytics_service::app {
+
+// Business functions may retain handles without retaining the graph itself.
+template <typename T, typename R>
+class SubStreamHandle final : public servicelib::ISubStream<T, R> {
+ public:
+  void bind(const std::shared_ptr<servicelib::ISubStream<T, R>>& stream) {
+    stream_.store(stream, std::memory_order_release);
+  }
+
+  void consume(servicelib::MessageContext context,
+               servicelib::Payload<T> value,
+               std::shared_ptr<servicelib::SubStreamCollector<R>> collector) override {
+    auto stream = stream_.load(std::memory_order_acquire).lock();
+    if (!stream) {
+      throw std::logic_error("SubStream is not available: service is not running");
+    }
+    stream->consume(std::move(context), std::move(value), std::move(collector));
+  }
+
+ private:
+  std::atomic<std::weak_ptr<servicelib::ISubStream<T, R>>> stream_;
+};
+
 
 struct DataTypes final {
   template <typename>
@@ -78,6 +107,12 @@ class ServiceGenerated
   servicelib::metrics::Metrics& getMetrics() override;
   servicelib::tracing::Tracing* getTracing() override;
 
+  std::shared_ptr<servicelib::ISubStream<example::analytics_service::types::AnalyticsEvent, example::analytics_service::types::AnalyticsResult>>
+  getAnalyzeAnalyticsSubstreamSubStream() const noexcept {
+    return analyze_analytics_substream_substream_;
+  }
+
+
  protected:
   struct ServiceMakers final {
     std::function<boost::asio::awaitable<
@@ -100,6 +135,10 @@ class ServiceGenerated
         std::unique_ptr<functions::AnalyticsShipmentsSource>>(
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::CustomEndpointConfig&)> analytics_shipments_source;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::BuildSubstreamAnalyticsResult>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::MapStreamConfig&)> build_substream_analytics_result;
     std::function<boost::asio::awaitable<
         std::unique_ptr<functions::CompleteCycleAnalytics>>(
         servicelib::Context, servicelib::IServiceEnvironment&,
@@ -124,6 +163,10 @@ class ServiceGenerated
         std::unique_ptr<functions::HighValueAnalyticsSink>>(
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::CustomEndpointConfig&)> high_value_analytics_sink;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::InvokeAnalyticsSubstream>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::MapStreamConfig&)> invoke_analytics_substream;
     std::function<boost::asio::awaitable<
         std::unique_ptr<functions::JoinOrderPaymentAnalytics>>(
         servicelib::Context, servicelib::IServiceEnvironment&,
@@ -169,6 +212,14 @@ class ServiceGenerated
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::CustomEndpointConfig&)> standard_analytics_sink;
     std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::SubstreamAnalyticsInputSource>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::CustomEndpointConfig&)> substream_analytics_input_source;
+    std::function<boost::asio::awaitable<
+        std::unique_ptr<functions::SubstreamAnalyticsResultSink>>(
+        servicelib::Context, servicelib::IServiceEnvironment&,
+        const servicelib::config::CustomEndpointConfig&)> substream_analytics_result_sink;
+    std::function<boost::asio::awaitable<
         std::shared_ptr<servicelib::http::Router>>(
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::ServiceConfig&)> http_router;
@@ -185,12 +236,14 @@ class ServiceGenerated
     std::unique_ptr<functions::AnalyticsPaymentsSource> analytics_payments_source;
     std::unique_ptr<functions::AnalyticsScheduleSource> analytics_schedule_source;
     std::unique_ptr<functions::AnalyticsShipmentsSource> analytics_shipments_source;
+    std::unique_ptr<functions::BuildSubstreamAnalyticsResult> build_substream_analytics_result;
     std::unique_ptr<functions::CompleteCycleAnalytics> complete_cycle_analytics;
     std::unique_ptr<functions::ContinueCycleAnalytics> continue_cycle_analytics;
     std::unique_ptr<functions::CountOrderProcessed> count_order_processed;
     std::unique_ptr<functions::CycleAnalyticsInputSource> cycle_analytics_input_source;
     std::unique_ptr<functions::CycleAnalyticsResultSink> cycle_analytics_result_sink;
     std::unique_ptr<functions::HighValueAnalyticsSink> high_value_analytics_sink;
+    std::unique_ptr<functions::InvokeAnalyticsSubstream> invoke_analytics_substream;
     std::unique_ptr<functions::JoinOrderPaymentAnalytics> join_order_payment_analytics;
     std::unique_ptr<functions::JoinedAnalyticsSink> joined_analytics_sink;
     std::unique_ptr<functions::KeyOrdersForJoin> key_orders_for_join;
@@ -202,6 +255,8 @@ class ServiceGenerated
     std::unique_ptr<functions::OrderProcessedEndpointSource> order_processed_endpoint_source;
     std::unique_ptr<functions::RouteAnalyticsResult> route_analytics_result;
     std::unique_ptr<functions::StandardAnalyticsSink> standard_analytics_sink;
+    std::unique_ptr<functions::SubstreamAnalyticsInputSource> substream_analytics_input_source;
+    std::unique_ptr<functions::SubstreamAnalyticsResultSink> substream_analytics_result_sink;
   };
 
   ServiceMakers makers_;
@@ -226,6 +281,12 @@ class ServiceGenerated
   void stopRuntime() noexcept;
   void releaseRuntime() noexcept;
 
+  using AnalyzeAnalyticsSubstreamSubStream =
+      servicelib::SubStream<example::analytics_service::types::AnalyticsEvent, example::analytics_service::types::AnalyticsResult, ServiceGenerated>;
+  std::shared_ptr<SubStreamHandle<example::analytics_service::types::AnalyticsEvent, example::analytics_service::types::AnalyticsResult>>
+      analyze_analytics_substream_substream_ =
+          std::make_shared<SubStreamHandle<example::analytics_service::types::AnalyticsEvent, example::analytics_service::types::AnalyticsResult>>();
+
   using AnalyticsScheduleInput =
       servicelib::InputStream<std::string, std::monostate, std::exception_ptr,
                               ServiceGenerated>;
@@ -244,17 +305,23 @@ class ServiceGenerated
   using CycleAnalyticsInputInput =
       servicelib::InputStream<example::analytics_service::types::AnalyticsEvent, std::monostate, std::exception_ptr,
                               ServiceGenerated>;
+  using SubstreamAnalyticsInputInput =
+      servicelib::InputStream<example::analytics_service::types::AnalyticsEvent, std::monostate, std::exception_ptr,
+                              ServiceGenerated>;
 
   using CycleAnalyticsLinkCycle =
       servicelib::CycleLinkStream<example::analytics_service::types::AnalyticsEvent, ServiceGenerated>;
 
   struct ServiceStreams final {
+    std::shared_ptr<AnalyzeAnalyticsSubstreamSubStream> analyze_analytics_substream;
+
     AnalyticsScheduleInput* analytics_schedule{};
     ConsumeOrderProcessedInput* consume_order_processed{};
     AnalyticsOrdersInput* analytics_orders{};
     AnalyticsPaymentsInput* analytics_payments{};
     AnalyticsShipmentsInput* analytics_shipments{};
     CycleAnalyticsInputInput* cycle_analytics_input{};
+    SubstreamAnalyticsInputInput* substream_analytics_input{};
     CycleAnalyticsLinkCycle* cycle_analytics_link{};
     servicelib::StreamBase* count_order_processed{nullptr};
 
@@ -299,6 +366,12 @@ class ServiceGenerated
     servicelib::SinkEndpointStreamRef<example::analytics_service::types::AnalyticsResult, std::monostate, std::exception_ptr> write_high_value_analytics;
 
     servicelib::SinkEndpointStreamRef<example::analytics_service::types::AnalyticsResult, std::monostate, std::exception_ptr> write_standard_analytics;
+
+    servicelib::StreamBase* build_substream_analytics_result{nullptr};
+
+    servicelib::StreamBase* invoke_analytics_substream{nullptr};
+
+    servicelib::SinkEndpointStreamRef<example::analytics_service::types::AnalyticsResult, std::monostate, std::exception_ptr> write_substream_analytics;
 
   };
   ServiceStreams streams_;
@@ -359,12 +432,27 @@ class ServiceGenerated
       }
     };
   };
+  struct WriteSubstreamAnalyticsSinkBinding final {
+    std::function<void(servicelib::MessageContext, const example::analytics_service::types::AnalyticsResult&)>
+        consume;
+    struct Function final {
+      WriteSubstreamAnalyticsSinkBinding* binding;
+      void operator()(servicelib::MessageContext context,
+                      const example::analytics_service::types::AnalyticsResult& value) const {
+        if (!binding->consume) {
+          throw std::logic_error("sink endpoint is not bound");
+        }
+        binding->consume(std::move(context), value);
+      }
+    };
+  };
 
   struct ServiceBindings final {
     WriteCycleAnalyticsSinkBinding write_cycle_analytics;
     WriteJoinedAnalyticsSinkBinding write_joined_analytics;
     WriteHighValueAnalyticsSinkBinding write_high_value_analytics;
     WriteStandardAnalyticsSinkBinding write_standard_analytics;
+    WriteSubstreamAnalyticsSinkBinding write_substream_analytics;
   };
   ServiceBindings bindings_;
 
@@ -398,6 +486,9 @@ class ServiceGenerated
   using CycleAnalyticsInputCustomSourceEndpoint =
       servicelib::datasource::localsource::Endpoint<
           example::analytics_service::types::AnalyticsEvent, std::monostate, functions::CycleAnalyticsInputSource, std::exception_ptr>;
+  using SubstreamAnalyticsInputCustomSourceEndpoint =
+      servicelib::datasource::localsource::Endpoint<
+          example::analytics_service::types::AnalyticsEvent, std::monostate, functions::SubstreamAnalyticsInputSource, std::exception_ptr>;
 
   using WriteCycleAnalyticsCustomSinkEndpoint =
       servicelib::datasink::localsink::Endpoint<
@@ -411,6 +502,9 @@ class ServiceGenerated
   using WriteStandardAnalyticsCustomSinkEndpoint =
       servicelib::datasink::localsink::Endpoint<
           example::analytics_service::types::AnalyticsResult, std::monostate, functions::StandardAnalyticsSink, std::exception_ptr>;
+  using WriteSubstreamAnalyticsCustomSinkEndpoint =
+      servicelib::datasink::localsink::Endpoint<
+          example::analytics_service::types::AnalyticsResult, std::monostate, functions::SubstreamAnalyticsResultSink, std::exception_ptr>;
 
 
   struct ServiceEndpoints final {
@@ -419,11 +513,13 @@ class ServiceGenerated
     std::shared_ptr<AnalyticsPaymentsCustomSourceEndpoint> analytics_payments;
     std::shared_ptr<AnalyticsShipmentsCustomSourceEndpoint> analytics_shipments;
     std::shared_ptr<CycleAnalyticsInputCustomSourceEndpoint> cycle_analytics_input;
+    std::shared_ptr<SubstreamAnalyticsInputCustomSourceEndpoint> substream_analytics_input;
     std::shared_ptr<servicelib::datasource::cron::Endpoint> analytics_schedule;
     std::shared_ptr<WriteCycleAnalyticsCustomSinkEndpoint> write_cycle_analytics;
     std::shared_ptr<WriteJoinedAnalyticsCustomSinkEndpoint> write_joined_analytics;
     std::shared_ptr<WriteHighValueAnalyticsCustomSinkEndpoint> write_high_value_analytics;
     std::shared_ptr<WriteStandardAnalyticsCustomSinkEndpoint> write_standard_analytics;
+    std::shared_ptr<WriteSubstreamAnalyticsCustomSinkEndpoint> write_substream_analytics;
   };
   ServiceEndpoints endpoints_;
 
