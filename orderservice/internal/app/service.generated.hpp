@@ -43,6 +43,8 @@
 #include <proto/inventoryserviceapi/inventoryserviceapi.generated.grpc.pb.h>
 #include <proto/inventoryserviceapi/processorderitem/processorderitem.pb.h>
 
+#include "orderservice/internal/app/pipelines/order.generated.hpp"
+
 
 namespace example::order_service::app {
 
@@ -74,39 +76,7 @@ class ServiceGenerated
 
 
  protected:
-  struct ServiceMakers final {
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::MapOrderItemResultToOrderState>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::MapStreamConfig&)> map_order_item_result_to_order_state;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::MapToOrderProcessed>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::MapStreamConfig&)> map_to_order_processed;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::MapToOrderState>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::MapStreamConfig&)> map_to_order_state;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::OrderProcessedEndpointSink>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::KafkaEndpointConfig&)> order_processed_endpoint_sink;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::ProcessOrderItemSink>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::GrpcEndpointConfig&)> process_order_item_sink;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::ProcessOrderItems>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::FlatMapStreamConfig&)> process_order_items;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::ProcessOrderSource>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::HttpEndpointConfig&)> process_order_source;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::SoftDeadline>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::DelayStreamConfig&)> soft_deadline;
+  struct ServiceMakers final : OrderPipelineMakers {
     std::function<boost::asio::awaitable<
         std::shared_ptr<servicelib::http::Router>>(
         servicelib::Context, servicelib::IServiceEnvironment&,
@@ -122,16 +92,7 @@ class ServiceGenerated
         servicelib::Context, servicelib::IServiceEnvironment&,
         const servicelib::config::GrpcDataConnectorConfig&)> inventory_service_api_client;
   };
-  struct ServiceFunctions final {
-    std::unique_ptr<functions::MapOrderItemResultToOrderState> map_order_item_result_to_order_state;
-    std::unique_ptr<functions::MapToOrderProcessed> map_to_order_processed;
-    std::unique_ptr<functions::MapToOrderState> map_to_order_state;
-    std::unique_ptr<functions::OrderProcessedEndpointSink> order_processed_endpoint_sink;
-    std::unique_ptr<functions::ProcessOrderItemSink> process_order_item_sink;
-    std::unique_ptr<functions::ProcessOrderItems> process_order_items;
-    std::unique_ptr<functions::ProcessOrderSource> process_order_source;
-    std::unique_ptr<functions::SoftDeadline> soft_deadline;
-  };
+  struct ServiceFunctions final : OrderPipelineFunctions {};
 
   ServiceMakers makers_;
   ServiceFunctions functions_;
@@ -161,30 +122,7 @@ class ServiceGenerated
                               ServiceGenerated>;
 
 
-  struct ServiceStreams final {
-
-    ProcessOrderInput* process_order{};
-    servicelib::StreamBase* split_pipeline{nullptr};
-
-    servicelib::StreamBase* process_order_items{nullptr};
-
-    servicelib::SinkEndpointStreamRef<example::model::types::OrderItem, example::model::types::OrderItemResult, example::order_service::types::OrderState> process_order_item;
-
-    servicelib::StreamBase* map_order_item_result_to_order_state{nullptr};
-
-    servicelib::StreamBase* soft_deadline{nullptr};
-
-    servicelib::StreamBase* map_to_order_state{nullptr};
-
-    servicelib::StreamBase* merge_results{nullptr};
-
-    servicelib::StreamBase* split_order_result{nullptr};
-
-    servicelib::StreamBase* map_to_order_processed{nullptr};
-
-    servicelib::SinkEndpointStreamRef<example::model::types::OrderProcessed, std::monostate, std::exception_ptr> publish_order_processed;
-
-  };
+  struct ServiceStreams final : OrderPipelineStreams {};
   ServiceStreams streams_;
 
   struct ProcessOrderItemSinkBinding final {

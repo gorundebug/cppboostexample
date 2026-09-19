@@ -1,47 +1,37 @@
-# Task 2/2: `ProcessOrderItemSource`
+# Task 2/3: `GetInventoryItemError`
 
 > Rules: [`spec/rules.md`](../rules.md)
 
 | Field | Value |
 |-------|-------|
 | Language | `C++/Boost` |
-| Kind | `grpc-source` |
-| File | `inventoryservice/internal/functions/endpoint/process_order_item_source.hpp` |
-| Test | `inventoryservice/internal/functions/endpoint/process_order_item_source_test.cpp` |
+| Kind | `map` |
+| File | `inventoryservice/internal/functions/inventory_item/get_inventory_item_error.hpp` |
+| Test | `inventoryservice/internal/functions/inventory_item/get_inventory_item_error_test.cpp` |
 | Service | `Inventory Service` |
 
 
 ## Behaviour
 
-Reserve inventory for one order item using its order ID, item ID, SKU, and quantity.
-Return the available quantity, reservation outcome, and status. The caller combines this response with the original identity, requested quantity, and unit price.
-If the inventory call fails, the caller returns a non-reserved PROCESSING_ERROR result with the failure message.
+When inventory processing fails, return an OUT_OF_STOCK result with no available quantity.
+Preserve the order and item identity and requested quantity, and record the failure.
 
 
 
-
-## External contract
-
-| Field | Value |
-|-------|-------|
-| Format | `proto` |
-| Request | `processorderitem::ProcessOrderItemRequest` |
-| Response | `processorderitem::ProcessOrderItemResponse` |
 
 
 ## Stream types
-- Input: `OrderItem` — `model_cpp/include/example/model/types/order_item.hpp`
+- Input: `InventoryFailure` — `inventoryservice/internal/types/inventory_failure.hpp`
 - Output: `OrderItemResult` — `model_cpp/include/example/model/types/order_item_result.hpp`
 
 ## Checklist
 
 - [ ] Read [`spec/rules.md`](../rules.md), especially the `C++/Boost` section
-- [ ] Open `inventoryservice/internal/functions/endpoint/process_order_item_source.hpp` and preserve its generated contract
-- [ ] Inspect input type `OrderItem` in `model_cpp/include/example/model/types/order_item.hpp`
+- [ ] Open `inventoryservice/internal/functions/inventory_item/get_inventory_item_error.hpp` and preserve its generated contract
+- [ ] Inspect input type `InventoryFailure` in `inventoryservice/internal/types/inventory_failure.hpp`
 - [ ] Inspect output type `OrderItemResult` in `model_cpp/include/example/model/types/order_item_result.hpp`
 - [ ] Implement the C++ function object without retaining borrowed payload/context references
 - [ ] Run `./scripts/test.generated.sh`
-- [ ] Implement meaningful assertions in `inventoryservice/internal/functions/endpoint/process_order_item_source_test.cpp`
-- [ ] Verify the endpoint/result lifecycle, including completion and error paths
+- [ ] Implement meaningful assertions in `inventoryservice/internal/functions/inventory_item/get_inventory_item_error_test.cpp`
 - [ ] Re-read this checklist
-- [ ] Append to `spec/progress.md`: `- [x] inventoryservice/task2.md — ProcessOrderItemSource — C++/Boost — done`
+- [ ] Append to `spec/progress.md`: `- [x] inventoryservice/task2.md — GetInventoryItemError — C++/Boost — done`

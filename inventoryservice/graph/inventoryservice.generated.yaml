@@ -37,6 +37,9 @@ services:
                         "y": -562
                     getInventoryItemError:
                         x: 733
+                        "y": -450
+                    mapInventoryItemError:
+                        x: 733
                         "y": -263
                     mergeInventoryResult:
                         x: 542
@@ -54,11 +57,11 @@ services:
         kubernetesWorkloadType: Deployment
         links:
             link1:
-                callSemantics: FunctionCall
+                callSemantics: ParallelCall
                 from: getInventoryItemData
                 to: mergeInventoryResult
             link2:
-                callSemantics: FunctionCall
+                callSemantics: PriorityTaskPool
                 from: processInventoryItem
                 poolName: Inventory Priority Workers
                 priority: 10
@@ -85,6 +88,11 @@ services:
                     type: Process
                     valueType: orderItemResult
                 getInventoryItemError:
+                    name: Get Inventory Item Error
+                    source: getInventoryItemData
+                    type: Error
+                    valueType: inventoryFailure
+                mapInventoryItemError:
                     functionDescription: |
                         When inventory processing fails, return an OUT_OF_STOCK result with no available quantity.
                         Preserve the order and item identity and requested quantity, and record the failure.
@@ -92,15 +100,15 @@ services:
                     functionModule: ""
                     functionName: GetInventoryItemError
                     functionPackage: inventoryItem
-                    name: Get Inventory Item Error
-                    source: getInventoryItemData
-                    type: Error
+                    name: Map Inventory Item Error
+                    source: getInventoryItemError
+                    type: Map
                     valueType: orderItemResult
                 mergeInventoryResult:
                     name: Merge Inventory Result
                     sources:
                         - getInventoryItemData
-                        - getInventoryItemError
+                        - mapInventoryItemError
                     type: Merge
                 processInventoryItem:
                     endpoint: processOrderItem
@@ -118,6 +126,12 @@ settings:
     name: Example
     repoPath: github.com/gorundebug/cppboostexample
 types:
+    inventoryFailure:
+        description: Native inventory operation error converted by GetInventoryItemError.
+        name: InventoryFailure
+        publicType: false
+        type: error
+        useAlias: false
     orderItem:
         definitionFormat: Native
         description: 'A single line item within an order. Fields: OrderID string, ItemID string, SKU string, Quantity int.'

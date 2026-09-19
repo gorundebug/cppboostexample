@@ -4,10 +4,10 @@
 flowchart LR
   subgraph ext[" "]
     style ext fill:#f5f5f5,stroke:#bbb,stroke-dasharray:4
-    s83[\"Process Order Item
+    s84[\"Process Order Item
 OrderItemResult"/]
   end
-  s77[/"ProcessOrderItemError
+  s78[/"ProcessOrderItemError
 OrderState"/]
-  s83 -.-> s77
+  s84 -.-> s78
 ```

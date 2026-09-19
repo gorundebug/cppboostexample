@@ -58,6 +58,13 @@
 #include <model_cpp/include/example/model/types/automation_job.hpp>
 #include <model_cpp/include/example/model/types/order_processed.hpp>
 
+#include "analyticsservice/internal/app/pipelines/analytics.generated.hpp"
+#include "analyticsservice/internal/app/pipelines/analytics_sources.generated.hpp"
+#include "analyticsservice/internal/app/pipelines/cycle_analytics.generated.hpp"
+#include "analyticsservice/internal/app/pipelines/join_analytics.generated.hpp"
+#include "analyticsservice/internal/app/pipelines/multi_join_analytics.generated.hpp"
+#include "analyticsservice/internal/app/pipelines/substream_analytics.generated.hpp"
+
 
 namespace example::analytics_service::app {
 
@@ -114,111 +121,7 @@ class ServiceGenerated
 
 
  protected:
-  struct ServiceMakers final {
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::AdvanceCycleAnalytics>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::MapStreamConfig&)> advance_cycle_analytics;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::AnalyticsOrdersSource>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::CustomEndpointConfig&)> analytics_orders_source;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::AnalyticsPaymentsSource>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::CustomEndpointConfig&)> analytics_payments_source;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::AnalyticsScheduleSource>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::CronEndpointConfig&)> analytics_schedule_source;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::AnalyticsShipmentsSource>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::CustomEndpointConfig&)> analytics_shipments_source;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::BuildSubstreamAnalyticsResult>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::MapStreamConfig&)> build_substream_analytics_result;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::CompleteCycleAnalytics>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::FilterStreamConfig&)> complete_cycle_analytics;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::ContinueCycleAnalytics>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::FilterStreamConfig&)> continue_cycle_analytics;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::CountOrderProcessed>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::ProcessStreamConfig&)> count_order_processed;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::CycleAnalyticsInputSource>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::CustomEndpointConfig&)> cycle_analytics_input_source;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::CycleAnalyticsResultSink>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::CustomEndpointConfig&)> cycle_analytics_result_sink;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::HighValueAnalyticsSink>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::CustomEndpointConfig&)> high_value_analytics_sink;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::InvokeAnalyticsSubstream>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::MapStreamConfig&)> invoke_analytics_substream;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::JoinOrderPaymentAnalytics>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::JoinStreamConfig&)> join_order_payment_analytics;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::JoinedAnalyticsSink>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::CustomEndpointConfig&)> joined_analytics_sink;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::KeyOrdersForJoin>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::KeyByStreamConfig&)> key_orders_for_join;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::KeyOrdersForMultiJoin>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::KeyByStreamConfig&)> key_orders_for_multi_join;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::KeyPaymentsForJoin>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::KeyByStreamConfig&)> key_payments_for_join;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::KeyPaymentsForMultiJoin>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::KeyByStreamConfig&)> key_payments_for_multi_join;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::KeyShipmentsForMultiJoin>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::KeyByStreamConfig&)> key_shipments_for_multi_join;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::MultiJoinAnalyticsEvents>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::MultiJoinStreamConfig&)> multi_join_analytics_events;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::OrderProcessedEndpointSource>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::KafkaEndpointConfig&)> order_processed_endpoint_source;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::RouteAnalyticsResult>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::CaseStreamConfig&)> route_analytics_result;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::StandardAnalyticsSink>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::CustomEndpointConfig&)> standard_analytics_sink;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::SubstreamAnalyticsInputSource>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::CustomEndpointConfig&)> substream_analytics_input_source;
-    std::function<boost::asio::awaitable<
-        std::unique_ptr<functions::SubstreamAnalyticsResultSink>>(
-        servicelib::Context, servicelib::IServiceEnvironment&,
-        const servicelib::config::CustomEndpointConfig&)> substream_analytics_result_sink;
+  struct ServiceMakers final : AnalyticsPipelineMakers, AnalyticsSourcesPipelineMakers, CycleAnalyticsPipelineMakers, JoinAnalyticsPipelineMakers, MultiJoinAnalyticsPipelineMakers, SubstreamAnalyticsPipelineMakers {
     std::function<boost::asio::awaitable<
         std::shared_ptr<servicelib::http::Router>>(
         servicelib::Context, servicelib::IServiceEnvironment&,
@@ -230,34 +133,7 @@ class ServiceGenerated
         std::shared_ptr<servicelib::http::Router>)> http_server;
 
   };
-  struct ServiceFunctions final {
-    std::unique_ptr<functions::AdvanceCycleAnalytics> advance_cycle_analytics;
-    std::unique_ptr<functions::AnalyticsOrdersSource> analytics_orders_source;
-    std::unique_ptr<functions::AnalyticsPaymentsSource> analytics_payments_source;
-    std::unique_ptr<functions::AnalyticsScheduleSource> analytics_schedule_source;
-    std::unique_ptr<functions::AnalyticsShipmentsSource> analytics_shipments_source;
-    std::unique_ptr<functions::BuildSubstreamAnalyticsResult> build_substream_analytics_result;
-    std::unique_ptr<functions::CompleteCycleAnalytics> complete_cycle_analytics;
-    std::unique_ptr<functions::ContinueCycleAnalytics> continue_cycle_analytics;
-    std::unique_ptr<functions::CountOrderProcessed> count_order_processed;
-    std::unique_ptr<functions::CycleAnalyticsInputSource> cycle_analytics_input_source;
-    std::unique_ptr<functions::CycleAnalyticsResultSink> cycle_analytics_result_sink;
-    std::unique_ptr<functions::HighValueAnalyticsSink> high_value_analytics_sink;
-    std::unique_ptr<functions::InvokeAnalyticsSubstream> invoke_analytics_substream;
-    std::unique_ptr<functions::JoinOrderPaymentAnalytics> join_order_payment_analytics;
-    std::unique_ptr<functions::JoinedAnalyticsSink> joined_analytics_sink;
-    std::unique_ptr<functions::KeyOrdersForJoin> key_orders_for_join;
-    std::unique_ptr<functions::KeyOrdersForMultiJoin> key_orders_for_multi_join;
-    std::unique_ptr<functions::KeyPaymentsForJoin> key_payments_for_join;
-    std::unique_ptr<functions::KeyPaymentsForMultiJoin> key_payments_for_multi_join;
-    std::unique_ptr<functions::KeyShipmentsForMultiJoin> key_shipments_for_multi_join;
-    std::unique_ptr<functions::MultiJoinAnalyticsEvents> multi_join_analytics_events;
-    std::unique_ptr<functions::OrderProcessedEndpointSource> order_processed_endpoint_source;
-    std::unique_ptr<functions::RouteAnalyticsResult> route_analytics_result;
-    std::unique_ptr<functions::StandardAnalyticsSink> standard_analytics_sink;
-    std::unique_ptr<functions::SubstreamAnalyticsInputSource> substream_analytics_input_source;
-    std::unique_ptr<functions::SubstreamAnalyticsResultSink> substream_analytics_result_sink;
-  };
+  struct ServiceFunctions final : AnalyticsPipelineFunctions, AnalyticsSourcesPipelineFunctions, CycleAnalyticsPipelineFunctions, JoinAnalyticsPipelineFunctions, MultiJoinAnalyticsPipelineFunctions, SubstreamAnalyticsPipelineFunctions {};
 
   ServiceMakers makers_;
   ServiceFunctions functions_;
@@ -312,68 +188,7 @@ class ServiceGenerated
   using CycleAnalyticsLinkCycle =
       servicelib::CycleLinkStream<example::analytics_service::types::AnalyticsEvent, ServiceGenerated>;
 
-  struct ServiceStreams final {
-    std::shared_ptr<AnalyzeAnalyticsSubstreamSubStream> analyze_analytics_substream;
-
-    AnalyticsScheduleInput* analytics_schedule{};
-    ConsumeOrderProcessedInput* consume_order_processed{};
-    AnalyticsOrdersInput* analytics_orders{};
-    AnalyticsPaymentsInput* analytics_payments{};
-    AnalyticsShipmentsInput* analytics_shipments{};
-    CycleAnalyticsInputInput* cycle_analytics_input{};
-    SubstreamAnalyticsInputInput* substream_analytics_input{};
-    CycleAnalyticsLinkCycle* cycle_analytics_link{};
-    servicelib::StreamBase* count_order_processed{nullptr};
-
-    servicelib::StreamBase* split_analytics_orders{nullptr};
-
-    servicelib::StreamBase* split_analytics_payments{nullptr};
-
-    servicelib::StreamBase* merge_cycle_analytics{nullptr};
-
-    servicelib::StreamBase* advance_cycle_analytics{nullptr};
-
-    servicelib::StreamBase* split_cycle_analytics{nullptr};
-
-    servicelib::StreamBase* complete_cycle_analytics{nullptr};
-
-    servicelib::StreamBase* continue_cycle_analytics{nullptr};
-
-    servicelib::SinkEndpointStreamRef<example::analytics_service::types::AnalyticsEvent, std::monostate, std::exception_ptr> write_cycle_analytics;
-
-    servicelib::StreamBase* key_orders_for_join{nullptr};
-
-    servicelib::StreamBase* key_payments_for_join{nullptr};
-
-    servicelib::StreamBase* join_order_payment_analytics{nullptr};
-
-    servicelib::SinkEndpointStreamRef<example::analytics_service::types::AnalyticsResult, std::monostate, std::exception_ptr> write_joined_analytics;
-
-    servicelib::StreamBase* key_orders_for_multi_join{nullptr};
-
-    servicelib::StreamBase* key_payments_for_multi_join{nullptr};
-
-    servicelib::StreamBase* key_shipments_for_multi_join{nullptr};
-
-    servicelib::StreamBase* multi_join_analytics_events{nullptr};
-
-    servicelib::StreamBase* route_analytics_result{nullptr};
-
-    servicelib::StreamBase* high_value_analytics{nullptr};
-
-    servicelib::StreamBase* standard_analytics{nullptr};
-
-    servicelib::SinkEndpointStreamRef<example::analytics_service::types::AnalyticsResult, std::monostate, std::exception_ptr> write_high_value_analytics;
-
-    servicelib::SinkEndpointStreamRef<example::analytics_service::types::AnalyticsResult, std::monostate, std::exception_ptr> write_standard_analytics;
-
-    servicelib::StreamBase* build_substream_analytics_result{nullptr};
-
-    servicelib::StreamBase* invoke_analytics_substream{nullptr};
-
-    servicelib::SinkEndpointStreamRef<example::analytics_service::types::AnalyticsResult, std::monostate, std::exception_ptr> write_substream_analytics;
-
-  };
+  struct ServiceStreams final : AnalyticsPipelineStreams, AnalyticsSourcesPipelineStreams, CycleAnalyticsPipelineStreams, JoinAnalyticsPipelineStreams, MultiJoinAnalyticsPipelineStreams, SubstreamAnalyticsPipelineStreams {};
   ServiceStreams streams_;
 
   struct WriteCycleAnalyticsSinkBinding final {

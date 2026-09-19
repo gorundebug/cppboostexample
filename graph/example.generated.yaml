@@ -950,13 +950,13 @@ services:
         kubernetesWorkloadType: Deployment
         links:
             link1:
-                callSemantics: FunctionCall
+                callSemantics: PriorityTaskPool
                 from: callSequentialActivityA
                 poolName: Default Pool
                 priority: 2
                 to: callSequentialActivityB
             link2:
-                callSemantics: FunctionCall
+                callSemantics: TaskPool
                 from: callSequentialActivityB
                 poolName: Default Pool
                 to: processWorkflowJob
@@ -977,7 +977,7 @@ services:
                 from: consumeFanOutActivityC
                 to: processFanOutActivityC
             link7:
-                callSemantics: FunctionCall
+                callSemantics: TaskPool
                 from: consumeFanOutWorkflowJob
                 poolName: Default Pool
                 to: callFanOutActivityA
@@ -994,19 +994,19 @@ services:
                 from: consumeWorkflowJob
                 to: workflowPause
             link11:
-                callSemantics: FunctionCall
+                callSemantics: PriorityTaskPool
                 from: splitActivityAResult
                 poolName: Default Pool
                 priority: 2
                 to: callFanOutActivityB
             link12:
-                callSemantics: FunctionCall
+                callSemantics: PriorityTaskPool
                 from: splitActivityAResult
                 poolName: Default Pool
                 priority: 7
                 to: callFanOutActivityC
             link13:
-                callSemantics: FunctionCall
+                callSemantics: TaskPool
                 from: workflowPause
                 poolName: Default Pool
                 to: callSequentialActivityA
@@ -1338,6 +1338,9 @@ services:
                         "y": -562
                     getInventoryItemError:
                         x: 733
+                        "y": -450
+                    mapInventoryItemError:
+                        x: 733
                         "y": -263
                     mergeInventoryResult:
                         x: 542
@@ -1355,11 +1358,11 @@ services:
         kubernetesWorkloadType: Deployment
         links:
             link1:
-                callSemantics: FunctionCall
+                callSemantics: ParallelCall
                 from: getInventoryItemData
                 to: mergeInventoryResult
             link2:
-                callSemantics: FunctionCall
+                callSemantics: PriorityTaskPool
                 from: processInventoryItem
                 poolName: Inventory Priority Workers
                 priority: 10
@@ -1386,6 +1389,11 @@ services:
                     type: Process
                     valueType: orderItemResult
                 getInventoryItemError:
+                    name: Get Inventory Item Error
+                    source: getInventoryItemData
+                    type: Error
+                    valueType: inventoryFailure
+                mapInventoryItemError:
                     functionDescription: |
                         When inventory processing fails, return an OUT_OF_STOCK result with no available quantity.
                         Preserve the order and item identity and requested quantity, and record the failure.
@@ -1393,15 +1401,15 @@ services:
                     functionModule: ""
                     functionName: GetInventoryItemError
                     functionPackage: inventoryItem
-                    name: Get Inventory Item Error
-                    source: getInventoryItemData
-                    type: Error
+                    name: Map Inventory Item Error
+                    source: getInventoryItemError
+                    type: Map
                     valueType: orderItemResult
                 mergeInventoryResult:
                     name: Merge Inventory Result
                     sources:
                         - getInventoryItemData
-                        - getInventoryItemError
+                        - mapInventoryItemError
                     type: Merge
                 processInventoryItem:
                     endpoint: processOrderItem
@@ -1470,17 +1478,17 @@ services:
                 from: mergeResults
                 to: splitOrderResult
             link2:
-                callSemantics: FunctionCall
+                callSemantics: TaskPool
                 from: processOrder
                 poolName: Default Pool
                 priority: 1
                 to: splitPipeline
             link3:
-                callSemantics: FunctionCall
+                callSemantics: ParallelCall
                 from: splitPipeline
                 to: processOrderItems
             link4:
-                callSemantics: FunctionCall
+                callSemantics: ParallelCall
                 from: splitPipeline
                 to: softDeadline
         livenessHandler: health/live
@@ -1626,6 +1634,12 @@ types:
         name: AutomationJob
         publicType: true
         type: string
+        useAlias: false
+    inventoryFailure:
+        description: Native inventory operation error converted by GetInventoryItemError.
+        name: InventoryFailure
+        publicType: false
+        type: error
         useAlias: false
     order:
         definitionFormat: Native

@@ -18,18 +18,18 @@
 namespace example::order_service::config {
 
 inline constexpr int kOrderServiceServiceId = 4;
-inline constexpr int kProcessOrderItemErrorStreamId = 77;
-inline constexpr int kMapOrderItemResultToOrderStateStreamId = 78;
-inline constexpr int kMapToOrderProcessedStreamId = 79;
-inline constexpr int kMapToOrderStateStreamId = 80;
-inline constexpr int kMergeResultsStreamId = 81;
-inline constexpr int kProcessOrderStreamId = 82;
-inline constexpr int kProcessOrderItemStreamId = 83;
-inline constexpr int kProcessOrderItemsStreamId = 84;
-inline constexpr int kPublishOrderProcessedStreamId = 85;
-inline constexpr int kSoftDeadlineStreamId = 86;
-inline constexpr int kSplitOrderResultStreamId = 87;
-inline constexpr int kSplitPipelineStreamId = 88;
+inline constexpr int kProcessOrderItemErrorStreamId = 78;
+inline constexpr int kMapOrderItemResultToOrderStateStreamId = 79;
+inline constexpr int kMapToOrderProcessedStreamId = 80;
+inline constexpr int kMapToOrderStateStreamId = 81;
+inline constexpr int kMergeResultsStreamId = 82;
+inline constexpr int kProcessOrderStreamId = 83;
+inline constexpr int kProcessOrderItemStreamId = 84;
+inline constexpr int kProcessOrderItemsStreamId = 85;
+inline constexpr int kPublishOrderProcessedStreamId = 86;
+inline constexpr int kSoftDeadlineStreamId = 87;
+inline constexpr int kSplitOrderResultStreamId = 88;
+inline constexpr int kSplitPipelineStreamId = 89;
 inline constexpr int kOrderProcessedEndpointId = 14;
 inline constexpr int kProcessOrderEndpointId = 15;
 inline constexpr int kProcessOrderItemEndpointId = 11;
@@ -418,21 +418,21 @@ inline Config MakeConfig() {
     LinkConfig value{};
     value.from = kProcessOrderStreamId;
     value.to = kSplitPipelineStreamId;
-    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kFunctionCall, "Default Pool", 1, false);
+    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kTaskPool, "Default Pool", 1, false);
     return value;
   }();
   cfg.links.splitPipelineToProcessOrderItems = [] {
     LinkConfig value{};
     value.from = kSplitPipelineStreamId;
     value.to = kProcessOrderItemsStreamId;
-    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kFunctionCall, "", 0, false);
+    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kParallelCall, "", 0, false);
     return value;
   }();
   cfg.links.splitPipelineToSoftDeadline = [] {
     LinkConfig value{};
     value.from = kSplitPipelineStreamId;
     value.to = kSoftDeadlineStreamId;
-    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kFunctionCall, "", 0, true);
+    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kParallelCall, "", 0, false);
     return value;
   }();
   cfg.modules.inventoryServiceApi = [] {
