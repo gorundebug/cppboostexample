@@ -13,8 +13,8 @@
 #include <servicelib/runtime/common.hpp>
 #include <servicelib/runtime/config/endpoint_types.hpp>
 #include <servicelib/runtime/environment/environment.hpp>
-#include <model_cpp/include/example/model/types/order_item.hpp>
-#include <model_cpp/include/example/model/types/order_item_result.hpp>
+#include <example/model/types/order_item.hpp>
+#include <example/model/types/order_item_result.hpp>
 #include <proto/inventoryserviceapi/processorderitem/processorderitem.pb.h>
 
 
@@ -32,7 +32,7 @@ struct ProcessOrderItemSource final {
 
   void consumeMessage(
       servicelib::MessageContext context, auto& stream_context, State&,
-      const processorderitem::ProcessOrderItemRequest& request, auto result_context,
+      const inventoryserviceapi::processorderitem::ProcessOrderItemRequest& request, auto result_context,
       auto& sender) const {
     (void)sender;
     result_context.setResultCallback(
@@ -44,7 +44,7 @@ struct ProcessOrderItemSource final {
             auto& callback_sender) {
           (void)callback_context;
           (void)callback_stream_context;
-          processorderitem::ProcessOrderItemResponse response;
+          inventoryserviceapi::processorderitem::ProcessOrderItemResponse response;
           response.set_available_qty(result.available_qty);
           response.set_reserved(result.reserved);
           response.set_status(result.status);
@@ -78,9 +78,8 @@ struct ProcessOrderItemSource final {
 };
 
 inline boost::asio::awaitable<std::unique_ptr<ProcessOrderItemSource>> MakeProcessOrderItemSource(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment,
-    const servicelib::config::GrpcEndpointConfig& config) {
-  (void)context; (void)environment; (void)config;
+    servicelib::Context context, servicelib::IServiceEnvironment& environment) {
+  (void)context; (void)environment;
   co_return std::make_unique<ProcessOrderItemSource>();
 }
 

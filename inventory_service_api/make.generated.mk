@@ -17,13 +17,13 @@ test: all ## [host] Run this module's tests
 	@go test ./...
 
 gen-proto:
-	@find . -type f -name 'go.generated.proto.mk' | while read mkfile; do \
+	@set -e; find . -type f -name 'go.generated.proto.mk' | while read mkfile; do \
 		dir=$$(dirname $$mkfile); \
 		echo "Generating files in $$dir..."; \
 		$(MAKE) -C $$dir -f $$(basename $$mkfile) gen MODULE_DIR="$(MODULE_DIR)" PROTOC="$(PROTOC)"; \
 	done
 
 fmt-proto:
-	@find . -type f -name '*.proto' | while read protofile; do \
+	@set -e; find . -type f -name '*.proto' | while read protofile; do \
 		$(BUF) format -w $$protofile; \
 	done

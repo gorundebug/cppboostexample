@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <model_cpp/include/example/model/types/order_item_result.hpp>
+#include <example/model/types/order_item_result.hpp>
 
 namespace example::order_service::types {
 

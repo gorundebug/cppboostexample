@@ -21,7 +21,7 @@ class GrpcServicesGenerated final {
                         boost::asio::any_io_executor executor);
 
  private:
-  inventoryserviceapi::InventoryServiceApi::AsyncService inventory_service_api_service;
+  ::inventoryserviceapi::InventoryServiceApi::AsyncService inventory_service_api_service;
 };
 
 }  // namespace example::inventory_service::app

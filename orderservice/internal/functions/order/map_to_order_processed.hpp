@@ -16,7 +16,7 @@
 #include <servicelib/runtime/base.hpp>
 #include <servicelib/runtime/config/stream_types.hpp>
 #include <servicelib/runtime/environment/environment.hpp>
-#include <model_cpp/include/example/model/types/order_processed.hpp>
+#include <example/model/types/order_processed.hpp>
 #include <orderservice/internal/types/order_state.hpp>
 
 
@@ -48,11 +48,10 @@ struct MapToOrderProcessed final {
 };
 
 inline boost::asio::awaitable<std::unique_ptr<MapToOrderProcessed>> MakeMapToOrderProcessed(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment,
-    const servicelib::config::MapStreamConfig& config) {
+    servicelib::Context context, servicelib::IServiceEnvironment& environment) {
   (void)context;
   (void)environment;
-  (void)config;
+
   co_return std::make_unique<MapToOrderProcessed>();
 }
 

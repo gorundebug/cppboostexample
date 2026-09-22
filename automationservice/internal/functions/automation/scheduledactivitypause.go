@@ -32,6 +32,6 @@ func (f *ScheduledActivityPause) DelayError(_ context.Context, _ runtime.Stream,
 // MakeScheduledActivityPause is instantiated once at application startup via its maker function.
 // Fields of this struct are not protected by any synchronization — do not use
 // shared mutable state here without external synchronization.
-func MakeScheduledActivityPause(ctx context.Context, env environment.ServiceEnvironment, cfg *runtimecfg.DelayStreamConfig) (*ScheduledActivityPause, error) {
+func MakeScheduledActivityPause(ctx context.Context, env environment.ServiceEnvironment) (*ScheduledActivityPause, error) {
 	return &ScheduledActivityPause{}, nil
 }

@@ -23,5 +23,7 @@ components:
   schemas:
     ProcessOrderRequest:
       type: object
+      additionalProperties: true
     ProcessOrderResponse:
       type: object
+      additionalProperties: true

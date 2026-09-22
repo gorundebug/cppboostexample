@@ -6,8 +6,7 @@ void Service::customMakersInit(servicelib::Context context) {
   (void)context;
   makers_.invoke_analytics_substream = [substream =
       getAnalyzeAnalyticsSubstreamSubStream()](
-      servicelib::Context, servicelib::IServiceEnvironment&,
-      const servicelib::config::MapStreamConfig&)
+      servicelib::Context, servicelib::IServiceEnvironment&)
       -> boost::asio::awaitable<
           std::unique_ptr<functions::InvokeAnalyticsSubstream>> {
     co_return std::make_unique<functions::InvokeAnalyticsSubstream>(substream);

@@ -84,6 +84,7 @@ COPY . /workspace/source
 WORKDIR /workspace/source
 
 FROM development AS debug-builder
+ARG CMAKE_BUILD_PARALLEL_LEVEL
 
 COPY . /workspace
 RUN --mount=type=cache,id=cppboostexample-debug-build-${TARGETARCH},target=/workspace/build,sharing=locked \
@@ -97,7 +98,7 @@ RUN --mount=type=cache,id=cppboostexample-debug-build-${TARGETARCH},target=/work
       --fresh \
       -DCMAKE_TOOLCHAIN_FILE="${conan_toolchain}" \
       -DFETCH_CPP_DEPENDENCIES=OFF \
-    && ./scripts/run_with_progress.generated.sh "Debug build" cmake --build --preset docker-debug --parallel
+    && ./scripts/run_with_progress.generated.sh "Debug build" cmake --build --preset docker-debug --parallel ${CMAKE_BUILD_PARALLEL_LEVEL:+"$CMAKE_BUILD_PARALLEL_LEVEL"}
 
 FROM debug-builder AS test-builder
 RUN --mount=type=cache,id=cppboostexample-debug-build-${TARGETARCH},target=/workspace/build,sharing=locked \
@@ -106,6 +107,7 @@ RUN --mount=type=cache,id=cppboostexample-debug-build-${TARGETARCH},target=/work
       ctest --test-dir /workspace/build --output-on-failure --no-tests=error
 
 FROM development AS runtime-builder
+ARG CMAKE_BUILD_PARALLEL_LEVEL
 
 ARG CPPBOOSTSERVICELIB_PROFILING=OFF
 ARG CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS=OFF
@@ -128,7 +130,7 @@ RUN --mount=type=cache,id=cppboostexample-runtime-build-${TARGETARCH}-${EXAMPLE_
       -DCPPBOOSTSERVICELIB_PROFILING="${CPPBOOSTSERVICELIB_PROFILING}" \
       -DCPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS="${CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS}" \
     && ./scripts/run_with_progress.generated.sh "Release build" cmake --build --preset docker-release \
-      --target example_inventory_service --parallel \
+      --target example_inventory_service --parallel ${CMAKE_BUILD_PARALLEL_LEVEL:+"$CMAKE_BUILD_PARALLEL_LEVEL"} \
     && mkdir -p /opt/service-bin /opt/runtime-libs \
     && mkdir -p /opt/runtime-libs/inventoryservice \
     && cp /workspace/build/example_inventory_service /opt/service-bin/example_inventory_service \

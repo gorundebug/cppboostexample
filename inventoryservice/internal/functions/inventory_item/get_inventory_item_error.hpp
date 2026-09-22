@@ -16,7 +16,7 @@
 #include <servicelib/runtime/config/stream_types.hpp>
 #include <servicelib/runtime/environment/environment.hpp>
 #include <inventoryservice/internal/types/inventory_failure.hpp>
-#include <model_cpp/include/example/model/types/order_item_result.hpp>
+#include <example/model/types/order_item_result.hpp>
 #include "inventoryservice/internal/functions/inventory_item/get_inventory_item_data.hpp"
 
 
@@ -47,11 +47,10 @@ struct GetInventoryItemError final {
 };
 
 inline boost::asio::awaitable<std::unique_ptr<GetInventoryItemError>> MakeGetInventoryItemError(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment,
-    const servicelib::config::MapStreamConfig& config) {
+    servicelib::Context context, servicelib::IServiceEnvironment& environment) {
   (void)context;
   (void)environment;
-  (void)config;
+
   co_return std::make_unique<GetInventoryItemError>();
 }
 

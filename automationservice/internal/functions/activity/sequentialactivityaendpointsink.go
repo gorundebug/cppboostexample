@@ -5,7 +5,6 @@ import (
 
 	temporalsink "github.com/gorundebug/servicelib/datasink/temporal"
 	"github.com/gorundebug/servicelib/runtime"
-	runtimecfg "github.com/gorundebug/servicelib/runtime/config"
 	"github.com/gorundebug/servicelib/runtime/environment"
 )
 
@@ -31,6 +30,6 @@ func (ep *SequentialActivityAEndpointSink) BeginRequest(ctx context.Context, _ r
 func (ep *SequentialActivityAEndpointSink) EndRequest(_ context.Context, _ runtime.Stream, _ error, _ SequentialActivityAEndpointSinkHandlerState) {
 }
 
-func MakeSequentialActivityAEndpointSink(_ context.Context, _ environment.ServiceEnvironment, _ *runtimecfg.TemporalEndpointConfig) (*SequentialActivityAEndpointSink, error) {
+func MakeSequentialActivityAEndpointSink(_ context.Context, _ environment.ServiceEnvironment) (*SequentialActivityAEndpointSink, error) {
 	return &SequentialActivityAEndpointSink{}, nil
 }

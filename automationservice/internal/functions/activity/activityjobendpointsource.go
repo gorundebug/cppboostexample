@@ -4,7 +4,6 @@ import (
 	"context"
 
 	temporalsource "github.com/gorundebug/servicelib/datasource/temporal"
-	runtimecfg "github.com/gorundebug/servicelib/runtime/config"
 	"github.com/gorundebug/servicelib/runtime/environment"
 )
 
@@ -28,6 +27,6 @@ func (ep *ActivityJobEndpointSource) ConsumeMessage(ctx context.Context, sc temp
 func (ep *ActivityJobEndpointSource) EndRequest(_ context.Context, _ temporalsource.StreamContext[string, string, error], _ error, _ ActivityJobEndpointSourceHandlerState) {
 }
 
-func MakeActivityJobEndpointSource(_ context.Context, _ environment.ServiceEnvironment, _ *runtimecfg.TemporalEndpointConfig) (*ActivityJobEndpointSource, error) {
+func MakeActivityJobEndpointSource(_ context.Context, _ environment.ServiceEnvironment) (*ActivityJobEndpointSource, error) {
 	return &ActivityJobEndpointSource{}, nil
 }

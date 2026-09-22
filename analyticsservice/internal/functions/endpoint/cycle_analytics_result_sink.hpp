@@ -46,10 +46,9 @@ struct CycleAnalyticsResultSink final
 };
 
 inline boost::asio::awaitable<std::unique_ptr<CycleAnalyticsResultSink>> MakeCycleAnalyticsResultSink(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment,
-    const servicelib::config::CustomEndpointConfig& config) {
+    servicelib::Context context, servicelib::IServiceEnvironment& environment) {
   (void)context;
-  (void)config;
+
   (void)environment;
   co_return std::make_unique<CycleAnalyticsResultSink>();
 }

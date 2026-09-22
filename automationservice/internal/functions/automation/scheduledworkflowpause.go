@@ -32,6 +32,6 @@ func (f *ScheduledWorkflowPause) DelayError(_ context.Context, _ runtime.Stream,
 // MakeScheduledWorkflowPause is instantiated once at application startup via its maker function.
 // Fields of this struct are not protected by any synchronization — do not use
 // shared mutable state here without external synchronization.
-func MakeScheduledWorkflowPause(ctx context.Context, env environment.ServiceEnvironment, cfg *runtimecfg.DelayStreamConfig) (*ScheduledWorkflowPause, error) {
+func MakeScheduledWorkflowPause(ctx context.Context, env environment.ServiceEnvironment) (*ScheduledWorkflowPause, error) {
 	return &ScheduledWorkflowPause{}, nil
 }

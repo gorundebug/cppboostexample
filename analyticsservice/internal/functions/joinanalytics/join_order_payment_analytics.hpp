@@ -43,11 +43,10 @@ struct JoinOrderPaymentAnalytics final {
 };
 
 inline boost::asio::awaitable<std::unique_ptr<JoinOrderPaymentAnalytics>> MakeJoinOrderPaymentAnalytics(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment,
-    const servicelib::config::JoinStreamConfig& config) {
+    servicelib::Context context, servicelib::IServiceEnvironment& environment) {
   (void)context;
   (void)environment;
-  (void)config;
+
   co_return std::make_unique<JoinOrderPaymentAnalytics>();
 }
 

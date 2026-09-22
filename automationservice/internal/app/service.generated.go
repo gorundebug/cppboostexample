@@ -3,348 +3,119 @@ package app
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"net"
-	"net/http"
-	"os"
-	"os/signal"
-	"reflect"
-	"sync"
-	"syscall"
-	"time"
-
+	config "github.com/gorundebug/cppboostexample-automationservice/internal/config"
 	"github.com/gorundebug/servicelib/runtime"
 	"github.com/gorundebug/servicelib/runtime/environment"
 	log "github.com/gorundebug/servicelib/runtime/environment/log"
-	runtimeserde "github.com/gorundebug/servicelib/runtime/serde"
 	temporalworkflow "go.temporal.io/sdk/workflow"
-	"golang.org/x/sync/errgroup"
-
-	"github.com/gorundebug/cppboostexample-automationservice/internal/config"
-	datasourcetemporal "github.com/gorundebug/servicelib/datasource/temporal"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
-
-type serviceMakers struct {
-	automationPipelineMakers
-}
-
-type serviceFunctions struct {
-	automationPipelineFunctions
-}
-
-type serviceStreams struct {
-	automationPipelineStreams
-}
-
-type serviceHandlers struct {
-	automationPipelineHandlers
-}
-
-type serviceDataConnectors struct {
-	automationPipelineDataConnectors
-}
 
 type Service struct {
 	runtime.ServiceApp
-	makers          serviceMakers
-	functions       serviceFunctions
-	streams         serviceStreams
-	handlers        serviceHandlers
-	dataConnectors  serviceDataConnectors
-	httpServer      *http.Server
-	httpServerMaker func(context.Context, runtime.RuntimeEnvironment) (*http.Server, error)
-	httpMux         *http.ServeMux
-	httpMuxMaker    func(context.Context, runtime.RuntimeEnvironment) (*http.ServeMux, error)
-	httpServerDone  chan struct{}
+	makers    serviceMakers
+	functions serviceFunctions
+	streams   serviceStreams
+	endpoints serviceEndpoints
+	clients   serviceClients
+	servers   serviceServers
 }
 
-func (s *Service) GetSerde(valueType reflect.Type) (runtimeserde.Serializer, error) {
-	if serde, err := s.getCustomSerde(valueType); err != nil {
-		return nil, err
-	} else if serde != nil {
-		return serde, nil
-	}
-	switch valueType {
-	}
-	return nil, nil
-}
-
-func (s *Service) RegisterHTTPHandler(path string, handler http.Handler) {
-	if s.httpMux != nil {
-		s.httpMux.Handle(path, s.httpHandlerMiddleware(path, handler))
-	} else {
-		s.ServiceApp.RegisterHTTPHandler(path, s.httpHandlerMiddleware(path, handler))
-	}
-}
-
-func (s *Service) Config() *config.Config {
-	return s.ServiceApp.GetConfig().(*config.Config)
-}
-
-func (s *Service) initMakers(ctx context.Context) error {
-	s.initAutomationMakers()
-
-	return nil
-}
+func (s *Service) Config() *config.Config { return s.ServiceApp.GetConfig().(*config.Config) }
 
 func (s *Service) buildRuntime(ctx context.Context) error {
 	cfg := s.Config()
-
-	if err := s.initMakers(ctx); err != nil {
+	if err := s.makers.initMakers(ctx); err != nil {
 		return fmt.Errorf("init makers failed: %w", err)
 	}
-
 	if err := s.customMakersInit(ctx); err != nil {
 		return fmt.Errorf("custom init makers failed: %w", err)
 	}
-
-	var err error
-	if _, err = datasourcetemporal.MakeConnector(cfg.DataConnectors.Temporal.ID, s); err != nil {
-		return fmt.Errorf("init Temporal connector 'Temporal' failed: %w", err)
+	if err := initConnectors(cfg, s); err != nil {
+		return err
 	}
-
-	if s.httpMuxMaker != nil {
-		if s.httpMux, err = s.httpMuxMaker(ctx, s); err != nil {
+	if s.makers.httpMuxMaker != nil {
+		mux, err := s.makers.httpMuxMaker(ctx, s)
+		if err != nil {
 			return fmt.Errorf("create http mux failed: %w", err)
 		}
+		s.servers.httpMux = mux
 	}
-
-	if err := s.initFunctions(ctx, cfg, s); err != nil {
+	if err := s.clients.initClients(ctx, cfg, s, &s.makers); err != nil {
+		return err
+	}
+	if err := s.functions.initFunctions(ctx, s, &s.makers); err != nil {
 		return fmt.Errorf("init functions failed: %w", err)
 	}
-
 	if err := s.customFunctionsInit(ctx); err != nil {
 		return fmt.Errorf("custom functions init failed: %w", err)
 	}
+	return s.buildGraph(ctx, cfg, s)
+}
 
-	if err := s.initStreams(ctx, cfg, s); err != nil {
+func (s *Service) buildGraph(ctx context.Context, cfg *config.Config, env runtime.RuntimeEnvironment) error {
+	if err := s.streams.initStreams(ctx, cfg, env, &s.functions); err != nil {
 		return fmt.Errorf("init streams failed: %w", err)
 	}
-
-	return nil
-}
-
-func (s *Service) initStreams(ctx context.Context, cfg *config.Config, env runtime.RuntimeEnvironment) error {
-	var err error
-	if err = s.initAutomationStreams(ctx, cfg, env); err != nil {
+	if err := s.streams.build(); err != nil {
 		return err
 	}
-	if err = s.bindAutomationStreams(); err != nil {
+	if err := s.endpoints.initEndpoints(s); err != nil {
 		return err
 	}
-	if err = s.initAutomationEndpoints(); err != nil {
-		return err
-	}
-	if err = s.postInitAutomationStreams(); err != nil {
-		return err
-	}
-	_ = err
-	_ = cfg
-	return nil
-}
-
-type pipelineMakerTaskGroup interface {
-	Go(func() error)
-}
-
-func (s *Service) initFunctions(ctx context.Context, cfg *config.Config, env runtime.RuntimeEnvironment) error {
-	eg, egCtx := errgroup.WithContext(ctx)
-	s.scheduleAutomationFunctions(eg, egCtx, cfg, env)
-	if err := eg.Wait(); err != nil {
-		return err
-	}
-	return nil
+	return s.streams.finish()
 }
 
 // buildWorkflowGraph constructs a fresh graph without creating process-owned
 // servers, clients, exporters, watchers or OS-backed executors.
 func (s *Service) buildWorkflowGraph(workflowCtx temporalworkflow.Context, ctx context.Context, cfg *config.Config, env runtime.RuntimeEnvironment) error {
-	if err := s.initMakers(ctx); err != nil {
+	if err := s.makers.initMakers(ctx); err != nil {
 		return fmt.Errorf("init Workflow makers failed: %w", err)
 	}
 	if err := s.customMakersInit(ctx); err != nil {
 		return fmt.Errorf("custom Workflow makers failed: %w", err)
 	}
-	if err := s.initWorkflowFunctions(workflowCtx, ctx, cfg, env); err != nil {
+	if err := s.functions.initWorkflowFunctions(workflowCtx, ctx, env, &s.makers); err != nil {
 		return fmt.Errorf("init Workflow functions failed: %w", err)
 	}
 	if err := s.customFunctionsInit(ctx); err != nil {
 		return fmt.Errorf("custom Workflow functions failed: %w", err)
 	}
-	if err := s.initStreams(ctx, cfg, env); err != nil {
+	if err := s.buildGraph(ctx, cfg, env); err != nil {
 		return fmt.Errorf("init Workflow streams failed: %w", err)
 	}
 	return nil
 }
 
-// Workflow makers preserve ordinary initializer-group semantics while using
-// Temporal's deterministic coroutine scheduler instead of process goroutines.
-func (s *Service) initWorkflowFunctions(workflowCtx temporalworkflow.Context, ctx context.Context, cfg *config.Config, env runtime.RuntimeEnvironment) error {
-	eg, egCtx := newWorkflowMakerGroup(workflowCtx, ctx)
-	s.scheduleAutomationFunctions(eg, egCtx, cfg, env)
-	if err := eg.Wait(); err != nil {
-		return err
-	}
-	return nil
-}
-
-type workflowMakerGroup struct {
-	workflowCtx  temporalworkflow.Context
-	waitGroup    temporalworkflow.WaitGroup
-	makerContext *workflowMakerContext
-	firstError   error
-}
-
-// workflowMakerContext is the standard-context adapter used only while makers
-// construct a replay-safe Workflow graph. Native Go cancellation channels are
-// intentionally unavailable inside Workflow code; cooperative makers observe
-// cancellation through Err().
-type workflowMakerContext struct {
-	canceled bool
-}
-
-func (*workflowMakerContext) Deadline() (time.Time, bool) { return time.Time{}, false }
-func (*workflowMakerContext) Done() <-chan struct{}       { return nil }
-func (c *workflowMakerContext) Err() error {
-	if c.canceled {
-		return context.Canceled
-	}
-	return nil
-}
-func (*workflowMakerContext) Value(any) any { return nil }
-
-func newWorkflowMakerGroup(workflowCtx temporalworkflow.Context, parent context.Context) (*workflowMakerGroup, context.Context) {
-	_ = parent
-	makerCtx := &workflowMakerContext{}
-	return &workflowMakerGroup{
-		workflowCtx:  workflowCtx,
-		waitGroup:    temporalworkflow.NewWaitGroup(workflowCtx),
-		makerContext: makerCtx,
-	}, makerCtx
-}
-
-func (g *workflowMakerGroup) Go(run func() error) {
-	g.waitGroup.Go(g.workflowCtx, func(temporalworkflow.Context) {
-		if err := run(); err != nil && g.firstError == nil {
-			g.firstError = err
-			g.makerContext.canceled = true
-		}
-	})
-}
-
-func (g *workflowMakerGroup) Wait() error {
-	g.waitGroup.Wait(g.workflowCtx)
-	g.makerContext.canceled = true
-	return g.firstError
-}
-
-func (s *Service) ServiceInit() error {
-	return nil
-}
-
 func (s *Service) StartService(ctx context.Context) error {
-
 	if err := s.buildRuntime(ctx); err != nil {
 		return fmt.Errorf("build runtime failed: %w", err)
 	}
-
 	if err := s.start(ctx); err != nil {
 		return fmt.Errorf("service start failed: %w", err)
 	}
-
 	if err := s.ServiceApp.Start(ctx); err != nil {
 		return fmt.Errorf("service app start failed: %w", err)
 	}
-
-	var err error
-
-	if s.httpMux != nil {
-		if s.httpServerMaker != nil {
-			if s.httpServer, err = s.httpServerMaker(ctx, s); err != nil {
-				return fmt.Errorf("create http server failed: %w", err)
-			}
-		}
-	}
-	if s.httpServer != nil {
-		s.httpServerDone = make(chan struct{})
-		ln, err := net.Listen("tcp", s.httpServer.Addr)
-		if err != nil {
-			return fmt.Errorf("failed to listen http port: %v", err)
-		}
-		go func() {
-			s.Log().Info(ctx, "HTTP server listening", log.Any("addr", s.httpServer.Addr))
-			if err := s.httpServer.Serve(ln); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				s.Log().Error(ctx, "HTTP server stopped unexpectedly", log.Err(err))
-			}
-			close(s.httpServerDone)
-		}()
-	}
-	return nil
+	return s.servers.start(ctx, s)
 }
 
 func (s *Service) StopService(ctx context.Context) {
-	svcCfg := s.ServiceConfig()
-	timeoutCtx, cancel := context.WithTimeout(ctx, time.Duration(svcCfg.ShutdownTimeout)*time.Millisecond)
+	timeoutCtx, cancel := context.WithTimeout(ctx, time.Duration(s.ServiceConfig().ShutdownTimeout)*time.Millisecond)
 	defer cancel()
-
-	// First stop transport admission and let requests already accepted by the
-	// HTTP/gRPC servers finish while the graph runtime and outbound clients
-	// are still available to their handlers.
-	wg := sync.WaitGroup{}
-	admissionDone := make(chan struct{})
-	if s.httpServer != nil {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			if err := s.httpServer.Shutdown(timeoutCtx); err != nil {
-				s.Log().Warn(timeoutCtx, "HTTP server shutdown", log.Err(err))
-			}
-			<-s.httpServerDone
-		}()
-	}
-	go func() {
-		wg.Wait()
-		close(admissionDone)
-	}()
-	select {
-	case <-admissionDone:
-	case <-timeoutCtx.Done():
-		s.Log().Warn(timeoutCtx, "transport drain timed out", log.Err(timeoutCtx.Err()))
-	}
-
-	// Only after inbound handlers have drained may graph resources, pools and
-	// sinks stop. All phases share the same absolute shutdown deadline.
+	s.servers.stop(timeoutCtx, s)
 	runtimeDone := make(chan struct{})
-	go func() {
-		defer close(runtimeDone)
-		s.ServiceApp.Stop(timeoutCtx)
-	}()
+	go func() { defer close(runtimeDone); s.ServiceApp.Stop(timeoutCtx) }()
 	select {
 	case <-runtimeDone:
 	case <-timeoutCtx.Done():
 		s.Log().Warn(timeoutCtx, "graph runtime stop timed out", log.Err(timeoutCtx.Err()))
 	}
-
-	// Outbound clients and user-owned resources are last: accepted handlers
-	// and graph shutdown callbacks may still need them in earlier phases.
-	cleanupWg := sync.WaitGroup{}
-
-	cleanupWg.Add(1)
-	go func() {
-		defer cleanupWg.Done()
-		s.stop(timeoutCtx)
-	}()
-	cleanupDone := make(chan struct{})
-	go func() {
-		cleanupWg.Wait()
-		close(cleanupDone)
-	}()
-	select {
-	case <-cleanupDone:
-	case <-timeoutCtx.Done():
-		s.Log().Warn(timeoutCtx, "service cleanup timed out", log.Err(timeoutCtx.Err()))
-	}
+	s.clients.close(timeoutCtx, s)
 }
 
 func Start(ctx context.Context,

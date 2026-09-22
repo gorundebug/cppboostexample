@@ -42,9 +42,8 @@ struct MapToOrderState final {
 };
 
 inline boost::asio::awaitable<std::unique_ptr<MapToOrderState>> MakeMapToOrderState(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment,
-    const servicelib::config::MapStreamConfig& config) {
-  (void)context; (void)environment; (void)config;
+    servicelib::Context context, servicelib::IServiceEnvironment& environment) {
+  (void)context; (void)environment;
   co_return std::make_unique<MapToOrderState>();
 }
 

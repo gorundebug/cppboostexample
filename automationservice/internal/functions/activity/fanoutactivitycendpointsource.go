@@ -4,7 +4,6 @@ import (
 	"context"
 
 	temporalsource "github.com/gorundebug/servicelib/datasource/temporal"
-	runtimecfg "github.com/gorundebug/servicelib/runtime/config"
 	"github.com/gorundebug/servicelib/runtime/environment"
 )
 
@@ -28,6 +27,6 @@ func (ep *FanoutActivityCEndpointSource) ConsumeMessage(ctx context.Context, sc 
 func (ep *FanoutActivityCEndpointSource) EndRequest(_ context.Context, _ temporalsource.StreamContext[string, string, error], _ error, _ FanoutActivityCEndpointSourceHandlerState) {
 }
 
-func MakeFanoutActivityCEndpointSource(_ context.Context, _ environment.ServiceEnvironment, _ *runtimecfg.TemporalEndpointConfig) (*FanoutActivityCEndpointSource, error) {
+func MakeFanoutActivityCEndpointSource(_ context.Context, _ environment.ServiceEnvironment) (*FanoutActivityCEndpointSource, error) {
 	return &FanoutActivityCEndpointSource{}, nil
 }

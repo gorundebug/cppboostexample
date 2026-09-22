@@ -143,11 +143,19 @@ if(NOT EXISTS
       SYMBOLIC COPY_ON_ERROR)
 endif()
 
+
 add_executable(example_order_service
     cmd/service/main.cpp
     internal/app/service.generated.cpp
 
     internal/app/service.cpp
+    internal/app/makers.generated.cpp
+    internal/app/functions.generated.cpp
+    internal/app/streams.generated.cpp
+    internal/app/endpoints.generated.cpp
+    internal/app/servers.generated.cpp
+    internal/app/substreams.generated.cpp
+
     internal/functions/order/map_order_item_result_to_order_state.cpp
     internal/functions/order/map_to_order_processed.cpp
     internal/functions/order/map_to_order_state.cpp
@@ -190,6 +198,7 @@ endif()
 include(GoogleTest)
 
 add_executable(example_order_service_unit_tests
+    internal/functions/order/soft_deadline_config_test.cpp
     internal/functions/endpoint/order_processed_endpoint_sink_test.cpp
     internal/functions/endpoint/process_order_item_sink_test.cpp
     internal/functions/endpoint/process_order_source_test.cpp

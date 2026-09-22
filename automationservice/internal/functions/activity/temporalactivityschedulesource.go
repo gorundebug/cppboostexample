@@ -6,7 +6,6 @@ import (
 
 	"github.com/gorundebug/servicelib/datasource"
 	"github.com/gorundebug/servicelib/runtime"
-	runtimecfg "github.com/gorundebug/servicelib/runtime/config"
 	"github.com/gorundebug/servicelib/runtime/environment"
 )
 
@@ -37,7 +36,6 @@ func (f *TemporalActivityScheduleSource) OnTrigger(
 func MakeTemporalActivityScheduleSource(
 	_ context.Context,
 	_ environment.ServiceEnvironment,
-	_ *runtimecfg.TemporalEndpointConfig,
 ) (*TemporalActivityScheduleSource, error) {
 	return &TemporalActivityScheduleSource{}, nil
 }

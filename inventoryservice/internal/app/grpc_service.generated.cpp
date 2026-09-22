@@ -14,11 +14,11 @@ void GrpcServicesGenerated::registerHandlers(
     agrpc::GrpcContext& context, ServiceGenerated& service,
     boost::asio::any_io_executor executor) {
   servicelib::grpc_transport::RegisterUnarySource<
-      &inventoryserviceapi::InventoryServiceApi::AsyncService::RequestProcessOrderItem>(
+      &::inventoryserviceapi::InventoryServiceApi::AsyncService::RequestProcessOrderItem>(
       context, inventory_service_api_service,
       [&service](servicelib::MessageContext message,
-                 const processorderitem::ProcessOrderItemRequest& request)
-          -> boost::asio::awaitable<processorderitem::ProcessOrderItemResponse> {
+                 const ::inventoryserviceapi::processorderitem::ProcessOrderItemRequest& request)
+          -> boost::asio::awaitable<::inventoryserviceapi::processorderitem::ProcessOrderItemResponse> {
         const auto endpoint = service.grpcSourceEndpointProcessInventoryItem();
         if (!endpoint) {
           throw std::runtime_error("gRPC datasource endpoint is not started");

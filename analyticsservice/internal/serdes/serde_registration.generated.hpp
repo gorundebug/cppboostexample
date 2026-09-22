@@ -7,7 +7,7 @@
 #include <servicelib/runtime/serde/serdeimpl.hpp>
 #include <analyticsservice/internal/serdes/analytics_event_serde.hpp>
 #include <analyticsservice/internal/serdes/analytics_result_serde.hpp>
-#include <model_cpp/include/example/model/serdes/order_processed_serde.hpp>
+#include <example/model/serdes/order_processed_serde.hpp>
 
 
 template <>

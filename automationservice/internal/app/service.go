@@ -104,11 +104,11 @@ func (s *Service) stop(ctx context.Context) {
 // When non-nil values are returned, the library's built-in server is NOT created
 // and the generated code manages the full lifecycle (Listen/Serve/Shutdown).
 func (s *Service) httpServerMakers(ctx context.Context) error {
-	s.httpServerMaker = func(_ context.Context, env runtime.RuntimeEnvironment) (*http.Server, error) {
+	s.makers.httpServerMaker = func(_ context.Context, env runtime.RuntimeEnvironment) (*http.Server, error) {
 		// svcCfg := s.ServiceConfig()
 		// return &http.Server{
 		//    Addr: fmt.Sprintf("%s:%d", svcCfg.HttpHost, svcCfg.HttpPort),
-		//    Handler: env.MetricsEngine().HTTPServerHandler(s.httpMux, runtime.ToSnakeCase(svcCfg.Name)),
+		//    Handler: env.MetricsEngine().HTTPServerHandler(s.servers.httpMux, runtime.ToSnakeCase(svcCfg.Name)),
 		// }, nil
 		return nil, nil
 	}

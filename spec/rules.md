@@ -14,8 +14,14 @@ user-owned extension points.
   transport contracts in order to make an implementation easier.
 - Change `.proto`/OpenAPI source and regenerate; never patch generated bindings.
 - Preserve the message/stream context received from the framework.
-- Do not keep mutable per-request state in function objects: function instances
-  are created once and may process requests concurrently.
+- Each business function has one instance per service shared by all referencing
+  streams, including streams in different pipelines. Its maker receives only
+  context and environment, never a stream or stream configuration.
+- Operator configuration, metrics and tracing remain local to each stream.
+  Endpoint-handler makers also receive only context and environment.
+  Only infrastructure makers retain their typed configuration.
+- Do not keep mutable per-request state in function objects: shared instances
+  may process requests concurrently.
 - Finish one task at a time and immediately copy its completion line to
   `spec/progress.md`.
 
@@ -39,8 +45,8 @@ user-owned extension points.
   run them through `errgroup`; they must honor cancellation and must not detach
   initialization work from the group.
 - Preserve generated maker parameters and their order: cancellable group
-  context, runtime environment, then the exact typed function, stream,
-  endpoint, connector or service configuration. Runtime-owned router, handler
+  context and runtime environment for business functions and endpoint handlers;
+  infrastructure makers additionally receive their typed configuration. Runtime-owned router, handler
   or owner values are additional explicit typed arguments where required;
   makers must not recover these inputs from globals.
 - Use generated `Makefile` targets:

@@ -44,6 +44,8 @@ asio_grpc_protobuf_generate(
 add_library(example_inventory_service_api ${_SERVICEGEN_PROTO_SOURCES})
 target_compile_features(example_inventory_service_api PUBLIC cxx_std_20)
 target_include_directories(example_inventory_service_api SYSTEM PUBLIC "${_GENERATED_DIR}")
+target_include_directories(example_inventory_service_api PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(example_inventory_service_api PUBLIC servicelib::grpc)
 
 set(example_inventory_service_api_GENERATED_DIR "${_GENERATED_DIR}"

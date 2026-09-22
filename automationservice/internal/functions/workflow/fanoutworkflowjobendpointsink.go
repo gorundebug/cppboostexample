@@ -5,7 +5,6 @@ import (
 
 	temporalsink "github.com/gorundebug/servicelib/datasink/temporal"
 	"github.com/gorundebug/servicelib/runtime"
-	runtimecfg "github.com/gorundebug/servicelib/runtime/config"
 	"github.com/gorundebug/servicelib/runtime/environment"
 )
 
@@ -31,6 +30,6 @@ func (ep *FanoutWorkflowJobEndpointSink) BeginRequest(ctx context.Context, _ run
 func (ep *FanoutWorkflowJobEndpointSink) EndRequest(_ context.Context, _ runtime.Stream, _ error, _ FanoutWorkflowJobEndpointSinkHandlerState) {
 }
 
-func MakeFanoutWorkflowJobEndpointSink(_ context.Context, _ environment.ServiceEnvironment, _ *runtimecfg.TemporalEndpointConfig) (*FanoutWorkflowJobEndpointSink, error) {
+func MakeFanoutWorkflowJobEndpointSink(_ context.Context, _ environment.ServiceEnvironment) (*FanoutWorkflowJobEndpointSink, error) {
 	return &FanoutWorkflowJobEndpointSink{}, nil
 }

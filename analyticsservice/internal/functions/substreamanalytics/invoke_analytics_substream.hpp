@@ -52,11 +52,10 @@ struct InvokeAnalyticsSubstream final {
 };
 
 inline boost::asio::awaitable<std::unique_ptr<InvokeAnalyticsSubstream>> MakeInvokeAnalyticsSubstream(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment,
-    const servicelib::config::MapStreamConfig& config) {
+    servicelib::Context context, servicelib::IServiceEnvironment& environment) {
   (void)context;
   (void)environment;
-  (void)config;
+
   throw std::logic_error(
       "InvokeAnalyticsSubstream must be constructed by "
       "Service::customMakersInit with the analyzeAnalyticsSubstream handle");

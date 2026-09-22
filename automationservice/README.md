@@ -9,6 +9,28 @@
 - **Metrics** (Prometheus): `GET http://localhost:9094/metrics`
 - **Status** (topology visualization): `GET http://localhost:9094/status`
 
+## Generated service layout
+
+`internal/app/service.generated.go` coordinates the lifecycle and contains named
+structures for streams, makers, functions, endpoints, clients and servers.
+
+| File in `internal/app` | Responsibility |
+| --- | --- |
+| `streams.generated.go` | All streams, globally ordered construction, result bindings and cycle links. |
+| `makers.generated.go` | Business and transport constructors; defaults can be customized in `service.go`. |
+| `functions.generated.go` | One instance per shared business function; ordered initialization groups, parallel within each group. |
+| `endpoints.generated.go` | Endpoint adapters and independent consumers, even when their business function is shared. |
+| `clients.generated.go` | Outbound clients and connection cleanup. |
+| `servers.generated.go` | HTTP/gRPC registration, startup and transport draining. |
+| `connectors.generated.go` | Connector initialization; the runtime owns the resources. |
+| `substreams.generated.go` | Service methods exposing callable SubStream handles. |
+| `service_serde.generated.go` | Serialization registry and custom serde lookup. |
+
+Pipelines group the model, not runtime ownership. Cross-pipeline connections use
+the same dependency order as connections within a pipeline. Shared functions are
+created once per service; an isolated Temporal Workflow graph owns its own instances.
+Customize business logic and makers in user-owned files, not generated files.
+
 ## Make commands
 
 ```bash

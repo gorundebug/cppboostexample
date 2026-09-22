@@ -32,11 +32,10 @@ struct CompleteCycleAnalytics final {
 };
 
 inline boost::asio::awaitable<std::unique_ptr<CompleteCycleAnalytics>> MakeCompleteCycleAnalytics(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment,
-    const servicelib::config::FilterStreamConfig& config) {
+    servicelib::Context context, servicelib::IServiceEnvironment& environment) {
   (void)context;
   (void)environment;
-  (void)config;
+
   co_return std::make_unique<CompleteCycleAnalytics>();
 }
 

@@ -15,7 +15,7 @@
 #include <servicelib/runtime/config/endpoint_types.hpp>
 #include <servicelib/runtime/environment/environment.hpp>
 #include <servicelib/datasource/kafka/librdkafka.hpp>
-#include <model_cpp/include/example/model/types/order_processed.hpp>
+#include <example/model/types/order_processed.hpp>
 
 
 namespace example::analytics_service::functions {
@@ -61,9 +61,8 @@ struct OrderProcessedEndpointSource final {
 };
 
 inline boost::asio::awaitable<std::unique_ptr<OrderProcessedEndpointSource>> MakeOrderProcessedEndpointSource(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment,
-    const servicelib::config::KafkaEndpointConfig& config) {
-  (void)context; (void)environment; (void)config;
+    servicelib::Context context, servicelib::IServiceEnvironment& environment) {
+  (void)context; (void)environment;
   co_return std::make_unique<OrderProcessedEndpointSource>();
 }
 

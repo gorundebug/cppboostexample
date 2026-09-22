@@ -61,10 +61,9 @@ struct CycleAnalyticsInputSource final
 };
 
 inline boost::asio::awaitable<std::unique_ptr<CycleAnalyticsInputSource>> MakeCycleAnalyticsInputSource(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment,
-    const servicelib::config::CustomEndpointConfig& config) {
+    servicelib::Context context, servicelib::IServiceEnvironment& environment) {
   (void)context;
-  (void)config;
+
   (void)environment;
   co_return std::make_unique<CycleAnalyticsInputSource>();
 }

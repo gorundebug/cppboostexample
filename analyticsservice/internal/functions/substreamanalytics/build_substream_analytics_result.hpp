@@ -37,11 +37,10 @@ struct BuildSubstreamAnalyticsResult final {
 };
 
 inline boost::asio::awaitable<std::unique_ptr<BuildSubstreamAnalyticsResult>> MakeBuildSubstreamAnalyticsResult(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment,
-    const servicelib::config::MapStreamConfig& config) {
+    servicelib::Context context, servicelib::IServiceEnvironment& environment) {
   (void)context;
   (void)environment;
-  (void)config;
+
   co_return std::make_unique<BuildSubstreamAnalyticsResult>();
 }
 

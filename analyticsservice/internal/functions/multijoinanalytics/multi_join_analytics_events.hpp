@@ -46,11 +46,10 @@ struct MultiJoinAnalyticsEvents final {
 };
 
 inline boost::asio::awaitable<std::unique_ptr<MultiJoinAnalyticsEvents>> MakeMultiJoinAnalyticsEvents(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment,
-    const servicelib::config::MultiJoinStreamConfig& config) {
+    servicelib::Context context, servicelib::IServiceEnvironment& environment) {
   (void)context;
   (void)environment;
-  (void)config;
+
   co_return std::make_unique<MultiJoinAnalyticsEvents>();
 }
 

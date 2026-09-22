@@ -5,7 +5,6 @@ import (
 
 	"github.com/gorundebug/servicelib/datasource"
 	"github.com/gorundebug/servicelib/runtime"
-	runtimecfg "github.com/gorundebug/servicelib/runtime/config"
 	"github.com/gorundebug/servicelib/runtime/environment"
 )
 
@@ -38,7 +37,6 @@ func (f *TemporalWorkflowScheduleSource) OnTrigger(
 func MakeTemporalWorkflowScheduleSource(
 	_ context.Context,
 	_ environment.ServiceEnvironment,
-	_ *runtimecfg.TemporalEndpointConfig,
 ) (*TemporalWorkflowScheduleSource, error) {
 	return &TemporalWorkflowScheduleSource{}, nil
 }

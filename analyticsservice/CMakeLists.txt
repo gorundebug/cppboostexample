@@ -109,11 +109,19 @@ if(NOT EXISTS
       SYMBOLIC COPY_ON_ERROR)
 endif()
 
+
 add_executable(example_analytics_service
     cmd/service/main.cpp
     internal/app/service.generated.cpp
 
     internal/app/service.cpp
+    internal/app/makers.generated.cpp
+    internal/app/functions.generated.cpp
+    internal/app/streams.generated.cpp
+    internal/app/endpoints.generated.cpp
+    internal/app/servers.generated.cpp
+    internal/app/substreams.generated.cpp
+
     internal/functions/analytics/count_order_processed.cpp
     internal/functions/cycleanalytics/advance_cycle_analytics.cpp
     internal/functions/cycleanalytics/complete_cycle_analytics.cpp
