@@ -1,3 +1,4 @@
+#include <exception>
 #include <optional>
 #include <utility>
 
@@ -19,12 +20,20 @@ struct ResultCollector final {
   }
 };
 
+struct ErrorCollector final {
+  std::exception_ptr value;
+
+  void out(servicelib::MessageContext, std::exception_ptr error) {
+    value = std::move(error);
+  }
+};
+
 }  // namespace
 
 TEST(GetInventoryItemData, ReservesAvailableStockAndPreservesPrice) {
   GetInventoryItemData function;
   ResultCollector success;
-  ResultCollector failure;
+  ErrorCollector failure;
   test::Stream stream;
 
   function(servicelib::MessageContext{}, stream,
@@ -33,7 +42,7 @@ TEST(GetInventoryItemData, ReservesAvailableStockAndPreservesPrice) {
            success, failure);
 
   ASSERT_TRUE(success.value.has_value());
-  EXPECT_FALSE(failure.value.has_value());
+  EXPECT_EQ(failure.value, nullptr);
   EXPECT_EQ(success.value->available_qty, 3);
   EXPECT_TRUE(success.value->reserved);
   EXPECT_EQ(success.value->status, "CONFIRMED");
@@ -43,7 +52,7 @@ TEST(GetInventoryItemData, ReservesAvailableStockAndPreservesPrice) {
 TEST(GetInventoryItemData, RoutesInsufficientStockToErrorOutput) {
   GetInventoryItemData function;
   ResultCollector success;
-  ResultCollector failure;
+  ErrorCollector failure;
   test::Stream stream;
 
   function(servicelib::MessageContext{}, stream,
@@ -52,11 +61,18 @@ TEST(GetInventoryItemData, RoutesInsufficientStockToErrorOutput) {
            success, failure);
 
   EXPECT_FALSE(success.value.has_value());
-  ASSERT_TRUE(failure.value.has_value());
-  EXPECT_EQ(failure.value->available_qty, 0);
-  EXPECT_FALSE(failure.value->reserved);
-  EXPECT_EQ(failure.value->status, "OUT_OF_STOCK");
-  EXPECT_DOUBLE_EQ(failure.value->unit_price, 4.25);
+  ASSERT_NE(failure.value, nullptr);
+  try {
+    std::rethrow_exception(failure.value);
+    FAIL() << "expected InventoryFailureError";
+  } catch (const InventoryFailureError& error) {
+    EXPECT_EQ(error.AvailableQty(), 0);
+    EXPECT_EQ(error.Item().order_id, "order-1");
+    EXPECT_EQ(error.Item().item_id, "item-1");
+    EXPECT_EQ(error.Item().sku, "UNKNOWN");
+    EXPECT_EQ(error.Item().quantity, 3);
+    EXPECT_DOUBLE_EQ(error.Item().unit_price, 4.25);
+  }
 }
 
 }  // namespace example::inventory_service::functions
