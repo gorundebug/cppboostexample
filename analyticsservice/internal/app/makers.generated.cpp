@@ -14,17 +14,17 @@ void ServiceMakers::initMakers(boost::asio::any_io_executor executor) {
   makers_.advance_cycle_analytics = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
     return functions::MakeAdvanceCycleAnalytics(std::move(context), environment);
   };
-  makers_.analytics_orders_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
-    return functions::MakeAnalyticsOrdersSource(std::move(context), environment);
+  makers_.analytics_orders_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment, const servicelib::config::CustomEndpointConfig& config) {
+    return functions::MakeAnalyticsOrdersSource(std::move(context), environment, config);
   };
-  makers_.analytics_payments_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
-    return functions::MakeAnalyticsPaymentsSource(std::move(context), environment);
+  makers_.analytics_payments_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment, const servicelib::config::CustomEndpointConfig& config) {
+    return functions::MakeAnalyticsPaymentsSource(std::move(context), environment, config);
   };
-  makers_.analytics_schedule_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
-    return functions::MakeAnalyticsScheduleSource(std::move(context), environment);
+  makers_.analytics_schedule_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment, const servicelib::config::CronEndpointConfig& config) {
+    return functions::MakeAnalyticsScheduleSource(std::move(context), environment, config);
   };
-  makers_.analytics_shipments_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
-    return functions::MakeAnalyticsShipmentsSource(std::move(context), environment);
+  makers_.analytics_shipments_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment, const servicelib::config::CustomEndpointConfig& config) {
+    return functions::MakeAnalyticsShipmentsSource(std::move(context), environment, config);
   };
   makers_.build_substream_analytics_result = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
     return functions::MakeBuildSubstreamAnalyticsResult(std::move(context), environment);
@@ -38,14 +38,14 @@ void ServiceMakers::initMakers(boost::asio::any_io_executor executor) {
   makers_.count_order_processed = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
     return functions::MakeCountOrderProcessed(std::move(context), environment);
   };
-  makers_.cycle_analytics_input_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
-    return functions::MakeCycleAnalyticsInputSource(std::move(context), environment);
+  makers_.cycle_analytics_input_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment, const servicelib::config::CustomEndpointConfig& config) {
+    return functions::MakeCycleAnalyticsInputSource(std::move(context), environment, config);
   };
-  makers_.cycle_analytics_result_sink = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
-    return functions::MakeCycleAnalyticsResultSink(std::move(context), environment);
+  makers_.cycle_analytics_result_sink = [](servicelib::Context context, servicelib::IServiceEnvironment& environment, const servicelib::config::CustomEndpointConfig& config) {
+    return functions::MakeCycleAnalyticsResultSink(std::move(context), environment, config);
   };
-  makers_.high_value_analytics_sink = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
-    return functions::MakeHighValueAnalyticsSink(std::move(context), environment);
+  makers_.high_value_analytics_sink = [](servicelib::Context context, servicelib::IServiceEnvironment& environment, const servicelib::config::CustomEndpointConfig& config) {
+    return functions::MakeHighValueAnalyticsSink(std::move(context), environment, config);
   };
   makers_.invoke_analytics_substream = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
     return functions::MakeInvokeAnalyticsSubstream(std::move(context), environment);
@@ -53,8 +53,8 @@ void ServiceMakers::initMakers(boost::asio::any_io_executor executor) {
   makers_.join_order_payment_analytics = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
     return functions::MakeJoinOrderPaymentAnalytics(std::move(context), environment);
   };
-  makers_.joined_analytics_sink = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
-    return functions::MakeJoinedAnalyticsSink(std::move(context), environment);
+  makers_.joined_analytics_sink = [](servicelib::Context context, servicelib::IServiceEnvironment& environment, const servicelib::config::CustomEndpointConfig& config) {
+    return functions::MakeJoinedAnalyticsSink(std::move(context), environment, config);
   };
   makers_.key_orders_for_join = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
     return functions::MakeKeyOrdersForJoin(std::move(context), environment);
@@ -74,20 +74,20 @@ void ServiceMakers::initMakers(boost::asio::any_io_executor executor) {
   makers_.multi_join_analytics_events = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
     return functions::MakeMultiJoinAnalyticsEvents(std::move(context), environment);
   };
-  makers_.order_processed_endpoint_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
-    return functions::MakeOrderProcessedEndpointSource(std::move(context), environment);
+  makers_.order_processed_endpoint_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment, const servicelib::config::KafkaEndpointConfig& config) {
+    return functions::MakeOrderProcessedEndpointSource(std::move(context), environment, config);
   };
   makers_.route_analytics_result = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
     return functions::MakeRouteAnalyticsResult(std::move(context), environment);
   };
-  makers_.standard_analytics_sink = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
-    return functions::MakeStandardAnalyticsSink(std::move(context), environment);
+  makers_.standard_analytics_sink = [](servicelib::Context context, servicelib::IServiceEnvironment& environment, const servicelib::config::CustomEndpointConfig& config) {
+    return functions::MakeStandardAnalyticsSink(std::move(context), environment, config);
   };
-  makers_.substream_analytics_input_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
-    return functions::MakeSubstreamAnalyticsInputSource(std::move(context), environment);
+  makers_.substream_analytics_input_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment, const servicelib::config::CustomEndpointConfig& config) {
+    return functions::MakeSubstreamAnalyticsInputSource(std::move(context), environment, config);
   };
-  makers_.substream_analytics_result_sink = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
-    return functions::MakeSubstreamAnalyticsResultSink(std::move(context), environment);
+  makers_.substream_analytics_result_sink = [](servicelib::Context context, servicelib::IServiceEnvironment& environment, const servicelib::config::CustomEndpointConfig& config) {
+    return functions::MakeSubstreamAnalyticsResultSink(std::move(context), environment, config);
   };
   makers_.http_router = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,

@@ -10,7 +10,7 @@
 namespace example::analytics_service::app {
 
 void ServiceFunctions::initFunctions(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment,
+    servicelib::Context context, const config::Config& cfg, servicelib::IServiceEnvironment& environment,
     ServiceMakers& makers_, boost::asio::any_io_executor executor) {
   (void)context;
   (void)environment;
@@ -105,6 +105,7 @@ void ServiceFunctions::initFunctions(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -119,16 +120,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->analytics_orders_source = co_await makers->analytics_orders_source(maker_context, *environment);
+            functions->analytics_orders_source = co_await makers->analytics_orders_source(maker_context, *environment, cfg->endpoints.analyticsOrders);
             if (!functions->analytics_orders_source) {
               throw std::logic_error("function maker AnalyticsOrdersSource returned null");
             }
@@ -139,16 +141,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->analytics_payments_source = co_await makers->analytics_payments_source(maker_context, *environment);
+            functions->analytics_payments_source = co_await makers->analytics_payments_source(maker_context, *environment, cfg->endpoints.analyticsPayments);
             if (!functions->analytics_payments_source) {
               throw std::logic_error("function maker AnalyticsPaymentsSource returned null");
             }
@@ -159,16 +162,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->analytics_schedule_source = co_await makers->analytics_schedule_source(maker_context, *environment);
+            functions->analytics_schedule_source = co_await makers->analytics_schedule_source(maker_context, *environment, cfg->endpoints.analyticsSchedule);
             if (!functions->analytics_schedule_source) {
               throw std::logic_error("function maker AnalyticsScheduleSource returned null");
             }
@@ -179,16 +183,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->analytics_shipments_source = co_await makers->analytics_shipments_source(maker_context, *environment);
+            functions->analytics_shipments_source = co_await makers->analytics_shipments_source(maker_context, *environment, cfg->endpoints.analyticsShipments);
             if (!functions->analytics_shipments_source) {
               throw std::logic_error("function maker AnalyticsShipmentsSource returned null");
             }
@@ -199,12 +204,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -219,12 +225,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -239,12 +246,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -259,12 +267,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -279,16 +288,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->cycle_analytics_input_source = co_await makers->cycle_analytics_input_source(maker_context, *environment);
+            functions->cycle_analytics_input_source = co_await makers->cycle_analytics_input_source(maker_context, *environment, cfg->endpoints.cycleAnalyticsInput);
             if (!functions->cycle_analytics_input_source) {
               throw std::logic_error("function maker CycleAnalyticsInputSource returned null");
             }
@@ -299,16 +309,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->cycle_analytics_result_sink = co_await makers->cycle_analytics_result_sink(maker_context, *environment);
+            functions->cycle_analytics_result_sink = co_await makers->cycle_analytics_result_sink(maker_context, *environment, cfg->endpoints.cycleAnalyticsResult);
             if (!functions->cycle_analytics_result_sink) {
               throw std::logic_error("function maker CycleAnalyticsResultSink returned null");
             }
@@ -319,16 +330,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->high_value_analytics_sink = co_await makers->high_value_analytics_sink(maker_context, *environment);
+            functions->high_value_analytics_sink = co_await makers->high_value_analytics_sink(maker_context, *environment, cfg->endpoints.highValueAnalytics);
             if (!functions->high_value_analytics_sink) {
               throw std::logic_error("function maker HighValueAnalyticsSink returned null");
             }
@@ -339,12 +351,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -359,12 +372,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -379,16 +393,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->joined_analytics_sink = co_await makers->joined_analytics_sink(maker_context, *environment);
+            functions->joined_analytics_sink = co_await makers->joined_analytics_sink(maker_context, *environment, cfg->endpoints.joinedAnalytics);
             if (!functions->joined_analytics_sink) {
               throw std::logic_error("function maker JoinedAnalyticsSink returned null");
             }
@@ -399,12 +414,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -419,12 +435,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -439,12 +456,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -459,12 +477,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -479,12 +498,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -499,12 +519,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -519,16 +540,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->order_processed_endpoint_source = co_await makers->order_processed_endpoint_source(maker_context, *environment);
+            functions->order_processed_endpoint_source = co_await makers->order_processed_endpoint_source(maker_context, *environment, cfg->endpoints.orderProcessed);
             if (!functions->order_processed_endpoint_source) {
               throw std::logic_error("function maker OrderProcessedEndpointSource returned null");
             }
@@ -539,12 +561,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -559,16 +582,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->standard_analytics_sink = co_await makers->standard_analytics_sink(maker_context, *environment);
+            functions->standard_analytics_sink = co_await makers->standard_analytics_sink(maker_context, *environment, cfg->endpoints.standardAnalytics);
             if (!functions->standard_analytics_sink) {
               throw std::logic_error("function maker StandardAnalyticsSink returned null");
             }
@@ -579,16 +603,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->substream_analytics_input_source = co_await makers->substream_analytics_input_source(maker_context, *environment);
+            functions->substream_analytics_input_source = co_await makers->substream_analytics_input_source(maker_context, *environment, cfg->endpoints.substreamAnalyticsInput);
             if (!functions->substream_analytics_input_source) {
               throw std::logic_error("function maker SubstreamAnalyticsInputSource returned null");
             }
@@ -599,16 +624,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->substream_analytics_result_sink = co_await makers->substream_analytics_result_sink(maker_context, *environment);
+            functions->substream_analytics_result_sink = co_await makers->substream_analytics_result_sink(maker_context, *environment, cfg->endpoints.substreamAnalyticsResult);
             if (!functions->substream_analytics_result_sink) {
               throw std::logic_error("function maker SubstreamAnalyticsResultSink returned null");
             }
@@ -619,7 +645,7 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     for (auto& task : maker_tasks) {
       try { task.get(); } catch (...) { /* First failure is recorded by its task. */ }

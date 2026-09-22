@@ -62,13 +62,13 @@ struct ServiceMakers final {
   std::function<boost::asio::awaitable<std::unique_ptr<functions::MapToOrderState>>(
       servicelib::Context, servicelib::IServiceEnvironment&)> map_to_order_state;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::OrderProcessedEndpointSink>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> order_processed_endpoint_sink;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::KafkaEndpointConfig&)> order_processed_endpoint_sink;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::ProcessOrderItemSink>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> process_order_item_sink;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::GrpcEndpointConfig&)> process_order_item_sink;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::ProcessOrderItems>>(
       servicelib::Context, servicelib::IServiceEnvironment&)> process_order_items;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::ProcessOrderSource>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> process_order_source;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::HttpEndpointConfig&)> process_order_source;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::SoftDeadline>>(
       servicelib::Context, servicelib::IServiceEnvironment&)> soft_deadline;
     std::function<boost::asio::awaitable<

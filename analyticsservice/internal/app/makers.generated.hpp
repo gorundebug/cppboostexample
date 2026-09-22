@@ -73,13 +73,13 @@ struct ServiceMakers final {
   std::function<boost::asio::awaitable<std::unique_ptr<functions::AdvanceCycleAnalytics>>(
       servicelib::Context, servicelib::IServiceEnvironment&)> advance_cycle_analytics;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::AnalyticsOrdersSource>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> analytics_orders_source;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::CustomEndpointConfig&)> analytics_orders_source;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::AnalyticsPaymentsSource>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> analytics_payments_source;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::CustomEndpointConfig&)> analytics_payments_source;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::AnalyticsScheduleSource>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> analytics_schedule_source;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::CronEndpointConfig&)> analytics_schedule_source;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::AnalyticsShipmentsSource>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> analytics_shipments_source;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::CustomEndpointConfig&)> analytics_shipments_source;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::BuildSubstreamAnalyticsResult>>(
       servicelib::Context, servicelib::IServiceEnvironment&)> build_substream_analytics_result;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::CompleteCycleAnalytics>>(
@@ -89,17 +89,17 @@ struct ServiceMakers final {
   std::function<boost::asio::awaitable<std::unique_ptr<functions::CountOrderProcessed>>(
       servicelib::Context, servicelib::IServiceEnvironment&)> count_order_processed;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::CycleAnalyticsInputSource>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> cycle_analytics_input_source;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::CustomEndpointConfig&)> cycle_analytics_input_source;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::CycleAnalyticsResultSink>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> cycle_analytics_result_sink;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::CustomEndpointConfig&)> cycle_analytics_result_sink;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::HighValueAnalyticsSink>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> high_value_analytics_sink;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::CustomEndpointConfig&)> high_value_analytics_sink;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::InvokeAnalyticsSubstream>>(
       servicelib::Context, servicelib::IServiceEnvironment&)> invoke_analytics_substream;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::JoinOrderPaymentAnalytics>>(
       servicelib::Context, servicelib::IServiceEnvironment&)> join_order_payment_analytics;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::JoinedAnalyticsSink>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> joined_analytics_sink;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::CustomEndpointConfig&)> joined_analytics_sink;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::KeyOrdersForJoin>>(
       servicelib::Context, servicelib::IServiceEnvironment&)> key_orders_for_join;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::KeyOrdersForMultiJoin>>(
@@ -113,15 +113,15 @@ struct ServiceMakers final {
   std::function<boost::asio::awaitable<std::unique_ptr<functions::MultiJoinAnalyticsEvents>>(
       servicelib::Context, servicelib::IServiceEnvironment&)> multi_join_analytics_events;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::OrderProcessedEndpointSource>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> order_processed_endpoint_source;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::KafkaEndpointConfig&)> order_processed_endpoint_source;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::RouteAnalyticsResult>>(
       servicelib::Context, servicelib::IServiceEnvironment&)> route_analytics_result;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::StandardAnalyticsSink>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> standard_analytics_sink;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::CustomEndpointConfig&)> standard_analytics_sink;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::SubstreamAnalyticsInputSource>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> substream_analytics_input_source;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::CustomEndpointConfig&)> substream_analytics_input_source;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::SubstreamAnalyticsResultSink>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> substream_analytics_result_sink;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::CustomEndpointConfig&)> substream_analytics_result_sink;
     std::function<boost::asio::awaitable<
         std::shared_ptr<servicelib::http::Router>>(
         servicelib::Context, servicelib::IServiceEnvironment&,

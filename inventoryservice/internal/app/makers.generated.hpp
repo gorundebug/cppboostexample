@@ -49,7 +49,7 @@ struct ServiceMakers final {
   std::function<boost::asio::awaitable<std::unique_ptr<functions::GetInventoryItemError>>(
       servicelib::Context, servicelib::IServiceEnvironment&)> get_inventory_item_error;
   std::function<boost::asio::awaitable<std::unique_ptr<functions::ProcessOrderItemSource>>(
-      servicelib::Context, servicelib::IServiceEnvironment&)> process_order_item_source;
+      servicelib::Context, servicelib::IServiceEnvironment&, const servicelib::config::GrpcEndpointConfig&)> process_order_item_source;
     std::function<boost::asio::awaitable<
         std::shared_ptr<servicelib::http::Router>>(
         servicelib::Context, servicelib::IServiceEnvironment&,

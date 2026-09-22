@@ -79,6 +79,7 @@ services:
         CPPBOOSTSERVICELIB_PROFILING: ${CPPBOOSTSERVICELIB_PROFILING:-OFF}
         CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS: ${CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS:-OFF}
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
+        CPPBOOST_LTO: ${CPPBOOST_LTO:-ON}
         EXAMPLE_PROFILE: ${EXAMPLE_PROFILE:-function-call}
       additional_contexts:
         servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.130}
@@ -106,6 +107,7 @@ services:
         CPPBOOSTSERVICELIB_PROFILING: ${CPPBOOSTSERVICELIB_PROFILING:-OFF}
         CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS: ${CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS:-OFF}
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
+        CPPBOOST_LTO: ${CPPBOOST_LTO:-ON}
         EXAMPLE_PROFILE: ${EXAMPLE_PROFILE:-function-call}
       additional_contexts:
         servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.130}
@@ -133,6 +135,7 @@ services:
         CPPBOOSTSERVICELIB_PROFILING: ${CPPBOOSTSERVICELIB_PROFILING:-OFF}
         CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS: ${CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS:-OFF}
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
+        CPPBOOST_LTO: ${CPPBOOST_LTO:-ON}
         EXAMPLE_PROFILE: ${EXAMPLE_PROFILE:-function-call}
       additional_contexts:
         servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.130}

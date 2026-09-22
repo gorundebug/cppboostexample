@@ -64,7 +64,7 @@ struct ServiceFunctions final {
   std::unique_ptr<functions::ProcessOrderItems> process_order_items;
   std::unique_ptr<functions::ProcessOrderSource> process_order_source;
   std::unique_ptr<functions::SoftDeadline> soft_deadline;
-  void initFunctions(servicelib::Context context, servicelib::IServiceEnvironment& environment,
+  void initFunctions(servicelib::Context context, const config::Config& cfg, servicelib::IServiceEnvironment& environment,
                      ServiceMakers& makers_, boost::asio::any_io_executor executor);
 };
 

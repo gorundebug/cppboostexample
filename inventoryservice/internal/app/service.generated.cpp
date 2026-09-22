@@ -77,7 +77,7 @@ void ServiceGenerated::initRuntime(servicelib::Context context) {
     throw std::runtime_error("service config is null");
   }
   servers_.initInfrastructure(*this, context, *config_snapshot, *service_config);
-  functions_.initFunctions(context, *this, makers_, executor_);
+  functions_.initFunctions(context, *config_snapshot, *this, makers_, executor_);
   customFunctionsInit(context);
   streams_.initStreams(*config_snapshot, *this);
   streams_.build(*config_snapshot, *this, functions_, bindings_);

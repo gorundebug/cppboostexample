@@ -17,8 +17,8 @@ void ServiceMakers::initMakers(boost::asio::any_io_executor executor, agrpc::Grp
   makers_.get_inventory_item_error = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
     return functions::MakeGetInventoryItemError(std::move(context), environment);
   };
-  makers_.process_order_item_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment) {
-    return functions::MakeProcessOrderItemSource(std::move(context), environment);
+  makers_.process_order_item_source = [](servicelib::Context context, servicelib::IServiceEnvironment& environment, const servicelib::config::GrpcEndpointConfig& config) {
+    return functions::MakeProcessOrderItemSource(std::move(context), environment, config);
   };
   makers_.http_router = [](
       servicelib::Context context, servicelib::IServiceEnvironment& environment,

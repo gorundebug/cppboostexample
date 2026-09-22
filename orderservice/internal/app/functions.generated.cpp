@@ -10,7 +10,7 @@
 namespace example::order_service::app {
 
 void ServiceFunctions::initFunctions(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment,
+    servicelib::Context context, const config::Config& cfg, servicelib::IServiceEnvironment& environment,
     ServiceMakers& makers_, boost::asio::any_io_executor executor) {
   (void)context;
   (void)environment;
@@ -51,6 +51,7 @@ void ServiceFunctions::initFunctions(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -65,12 +66,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -85,12 +87,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -105,16 +108,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->order_processed_endpoint_sink = co_await makers->order_processed_endpoint_sink(maker_context, *environment);
+            functions->order_processed_endpoint_sink = co_await makers->order_processed_endpoint_sink(maker_context, *environment, cfg->endpoints.orderProcessed);
             if (!functions->order_processed_endpoint_sink) {
               throw std::logic_error("function maker OrderProcessedEndpointSink returned null");
             }
@@ -125,16 +129,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->process_order_item_sink = co_await makers->process_order_item_sink(maker_context, *environment);
+            functions->process_order_item_sink = co_await makers->process_order_item_sink(maker_context, *environment, cfg->endpoints.processOrderItem);
             if (!functions->process_order_item_sink) {
               throw std::logic_error("function maker ProcessOrderItemSink returned null");
             }
@@ -145,12 +150,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -165,16 +171,17 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
-            functions->process_order_source = co_await makers->process_order_source(maker_context, *environment);
+            functions->process_order_source = co_await makers->process_order_source(maker_context, *environment, cfg->endpoints.processOrder);
             if (!functions->process_order_source) {
               throw std::logic_error("function maker ProcessOrderSource returned null");
             }
@@ -185,12 +192,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
+           const config::Config* cfg,
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -205,7 +213,7 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     for (auto& task : maker_tasks) {
       try { task.get(); } catch (...) { /* First failure is recorded by its task. */ }

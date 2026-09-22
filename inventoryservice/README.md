@@ -41,6 +41,19 @@ optimized `Release` code with explicit debug symbols and frame pointers and
 without stripping. ASan+UBSan and TSan use standard Conan/compiler settings
 and upstream-supported build options; third-party source code is never patched.
 
+The `host-release` and `docker-release` presets enable link-time optimization
+(LTO) through CMake's `CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE` setting.
+Docker runtime builds enable it by default as well. Debug and sanitizer build
+settings are unchanged. To disable LTO for a Docker runtime build:
+
+```bash
+CPPBOOST_LTO=OFF make docker-up
+```
+
+For a host release build, configure with
+`cmake --preset host-release -DCMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE=OFF`.
+LTO can increase link time and peak memory usage.
+
 The service defaults to repository modules (`USE_LOCAL_MODULES=0`). A generated
 project passes `USE_LOCAL_MODULES=1`. The same local mode works for a separately
 obtained service when all unpublished contract/model modules are placed next to

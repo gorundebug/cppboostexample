@@ -97,7 +97,7 @@ struct ServiceFunctions final {
   std::unique_ptr<functions::StandardAnalyticsSink> standard_analytics_sink;
   std::unique_ptr<functions::SubstreamAnalyticsInputSource> substream_analytics_input_source;
   std::unique_ptr<functions::SubstreamAnalyticsResultSink> substream_analytics_result_sink;
-  void initFunctions(servicelib::Context context, servicelib::IServiceEnvironment& environment,
+  void initFunctions(servicelib::Context context, const config::Config& cfg, servicelib::IServiceEnvironment& environment,
                      ServiceMakers& makers_, boost::asio::any_io_executor executor);
 };
 

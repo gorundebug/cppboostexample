@@ -24,6 +24,7 @@
       "binaryDir": "${sourceDir}/build/host",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE": "ON",
         "FETCH_CPP_DEPENDENCIES": "ON",
         "SERVICELIB_SOURCE_DIR": "$env{SERVICELIB_SOURCE_DIR}"
       }
@@ -46,6 +47,7 @@
       "binaryDir": "/workspace/build",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE": "ON",
         "FETCH_CPP_DEPENDENCIES": "OFF",
         "SERVICELIB_SOURCE_DIR": "$env{SERVICELIB_SOURCE_DIR}"
       }

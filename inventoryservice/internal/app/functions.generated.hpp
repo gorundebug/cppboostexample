@@ -48,7 +48,7 @@ struct ServiceFunctions final {
   std::unique_ptr<functions::GetInventoryItemData> get_inventory_item_data;
   std::unique_ptr<functions::GetInventoryItemError> get_inventory_item_error;
   std::unique_ptr<functions::ProcessOrderItemSource> process_order_item_source;
-  void initFunctions(servicelib::Context context, servicelib::IServiceEnvironment& environment,
+  void initFunctions(servicelib::Context context, const config::Config& cfg, servicelib::IServiceEnvironment& environment,
                      ServiceMakers& makers_, boost::asio::any_io_executor executor);
 };
 

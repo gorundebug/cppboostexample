@@ -104,6 +104,7 @@ RUN --mount=type=cache,id=cppboostexample-debug-build-${TARGETARCH},target=/work
 
 FROM development AS runtime-builder
 ARG CMAKE_BUILD_PARALLEL_LEVEL
+ARG CPPBOOST_LTO=ON
 
 ARG CPPBOOSTSERVICELIB_PROFILING=OFF
 ARG CPPBOOSTSERVICELIB_COROUTINE_DIAGNOSTICS=OFF
@@ -121,6 +122,7 @@ RUN --mount=type=cache,id=cppboostexample-runtime-build-${TARGETARCH}-${EXAMPLE_
     && CCACHE_DIR=/ccache ./scripts/run_with_progress.generated.sh "Release configure" cmake --preset docker-release \
       --fresh \
       -DCMAKE_TOOLCHAIN_FILE="${conan_toolchain}" \
+      -DCMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE="${CPPBOOST_LTO}" \
       -DBUILD_TESTING=OFF \
       -DFETCH_CPP_DEPENDENCIES=OFF \
       -DCPPBOOSTSERVICELIB_PROFILING="${CPPBOOSTSERVICELIB_PROFILING}" \
