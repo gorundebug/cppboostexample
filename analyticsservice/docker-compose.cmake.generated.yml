@@ -34,8 +34,8 @@ services:
         DEPENDENCY_APT_UBUNTU_SECURITY_URL: ${DEPENDENCY_APT_UBUNTU_SECURITY_URL:-}
         DEPENDENCY_APT_UBUNTU_PORTS_URL: ${DEPENDENCY_APT_UBUNTU_PORTS_URL:-}
       additional_contexts:
-        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.127}
-        module-model_cpp: ${MODULE_MODEL_CPP_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.127}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.128}
+        module-model_cpp: ${MODULE_MODEL_CPP_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.128}
       secrets:
         - dependency_conan_credential
     extra_hosts:
@@ -72,7 +72,7 @@ services:
     command:
       - /bin/bash
       - -c
-      - source scripts/configure-git-auth.generated.sh && ./scripts/conan-install.generated.sh Debug /workspace/build/conan-debug && conan_toolchain="$$(cat /workspace/build/conan-debug/toolchain.path)" && cmake --fresh --preset docker-debug -DCMAKE_TOOLCHAIN_FILE="$$conan_toolchain" -DMODULES_ROOT=/workspace/modules -DFETCH_CPP_DEPENDENCIES=OFF && cmake --build --preset docker-debug --parallel ${CMAKE_BUILD_PARALLEL_LEVEL:+"${CMAKE_BUILD_PARALLEL_LEVEL}"} && ctest --test-dir /workspace/build --output-on-failure --no-tests=error
+      - source scripts/configure-git-auth.generated.sh && ./scripts/conan-install.generated.sh Debug /workspace/build/conan-debug && conan_toolchain="$$(cat /workspace/build/conan-debug/toolchain.path)" && cmake --fresh --preset docker-debug -DCMAKE_TOOLCHAIN_FILE="$$conan_toolchain" -DMODULES_ROOT=/workspace/modules -DFETCH_CPP_DEPENDENCIES=OFF && cmake --build --preset docker-debug --parallel $${CMAKE_BUILD_PARALLEL_LEVEL:+"$${CMAKE_BUILD_PARALLEL_LEVEL}"} && ctest --test-dir /workspace/build --output-on-failure --no-tests=error
 
   analyticsservice-runtime:
     image: cppboostexample-analyticsservice:local
@@ -97,8 +97,8 @@ services:
         RUNTIME_STRIP: ${RUNTIME_STRIP:-ON}
         EXAMPLE_PROFILE: ${EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.127}
-        module-model_cpp: ${MODULE_MODEL_CPP_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.127}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.128}
+        module-model_cpp: ${MODULE_MODEL_CPP_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostexample.git#v0.2.128}
       secrets:
         - dependency_conan_credential
 

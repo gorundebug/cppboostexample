@@ -23,6 +23,19 @@ make docker-clean   # [Docker] stop and remove standalone volumes/build state
 make help           # [host] list generated targets
 ```
 
+To limit concurrent CMake build jobs from outside the project, set a positive
+integer in the environment. This works with `make build`, `make test`, and
+`make docker-up`, including when invoked from the generated project root:
+
+```bash
+CMAKE_BUILD_PARALLEL_LEVEL=9 make docker-up
+```
+
+Without this variable, the build tool chooses its default parallelism. The
+setting limits build jobs, not Docker's CPU allocation or threads created
+internally by an individual compiler/linker. It does not change service worker
+pools or business-function initialization concurrency.
+
 Sanitizer targets compile the complete statically linked dependency graph as
 optimized `Release` code with explicit debug symbols and frame pointers and
 without stripping. ASan+UBSan and TSan use standard Conan/compiler settings

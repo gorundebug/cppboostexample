@@ -31,7 +31,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
          "Fetch pinned cppboostservicelib and missing contract modules" ON)
   set(CPPBOOSTSERVICELIB_REPOSITORY "https://github.com/gorundebug/cppboostservicelib.git" CACHE STRING
       "Standalone cppboostservicelib repository")
-  set(CPPBOOSTSERVICELIB_REVISION "v0.2.127" CACHE STRING
+  set(CPPBOOSTSERVICELIB_REVISION "v0.2.128" CACHE STRING
       "Pinned cppboostservicelib revision")
   set(CPPBOOSTSERVICELIB_ENABLE_GRPC ON
       CACHE BOOL "Build asio-grpc support" FORCE)
@@ -86,7 +86,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
       include(FetchContent)
       FetchContent_Declare(servicegen_module_inventory_service_api
           GIT_REPOSITORY "https://github.com/gorundebug/cppboostexample.git"
-          GIT_TAG "v0.2.127"
+          GIT_TAG "v0.2.128"
           GIT_SHALLOW FALSE
           GIT_PROGRESS TRUE)
       FetchContent_MakeAvailable(servicegen_module_inventory_service_api)
@@ -103,7 +103,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
       include(FetchContent)
       FetchContent_Declare(servicegen_module_model
           GIT_REPOSITORY "https://github.com/gorundebug/cppboostexample.git"
-          GIT_TAG "v0.2.127"
+          GIT_TAG "v0.2.128"
           GIT_SHALLOW FALSE
           GIT_PROGRESS TRUE)
       FetchContent_MakeAvailable(servicegen_module_model)
@@ -120,7 +120,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
       include(FetchContent)
       FetchContent_Declare(servicegen_module_order_service_api
           GIT_REPOSITORY "https://github.com/gorundebug/cppboostexample.git"
-          GIT_TAG "v0.2.127"
+          GIT_TAG "v0.2.128"
           GIT_SHALLOW FALSE
           GIT_PROGRESS TRUE)
       FetchContent_MakeAvailable(servicegen_module_order_service_api)
@@ -198,7 +198,6 @@ endif()
 include(GoogleTest)
 
 add_executable(example_order_service_unit_tests
-    internal/functions/order/soft_deadline_config_test.cpp
     internal/functions/endpoint/order_processed_endpoint_sink_test.cpp
     internal/functions/endpoint/process_order_item_sink_test.cpp
     internal/functions/endpoint/process_order_source_test.cpp
