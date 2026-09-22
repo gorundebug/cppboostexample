@@ -50,7 +50,9 @@ struct OrderProcessedEndpointSink final {
 };
 
 inline boost::asio::awaitable<std::unique_ptr<OrderProcessedEndpointSink>> MakeOrderProcessedEndpointSink(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment) {
+    servicelib::Context context, servicelib::IServiceEnvironment& environment,
+    const auto& config) {
+  (void)config;
   (void)context; (void)environment;
   co_return std::make_unique<OrderProcessedEndpointSink>();
 }

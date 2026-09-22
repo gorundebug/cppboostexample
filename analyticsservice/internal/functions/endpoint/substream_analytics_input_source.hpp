@@ -61,7 +61,9 @@ struct SubstreamAnalyticsInputSource final
 };
 
 inline boost::asio::awaitable<std::unique_ptr<SubstreamAnalyticsInputSource>> MakeSubstreamAnalyticsInputSource(
-    servicelib::Context context, servicelib::IServiceEnvironment& environment) {
+    servicelib::Context context, servicelib::IServiceEnvironment& environment,
+    const auto& config) {
+  (void)config;
   (void)context;
 
   (void)environment;
