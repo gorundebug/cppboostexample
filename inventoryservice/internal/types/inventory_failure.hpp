@@ -1,16 +1,11 @@
 #pragma once
 
-#include <any>
-#include <cstddef>
 #include <cstdint>
-#include <exception>
-#include <string>
-#include <unordered_map>
-#include <vector>
-
+#include <example/model/types/order_item.hpp>
 
 namespace example::inventory_service::types {
-
-using InventoryFailure = std::exception_ptr;
-
+struct InventoryFailure final {
+  example::model::types::OrderItem item;
+  std::int32_t available_qty{};
+};
 }  // namespace example::inventory_service::types

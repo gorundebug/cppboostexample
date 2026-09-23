@@ -5,9 +5,18 @@
 
 #include <servicelib/runtime/serde/serde.hpp>
 #include <servicelib/runtime/serde/serdeimpl.hpp>
+#include <inventoryservice/internal/serdes/inventory_failure_serde.hpp>
 #include <example/model/serdes/order_item_serde.hpp>
 #include <example/model/serdes/order_item_result_serde.hpp>
 
+
+template <>
+struct servicelib::serde::DefaultSerdeFactory<example::inventory_service::types::InventoryFailure> final {
+  static std::shared_ptr<const servicelib::serde::Serde<example::inventory_service::types::InventoryFailure>>
+  Make(servicelib::serde::SerdeLimits) {
+    return std::make_shared<example::inventory_service::types::serde::InventoryFailureSerde>();
+  }
+};
 
 template <>
 struct servicelib::serde::DefaultSerdeFactory<example::model::types::OrderItem> final {

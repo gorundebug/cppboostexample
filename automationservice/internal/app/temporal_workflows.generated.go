@@ -28,6 +28,7 @@ func (env *workflowRuntimeEnvironment) GetSerde(valueType reflect.Type) (runtime
 func buildTemporalWorkflowGraph(
 	workflowCtx workflow.Context,
 	snapshot []byte,
+	telemetry datasourcetemporal.WorkflowTelemetryPolicy,
 ) (*workflowRuntimeEnvironment, *config.Config, error) {
 	var cfg config.Config
 	if err := json.Unmarshal(snapshot, &cfg); err != nil {
@@ -39,6 +40,7 @@ func buildTemporalWorkflowGraph(
 	}
 	base, err := datasourcetemporal.NewWorkflowEnvironment(
 		workflowCtx, runtimeConfig, cfg.Services.AutomationService.ID,
+		telemetry,
 	)
 	if err != nil {
 		return nil, nil, err
@@ -67,7 +69,9 @@ func executeTemporalWorkflowEndpoint(
 	request datasourcetemporal.DirectEndpointWorkflowRequest,
 	endpointName string,
 ) (datasourcetemporal.EndpointResult, error) {
-	env, _, err := buildTemporalWorkflowGraph(workflowCtx, request.RuntimeConfig)
+	env, _, err := buildTemporalWorkflowGraph(
+		workflowCtx, request.RuntimeConfig, request.Telemetry,
+	)
 	if err != nil {
 		return datasourcetemporal.EndpointResult{}, err
 	}

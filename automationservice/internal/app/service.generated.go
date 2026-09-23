@@ -165,12 +165,6 @@ func Start(ctx context.Context,
 		return fmt.Errorf("start service failed: %w", err)
 	}
 	service.Log().Info(ctx, "service started", log.Str("service", service.ServiceConfig().Name))
-
-	if os.Getenv("GORUNDEBUG_TEST") != "" && stop != nil {
-		time.AfterFunc(1*time.Second, func() {
-			close(stop)
-		})
-	}
 	if stop != nil {
 		<-stop
 	} else if done != nil {

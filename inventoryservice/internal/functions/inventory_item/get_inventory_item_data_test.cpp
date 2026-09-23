@@ -21,9 +21,9 @@ struct ResultCollector final {
 };
 
 struct ErrorCollector final {
-  std::exception_ptr value;
+  std::optional<example::inventory_service::types::InventoryFailure> value;
 
-  void out(servicelib::MessageContext, std::exception_ptr error) {
+  void out(servicelib::MessageContext, example::inventory_service::types::InventoryFailure error) {
     value = std::move(error);
   }
 };
@@ -42,7 +42,7 @@ TEST(GetInventoryItemData, ReservesAvailableStockAndPreservesPrice) {
            success, failure);
 
   ASSERT_TRUE(success.value.has_value());
-  EXPECT_EQ(failure.value, nullptr);
+  EXPECT_EQ(failure.value.has_value(), false);
   EXPECT_EQ(success.value->available_qty, 3);
   EXPECT_TRUE(success.value->reserved);
   EXPECT_EQ(success.value->status, "CONFIRMED");
@@ -61,18 +61,36 @@ TEST(GetInventoryItemData, RoutesInsufficientStockToErrorOutput) {
            success, failure);
 
   EXPECT_FALSE(success.value.has_value());
-  ASSERT_NE(failure.value, nullptr);
-  try {
-    std::rethrow_exception(failure.value);
-    FAIL() << "expected InventoryFailureError";
-  } catch (const InventoryFailureError& error) {
-    EXPECT_EQ(error.AvailableQty(), 0);
-    EXPECT_EQ(error.Item().order_id, "order-1");
-    EXPECT_EQ(error.Item().item_id, "item-1");
-    EXPECT_EQ(error.Item().sku, "UNKNOWN");
-    EXPECT_EQ(error.Item().quantity, 3);
-    EXPECT_DOUBLE_EQ(error.Item().unit_price, 4.25);
-  }
+  ASSERT_NE(failure.value.has_value(), false);
+ASSERT_TRUE(failure.value.has_value());
+const auto& failure_data = *failure.value;
+EXPECT_EQ(failure_data.available_qty, 0);
+EXPECT_EQ(failure_data.item.order_id, "order-1");
+EXPECT_EQ(failure_data.item.item_id, "item-1");
+EXPECT_EQ(failure_data.item.sku, "UNKNOWN");
+EXPECT_EQ(failure_data.item.quantity, 3);
+EXPECT_DOUBLE_EQ(failure_data.item.unit_price, 4.25);
 }
 
+TEST(GetInventoryItemData, RejectedReservationDoesNotConsumeStock) {
+  GetInventoryItemData function;
+  test::Stream stream;
+  ResultCollector success;
+  ErrorCollector failure;
+  function(servicelib::MessageContext{}, stream,
+           example::model::types::OrderItem{"order-1", "rejected", "SKU-003", 26, 5.0},
+           success, failure);
+  ASSERT_TRUE(failure.value.has_value());
+  EXPECT_EQ(failure.value->available_qty, 25);
+  EXPECT_FALSE(success.value.has_value());
+  failure.value.reset();
+  function(servicelib::MessageContext{}, stream,
+           example::model::types::OrderItem{"order-1", "accepted", "SKU-003", 25, 5.0},
+           success, failure);
+  ASSERT_TRUE(success.value.has_value());
+  EXPECT_TRUE(success.value->reserved);
+  EXPECT_EQ(success.value->available_qty, 25);
+  EXPECT_FALSE(failure.value.has_value());
+}
 }  // namespace example::inventory_service::functions
+

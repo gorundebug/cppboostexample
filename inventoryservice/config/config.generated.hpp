@@ -230,14 +230,14 @@ inline Config MakeConfig() {
     LinkConfig value{};
     value.from = kGetInventoryItemDataStreamId;
     value.to = kMergeInventoryResultStreamId;
-    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kParallelCall, "", 0, false);
+    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kFunctionCall, "", 0, false);
     return value;
   }();
   cfg.links.processInventoryItemToGetInventoryItemData = [] {
     LinkConfig value{};
     value.from = kProcessInventoryItemStreamId;
     value.to = kGetInventoryItemDataStreamId;
-    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kPriorityTaskPool, "Inventory Priority Workers", 10, false);
+    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kFunctionCall, "Inventory Priority Workers", 10, false);
     return value;
   }();
   cfg.modules.inventoryServiceApi = [] {
@@ -261,16 +261,15 @@ inline Config MakeConfig() {
   cfg.types.inventoryFailure = [] {
     TypeConfig value{};
     value.name = "InventoryFailure";
-    value.type = DataType::kError;
+    value.type = DataType::kStruct;
+    value.definitionFormat = TypeDefinitionFormat::kNative;
     value.publicType = false;
-    value.useAlias = false;
     return value;
   }();
   cfg.types.orderItem = [] {
     TypeConfig value{};
     value.name = "OrderItem";
     value.type = DataType::kStruct;
-    value.package = "";
     value.module = "model";
     value.definitionFormat = TypeDefinitionFormat::kNative;
     value.publicType = false;
@@ -281,7 +280,6 @@ inline Config MakeConfig() {
     TypeConfig value{};
     value.name = "OrderItemResult";
     value.type = DataType::kStruct;
-    value.package = "";
     value.module = "model";
     value.definitionFormat = TypeDefinitionFormat::kNative;
     value.publicType = false;

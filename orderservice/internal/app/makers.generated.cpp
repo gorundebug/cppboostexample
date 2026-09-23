@@ -50,7 +50,6 @@ void ServiceMakers::initMakers(boost::asio::any_io_executor executor, agrpc::Grp
       std::shared_ptr<servicelib::http::Router> router)
       -> boost::asio::awaitable<std::unique_ptr<servicelib::http::Server>> {
     (void)context;
-    (void)environment;
     if (config.httpPort < 0 || config.httpPort > 65535) {
       throw std::invalid_argument("service HTTP port is out of range");
     }
@@ -58,6 +57,7 @@ void ServiceMakers::initMakers(boost::asio::any_io_executor executor, agrpc::Grp
     options.address = config.httpHost.empty() ? std::string{"0.0.0.0"}
                                                : config.httpHost;
     options.port = static_cast<std::uint16_t>(config.httpPort);
+    options.tracingEnabled = environment.getTracing() != nullptr;
     options.shutdownTimeout =
         std::chrono::milliseconds{std::max(config.shutdownTimeout, 0)};
     co_return std::make_unique<servicelib::http::Server>(
