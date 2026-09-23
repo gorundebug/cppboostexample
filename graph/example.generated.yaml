@@ -957,59 +957,59 @@ services:
                 to: callSequentialActivityB
             link2:
                 callSemantics: FunctionCall
+                from: callSequentialActivityB
+                poolName: Default Pool
+                to: processWorkflowJob
+            link3:
+                callSemantics: FunctionCall
+                from: consumeActivityJob
+                to: activityPause
+            link4:
+                callSemantics: FunctionCall
+                from: consumeFanOutActivityA
+                to: processFanOutActivityA
+            link5:
+                callSemantics: FunctionCall
+                from: consumeFanOutActivityB
+                to: processFanOutActivityB
+            link6:
+                callSemantics: FunctionCall
+                from: consumeFanOutActivityC
+                to: processFanOutActivityC
+            link7:
+                callSemantics: FunctionCall
+                from: consumeFanOutWorkflowJob
+                poolName: Default Pool
+                to: callFanOutActivityA
+            link8:
+                callSemantics: FunctionCall
+                from: consumeSequentialActivityA
+                to: processSequentialActivityA
+            link9:
+                callSemantics: FunctionCall
+                from: consumeSequentialActivityB
+                to: processSequentialActivityB
+            link10:
+                callSemantics: FunctionCall
                 from: consumeWorkflowJob
                 to: workflowPause
-            link3:
+            link11:
                 callSemantics: FunctionCall
                 from: splitActivityAResult
                 poolName: Default Pool
                 priority: 2
                 to: callFanOutActivityB
-            link4:
+            link12:
                 callSemantics: FunctionCall
                 from: splitActivityAResult
                 poolName: Default Pool
                 priority: 7
                 to: callFanOutActivityC
-            link5:
+            link13:
                 callSemantics: FunctionCall
                 from: workflowPause
                 poolName: Default Pool
                 to: callSequentialActivityA
-            link6:
-                callSemantics: FunctionCall
-                from: callSequentialActivityB
-                poolName: Default Pool
-                to: processWorkflowJob
-            link7:
-                callSemantics: FunctionCall
-                from: consumeActivityJob
-                to: activityPause
-            link8:
-                callSemantics: FunctionCall
-                from: consumeFanOutActivityA
-                to: processFanOutActivityA
-            link9:
-                callSemantics: FunctionCall
-                from: consumeFanOutActivityB
-                to: processFanOutActivityB
-            link10:
-                callSemantics: FunctionCall
-                from: consumeFanOutActivityC
-                to: processFanOutActivityC
-            link11:
-                callSemantics: FunctionCall
-                from: consumeFanOutWorkflowJob
-                poolName: Default Pool
-                to: callFanOutActivityA
-            link12:
-                callSemantics: FunctionCall
-                from: consumeSequentialActivityA
-                to: processSequentialActivityA
-            link13:
-                callSemantics: FunctionCall
-                from: consumeSequentialActivityB
-                to: processSequentialActivityB
         livenessHandler: health/live
         metricsHandler: metrics
         modulePath: github.com/gorundebug/cppboostexample-automationservice
@@ -1604,7 +1604,7 @@ services:
         startupHandler: health/startup
         statusHandler: status
 settings:
-    moduleVersion: v0.2.133
+    moduleVersion: v0.2.134
     name: Example
     repoPath: github.com/gorundebug/cppboostexample
 types:

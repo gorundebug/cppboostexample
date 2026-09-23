@@ -432,7 +432,7 @@ inline Config MakeConfig() {
     LinkConfig value{};
     value.from = kSplitPipelineStreamId;
     value.to = kSoftDeadlineStreamId;
-    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kFunctionCall, "", 0, false);
+    value.callSemantics = MakeCallSemanticsGroup(CallSemantics::kFunctionCall, "", 0, true);
     return value;
   }();
   cfg.modules.inventoryServiceApi = [] {
@@ -457,6 +457,7 @@ inline Config MakeConfig() {
     TypeConfig value{};
     value.name = "Order";
     value.type = DataType::kStruct;
+    value.package = "";
     value.definitionFormat = TypeDefinitionFormat::kNative;
     value.publicType = false;
     value.transferByValue = false;
@@ -466,6 +467,7 @@ inline Config MakeConfig() {
     TypeConfig value{};
     value.name = "OrderItem";
     value.type = DataType::kStruct;
+    value.package = "";
     value.module = "model";
     value.definitionFormat = TypeDefinitionFormat::kNative;
     value.publicType = false;
@@ -476,6 +478,7 @@ inline Config MakeConfig() {
     TypeConfig value{};
     value.name = "OrderItemResult";
     value.type = DataType::kStruct;
+    value.package = "";
     value.module = "model";
     value.definitionFormat = TypeDefinitionFormat::kNative;
     value.publicType = false;
@@ -486,6 +489,7 @@ inline Config MakeConfig() {
     TypeConfig value{};
     value.name = "OrderProcessed";
     value.type = DataType::kStruct;
+    value.package = "";
     value.module = "model";
     value.definitionFormat = TypeDefinitionFormat::kNative;
     value.publicType = false;
@@ -496,6 +500,7 @@ inline Config MakeConfig() {
     TypeConfig value{};
     value.name = "OrderState";
     value.type = DataType::kStruct;
+    value.package = "";
     value.definitionFormat = TypeDefinitionFormat::kNative;
     value.publicType = false;
     value.transferByValue = false;
