@@ -96,7 +96,61 @@ void ServiceGenerated::initRuntime(servicelib::Context context) {
       service_config->livenessHandler);
 }
 
-void ServiceGenerated::stop() noexcept {
+void ServiceGenerated::stop(servicelib::Context context) noexcept {
+  try {
+    auto lifetime = getShutdownLifetime();
+    if (!lifetime) {
+      // An externally owned service cannot safely outlive its caller.
+      stopSynchronously(context);
+      return;
+    }
+    if (const auto config = getServiceConfigSnapshot();
+        config && config->shutdownTimeout > 0) {
+      context = context.bounded(
+          std::chrono::milliseconds{config->shutdownTimeout});
+    }
+    std::optional<servicelib::detail::ShutdownTask> task;
+    {
+      std::lock_guard lock(shutdown_mutex_);
+      if (!shutdown_task_) {
+        shutdown_task_.emplace([this, context, lifetime = std::move(lifetime)] {
+          stopSynchronously(context);
+          waitForShutdown();
+        });
+      }
+      task = shutdown_task_;
+    }
+    if (task->wait(context)) {
+      if (auto error = task->get()) std::rethrow_exception(error);
+    }
+  } catch (const std::exception& error) {
+    try {
+      getLogger().error("generated service shutdown failed",
+                       {servicelib::log::Field::Err(error.what())});
+    } catch (...) {
+    }
+  } catch (...) {
+    try {
+      getLogger().error("generated service shutdown failed");
+    } catch (...) {
+    }
+  }
+}
+
+void ServiceGenerated::waitStopped() {
+  std::optional<servicelib::detail::ShutdownTask> task;
+  {
+    std::lock_guard lock(shutdown_mutex_);
+    task = shutdown_task_;
+  }
+  if (task) {
+    if (auto error = task->get()) std::rethrow_exception(error);
+  } else {
+    waitForShutdown();
+  }
+}
+
+void ServiceGenerated::stopSynchronously(servicelib::Context context) noexcept {
   const auto report_failure =
       [this](std::string_view operation, std::string_view error) noexcept {
         try {
@@ -120,10 +174,10 @@ void ServiceGenerated::stop() noexcept {
     report_failure("serviceStopping", "unknown exception");
   }
 
-  stopRuntime();
+  stopRuntime(context);
 }
 
-void ServiceGenerated::stopRuntime() noexcept {
+void ServiceGenerated::stopRuntime(servicelib::Context context) noexcept {
   const auto report_failure =
       [this](std::string_view operation, std::string_view error) noexcept {
         try {
@@ -136,11 +190,14 @@ void ServiceGenerated::stopRuntime() noexcept {
         }
       };
 
-  if (servers_.http_server_) servers_.http_server_->Stop();
+  if (servers_.http_server_) {
+    servers_.http_server_->Stop();
+    servers_.http_server_->WaitStopped();
+  }
   clients_.stop();
 
   try {
-    servicelib::ServiceApp<ServiceGenerated, DataTypes>::stop();
+    servicelib::ServiceApp<ServiceGenerated, DataTypes>::stop(context);
   } catch (const std::exception& ex) {
     report_failure("ServiceApp::stop", ex.what());
   } catch (...) {

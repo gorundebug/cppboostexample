@@ -31,7 +31,8 @@ class ServiceGenerated
   ~ServiceGenerated() override;
 
   void start();
-  void stop() noexcept;
+  void stop(servicelib::Context context = {}) noexcept;
+  void waitStopped();
 
   servicelib::log::Logger& getLogger() override;
   servicelib::metrics::Metrics& getMetrics() override;
@@ -62,7 +63,8 @@ class ServiceGenerated
   friend struct ServiceServers;
   friend struct ServiceEndpoints;
   void initRuntime(servicelib::Context context);
-  void stopRuntime() noexcept;
+  void stopSynchronously(servicelib::Context context) noexcept;
+  void stopRuntime(servicelib::Context context = {}) noexcept;
   void releaseRuntime() noexcept;
   ServiceStreams streams_;
   ServiceBindings bindings_;
@@ -81,6 +83,8 @@ class ServiceGenerated
   servicelib::metrics::Metrics* metrics_;
   servicelib::tracing::Tracing* tracing_;
   bool lifecycle_started_{false};
+  std::mutex shutdown_mutex_;
+  std::optional<servicelib::detail::ShutdownTask> shutdown_task_;
 };
 
 

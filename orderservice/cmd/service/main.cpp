@@ -5,9 +5,12 @@
 #include <exception>
 #include <iostream>
 #include <memory>
-#include <future>
 #include <stdexcept>
 #include <string>
+#include <thread>
+
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/signal_set.hpp>
 
 
 #include <servicelib/runtime/detail/asio_runtime.hpp>
@@ -24,12 +27,42 @@
 #include "orderservice/internal/app/service.hpp"
 
 
+namespace {
+
+// Process policy, not runtime policy. Keep the watchdog alive through static
+// destruction too: no cleanup stage may extend the one shutdown deadline.
+void ArmShutdownDeadline(std::chrono::steady_clock::time_point deadline, int exit_code) noexcept {
+  try {
+    std::thread([deadline, exit_code] {
+      std::this_thread::sleep_until(deadline);
+      std::_Exit(exit_code);
+    }).detach();
+  } catch (...) {
+    // Without a watchdog a blocked callback could prevent process termination.
+    std::_Exit(exit_code);
+  }
+}
+
+} // namespace
+
 int main(int argc, char* argv[]) {
   try {
     servicelib::async::ConfigureGrpcRuntimeDefaults();
 
     const auto options = servicelib::config::CommandLine::Parse(argc, argv);
     using Config = example::order_service::config::Config;
+    namespace otel = servicelib::telemetry::opentelemetry_adapter;
+    using ServiceRuntime = servicelib::async::GrpcRuntime;
+    // A timed-out shutdown retains this complete host until admitted work
+    // finishes. Destruction order keeps dependencies alive through the service.
+    struct ServiceLifetime final {
+      std::unique_ptr<servicelib::metrics::PrometheusMetrics> prometheus_metrics;
+      std::unique_ptr<otel::OpenTelemetryLogger> otlp_logs;
+      std::unique_ptr<otel::OpenTelemetryTracing> tracing;
+      std::unique_ptr<ServiceRuntime> runtime;
+      std::unique_ptr<example::order_service::app::Service> service;
+    };
+    auto lifetime = std::make_shared<ServiceLifetime>();
     const bool noop_logs =
         servicelib::EnvironmentFlagEnabled("SERVICELIB_NOOP_LOGS");
     const bool noop_metrics =
@@ -41,7 +74,7 @@ int main(int argc, char* argv[]) {
             ? servicelib::log::NoopLogger::instance()
             : servicelib::logging::createLogsEngine(
                   servicelib::logging::LogsEngineType::kBoost);
-    std::unique_ptr<servicelib::metrics::PrometheusMetrics> prometheus_metrics;
+    auto& prometheus_metrics = lifetime->prometheus_metrics;
     servicelib::metrics::Metrics* metrics =
         &servicelib::metrics::NoopMetrics::instance();
     if (!noop_metrics) {
@@ -57,9 +90,8 @@ int main(int argc, char* argv[]) {
     const auto config = loader.GetConfig();
     const auto& own_service_config =
         config->services.orderService;
-    namespace otel = servicelib::telemetry::opentelemetry_adapter;
-    std::unique_ptr<otel::OpenTelemetryLogger> otlp_logs;
-    std::unique_ptr<otel::OpenTelemetryTracing> tracing;
+    auto& otlp_logs = lifetime->otlp_logs;
+    auto& tracing = lifetime->tracing;
     servicelib::log::Logger* service_logger = &bootstrap_logger;
     switch (own_service_config.environment) {
       case servicelib::api::Environment::kStaging:
@@ -80,24 +112,49 @@ int main(int argc, char* argv[]) {
         }
         break;
     }
-    servicelib::async::GrpcRuntime runtime(
-        {.workers = options.workers,
+    lifetime->runtime = std::make_unique<ServiceRuntime>(
+        ServiceRuntime::Options{.workers = options.workers,
          .unhandledException = {},
          .metrics = metrics});
 
-    example::order_service::app::Service service(runtime.executor(),
+    auto& runtime = *lifetime->runtime;
+    lifetime->service = std::make_unique<example::order_service::app::Service>(runtime.executor(),
                                     runtime.grpcContext(),
                                     config, *service_logger,
                                     *metrics, tracing.get());
+    auto& service = *lifetime->service;
+    service.setShutdownLifetime(lifetime);
+    auto shutdown_deadline = std::chrono::steady_clock::time_point::max();
+    bool shutdown_deadline_started{};
+    const auto begin_shutdown = [&](int exit_code) {
+      if (shutdown_deadline_started) return;
+      shutdown_deadline_started = true;
+      const auto timeout = std::chrono::milliseconds(
+          own_service_config.shutdownTimeout > 0
+              ? own_service_config.shutdownTimeout
+              : 0);
+      shutdown_deadline = std::chrono::steady_clock::now() + timeout;
+      ArmShutdownDeadline(shutdown_deadline, exit_code);
+    };
     bool runtime_shutdown{};
     const auto shutdown_runtime = [&] {
       if (runtime_shutdown) return;
+      begin_shutdown(EXIT_SUCCESS);
       loader.Stop();
       service.stop();
+      service.waitStopped();
       runtime.stop();
       runtime.join();
       runtime_shutdown = true;
     };
+    // The main thread waits for signals independently of business workers.
+    // A blocked worker must not prevent the shutdown watchdog from starting.
+    boost::asio::io_context shutdown_signals_context;
+    boost::asio::signal_set shutdown_signals(shutdown_signals_context, SIGINT, SIGTERM);
+    shutdown_signals.async_wait([&](const boost::system::error_code& error, int) {
+      if (error) throw std::runtime_error("shutdown signal wait failed: " + error.message());
+      begin_shutdown(EXIT_SUCCESS);
+    });
     try {
       runtime.start();
       service.start();
@@ -108,11 +165,7 @@ int main(int argc, char* argv[]) {
                          std::move(next_config));
                    });
 
-      std::promise<void> shutdown;
-      auto shutdown_requested = shutdown.get_future();
-      runtime.waitForSignals({SIGINT, SIGTERM},
-                             [&](int) { shutdown.set_value(); });
-      shutdown_requested.wait();
+      shutdown_signals_context.run();
       shutdown_runtime();
       const bool tracing_flushed = !tracing || tracing->forceFlush();
       const bool tracing_stopped = !tracing || tracing->shutdown();
@@ -123,6 +176,7 @@ int main(int argc, char* argv[]) {
         throw std::runtime_error("failed to flush OpenTelemetry providers");
       }
     } catch (...) {
+      begin_shutdown(EXIT_FAILURE);
       try {
         shutdown_runtime();
       } catch (...) {
