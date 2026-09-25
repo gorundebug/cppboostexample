@@ -19,7 +19,7 @@ services:
         DEPENDENCY_APT_UBUNTU_SECURITY_URL: ${DEPENDENCY_APT_UBUNTU_SECURITY_URL:-}
         DEPENDENCY_APT_UBUNTU_PORTS_URL: ${DEPENDENCY_APT_UBUNTU_PORTS_URL:-}
       additional_contexts:
-        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.140}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.141}
       secrets:
         - dependency_conan_credential
     extra_hosts:
@@ -82,7 +82,7 @@ services:
         CPPBOOST_LTO: ${CPPBOOST_LTO:-ON}
         EXAMPLE_PROFILE: ${EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.140}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.141}
       secrets:
         - dependency_conan_credential
   inventoryservice-runtime:
@@ -110,7 +110,7 @@ services:
         CPPBOOST_LTO: ${CPPBOOST_LTO:-ON}
         EXAMPLE_PROFILE: ${EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.140}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.141}
       secrets:
         - dependency_conan_credential
   orderservice-runtime:
@@ -138,13 +138,13 @@ services:
         CPPBOOST_LTO: ${CPPBOOST_LTO:-ON}
         EXAMPLE_PROFILE: ${EXAMPLE_PROFILE:-function-call}
       additional_contexts:
-        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.140}
+        servicelib-source: ${SERVICELIB_SOURCE_CONTEXT:-https://github.com/gorundebug/cppboostservicelib.git#v0.2.141}
       secrets:
         - dependency_conan_credential
 
 volumes:
   cpp-cmake-build:
-    name: ${CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.140}
+    name: ${CPPBOOST_BUILD_VOLUME:-cppboostexample_cpp-cmake-build-v0.2.141}
   cpp-ccache:
     name: cppboostexample_cpp-ccache
   cpp-conan2:

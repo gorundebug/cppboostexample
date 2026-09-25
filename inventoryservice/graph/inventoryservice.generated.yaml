@@ -57,11 +57,11 @@ services:
         kubernetesWorkloadType: Deployment
         links:
             link1:
-                callSemantics: FunctionCall
+                callSemantics: ParallelCall
                 from: getInventoryItemData
                 to: mergeInventoryResult
             link2:
-                callSemantics: FunctionCall
+                callSemantics: PriorityTaskPool
                 from: processInventoryItem
                 poolName: Inventory Priority Workers
                 priority: 10
@@ -122,7 +122,7 @@ services:
         startupHandler: health/startup
         statusHandler: status
 settings:
-    moduleVersion: v0.2.140
+    moduleVersion: v0.2.141
     name: Example
     repoPath: github.com/gorundebug/cppboostexample
 types:
