@@ -29,7 +29,7 @@ set(CPPBOOSTSERVICELIB_REPOSITORY
     "https://github.com/gorundebug/cppboostservicelib.git" CACHE STRING
     "Standalone cppboostservicelib repository")
 set(CPPBOOSTSERVICELIB_REVISION
-    "v0.2.141" CACHE STRING
+    "v0.2.142" CACHE STRING
     "Pinned cppboostservicelib revision")
 set(CPPBOOSTSERVICELIB_DEPENDENCY_MODE "CONAN" CACHE STRING
     "Dependency provider used for a source-tree cppboostservicelib build")
