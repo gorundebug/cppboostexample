@@ -13,6 +13,7 @@ void ServiceFunctions::initFunctions(
     servicelib::Context context, const config::Config& cfg, servicelib::IServiceEnvironment& environment,
     ServiceMakers& makers_, boost::asio::any_io_executor executor) {
   (void)context;
+  (void)cfg;
   (void)environment;
   (void)makers_;
   (void)executor;
@@ -105,7 +106,7 @@ void ServiceFunctions::initFunctions(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
-           const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -120,13 +121,14 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
            const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -148,6 +150,7 @@ void ServiceFunctions::initFunctions(
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
            const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -169,6 +172,7 @@ void ServiceFunctions::initFunctions(
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
            const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -190,6 +194,7 @@ void ServiceFunctions::initFunctions(
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
            const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -210,7 +215,7 @@ void ServiceFunctions::initFunctions(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
-           const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -225,13 +230,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
-           const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -246,13 +251,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
-           const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -267,13 +272,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
-           const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -288,13 +293,14 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
            const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -316,6 +322,7 @@ void ServiceFunctions::initFunctions(
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
            const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -337,6 +344,7 @@ void ServiceFunctions::initFunctions(
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
            const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -357,7 +365,7 @@ void ServiceFunctions::initFunctions(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
-           const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -372,13 +380,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
-           const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -393,13 +401,14 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
            const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -420,7 +429,7 @@ void ServiceFunctions::initFunctions(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
-           const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -435,13 +444,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
-           const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -456,13 +465,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
-           const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -477,13 +486,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
-           const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -498,13 +507,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
-           const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -519,13 +528,13 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
-           const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -540,13 +549,14 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
            const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -567,7 +577,7 @@ void ServiceFunctions::initFunctions(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
-           const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -582,13 +592,14 @@ void ServiceFunctions::initFunctions(
             throw;
           }
           co_return;
-        }(&makers_, this, &environment, maker_context, &cfg, &maker_cancellation,
+        }(&makers_, this, &environment, maker_context, &maker_cancellation,
           &maker_error_mutex, &first_maker_error), boost::asio::use_future));
     maker_tasks.push_back(boost::asio::co_spawn(
         executor,
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
            const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -610,6 +621,7 @@ void ServiceFunctions::initFunctions(
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
            const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
@@ -631,6 +643,7 @@ void ServiceFunctions::initFunctions(
         [](ServiceMakers* makers, ServiceFunctions* functions,
            servicelib::IServiceEnvironment* environment, servicelib::Context maker_context,
            const config::Config* cfg,
+
            std::stop_source* maker_cancellation, std::mutex* maker_error_mutex,
            std::exception_ptr* first_maker_error) -> boost::asio::awaitable<void> {
           try {
