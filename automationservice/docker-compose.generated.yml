@@ -1,6 +1,6 @@
 services:
   automationservice:
-    image: automationservice:local
+    image: automationservice:${DOCKER_IMAGE_TAG:-local}
     build:
       context: .
       dockerfile: Dockerfile

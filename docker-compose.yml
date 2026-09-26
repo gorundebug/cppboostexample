@@ -1,6 +1,6 @@
 services:
   analyticsservice:
-    image: cppboostexample-analyticsservice:local
+    image: cppboostexample-analyticsservice:${DOCKER_IMAGE_TAG:-local}
     working_dir: /app
     command:
       - --config
@@ -25,7 +25,7 @@ services:
       - app_net
 
   automationservice:
-    image: automationservice:local
+    image: automationservice:${DOCKER_IMAGE_TAG:-local}
     restart: unless-stopped
     environment:
       - DEBUG=${AUTOMATION_SERVICE_DEBUG:-0}
@@ -44,7 +44,7 @@ services:
       - app_net
 
   inventoryservice:
-    image: cppboostexample-inventoryservice:local
+    image: cppboostexample-inventoryservice:${DOCKER_IMAGE_TAG:-local}
     working_dir: /app
     command:
       - --config
@@ -66,7 +66,7 @@ services:
       - app_net
 
   orderservice:
-    image: cppboostexample-orderservice:local
+    image: cppboostexample-orderservice:${DOCKER_IMAGE_TAG:-local}
     working_dir: /app
     command:
       - --config

@@ -1,6 +1,6 @@
 services:
   inventoryservice:
-    image: cppboostexample-inventoryservice:local
+    image: cppboostexample-inventoryservice:${DOCKER_IMAGE_TAG:-local}
     working_dir: /app
     command:
       - --config

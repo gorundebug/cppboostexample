@@ -58,7 +58,7 @@ services:
       - -c
       - source scripts/configure-git-auth.generated.sh && ./scripts/conan-install.generated.sh Debug /workspace/build/conan-debug && conan_toolchain="$$(cat /workspace/build/conan-debug/toolchain.path)" && cmake --fresh --preset docker-debug -DCMAKE_TOOLCHAIN_FILE="$$conan_toolchain" -DFETCH_CPP_DEPENDENCIES=OFF && cmake --build --preset docker-debug --parallel && ctest --test-dir /workspace/build --output-on-failure --no-tests=error
   analyticsservice-runtime:
-    image: cppboostexample-analyticsservice:local
+    image: cppboostexample-analyticsservice:${DOCKER_IMAGE_TAG:-local}
     build:
       context: .
       dockerfile: Dockerfile.cmake
@@ -86,7 +86,7 @@ services:
       secrets:
         - dependency_conan_credential
   inventoryservice-runtime:
-    image: cppboostexample-inventoryservice:local
+    image: cppboostexample-inventoryservice:${DOCKER_IMAGE_TAG:-local}
     build:
       context: .
       dockerfile: Dockerfile.cmake
@@ -114,7 +114,7 @@ services:
       secrets:
         - dependency_conan_credential
   orderservice-runtime:
-    image: cppboostexample-orderservice:local
+    image: cppboostexample-orderservice:${DOCKER_IMAGE_TAG:-local}
     build:
       context: .
       dockerfile: Dockerfile.cmake

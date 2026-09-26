@@ -77,7 +77,7 @@ services:
       - source scripts/configure-git-auth.generated.sh && ./scripts/conan-install.generated.sh Debug /workspace/build/conan-debug && conan_toolchain="$$(cat /workspace/build/conan-debug/toolchain.path)" && cmake --fresh --preset docker-debug -DCMAKE_TOOLCHAIN_FILE="$$conan_toolchain" -DMODULES_ROOT=/workspace/modules -DFETCH_CPP_DEPENDENCIES=OFF && cmake --build --preset docker-debug --parallel $${CMAKE_BUILD_PARALLEL_LEVEL:+"$${CMAKE_BUILD_PARALLEL_LEVEL}"} && ctest --test-dir /workspace/build --output-on-failure --no-tests=error
 
   orderservice-runtime:
-    image: cppboostexample-orderservice:local
+    image: cppboostexample-orderservice:${DOCKER_IMAGE_TAG:-local}
     build:
       context: .
       dockerfile: Dockerfile

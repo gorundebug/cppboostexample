@@ -1,6 +1,6 @@
 services:
   analyticsservice:
-    image: cppboostexample-analyticsservice:local
+    image: cppboostexample-analyticsservice:${DOCKER_IMAGE_TAG:-local}
     working_dir: /app
     command:
       - --config

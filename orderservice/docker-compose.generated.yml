@@ -1,6 +1,6 @@
 services:
   orderservice:
-    image: cppboostexample-orderservice:local
+    image: cppboostexample-orderservice:${DOCKER_IMAGE_TAG:-local}
     working_dir: /app
     command:
       - --config
