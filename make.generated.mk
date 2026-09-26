@@ -6,7 +6,7 @@ PROJECT_DIR := $(abspath .)
 BIN_DIR := $(PROJECT_DIR)/bin
 TOOLS_DIR := $(PROJECT_DIR)/tools
 GOPRIVATE := github.com
-MODULE_VERSION := v0.2.144
+MODULE_VERSION := v0.2.145
 USE_LOCAL_MODULES ?= 1
 OS := $(shell uname -s)
 ARCH := $(shell uname -m)
@@ -52,15 +52,15 @@ DEPENDENCY_HOST_TARGETS := $(LANG_HOST_PREP_TARGETS)
 include dependency-proxy.generated.mk
 
 ifneq ($(strip $(DEPENDENCY_PROXY_DIR)),)
-export GOSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/servicelib.git\#v0.2.144
-export SERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostservicelib.git\#v0.2.144
+export GOSERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/servicelib.git\#v0.2.145
+export SERVICELIB_SOURCE_CONTEXT ?= $(DEPENDENCY_GIT_MIRROR_DOCKER_BASE)/github.com/gorundebug/cppboostservicelib.git\#v0.2.145
 endif
 
 export DOCKER_TARGET := runtime
 DOCKER_COMPOSE := docker compose -f docker-compose.yml $(foreach file,$(DOCKER_COMPOSE_RUNTIME_FILES),-f $(file))
 DOCKER_COMPOSE_DEV := docker compose -f docker-compose.yml $(foreach file,$(DOCKER_COMPOSE_DEV_FILES),-f $(file))
 
-ACT_VERSION := v0.2.144
+ACT_VERSION := v0.2.145
 ACT := $(TOOLS_DIR)/act
 GH_VERSION := v2.67.0
 GH := $(TOOLS_DIR)/gh
