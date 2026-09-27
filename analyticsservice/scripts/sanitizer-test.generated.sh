@@ -96,7 +96,7 @@ docker compose -f docker-compose.cmake.generated.yml run --build --rm \
          ctest --test-dir "$build_dir" --output-on-failure
        ;;
      tsan)
-       TSAN_OPTIONS=halt_on_error=1 \
+       TSAN_OPTIONS="halt_on_error=1:suppressions=/workspace/source/scripts/tsan-suppressions.generated.txt" \
          ctest --test-dir "$build_dir" --output-on-failure
        ;;
    esac; fi

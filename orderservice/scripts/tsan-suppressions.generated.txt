@@ -1,0 +1,5 @@
+# Boost.Context snapshots the C++ exception state while a stackful fiber
+# migrates between Asio workers. TSan reports the TLS copy in this upstream
+# helper, although the fiber is resumed serially. Keep this function-scoped;
+# races in servicelib and user code remain visible.
+race:__cxxabiv1::manage_exception_state
